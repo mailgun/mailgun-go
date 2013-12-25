@@ -1,13 +1,20 @@
 package mailgun
 
+import (
+	"fmt"
+	"net/http"
+)
+
 const (
-	MAILGUN_API_ADDRESS = "https://api.mailgun.net/v2/samples.mailgun.org/messages"
+	apiBase          = "https://api.mailgun.net/v2"
+	messagesEndpoint = "messages"
+	basicAuthUser    = "key"
 )
 
 type Mailgun interface {
 	Domain() string
 	ApiKey() string
-	SendMessage(m *MailgunMessage)
+	SendMessage(m *MailgunMessage) error
 }
 
 type mailgunImpl struct {
@@ -28,6 +35,18 @@ func (m *mailgunImpl) ApiKey() string {
 	return m.apiKey
 }
 
-func (m *mailgunImpl) SendMessage(message *MailgunMessage) {
+func (m *mailgunImpl) SendMessage(message *MailgunMessage) error {
 	// TODO
+	req, err := http.NewRequest("POST", generateApiUrl(m, messagesEndpoint), nil)
+	if err != nil {
+		return err
+	}
+
+	req.SetBasicAuth(basicAuthUser, m.ApiKey())
+
+	return nil
+}
+
+func generateApiUrl(m Mailgun, endpoint string) string {
+	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
 }
