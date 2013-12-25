@@ -12,4 +12,7 @@ func TestMailgun(t *testing.T) {
 	if API_KEY != m.ApiKey() {
 		t.Fatal("ApiKey not equal!")
 	}
+	if DOMAIN != m.Domain() {
+		t.Fatal("Domain not equal!")
+	}
 }
