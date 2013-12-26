@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-const DOMAIN = "banzon.dk"
-const API_KEY = "testingapikey"
+const DOMAIN = "valid-mailgun-domain"
+const API_KEY = "valid-mailgun-api-key"
 
 func TestMailgun(t *testing.T) {
 	m := NewMailgun(DOMAIN, API_KEY)
