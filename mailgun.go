@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"bytes"
 )
 
 const (
 	apiBase          = "https://api.mailgun.net/v2"
 	messagesEndpoint = "messages"
-	basicAuthUser    = "key"
+	basicAuthUser    = "api"
 )
 
 type Mailgun interface {
@@ -42,13 +43,6 @@ func (m *mailgunImpl) SendMessage(message *MailgunMessage) error {
 		return errors.New("Message not valid")
 	}
 
-	req, err := http.NewRequest("POST", generateApiUrl(m, messagesEndpoint), nil)
-	if err != nil {
-		return err
-	}
-
-	req.SetBasicAuth(basicAuthUser, m.ApiKey())
-
 	data := url.Values{}
 	data.Add("from", message.From.String())
 	data.Add("subject", message.Subject)
@@ -68,13 +62,20 @@ func (m *mailgunImpl) SendMessage(message *MailgunMessage) error {
 		data.Add("html", message.Html)
 	}
 
+	req, err := http.NewRequest("POST", generateApiUrl(m, messagesEndpoint), bytes.NewBufferString(data.Encode()))
+	if err != nil {
+		return err
+	}
+	req.SetBasicAuth(basicAuthUser, m.ApiKey())
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("Status is not 200")
+		return errors.New(fmt.Sprintf("Status is not 200. It was %d", resp.StatusCode))
 	}
 
 	return nil
