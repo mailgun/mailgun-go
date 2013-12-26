@@ -1,11 +1,11 @@
 package mailgun
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"bytes"
 )
 
 const (
