@@ -19,12 +19,14 @@ const (
 type Mailgun interface {
 	Domain() string
 	ApiKey() string
+	PublicApiKey() string
 	SendMessage(m *MailgunMessage) (SendMessageResponse, error)
 }
 
 type mailgunImpl struct {
-	domain string
-	apiKey string
+	domain       string
+	apiKey       string
+	publicApiKey string
 }
 
 type SendMessageResponse struct {
@@ -32,8 +34,8 @@ type SendMessageResponse struct {
 	Id      string `json:"id"`
 }
 
-func NewMailgun(domain, apiKey string) Mailgun {
-	m := mailgunImpl{domain: domain, apiKey: apiKey}
+func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
+	m := mailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
 	return &m
 }
 
@@ -43,6 +45,10 @@ func (m *mailgunImpl) Domain() string {
 
 func (m *mailgunImpl) ApiKey() string {
 	return m.apiKey
+}
+
+func (m *mailgunImpl) PublicApiKey() string {
+	return m.publicApiKey
 }
 
 func (m *mailgunImpl) SendMessage(message *MailgunMessage) (SendMessageResponse, error) {
