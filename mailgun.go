@@ -2,8 +2,10 @@ package mailgun
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -17,12 +19,17 @@ const (
 type Mailgun interface {
 	Domain() string
 	ApiKey() string
-	SendMessage(m *MailgunMessage) error
+	SendMessage(m *MailgunMessage) (SendMessageResponse, error)
 }
 
 type mailgunImpl struct {
 	domain string
 	apiKey string
+}
+
+type SendMessageResponse struct {
+	Message string `json:"message"`
+	Id      string `json:"id"`
 }
 
 func NewMailgun(domain, apiKey string) Mailgun {
@@ -38,11 +45,45 @@ func (m *mailgunImpl) ApiKey() string {
 	return m.apiKey
 }
 
-func (m *mailgunImpl) SendMessage(message *MailgunMessage) error {
+func (m *mailgunImpl) SendMessage(message *MailgunMessage) (SendMessageResponse, error) {
 	if !message.validateMessage() {
-		return errors.New("Message not valid")
+		return SendMessageResponse{}, errors.New("Message not valid")
 	}
 
+	data := generateUrlValues(message)
+
+	req, err := http.NewRequest("POST", generateApiUrl(m, messagesEndpoint), bytes.NewBufferString(data.Encode()))
+	if err != nil {
+		return SendMessageResponse{}, err
+	}
+	req.SetBasicAuth(basicAuthUser, m.ApiKey())
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return SendMessageResponse{}, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return SendMessageResponse{}, errors.New(fmt.Sprintf("Status is not 200. It was %d", resp.StatusCode))
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return SendMessageResponse{}, err
+	}
+
+	var response SendMessageResponse
+	err2 := json.Unmarshal(body, &response)
+	if err2 != nil {
+		return SendMessageResponse{}, err2
+	}
+
+	return response, nil
+}
+
+func generateUrlValues(message *MailgunMessage) url.Values {
 	data := url.Values{}
 	data.Add("from", message.From.String())
 	data.Add("subject", message.Subject)
@@ -61,24 +102,7 @@ func (m *mailgunImpl) SendMessage(message *MailgunMessage) error {
 	if message.Html != "" {
 		data.Add("html", message.Html)
 	}
-
-	req, err := http.NewRequest("POST", generateApiUrl(m, messagesEndpoint), bytes.NewBufferString(data.Encode()))
-	if err != nil {
-		return err
-	}
-	req.SetBasicAuth(basicAuthUser, m.ApiKey())
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("Status is not 200. It was %d", resp.StatusCode))
-	}
-
-	return nil
+	return data
 }
 
 func generateApiUrl(m Mailgun, endpoint string) string {
