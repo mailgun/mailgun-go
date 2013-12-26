@@ -1,5 +1,5 @@
-go-mailgun
-==========
+gomailgun
+=========
 
 Go library for sending mail with the Mailgun API.
 
