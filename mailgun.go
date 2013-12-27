@@ -15,6 +15,7 @@ const (
 	messagesEndpoint        = "messages"
 	addressValidateEndpoint = "address/validate"
 	addressParseEndpoint    = "address/parse"
+	bouncesEndpoint         = "bounces"
 	basicAuthUser           = "api"
 )
 
@@ -25,6 +26,10 @@ type Mailgun interface {
 	SendMessage(m *MailgunMessage) (SendMessageResponse, error)
 	ValidateEmail(email string) (EmailVerification, error)
 	ParseAddresses(addresses ...string) ([]string, []string, error)
+	GetBounces(limit, skip int) (Bounces, error)
+	GetSingleBounce(address string) (BounceItem, error)
+	AddBounce(address, code, error string) error
+	DeleteBounce(address string) error
 }
 
 type mailgunImpl struct {
