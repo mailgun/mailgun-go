@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	apiBase          = "https://api.mailgun.net/v2"
-	messagesEndpoint = "messages"
-	basicAuthUser    = "api"
+	apiBase                 = "https://api.mailgun.net/v2"
+	messagesEndpoint        = "messages"
+	addressValidateEndpoint = "address/validate"
+	basicAuthUser           = "api"
 )
 
 type Mailgun interface {
@@ -21,6 +22,7 @@ type Mailgun interface {
 	ApiKey() string
 	PublicApiKey() string
 	SendMessage(m *MailgunMessage) (SendMessageResponse, error)
+	ValidateEmail(email string) (EmailVerification, error)
 }
 
 type mailgunImpl struct {
@@ -113,4 +115,8 @@ func generateUrlValues(message *MailgunMessage) url.Values {
 
 func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
+}
+
+func generatePublicApiUrl(endpoint string) string {
+	return fmt.Sprintf("%s/%s", apiBase, endpoint)
 }
