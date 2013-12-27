@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
-	"strconv"
 	"net/url"
+	"strconv"
+	"time"
 )
 
 type BounceItem struct {
 	CreatedAt string `json:"created_at"`
-	Code      string    `json:"code"`
-	Address   string    `json:"address"`
-	Error     string    `json:"error"`
+	Code      string `json:"code"`
+	Address   string `json:"address"`
+	Error     string `json:"error"`
 }
 
 type Bounces struct {
@@ -46,7 +46,6 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (Bounces, error) {
 		q.Set("skip", strconv.Itoa(skip))
 	}
 	u.RawQuery = q.Encode()
-
 
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
