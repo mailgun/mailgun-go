@@ -31,7 +31,22 @@ func (i BounceItem) GetCreatedAt() (t time.Time, err error) {
 }
 
 func (m *mailgunImpl) GetBounces(limit, skip int) (Bounces, error) {
-	req, err := http.NewRequest("GET", generateApiUrl(m, bouncesEndpoint), nil)
+	u, err := url.Parse(generateApiUrl(m, bouncesEndpoint))
+	if err != nil {
+		return Bounce{}, err
+	}
+
+	q := u.Query()
+	if limit != -1 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
+	if skip != -1 {
+		q.Set("skip", strconv.Itoa(skip))
+	}
+	u.RawQuery = q.Encode()
+
+
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return Bounces{}, err
 	}
