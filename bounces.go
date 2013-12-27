@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"strconv"
+	"net/url"
 )
 
 type BounceItem struct {
@@ -33,7 +35,7 @@ func (i BounceItem) GetCreatedAt() (t time.Time, err error) {
 func (m *mailgunImpl) GetBounces(limit, skip int) (Bounces, error) {
 	u, err := url.Parse(generateApiUrl(m, bouncesEndpoint))
 	if err != nil {
-		return Bounce{}, err
+		return Bounces{}, err
 	}
 
 	q := u.Query()
