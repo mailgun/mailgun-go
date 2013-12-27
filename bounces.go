@@ -10,7 +10,7 @@ import (
 )
 
 type BounceItem struct {
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 	Code      string    `json:"code"`
 	Address   string    `json:"address"`
 	Error     string    `json:"error"`
@@ -23,6 +23,11 @@ type Bounces struct {
 
 type singleBounce struct {
 	Bounce BounceItem `json:"bounce"`
+}
+
+func (i BounceItem) GetCreatedAt() (t time.Time, err error) {
+	t, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", i.CreatedAt)
+	return
 }
 
 func (m *mailgunImpl) GetBounces(limit, skip int) (Bounces, error) {
