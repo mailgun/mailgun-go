@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type EmailVarificationParts struct {
@@ -22,6 +23,11 @@ type EmailVerification struct {
 	DidYouMean string                 `json:"did_you_mean"`
 }
 
+type AddressParseResult struct {
+	Parsed      []string `json:"parsed"`
+	Unparseable []string `json:"unparseable"`
+}
+
 func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	u, err := url.Parse(generatePublicApiUrl(addressValidateEndpoint))
 	if err != nil {
@@ -32,7 +38,6 @@ func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	u.RawQuery = q.Encode()
 
 	req, err := http.NewRequest("GET", u.String(), nil)
-	fmt.Println(req.URL.String())
 
 	if err != nil {
 		return EmailVerification{}, err
@@ -61,4 +66,44 @@ func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	}
 
 	return response, nil
+}
+
+func (m *mailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
+	u, err := url.Parse(generatePublicApiUrl(addressParseEndpoint))
+	if err != nil {
+		return nil, nil, err
+	}
+	q := u.Query()
+	q.Set("addresses", strings.Join(addresses, ","))
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest("GET", u.String(), nil)
+
+	if err != nil {
+		return nil, nil, err
+	}
+	req.SetBasicAuth(basicAuthUser, m.PublicApiKey())
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, nil, errors.New(fmt.Sprintf("Status is not 200. It was %d", resp.StatusCode))
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var response AddressParseResult
+	err2 := json.Unmarshal(body, &response)
+	if err2 != nil {
+		return nil, nil, err2
+	}
+
+	return response.Parsed, response.Unparseable, nil
 }

@@ -14,6 +14,7 @@ const (
 	apiBase                 = "https://api.mailgun.net/v2"
 	messagesEndpoint        = "messages"
 	addressValidateEndpoint = "address/validate"
+	addressParseEndpoint    = "address/parse"
 	basicAuthUser           = "api"
 )
 
@@ -23,6 +24,7 @@ type Mailgun interface {
 	PublicApiKey() string
 	SendMessage(m *MailgunMessage) (SendMessageResponse, error)
 	ValidateEmail(email string) (EmailVerification, error)
+	ParseAddresses(addresses ...string) ([]string, []string, error)
 }
 
 type mailgunImpl struct {
