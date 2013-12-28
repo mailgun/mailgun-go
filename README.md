@@ -1,6 +1,8 @@
 Mailgun with Go
 ===============
 
+[![Build Status](https://travis-ci.org/mbanzon/mailgun.png?branch=master)](https://travis-ci.org/mbanzon/mailgun)
+
 Go library for sending mail with the Mailgun API.
 
 Currently sending messages and the e-mail address and bounce APIs are supported. Internally the HTTP API is
