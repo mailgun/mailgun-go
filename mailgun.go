@@ -26,8 +26,8 @@ type Mailgun interface {
 	SendMessage(m *MailgunMessage) (SendMessageResponse, error)
 	ValidateEmail(email string) (EmailVerification, error)
 	ParseAddresses(addresses ...string) ([]string, []string, error)
-	GetBounces(limit, skip int) (Bounces, error)
-	GetSingleBounce(address string) (BounceItem, error)
+	GetBounces(limit, skip int) (int, []Bounce, error)
+	GetSingleBounce(address string) (Bounce, error)
 	AddBounce(address, code, error string) error
 	DeleteBounce(address string) error
 }
