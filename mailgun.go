@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const (
@@ -30,6 +31,7 @@ type Mailgun interface {
 	GetSingleBounce(address string) (BounceItem, error)
 	AddBounce(address, code, error string) error
 	DeleteBounce(address string) error
+	GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error)
 }
 
 type mailgunImpl struct {
