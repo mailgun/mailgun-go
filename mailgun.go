@@ -119,7 +119,7 @@ func generateUrlValues(message *MailgunMessage) url.Values {
 	if message.Html != "" {
 		data.Add("html", message.Html)
 	}
-	
+
 	return data
 }
 
