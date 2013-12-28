@@ -6,7 +6,5 @@ go:
 env:
   - GOARCH=amd64
   - GOARCH=386
-install:
 script:
-  - export PATH="$HOME/gopath/bin:$PATH"
-  - go build
+  - go test
