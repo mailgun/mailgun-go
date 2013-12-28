@@ -19,12 +19,12 @@ type Bounce struct {
 	Error     string `json:"error"`
 }
 
-type BounceEnvelope struct {
+type bounceEnvelope struct {
 	TotalCount int      `json:"total_count"`
 	Items      []Bounce `json:"items"`
 }
 
-type singleBounce struct {
+type singleBounceEnvelope struct {
 	Bounce Bounce `json:"bounce"`
 }
 
@@ -69,7 +69,7 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 		return -1, nil, err
 	}
 
-	var response BounceEnvelope
+	var response bounceEnvelope
 	err2 := json.Unmarshal(body, &response)
 	if err2 != nil {
 		return -1, nil, err2
@@ -105,7 +105,7 @@ func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 		return Bounce{}, err
 	}
 
-	var response singleBounce
+	var response singleBounceEnvelope
 	err2 := json.Unmarshal(body, &response)
 	if err2 != nil {
 		return Bounce{}, err2
