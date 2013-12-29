@@ -20,7 +20,7 @@ type Mailgun interface {
 	Domain() string
 	ApiKey() string
 	PublicApiKey() string
-	SendMessage(m *MailgunMessage) (SendMessageResponse, error)
+	SendMessage(m *Message) (SendMessageResponse, error)
 	ValidateEmail(email string) (EmailVerification, error)
 	ParseAddresses(addresses ...string) ([]string, []string, error)
 	GetBounces(limit, skip int) (int, []Bounce, error)
@@ -58,23 +58,23 @@ func (m *mailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
 }
 
-func (m *mailgunImpl) SendMessage(message *MailgunMessage) (SendMessageResponse, error) {
+func (m *mailgunImpl) SendMessage(message *Message) (SendMessageResponse, error) {
 	if !message.validateMessage() {
 		return SendMessageResponse{}, errors.New("Message not valid")
 	}
 
 	r := simplehttp.NewSimpleHTTPRequest("POST", generateApiUrl(m, messagesEndpoint))
-	r.AddFormValue("from", message.From.String())
+	r.AddFormValue("from", message.From)
 	r.AddFormValue("subject", message.Subject)
 	r.AddFormValue("text", message.Text)
 	for _, to := range message.To {
-		r.AddFormValue("to", to.String())
+		r.AddFormValue("to", to)
 	}
 	for _, cc := range message.Cc {
-		r.AddFormValue("cc", cc.String())
+		r.AddFormValue("cc", cc)
 	}
 	for _, bcc := range message.Bcc {
-		r.AddFormValue("bcc", bcc.String())
+		r.AddFormValue("bcc", bcc)
 	}
 	if message.Html != "" {
 		r.AddFormValue("html", message.Html)

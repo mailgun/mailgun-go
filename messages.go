@@ -1,41 +1,36 @@
 package mailgun
 
 import (
-	"net/mail"
 )
 
-type MailgunMessage struct {
-	From    *mail.Address
-	To      []*mail.Address
-	Cc      []*mail.Address
-	Bcc     []*mail.Address
+type Message struct {
+	From    string
+	To      []string
+	Cc      []string
+	Bcc     []string
 	Subject string
 	Text    string
 	Html    string
 }
 
-func (m *MailgunMessage) AddRecipient(recipient *mail.Address) {
+func (m *Message) AddRecipient(recipient string) {
 	m.To = append(m.To, recipient)
 }
 
-func (m *MailgunMessage) AddCC(recipient *mail.Address) {
+func (m *Message) AddCC(recipient string) {
 	m.Cc = append(m.Cc, recipient)
 }
 
-func (m *MailgunMessage) AddBCC(recipient *mail.Address) {
+func (m *Message) AddBCC(recipient string) {
 	m.Bcc = append(m.Bcc, recipient)
 }
 
-func (m *MailgunMessage) validateMessage() bool {
+func (m *Message) validateMessage() bool {
 	if m == nil {
 		return false
 	}
 
-	if m.From == nil {
-		return false
-	}
-
-	if m.From.Address == "" {
+	if m.From == "" {
 		return false
 	}
 
@@ -58,14 +53,14 @@ func (m *MailgunMessage) validateMessage() bool {
 	return true
 }
 
-func validateAddressList(list []*mail.Address, requireOne bool) bool {
+func validateAddressList(list []string, requireOne bool) bool {
 	hasOne := false
 
 	if list == nil {
 		return !requireOne
 	} else {
 		for _, a := range list {
-			if a.Address == "" {
+			if a == "" {
 				return false
 			} else {
 				hasOne = hasOne || true
