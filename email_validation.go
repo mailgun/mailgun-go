@@ -1,8 +1,8 @@
 package mailgun
 
 import (
-	"strings"
 	"github.com/mbanzon/simplehttp"
+	"strings"
 )
 
 type EmailVarificationParts struct {

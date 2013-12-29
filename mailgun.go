@@ -3,8 +3,8 @@ package mailgun
 import (
 	"errors"
 	"fmt"
-	"time"
 	"github.com/mbanzon/simplehttp"
+	"time"
 )
 
 const (
