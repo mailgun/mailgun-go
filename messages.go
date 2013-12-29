@@ -15,6 +15,11 @@ type Message struct {
 	Html    string
 }
 
+type SendMessageResponse struct {
+	Message string `json:"message"`
+	Id      string `json:"id"`
+}
+
 func (m *Message) AddRecipient(recipient string) {
 	m.To = append(m.To, recipient)
 }

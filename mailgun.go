@@ -34,11 +34,6 @@ type mailgunImpl struct {
 	publicApiKey string
 }
 
-type SendMessageResponse struct {
-	Message string `json:"message"`
-	Id      string `json:"id"`
-}
-
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
 	m := mailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
 	return &m
