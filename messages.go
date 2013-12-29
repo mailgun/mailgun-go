@@ -15,7 +15,7 @@ type Message struct {
 	Html    string
 }
 
-type SendMessageResponse struct {
+type sendMessageResponse struct {
 	Message string `json:"message"`
 	Id      string `json:"id"`
 }
@@ -32,33 +32,37 @@ func (m *Message) AddBCC(recipient string) {
 	m.Bcc = append(m.Bcc, recipient)
 }
 
-func (m *mailgunImpl) Send(message *Message) (SendMessageResponse, error) {
+func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !message.validateMessage() {
-		return SendMessageResponse{}, errors.New("Message not valid")
+		err = errors.New("Message not valid")
+	} else {
+		r := simplehttp.NewSimpleHTTPRequest("POST", generateApiUrl(m, messagesEndpoint))
+		r.AddFormValue("from", message.From)
+		r.AddFormValue("subject", message.Subject)
+		r.AddFormValue("text", message.Text)
+		for _, to := range message.To {
+			r.AddFormValue("to", to)
+		}
+		for _, cc := range message.Cc {
+			r.AddFormValue("cc", cc)
+		}
+		for _, bcc := range message.Bcc {
+			r.AddFormValue("bcc", bcc)
+		}
+		if message.Html != "" {
+			r.AddFormValue("html", message.Html)
+		}
+		r.SetBasicAuth(basicAuthUser, m.ApiKey())
+
+		var response sendMessageResponse
+		err = r.MakeJSONRequest(&response)
+		if err != nil {
+			mes = response.Message
+			id = response.Id
+		}
 	}
 
-	r := simplehttp.NewSimpleHTTPRequest("POST", generateApiUrl(m, messagesEndpoint))
-	r.AddFormValue("from", message.From)
-	r.AddFormValue("subject", message.Subject)
-	r.AddFormValue("text", message.Text)
-	for _, to := range message.To {
-		r.AddFormValue("to", to)
-	}
-	for _, cc := range message.Cc {
-		r.AddFormValue("cc", cc)
-	}
-	for _, bcc := range message.Bcc {
-		r.AddFormValue("bcc", bcc)
-	}
-	if message.Html != "" {
-		r.AddFormValue("html", message.Html)
-	}
-	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-
-	var response SendMessageResponse
-	err := r.MakeJSONRequest(&response)
-
-	return response, err
+	return
 }
 
 func (m *Message) validateMessage() bool {

@@ -18,7 +18,7 @@ type Mailgun interface {
 	Domain() string
 	ApiKey() string
 	PublicApiKey() string
-	Send(m *Message) (SendMessageResponse, error)
+	Send(m *Message) (string, string, error)
 	ValidateEmail(email string) (EmailVerification, error)
 	ParseAddresses(addresses ...string) ([]string, []string, error)
 	GetBounces(limit, skip int) (int, []Bounce, error)
