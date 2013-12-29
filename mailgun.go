@@ -20,7 +20,7 @@ type Mailgun interface {
 	Domain() string
 	ApiKey() string
 	PublicApiKey() string
-	SendMessage(m *Message) (SendMessageResponse, error)
+	Send(m *Message) (SendMessageResponse, error)
 	ValidateEmail(email string) (EmailVerification, error)
 	ParseAddresses(addresses ...string) ([]string, []string, error)
 	GetBounces(limit, skip int) (int, []Bounce, error)
@@ -58,7 +58,7 @@ func (m *mailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
 }
 
-func (m *mailgunImpl) SendMessage(message *Message) (SendMessageResponse, error) {
+func (m *mailgunImpl) Send(message *Message) (SendMessageResponse, error) {
 	if !message.validateMessage() {
 		return SendMessageResponse{}, errors.New("Message not valid")
 	}
