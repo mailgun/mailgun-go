@@ -1,6 +1,8 @@
 package mailgun
 
 import (
+	"errors"
+	"github.com/mbanzon/simplehttp"
 )
 
 type Message struct {
@@ -23,6 +25,35 @@ func (m *Message) AddCC(recipient string) {
 
 func (m *Message) AddBCC(recipient string) {
 	m.Bcc = append(m.Bcc, recipient)
+}
+
+func (m *mailgunImpl) Send(message *Message) (SendMessageResponse, error) {
+	if !message.validateMessage() {
+		return SendMessageResponse{}, errors.New("Message not valid")
+	}
+
+	r := simplehttp.NewSimpleHTTPRequest("POST", generateApiUrl(m, messagesEndpoint))
+	r.AddFormValue("from", message.From)
+	r.AddFormValue("subject", message.Subject)
+	r.AddFormValue("text", message.Text)
+	for _, to := range message.To {
+		r.AddFormValue("to", to)
+	}
+	for _, cc := range message.Cc {
+		r.AddFormValue("cc", cc)
+	}
+	for _, bcc := range message.Bcc {
+		r.AddFormValue("bcc", bcc)
+	}
+	if message.Html != "" {
+		r.AddFormValue("html", message.Html)
+	}
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+
+	var response SendMessageResponse
+	err := r.MakeJSONRequest(&response)
+
+	return response, err
 }
 
 func (m *Message) validateMessage() bool {
