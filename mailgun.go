@@ -1,14 +1,10 @@
 package mailgun
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"time"
+	"github.com/mbanzon/simplehttp"
 )
 
 const (
@@ -67,60 +63,28 @@ func (m *mailgunImpl) SendMessage(message *MailgunMessage) (SendMessageResponse,
 		return SendMessageResponse{}, errors.New("Message not valid")
 	}
 
-	data := generateUrlValues(message)
-
-	req, err := http.NewRequest("POST", generateApiUrl(m, messagesEndpoint), bytes.NewBufferString(data.Encode()))
-	if err != nil {
-		return SendMessageResponse{}, err
-	}
-	req.SetBasicAuth(basicAuthUser, m.ApiKey())
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return SendMessageResponse{}, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return SendMessageResponse{}, errors.New(fmt.Sprintf("Status is not 200. It was %d", resp.StatusCode))
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return SendMessageResponse{}, err
-	}
-
-	var response SendMessageResponse
-	err2 := json.Unmarshal(body, &response)
-	if err2 != nil {
-		return SendMessageResponse{}, err2
-	}
-
-	return response, nil
-}
-
-func generateUrlValues(message *MailgunMessage) url.Values {
-	data := url.Values{}
-	data.Add("from", message.From.String())
-	data.Add("subject", message.Subject)
-	data.Add("text", message.Text)
-
+	r := simplehttp.NewSimpleHTTPRequest("POST", generateApiUrl(m, messagesEndpoint))
+	r.AddFormValue("from", message.From.String())
+	r.AddFormValue("subject", message.Subject)
+	r.AddFormValue("text", message.Text)
 	for _, to := range message.To {
-		data.Add("to", to.String())
+		r.AddFormValue("to", to.String())
 	}
 	for _, cc := range message.Cc {
-		data.Add("cc", cc.String())
+		r.AddFormValue("cc", cc.String())
 	}
 	for _, bcc := range message.Bcc {
-		data.Add("bcc", bcc.String())
+		r.AddFormValue("bcc", bcc.String())
 	}
-
 	if message.Html != "" {
-		data.Add("html", message.Html)
+		r.AddFormValue("html", message.Html)
 	}
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
-	return data
+	var response SendMessageResponse
+	err := r.MakeJSONRequest(&response)
+
+	return response, err
 }
 
 func generateApiUrl(m Mailgun, endpoint string) string {

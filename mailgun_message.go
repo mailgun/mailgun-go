@@ -12,11 +12,6 @@ type MailgunMessage struct {
 	Subject string
 	Text    string
 	Html    string
-	/*	Tracking     bool
-		DeliveryTime *time.Time
-		Tags         []string
-		Attachments  []string
-		Inlines      []string*/
 }
 
 func (m *MailgunMessage) AddRecipient(recipient *mail.Address) {
@@ -30,18 +25,6 @@ func (m *MailgunMessage) AddCC(recipient *mail.Address) {
 func (m *MailgunMessage) AddBCC(recipient *mail.Address) {
 	m.Bcc = append(m.Bcc, recipient)
 }
-
-/*func (m *MailgunMessage) AddTag(tag string) {
-	m.Tags = append(m.Tags, tag)
-}
-
-func (m *MailgunMessage) AddAttachment(attachment string) {
-	m.Attachments = append(m.Attachments, attachment)
-}
-
-func (m *MailgunMessage) AddInline(inline string) {
-	m.Inlines = append(m.Inlines, inline)
-}*/
 
 func (m *MailgunMessage) validateMessage() bool {
 	if m == nil {
