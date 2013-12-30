@@ -56,7 +56,7 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 
 		var response sendMessageResponse
 		err = r.MakeJSONRequest(&response)
-		if err != nil {
+		if err == nil {
 			mes = response.Message
 			id = response.Id
 		}
