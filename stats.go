@@ -1,6 +1,8 @@
 package mailgun
 
 import (
+	"github.com/mbanzon/simplehttp"
+	"strconv"
 	"time"
 )
 
@@ -18,5 +20,26 @@ type statsEnvelope struct {
 }
 
 func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error) {
-	return -1, nil, nil
+	r := simplehttp.NewGetRequest(generateApiUrl(m, statsEndpoint))
+
+	if limit != -1 {
+		r.AddParameter("limit", strconv.Itoa(limit))
+	}
+	if skip != -1 {
+		r.AddParameter("skip", strconv.Itoa(skip))
+	}
+
+	r.AddParameter("start-date", startDate.Format("2006-02-01"))
+
+	for _, e := range event {
+		r.AddParameter("event", e)
+	}
+
+	var res statsEnvelope
+	err := r.MakeJSONRequest(&res)
+	if err != nil {
+		return -1, nil, err
+	} else {
+		return res.TotalCount, res.Items, nil
+	}
 }
