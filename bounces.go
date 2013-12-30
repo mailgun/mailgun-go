@@ -48,7 +48,7 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 }
 
 func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
-	r := simplehttp.NewGetRequest(generateApiUrl(m, bouncesEndpoint)+"/"+address)
+	r := simplehttp.NewGetRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response singleBounceEnvelope
@@ -76,7 +76,7 @@ func (m *mailgunImpl) AddBounce(address, code, error string) error {
 }
 
 func (m *mailgunImpl) DeleteBounce(address string) error {
-	r := simplehttp.NewDeleteRequest(generateApiUrl(m, bouncesEndpoint)+"/"+address)
+	r := simplehttp.NewDeleteRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := r.MakeRequest()
 	return err
