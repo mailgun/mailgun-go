@@ -7,11 +7,11 @@ import (
 )
 
 type Stat struct {
-	Event      string `json:"event"`
-	TotalCount int    `json:"total_count"`
-	CreatedAt  string `json:"created_at"`
-	Id         string `json:"id"`
-	Tags       string `json:"tags"`
+	Event      string      `json:"event"`
+	TotalCount int         `json:"total_count"`
+	CreatedAt  string      `json:"created_at"`
+	Id         string      `json:"id"`
+	Tags       interface{} `json:"tags"`
 }
 
 type statsEnvelope struct {
@@ -34,6 +34,7 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event .
 	for _, e := range event {
 		r.AddParameter("event", e)
 	}
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var res statsEnvelope
 	err := r.MakeJSONRequest(&res)
