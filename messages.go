@@ -6,18 +6,22 @@ import (
 )
 
 type Message struct {
-	From    string
+	from    string
 	To      []string
 	Cc      []string
 	Bcc     []string
-	Subject string
-	Text    string
+	subject string
+	text    string
 	Html    string
 }
 
 type sendMessageResponse struct {
 	Message string `json:"message"`
 	Id      string `json:"id"`
+}
+
+func NewMessage(from, subject, text string) *Message {
+	return &Message{ from: from, subject: subject, text: text }
 }
 
 func (m *Message) AddRecipient(recipient string) {
@@ -37,9 +41,9 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		err = errors.New("Message not valid")
 	} else {
 		r := simplehttp.NewPostRequest(generateApiUrl(m, messagesEndpoint))
-		r.AddFormValue("from", message.From)
-		r.AddFormValue("subject", message.Subject)
-		r.AddFormValue("text", message.Text)
+		r.AddFormValue("from", message.from)
+		r.AddFormValue("subject", message.subject)
+		r.AddFormValue("text", message.text)
 		for _, to := range message.To {
 			r.AddFormValue("to", to)
 		}
@@ -70,7 +74,7 @@ func (m *Message) validateMessage() bool {
 		return false
 	}
 
-	if m.From == "" {
+	if m.from == "" {
 		return false
 	}
 
@@ -86,7 +90,7 @@ func (m *Message) validateMessage() bool {
 		return false
 	}
 
-	if m.Text == "" {
+	if m.text == "" {
 		return false
 	}
 
