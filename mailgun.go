@@ -11,6 +11,7 @@ const (
 	addressValidateEndpoint = "address/validate"
 	addressParseEndpoint    = "address/parse"
 	bouncesEndpoint         = "bounces"
+	statsEndpoint           = "stats"
 	basicAuthUser           = "api"
 )
 
