@@ -28,7 +28,7 @@ func (i Bounce) GetCreatedAt() (t time.Time, err error) {
 }
 
 func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
-	r := simplehttp.NewSimpleHTTPRequest("GET", generateApiUrl(m, bouncesEndpoint))
+	r := simplehttp.NewGetRequest(generateApiUrl(m, bouncesEndpoint))
 	if limit != -1 {
 		r.AddParameter("limit", strconv.Itoa(limit))
 	}
@@ -48,7 +48,7 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 }
 
 func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
-	r := simplehttp.NewSimpleHTTPRequest("GET", generateApiUrl(m, bouncesEndpoint)+"/"+address)
+	r := simplehttp.NewGetRequest(generateApiUrl(m, bouncesEndpoint)+"/"+address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response singleBounceEnvelope
@@ -61,7 +61,7 @@ func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 }
 
 func (m *mailgunImpl) AddBounce(address, code, error string) error {
-	r := simplehttp.NewSimpleHTTPRequest("POST", generateApiUrl(m, bouncesEndpoint))
+	r := simplehttp.NewPostRequest(generateApiUrl(m, bouncesEndpoint))
 
 	r.AddFormValue("address", address)
 	if code != "" {
@@ -76,7 +76,7 @@ func (m *mailgunImpl) AddBounce(address, code, error string) error {
 }
 
 func (m *mailgunImpl) DeleteBounce(address string) error {
-	r := simplehttp.NewSimpleHTTPRequest("DELETE", generateApiUrl(m, bouncesEndpoint)+"/"+address)
+	r := simplehttp.NewDeleteRequest(generateApiUrl(m, bouncesEndpoint)+"/"+address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := r.MakeRequest()
 	return err

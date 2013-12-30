@@ -24,7 +24,7 @@ type AddressParseResult struct {
 }
 
 func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
-	r := simplehttp.NewSimpleHTTPRequest("GET", generatePublicApiUrl(addressValidateEndpoint))
+	r := simplehttp.NewGetRequest(generatePublicApiUrl(addressValidateEndpoint))
 	r.AddParameter("address", email)
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())
 
@@ -38,7 +38,7 @@ func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 }
 
 func (m *mailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
-	r := simplehttp.NewSimpleHTTPRequest("GET", generatePublicApiUrl(addressParseEndpoint))
+	r := simplehttp.NewGetRequest(generatePublicApiUrl(addressParseEndpoint))
 	r.AddParameter("addresses", strings.Join(addresses, ","))
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())
 

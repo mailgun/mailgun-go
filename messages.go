@@ -36,7 +36,7 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	if !message.validateMessage() {
 		err = errors.New("Message not valid")
 	} else {
-		r := simplehttp.NewSimpleHTTPRequest("POST", generateApiUrl(m, messagesEndpoint))
+		r := simplehttp.NewPostRequest(generateApiUrl(m, messagesEndpoint))
 		r.AddFormValue("from", message.From)
 		r.AddFormValue("subject", message.Subject)
 		r.AddFormValue("text", message.Text)
