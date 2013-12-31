@@ -13,6 +13,7 @@ type Message struct {
 	subject string
 	text    string
 	html    string
+	tags	[]string
 }
 
 type sendMessageResponse struct {
@@ -39,6 +40,9 @@ func (m *Message) AddBCC(recipient string) {
 func (m *Message) SetHtml(html string) {
 	m.html = html
 }
+func (m *Message) AddTag(tag string) {
+	m.tags = append(m.tags, tag)
+}
 
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !message.validateMessage() {
@@ -56,6 +60,9 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		for _, bcc := range message.bcc {
 			r.AddFormValue("bcc", bcc)
+		}
+		for _, tag := range message.tags {
+			r.AddFormValue("o:tag", tag)
 		}
 		if message.html != "" {
 			r.AddFormValue("html", message.html)
