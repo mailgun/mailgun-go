@@ -7,11 +7,11 @@ import (
 )
 
 type Stat struct {
-	Event      string      `json:"event"`
-	TotalCount int         `json:"total_count"`
-	CreatedAt  string      `json:"created_at"`
-	Id         string      `json:"id"`
-	Tags       interface{} `json:"tags"`
+	Event      string         `json:"event"`
+	TotalCount int            `json:"total_count"`
+	CreatedAt  string         `json:"created_at"`
+	Id         string         `json:"id"`
+	Tags       map[string]int `json:"tags"`
 }
 
 type statsEnvelope struct {
