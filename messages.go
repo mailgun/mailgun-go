@@ -14,7 +14,7 @@ type Message struct {
 	text     string
 	html     string
 	tags     []string
-	campains []string
+	campaigns []string
 }
 
 type sendMessageResponse struct {
@@ -46,7 +46,7 @@ func (m *Message) AddTag(tag string) {
 }
 
 func (m *Message) AddCampaign(campain string) {
-	m.campains = append(m.campains, campain)
+	m.campaigns = append(m.campaigns, campain)
 }
 
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
@@ -69,7 +69,7 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		for _, tag := range message.tags {
 			r.AddFormValue("o:tag", tag)
 		}
-		for _, campain := range messge.campains {
+		for _, campain := range message.campaigns {
 			r.AddFormValue("o:campain", campain)
 		}
 		if message.html != "" {
@@ -113,7 +113,7 @@ func (m *Message) validateMessage() bool {
 		return false
 	}
 
-	if !validateStringList(m.campains, false) || len(m.campains) > 3 {
+	if !validateStringList(m.campaigns, false) || len(m.campaigns) > 3 {
 		return false
 	}
 
