@@ -36,6 +36,10 @@ func (m *Message) AddBCC(recipient string) {
 	m.bcc = append(m.bcc, recipient)
 }
 
+func (m *Message) SetHtml(html string) {
+	m.html = html
+}
+
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !message.validateMessage() {
 		err = errors.New("Message not valid")
