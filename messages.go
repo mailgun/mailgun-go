@@ -6,14 +6,15 @@ import (
 )
 
 type Message struct {
-	from    string
-	to      []string
-	cc      []string
-	bcc     []string
-	subject string
-	text    string
-	html    string
-	tags    []string
+	from     string
+	to       []string
+	cc       []string
+	bcc      []string
+	subject  string
+	text     string
+	html     string
+	tags     []string
+	campains []string
 }
 
 type sendMessageResponse struct {
@@ -44,6 +45,10 @@ func (m *Message) AddTag(tag string) {
 	m.tags = append(m.tags, tag)
 }
 
+func (m *Message) AddCampaign(campain string) {
+	m.campains = append(m.campains, campain)
+}
+
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !message.validateMessage() {
 		err = errors.New("Message not valid")
@@ -63,6 +68,9 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		for _, tag := range message.tags {
 			r.AddFormValue("o:tag", tag)
+		}
+		for _, campain := range messge.campains {
+			r.AddFormValue("o:campain", campain)
 		}
 		if message.html != "" {
 			r.AddFormValue("html", message.html)
@@ -89,15 +97,23 @@ func (m *Message) validateMessage() bool {
 		return false
 	}
 
-	if !validateAddressList(m.to, true) {
+	if !validateStringList(m.to, true) {
 		return false
 	}
 
-	if !validateAddressList(m.cc, false) {
+	if !validateStringList(m.cc, false) {
 		return false
 	}
 
-	if !validateAddressList(m.bcc, false) {
+	if !validateStringList(m.bcc, false) {
+		return false
+	}
+
+	if !validateStringList(m.tags, false) {
+		return false
+	}
+
+	if !validateStringList(m.campains, false) || len(m.campains) > 3 {
 		return false
 	}
 
@@ -108,7 +124,7 @@ func (m *Message) validateMessage() bool {
 	return true
 }
 
-func validateAddressList(list []string, requireOne bool) bool {
+func validateStringList(list []string, requireOne bool) bool {
 	hasOne := false
 
 	if list == nil {
