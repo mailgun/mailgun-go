@@ -13,7 +13,7 @@ type Message struct {
 	subject string
 	text    string
 	html    string
-	tags	[]string
+	tags    []string
 }
 
 type sendMessageResponse struct {
@@ -22,7 +22,7 @@ type sendMessageResponse struct {
 }
 
 func NewMessage(from string, subject string, text string, to ...string) *Message {
-	return &Message{ from: from, subject: subject, text: text, to: to }
+	return &Message{from: from, subject: subject, text: text, to: to}
 }
 
 func (m *Message) AddRecipient(recipient string) {
