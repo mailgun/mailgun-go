@@ -7,12 +7,12 @@ import (
 
 type Message struct {
 	from    string
-	To      []string
-	Cc      []string
-	Bcc     []string
+	to      []string
+	cc      []string
+	bcc     []string
 	subject string
 	text    string
-	Html    string
+	html    string
 }
 
 type sendMessageResponse struct {
@@ -20,20 +20,20 @@ type sendMessageResponse struct {
 	Id      string `json:"id"`
 }
 
-func NewMessage(from, subject, text string) *Message {
-	return &Message{ from: from, subject: subject, text: text }
+func NewMessage(from string, subject string, text string, to ...string) *Message {
+	return &Message{ from: from, subject: subject, text: text, to: to }
 }
 
 func (m *Message) AddRecipient(recipient string) {
-	m.To = append(m.To, recipient)
+	m.to = append(m.to, recipient)
 }
 
 func (m *Message) AddCC(recipient string) {
-	m.Cc = append(m.Cc, recipient)
+	m.cc = append(m.cc, recipient)
 }
 
 func (m *Message) AddBCC(recipient string) {
-	m.Bcc = append(m.Bcc, recipient)
+	m.bcc = append(m.bcc, recipient)
 }
 
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
@@ -44,17 +44,17 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		r.AddFormValue("from", message.from)
 		r.AddFormValue("subject", message.subject)
 		r.AddFormValue("text", message.text)
-		for _, to := range message.To {
+		for _, to := range message.to {
 			r.AddFormValue("to", to)
 		}
-		for _, cc := range message.Cc {
+		for _, cc := range message.cc {
 			r.AddFormValue("cc", cc)
 		}
-		for _, bcc := range message.Bcc {
+		for _, bcc := range message.bcc {
 			r.AddFormValue("bcc", bcc)
 		}
-		if message.Html != "" {
-			r.AddFormValue("html", message.Html)
+		if message.html != "" {
+			r.AddFormValue("html", message.html)
 		}
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -78,15 +78,15 @@ func (m *Message) validateMessage() bool {
 		return false
 	}
 
-	if !validateAddressList(m.To, true) {
+	if !validateAddressList(m.to, true) {
 		return false
 	}
 
-	if !validateAddressList(m.Cc, false) {
+	if !validateAddressList(m.cc, false) {
 		return false
 	}
 
-	if !validateAddressList(m.Bcc, false) {
+	if !validateAddressList(m.bcc, false) {
 		return false
 	}
 
