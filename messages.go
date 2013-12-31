@@ -15,6 +15,15 @@ type Message struct {
 	html      string
 	tags      []string
 	campaigns []string
+
+	testMode       bool
+	tracking       bool
+	trackingClicks bool
+	trackingOpens  bool
+
+	trackingSet       bool
+	trackingClicksSet bool
+	trackingOpensSet  bool
 }
 
 type sendMessageResponse struct {
@@ -45,8 +54,27 @@ func (m *Message) AddTag(tag string) {
 	m.tags = append(m.tags, tag)
 }
 
-func (m *Message) AddCampaign(campain string) {
-	m.campaigns = append(m.campaigns, campain)
+func (m *Message) AddCampaign(campaign string) {
+	m.campaigns = append(m.campaigns, campaign)
+}
+
+func (m *Message) EnableTestMode() {
+	m.testMode = true
+}
+
+func (m *Message) SetTracking(tracking bool) {
+	m.tracking = tracking
+	m.trackingSet = true
+}
+
+func (m *Message) SetTrackingClicks(trackingClicks bool) {
+	m.trackingClicks = trackingClicks
+	m.trackingClicksSet = true
+}
+
+func (m *Message) SetTrackingOpens(trackingOpens bool) {
+	m.trackingOpens = trackingOpens
+	m.trackingOpensSet = true
 }
 
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
@@ -69,11 +97,23 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		for _, tag := range message.tags {
 			r.AddFormValue("o:tag", tag)
 		}
-		for _, campain := range message.campaigns {
-			r.AddFormValue("o:campain", campain)
+		for _, campaign := range message.campaigns {
+			r.AddFormValue("o:campaign", campaign)
 		}
 		if message.html != "" {
 			r.AddFormValue("html", message.html)
+		}
+		if message.testMode {
+			r.AddFormValue("o:testmode", "yes")
+		}
+		if message.trackingSet {
+			r.AddFormValue("o:tracking", yesNo(message.tracking))
+		}
+		if message.trackingClicksSet {
+			r.AddFormValue("o:tracking-clicks", yesNo(message.trackingClicks))
+		}
+		if message.trackingOpensSet {
+			r.AddFormValue("o:tracking-opens", yesNo(message.trackingOpens))
 		}
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -86,6 +126,14 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	}
 
 	return
+}
+
+func yesNo(b bool) string {
+	if b {
+		return "yes"
+	} else {
+		return "no"
+	}
 }
 
 func (m *Message) validateMessage() bool {
