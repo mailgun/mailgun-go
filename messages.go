@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/mbanzon/simplehttp"
 	"time"
@@ -24,6 +25,7 @@ type Message struct {
 	trackingClicks bool
 	trackingOpens  bool
 	headers        map[string]string
+	variables      map[string]string
 
 	dkimSet           bool
 	trackingSet       bool
@@ -94,6 +96,18 @@ func (m *Message) AddHeader(header, value string) {
 	m.headers[header] = value
 }
 
+func (m *Message) AddVariable(variable string, value interface{}) error {
+	j, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	if m.variables == nil {
+		m.variables = make(map[string]string)
+	}
+	m.variables[variable] = string(j)
+	return nil
+}
+
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !message.validateMessage() {
 		err = errors.New("Message not valid")
@@ -140,7 +154,12 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		if message.headers != nil {
 			for header, value := range message.headers {
-				r.AddFormValue("h:" + header, value)
+				r.AddFormValue("h:"+header, value)
+			}
+		}
+		if message.variables != nil {
+			for variable, value := range message.variables {
+				r.AddFormValue("v:"+variable, value)
 			}
 		}
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
