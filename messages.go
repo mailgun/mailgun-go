@@ -3,20 +3,22 @@ package mailgun
 import (
 	"errors"
 	"github.com/mbanzon/simplehttp"
+	"time"
 )
 
 type Message struct {
-	from      string
-	to        []string
-	cc        []string
-	bcc       []string
-	subject   string
-	text      string
-	html      string
-	tags      []string
-	campaigns []string
+	from         string
+	to           []string
+	cc           []string
+	bcc          []string
+	subject      string
+	text         string
+	html         string
+	tags         []string
+	campaigns    []string
+	dkim         bool
+	deliveryTime *time.Time
 
-	dkim           bool
 	testMode       bool
 	tracking       bool
 	trackingClicks bool
@@ -60,7 +62,7 @@ func (m *Message) AddCampaign(campaign string) {
 	m.campaigns = append(m.campaigns, campaign)
 }
 
-func (m *Messge) SetDKIM(dkim bool) {
+func (m *Message) SetDKIM(dkim bool) {
 	m.dkim = dkim
 	m.dkimSet = true
 }
@@ -112,6 +114,9 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		if message.dkimSet {
 			r.AddFormValue("o:dkim", yesNo(message.dkim))
+		}
+		if message.deliveryTime != nil {
+			r.AddFormValue("o:deliverytime", message.deliveryTime.Format("Mon, 2 Jan 2006 15:04:05 MST"))
 		}
 		if message.testMode {
 			r.AddFormValue("o:testmode", "yes")
