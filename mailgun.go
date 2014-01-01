@@ -12,6 +12,7 @@ const (
 	addressParseEndpoint    = "address/parse"
 	bouncesEndpoint         = "bounces"
 	statsEndpoint           = "stats"
+	deleteTagEndpoint       = "tags"
 	basicAuthUser           = "api"
 )
 
@@ -27,6 +28,7 @@ type Mailgun interface {
 	AddBounce(address, code, error string) error
 	DeleteBounce(address string) error
 	GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error)
+	DeleteTag(tag string) error
 }
 
 type mailgunImpl struct {

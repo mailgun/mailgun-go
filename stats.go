@@ -44,3 +44,10 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event .
 		return res.TotalCount, res.Items, nil
 	}
 }
+
+func (m *mailgunImpl) DeleteTag(tag string) error {
+	r := simplehttp.NewDeleteRequest(generateApiUrl(m, deleteTagEndpoint) + "/" + tag)
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	_, err := r.MakeRequest()
+	return err
+}
