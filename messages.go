@@ -23,6 +23,7 @@ type Message struct {
 	tracking       bool
 	trackingClicks bool
 	trackingOpens  bool
+	headers        map[string]string
 
 	dkimSet           bool
 	trackingSet       bool
@@ -86,6 +87,13 @@ func (m *Message) SetTrackingOpens(trackingOpens bool) {
 	m.trackingOpensSet = true
 }
 
+func (m *Message) AddHeader(header, value string) {
+	if m.headers == nil {
+		m.headers = make(map[string]string)
+	}
+	m.headers[header] = value
+}
+
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !message.validateMessage() {
 		err = errors.New("Message not valid")
@@ -129,6 +137,11 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		if message.trackingOpensSet {
 			r.AddFormValue("o:tracking-opens", yesNo(message.trackingOpens))
+		}
+		if message.headers != nil {
+			for header, value := range message.headers {
+				r.AddFormValue("h:" + header, value)
+			}
 		}
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
