@@ -16,11 +16,13 @@ type Message struct {
 	tags      []string
 	campaigns []string
 
+	dkim           bool
 	testMode       bool
 	tracking       bool
 	trackingClicks bool
 	trackingOpens  bool
 
+	dkimSet           bool
 	trackingSet       bool
 	trackingClicksSet bool
 	trackingOpensSet  bool
@@ -56,6 +58,11 @@ func (m *Message) AddTag(tag string) {
 
 func (m *Message) AddCampaign(campaign string) {
 	m.campaigns = append(m.campaigns, campaign)
+}
+
+func (m *Messge) SetDKIM(dkim bool) {
+	m.dkim = dkim
+	m.dkimSet = true
 }
 
 func (m *Message) EnableTestMode() {
@@ -102,6 +109,9 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		if message.html != "" {
 			r.AddFormValue("html", message.html)
+		}
+		if message.dkimSet {
+			r.AddFormValue("o:dkim", yesNo(message.dkim))
 		}
 		if message.testMode {
 			r.AddFormValue("o:testmode", "yes")
