@@ -29,6 +29,10 @@ type Mailgun interface {
 	DeleteBounce(address string) error
 	GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error)
 	DeleteTag(tag string) error
+	GetDomains(limit, skip int) (int, []Domain, error)
+	GetSingleDomain(domain string) (Domain, DomainDns, error)
+	CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error
+	DeleteDomain(name string) error
 }
 
 type mailgunImpl struct {
