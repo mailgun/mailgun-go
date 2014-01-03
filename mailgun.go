@@ -12,6 +12,7 @@ const (
 	addressParseEndpoint    = "address/parse"
 	bouncesEndpoint         = "bounces"
 	statsEndpoint           = "stats"
+	domainsEndpoint         = "domains"
 	deleteTagEndpoint       = "tags"
 	basicAuthUser           = "api"
 )
@@ -30,7 +31,7 @@ type Mailgun interface {
 	GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error)
 	DeleteTag(tag string) error
 	GetDomains(limit, skip int) (int, []Domain, error)
-	GetSingleDomain(domain string) (Domain, DomainDns, error)
+	GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
 	CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error
 	DeleteDomain(name string) error
 }
