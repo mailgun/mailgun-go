@@ -62,9 +62,23 @@ func (m *mailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNS
 }
 
 func (m *mailgunImpl) CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error {
-	return nil
+	r := simplehttp.NewPostRequest(generatePublicApiUrl(domainsEndpoint))
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	r.AddFormValue("name", name)
+	r.AddFormValue("smtp_password", smtpPassword)
+	if spamAction {
+		r.AddFormValue("spam_action", "tag")
+	} else {
+		r.AddFormValue("spam_action", "disabled")
+	}
+	r.AddFormValue("wildcard", strconv.FormatBool(wildcard))
+	_, err := r.MakeRequest()
+	return err
 }
 
 func (m *mailgunImpl) DeleteDomain(name string) error {
-	return nil
+	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint) + "/" + name)
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	_, err := r.MakeRequest()
+	return err
 }
