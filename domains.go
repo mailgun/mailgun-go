@@ -51,7 +51,14 @@ func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 }
 
 func (m *mailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
-	return Domain{}, nil, nil, nil
+	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint) + "/" + domain)
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	var envelope singleDomainEnvelope
+	err := r.MakeJSONRequest(&envelope)
+	if err != nil {
+		return Domain{}, nil, nil, err
+	}
+	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, nil
 }
 
 func (m *mailgunImpl) CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error {
