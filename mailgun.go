@@ -14,6 +14,7 @@ const (
 	statsEndpoint           = "stats"
 	domainsEndpoint         = "domains"
 	deleteTagEndpoint       = "tags"
+	campaignsEndpoint = "campaigns"
 	basicAuthUser           = "api"
 )
 
@@ -34,6 +35,7 @@ type Mailgun interface {
 	GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
 	CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error
 	DeleteDomain(name string) error
+	GetCampaigns() (int, []Campaign, error)
 }
 
 type mailgunImpl struct {
