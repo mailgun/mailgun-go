@@ -14,7 +14,7 @@ const (
 	statsEndpoint           = "stats"
 	domainsEndpoint         = "domains"
 	deleteTagEndpoint       = "tags"
-	campaignsEndpoint = "campaigns"
+	campaignsEndpoint       = "campaigns"
 	basicAuthUser           = "api"
 )
 

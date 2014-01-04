@@ -1,6 +1,8 @@
 package mailgun
 
-import ("github.com/mbanzon/simplehttp")
+import (
+	"github.com/mbanzon/simplehttp"
+)
 
 type Campaign struct {
 	Id                string `json:"id"`
@@ -17,8 +19,8 @@ type Campaign struct {
 }
 
 type campaignsEnvelope struct {
-	TotalCount int `json:"total_count"`
-	Items []Campaign `json:"items"`
+	TotalCount int        `json:"total_count"`
+	Items      []Campaign `json:"items"`
 }
 
 func (m *mailgunImpl) GetCampaigns() (int, []Campaign, error) {
