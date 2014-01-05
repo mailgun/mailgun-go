@@ -1,3 +1,8 @@
+// Package mailgun provides methods for interacting with the Mailgun API.
+// For further information please see the Mailgun documentation at
+// http://documentation.mailgun.com/
+//
+// Author: Michael Banzon
 package mailgun
 
 import (
