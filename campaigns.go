@@ -55,3 +55,10 @@ func (m *mailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 	_, err := r.MakeRequest()
 	return err
 }
+
+func (m *mailgunImpl) DeleteCampaign(id string) error {
+	r := simplehttp.NewDeleteRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	_, err := r.MakeRequest()
+	return err
+}
