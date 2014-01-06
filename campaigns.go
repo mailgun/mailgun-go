@@ -44,3 +44,14 @@ func (m *mailgunImpl) CreateCampaign(name, id string) error {
 	_, err := r.MakeRequest()
 	return err
 }
+
+func (m *mailgunImpl) UpdateCampaign(oldId, name, newId string) error {
+	r := simplehttp.NewPostRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	r.AddFormValue("name", name)
+	if newId != "" {
+		r.AddFormValue("id", newId)
+	}
+	_, err := r.MakeRequest()
+	return err
+}

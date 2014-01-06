@@ -42,6 +42,7 @@ type Mailgun interface {
 	DeleteDomain(name string) error
 	GetCampaigns() (int, []Campaign, error)
 	CreateCampaign(name, id string) error
+	UpdateCampaign(oldId, name, newId string) error
 }
 
 type mailgunImpl struct {
