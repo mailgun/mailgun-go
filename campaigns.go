@@ -33,3 +33,14 @@ func (m *mailgunImpl) GetCampaigns() (int, []Campaign, error) {
 	}
 	return envelope.TotalCount, envelope.Items, nil
 }
+
+func (m *mailgunImpl) CreateCampaign(name, id string) error {
+	r := simplehttp.NewPostRequest(generateApiUrl(m, campaignsEndpoint))
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	r.AddFormValue("name", name)
+	if id != "" {
+		r.AddFormValue("id", id)
+	}
+	_, err := r.MakeRequest()
+	return err
+}

@@ -41,6 +41,7 @@ type Mailgun interface {
 	CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error
 	DeleteDomain(name string) error
 	GetCampaigns() (int, []Campaign, error)
+	CreateCampaign(name, id string) error
 }
 
 type mailgunImpl struct {
