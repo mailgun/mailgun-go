@@ -3,6 +3,7 @@ package mailgun
 import (
 	"github.com/mbanzon/simplehttp"
 	"strconv"
+	"time"
 )
 
 type Domain struct {
@@ -30,6 +31,11 @@ type singleDomainEnvelope struct {
 	Domain              Domain      `json:"domain"`
 	ReceivingDNSRecords []DNSRecord `json:"receiving_dns_records"`
 	SendingDNSRecords   []DNSRecord `json:"sending_dns_records"`
+}
+
+func (d Domain) GetCreatedAt() (t time.Time, err error) {
+	t, err = parseMailgunTime(d.CreatedAt)
+	return
 }
 
 func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
