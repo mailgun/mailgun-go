@@ -44,6 +44,7 @@ type Mailgun interface {
 	CreateCampaign(name, id string) error
 	UpdateCampaign(oldId, name, newId string) error
 	DeleteCampaign(id string) error
+	GetComplaints(limit, skip int) (int, []interface{}, error)
 }
 
 type mailgunImpl struct {
@@ -75,4 +76,9 @@ func generateApiUrl(m Mailgun, endpoint string) string {
 
 func generatePublicApiUrl(endpoint string) string {
 	return fmt.Sprintf("%s/%s", apiBase, endpoint)
+}
+
+func parseMailgunTime(ts string) (t time.Time, err error) {
+	t, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", ts)
+	return
 }
