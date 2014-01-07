@@ -23,8 +23,7 @@ type singleBounceEnvelope struct {
 }
 
 func (i Bounce) GetCreatedAt() (t time.Time, err error) {
-	t, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", i.CreatedAt)
-	return
+	return parseMailgunTime(i.CreatedAt)
 }
 
 func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
