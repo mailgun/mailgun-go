@@ -7,5 +7,6 @@ type Complaint struct {
 }
 
 func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []interface{}, error) {
+	// TODO - this is NOT complete!
 	return -1, nil, nil
 }
