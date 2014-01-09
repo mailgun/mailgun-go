@@ -44,7 +44,7 @@ type Mailgun interface {
 	CreateCampaign(name, id string) error
 	UpdateCampaign(oldId, name, newId string) error
 	DeleteCampaign(id string) error
-	GetComplaints(limit, skip int) (int, []interface{}, error)
+	GetComplaints(limit, skip int) (int, []Complaint, error)
 }
 
 type mailgunImpl struct {

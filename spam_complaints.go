@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"github.com/mbanzon/simplehttp"
+	"strconv"
 )
 
 const (
@@ -14,13 +15,23 @@ type Complaint struct {
 	Address   string `json:"address"`
 }
 
-type complaintContainer struct {
+type complaintsEnvelope struct {
 	TotalCount int         `json:"total_count"`
 	Items      []Complaint `json:"items"`
 }
 
-func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []interface{}, error) {
-	simplehttp.NewGetRequest(generateApiUrl(m, complaintsEndpoint))
-	// TODO - this is NOT complete!
-	return -1, nil, nil
+func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
+	r := simplehttp.NewGetRequest(generateApiUrl(m, complaintsEndpoint))
+	if limit != -1 {
+		r.AddParameter("limit", strconv.Itoa(limit))
+	}
+	if skip != -1 {
+		r.AddParameter("skip", strconv.Itoa(skip))
+	}
+	var envelope complaintsEnvelope
+	err := r.MakeJSONRequest(&envelope)
+	if err != nil {
+		return -1, nil, err
+	}
+	return envelope.TotalCount, envelope.Items, nil
 }
