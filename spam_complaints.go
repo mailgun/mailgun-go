@@ -35,3 +35,13 @@ func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 	}
 	return envelope.TotalCount, envelope.Items, nil
 }
+
+func (m *mailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
+	r := simplehttp.NewGetRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
+	var c Complaint
+	err := r.MakeJSONRequest(&c)
+	if err != nil {
+		return Complaint{}, err
+	}
+	return c, nil
+}
