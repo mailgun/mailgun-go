@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Holds information about a domain used when sending mail.
 type Domain struct {
 	CreatedAt    string `json:"created_at"`
 	SMTPLogin    string `json:"smtp_login"`
