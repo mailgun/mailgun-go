@@ -23,6 +23,7 @@ type DNSRecord struct {
 	Value      string
 }
 
+// Used to decode the domains JSON response.
 type domainsEnvelope struct {
 	TotalCount int      `json:"total_count"`
 	Items      []Domain `json:"items"`
