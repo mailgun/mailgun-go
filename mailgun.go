@@ -63,6 +63,7 @@ func (m *mailgunImpl) Domain() string {
 	return m.domain
 }
 
+// Returns the API key.
 func (m *mailgunImpl) ApiKey() string {
 	return m.apiKey
 }
