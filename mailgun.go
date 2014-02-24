@@ -68,6 +68,7 @@ func (m *mailgunImpl) ApiKey() string {
 	return m.apiKey
 }
 
+// Returns the public API key.
 func (m *mailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
 }
