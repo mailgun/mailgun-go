@@ -73,6 +73,7 @@ func (m *mailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
 }
 
+// Generates the URL for the API using the domain and endpoint.
 func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
 }
