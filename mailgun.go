@@ -54,6 +54,7 @@ type mailgunImpl struct {
 	publicApiKey string
 }
 
+// Creates a new Mailgun instance.
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
 	m := mailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
 	return &m
