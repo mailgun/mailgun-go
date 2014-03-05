@@ -49,7 +49,7 @@ type Mailgun interface {
 	GetSingleComplaint(address string) (Complaint, error)
 }
 
-// Imagine some data needed by a large set of methods in order to interact with the Mailgun API. 
+// Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
 // mailgunImpl bundles these data together in a convenient place.
 // Colloquially, we refer to instances of this structure as "clients."
 type mailgunImpl struct {
