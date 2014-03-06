@@ -61,6 +61,8 @@ func (m *Message) SetHtml(html string) {
 	m.html = html
 }
 
+// AddTag attaches a tag to the message.  Tags are useful for metrics gathering and event tracking purposes.
+// Refer to the Mailgun documentation for further details.
 func (m *Message) AddTag(tag string) {
 	m.tags = append(m.tags, tag)
 }
@@ -78,6 +80,9 @@ func (m *Message) EnableTestMode() {
 	m.testMode = true
 }
 
+// SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis, whether or not Mailgun will rewrite URLs to facilitate event tracking,
+// such as opens, clicks, unsubscribes, etc.  Note: simply calling this method ensures that the o:tracking header is passed in with the message.  Its yes/no setting
+// is determined by the call's parameter.  Note that this header is not passed on to the final recipient(s).
 func (m *Message) SetTracking(tracking bool) {
 	m.tracking = tracking
 	m.trackingSet = true
