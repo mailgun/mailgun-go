@@ -39,7 +39,7 @@ type Mailgun interface {
 	DeleteTag(tag string) error
 	GetDomains(limit, skip int) (int, []Domain, error)
 	GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
-	CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error
+	CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error
 	DeleteDomain(name string) error
 	GetCampaigns() (int, []Campaign, error)
 	CreateCampaign(name, id string) error
