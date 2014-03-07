@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+// DefaultLimit and DefaultSkip instruct the SDK to rely on Mailgun's reasonable defaults for pagination settings.
+const (
+	DefaultLimit = -1
+	DefaultSkip = -1
+)
+
 // Holds information about a domain used when sending mail.
 type Domain struct {
 	CreatedAt    string `json:"created_at"`
@@ -13,7 +19,7 @@ type Domain struct {
 	Name         string `json:"name"`
 	SMTPPassword string `json:"smtp_password"`
 	Wildcard     bool   `json:"wildcard"`
-	SpamAction   bool   `json:"spam_action"`
+	SpamAction   string `json:"spam_action"`
 }
 
 type DNSRecord struct {
@@ -40,12 +46,23 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 	return
 }
 
+// GetDomains queries the Mailgun API for a list of domains.
+// The limit parameter indicates how many items to restrict the results to.
+// Set limit to DefaultLimit if you're happy with Mailgun's default limit
+// (currently 100 at the time this comment was written).
+// The skip parameter indicates where to start returning results from.
+// Set skip to DefaultSkip if you're happy with Mailgun's default skip,
+// which is 0 (the very beginning of the list of domains).
+//
+// This call returns the number of domains returned,
+// which may be less than or equal to the given limit,
+// as well as a slice of Domain instances.
 func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint))
-	if limit != -1 {
+	if limit != DefaultLimit {
 		r.AddParameter("limit", strconv.Itoa(limit))
 	}
-	if skip != -1 {
+	if skip != DefaultSkip {
 		r.AddParameter("skip", strconv.Itoa(skip))
 	}
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
