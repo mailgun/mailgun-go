@@ -12,7 +12,18 @@ const (
 	DefaultSkip = -1
 )
 
+// Disabled, Tag, and Delete indicate spam actions.
+// Disabled prevents Mailgun from taking any action on what it perceives to be spam.
+// Tag instruments the received message with headers providing a measure of its spamness.
+// Delete instructs Mailgun to just block or delete the message all-together.
+const (
+	Tag = "tag"
+	Disabled = "disabled"
+	Delete = "delete"
+)
+
 // Holds information about a domain used when sending mail.
+// The SpamAction field must be one of Tag, Disabled, or Delete.
 type Domain struct {
 	CreatedAt    string `json:"created_at"`
 	SMTPLogin    string `json:"smtp_login"`
@@ -24,7 +35,7 @@ type Domain struct {
 
 type DNSRecord struct {
 	Priority   string
-	RecordType string
+	RecordType string `json:"record_type"`
 	Valid      string
 	Value      string
 }
@@ -46,17 +57,16 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 	return
 }
 
-// GetDomains queries the Mailgun API for a list of domains.
-// The limit parameter indicates how many items to restrict the results to.
-// Set limit to DefaultLimit if you're happy with Mailgun's default limit
-// (currently 100 at the time this comment was written).
-// The skip parameter indicates where to start returning results from.
-// Set skip to DefaultSkip if you're happy with Mailgun's default skip,
-// which is 0 (the very beginning of the list of domains).
+// GetDomains retrieves a set of domains from Mailgun.
+// The limit parameter indicates how many domains to constrain the result to.
+// If set to DefaultLimit, it will defer to Mailgun's best judgement (currently, 100).
+// The skip parameter indicates where to start the retrieval of domains from.
+// If set to DefaultSkip, it will start at the beginning of the list (skip of 0).
 //
-// This call returns the number of domains returned,
-// which may be less than or equal to the given limit,
-// as well as a slice of Domain instances.
+// Assuming no error, both the number of items retrieved and a slice of Domain instances.
+// The number of items returned may be less than the specified limit, if it's specified.
+// Note that zero items and a zero-length slice do not necessarily imply an error occurred.
+// Except for the error itself, all results are undefined in the event of an error.
 func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint))
 	if limit != DefaultLimit {
@@ -75,6 +85,7 @@ func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	return envelope.TotalCount, envelope.Items, nil
 }
 
+// Retrieve detailed information about the named domain.
 func (m *mailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
 	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint) + "/" + domain)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
@@ -86,21 +97,24 @@ func (m *mailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNS
 	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, nil
 }
 
-func (m *mailgunImpl) CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error {
+// CreateDomain instructs Mailgun to create a new domain for your account.
+// The name parameter identifies the domain.
+// The smtpPassword parameter provides an access credential for the domain.
+// The spamAction domain must be one of Delete, Tag, or Disabled.
+// The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
+// and as different domains if false.
+func (m *mailgunImpl) CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error {
 	r := simplehttp.NewPostRequest(generatePublicApiUrl(domainsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	r.AddFormValue("name", name)
 	r.AddFormValue("smtp_password", smtpPassword)
-	if spamAction {
-		r.AddFormValue("spam_action", "tag")
-	} else {
-		r.AddFormValue("spam_action", "disabled")
-	}
+	r.AddFormValue("spam_action", spamAction)
 	r.AddFormValue("wildcard", strconv.FormatBool(wildcard))
 	_, err := r.MakeRequest()
 	return err
 }
 
+// DeleteDomain instructs Mailgun to dispose of the named domain name.
 func (m *mailgunImpl) DeleteDomain(name string) error {
 	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint) + "/" + name)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())

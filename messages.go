@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// Message structures contain both the message text and the envelop for an e-mail message.
+// At this time, please note that a message may NOT have file attachments.
 type Message struct {
 	from         string
 	to           []string
@@ -38,6 +40,7 @@ type sendMessageResponse struct {
 	Id      string `json:"id"`
 }
 
+// NewMessage returns a new e-mail message with the simplest envelop needed to send.
 func NewMessage(from string, subject string, text string, to ...string) *Message {
 	return &Message{from: from, subject: subject, text: text, to: to}
 }
@@ -57,6 +60,9 @@ func (m *Message) AddBCC(recipient string) {
 func (m *Message) SetHtml(html string) {
 	m.html = html
 }
+
+// AddTag attaches a tag to the message.  Tags are useful for metrics gathering and event tracking purposes.
+// Refer to the Mailgun documentation for further details.
 func (m *Message) AddTag(tag string) {
 	m.tags = append(m.tags, tag)
 }
@@ -74,6 +80,9 @@ func (m *Message) EnableTestMode() {
 	m.testMode = true
 }
 
+// SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis, whether or not Mailgun will rewrite URLs to facilitate event tracking,
+// such as opens, clicks, unsubscribes, etc.  Note: simply calling this method ensures that the o:tracking header is passed in with the message.  Its yes/no setting
+// is determined by the call's parameter.  Note that this header is not passed on to the final recipient(s).
 func (m *Message) SetTracking(tracking bool) {
 	m.tracking = tracking
 	m.trackingSet = true
@@ -108,6 +117,10 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 	return nil
 }
 
+// Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
+// It returns the Mailgun server response, which consists of two components:
+// a human-readable status message, and a message ID.  The status and message ID are set only
+// if no error occurred.
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !message.validateMessage() {
 		err = errors.New("Message not valid")
@@ -175,6 +188,7 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	return
 }
 
+// yesNo translates a true/false boolean value into a yes/no setting suitable for the Mailgun API.
 func yesNo(b bool) string {
 	if b {
 		return "yes"
@@ -183,6 +197,8 @@ func yesNo(b bool) string {
 	}
 }
 
+// validateMessage returns true if, and only if,
+// a Message instance is sufficiently initialized to send via the Mailgun interface.
 func (m *Message) validateMessage() bool {
 	if m == nil {
 		return false
@@ -219,6 +235,10 @@ func (m *Message) validateMessage() bool {
 	return true
 }
 
+// validateStringList returns true if, and only if,
+// a slice of strings exists AND all of its elements exist,
+// OR if the slice doesn't exist AND it's not required to exist.
+// The requireOne parameter indicates whether the list is required to exist.
 func validateStringList(list []string, requireOne bool) bool {
 	hasOne := false
 
