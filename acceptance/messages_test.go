@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	fromUser       = "Joe Example <joe@example.com>"
+	fromUser       = "\"Joe, Example\" <joe@example.com>"
 	exampleSubject = "Joe's Example Subject"
 	exampleText    = "Testing some Mailgun awesomeness!"
-	exampleHtml    = "<html><head /><body><p>Testing some Mailgun HTML awesomeness!</p></body></html>"
+	exampleHtml    = "<html><head /><body><p>Testing some <a href=\"http://google.com?q=abc&r=def&s=ghi\">Mailgun HTML awesomeness!</a> at www.kc5tja@yahoo.com</p></body></html>"
 
 	exampleMime = `Content-Type: text/plain; charset="ascii"
 Subject: Joe's Example Subject
