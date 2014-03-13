@@ -22,6 +22,20 @@ func TestGetBounces(t *testing.T) {
 	}
 }
 
+func TestGetSingleBounce(t *testing.T) {
+	domain := reqEnv(t, "MG_DOMAIN")
+	apiKey := reqEnv(t, "MG_API_KEY")
+	mg := mailgun.NewMailgun(domain, apiKey, "")
+	exampleEmail := fmt.Sprintf("baz@%s", domain)
+	bounce, err := mg.GetSingleBounce(exampleEmail)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bounce.CreatedAt != "" {
+		t.Fatalf("Expected no bounces for %s", exampleEmail)
+	}
+}
+
 func TestAddDelBounces(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
