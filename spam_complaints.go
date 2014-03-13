@@ -22,12 +22,15 @@ type complaintsEnvelope struct {
 
 func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 	r := simplehttp.NewGetRequest(generateApiUrl(m, complaintsEndpoint))
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+
 	if limit != -1 {
 		r.AddParameter("limit", strconv.Itoa(limit))
 	}
 	if skip != -1 {
 		r.AddParameter("skip", strconv.Itoa(skip))
 	}
+
 	var envelope complaintsEnvelope
 	err := r.MakeJSONRequest(&envelope)
 	if err != nil {
@@ -38,6 +41,8 @@ func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 
 func (m *mailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 	r := simplehttp.NewGetRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+
 	var c Complaint
 	err := r.MakeJSONRequest(&c)
 	if err != nil {
