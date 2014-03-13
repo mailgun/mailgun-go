@@ -4,7 +4,7 @@ package acceptance
 
 import (
 	"testing"
-	mailgun "github.com/mailgun/mailgun-go"
+	"github.com/mailgun/mailgun-go"
 )
 
 func TestGetComplaints(t *testing.T) {
