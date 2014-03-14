@@ -19,7 +19,7 @@ type statsEnvelope struct {
 	Items      []Stat `json:"items"`
 }
 
-func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error) {
+func (m *mailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error) {
 	r := simplehttp.NewGetRequest(generateApiUrl(m, statsEndpoint))
 
 	if limit != -1 {
@@ -29,7 +29,9 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event .
 		r.AddParameter("skip", strconv.Itoa(skip))
 	}
 
-	r.AddParameter("start-date", startDate.Format("2006-02-01"))
+	if startDate != nil {
+		r.AddParameter("start-date", startDate.Format("2006-02-01"))
+	}
 
 	for _, e := range event {
 		r.AddParameter("event", e)
