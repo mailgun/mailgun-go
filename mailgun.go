@@ -35,7 +35,7 @@ type Mailgun interface {
 	GetSingleBounce(address string) (Bounce, error)
 	AddBounce(address, code, error string) error
 	DeleteBounce(address string) error
-	GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error)
+	GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error)
 	DeleteTag(tag string) error
 	GetDomains(limit, skip int) (int, []Domain, error)
 	GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
