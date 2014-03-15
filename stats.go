@@ -20,7 +20,7 @@ type statsEnvelope struct {
 }
 
 func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error) {
-	r := simplehttp.NewGetRequest(generateApiUrl(m, statsEndpoint))
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, statsEndpoint))
 
 	if limit != -1 {
 		r.AddParameter("limit", strconv.Itoa(limit))
@@ -37,7 +37,7 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event .
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var res statsEnvelope
-	err := r.MakeJSONRequest(&res)
+	err := r.GetResponseFromJSON(&res)
 	if err != nil {
 		return -1, nil, err
 	} else {
@@ -46,8 +46,8 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate time.Time, event .
 }
 
 func (m *mailgunImpl) DeleteTag(tag string) error {
-	r := simplehttp.NewDeleteRequest(generateApiUrl(m, deleteTagEndpoint) + "/" + tag)
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, deleteTagEndpoint) + "/" + tag)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeRequest()
+	_, err := r.MakeDeleteRequest()
 	return err
 }

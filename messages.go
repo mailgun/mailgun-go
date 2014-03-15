@@ -112,60 +112,63 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	if !message.validateMessage() {
 		err = errors.New("Message not valid")
 	} else {
-		r := simplehttp.NewPostRequest(generateApiUrl(m, messagesEndpoint))
-		r.AddFormValue("from", message.from)
-		r.AddFormValue("subject", message.subject)
-		r.AddFormValue("text", message.text)
+		r := simplehttp.NewHTTPRequest(generateApiUrl(m, messagesEndpoint))
+
+		payload := simplehttp.NewFormDataPayload()
+
+		payload.AddValue("from", message.from)
+		payload.AddValue("subject", message.subject)
+		payload.AddValue("text", message.text)
 		for _, to := range message.to {
-			r.AddFormValue("to", to)
+			payload.AddValue("to", to)
 		}
 		for _, cc := range message.cc {
-			r.AddFormValue("cc", cc)
+			payload.AddValue("cc", cc)
 		}
 		for _, bcc := range message.bcc {
-			r.AddFormValue("bcc", bcc)
+			payload.AddValue("bcc", bcc)
 		}
 		for _, tag := range message.tags {
-			r.AddFormValue("o:tag", tag)
+			payload.AddValue("o:tag", tag)
 		}
 		for _, campaign := range message.campaigns {
-			r.AddFormValue("o:campaign", campaign)
+			payload.AddValue("o:campaign", campaign)
 		}
 		if message.html != "" {
-			r.AddFormValue("html", message.html)
+			payload.AddValue("html", message.html)
 		}
 		if message.dkimSet {
-			r.AddFormValue("o:dkim", yesNo(message.dkim))
+			payload.AddValue("o:dkim", yesNo(message.dkim))
 		}
 		if message.deliveryTime != nil {
-			r.AddFormValue("o:deliverytime", message.deliveryTime.Format("Mon, 2 Jan 2006 15:04:05 MST"))
+			payload.AddValue("o:deliverytime", message.deliveryTime.Format("Mon, 2 Jan 2006 15:04:05 MST"))
 		}
 		if message.testMode {
-			r.AddFormValue("o:testmode", "yes")
+			payload.AddValue("o:testmode", "yes")
 		}
 		if message.trackingSet {
-			r.AddFormValue("o:tracking", yesNo(message.tracking))
+			payload.AddValue("o:tracking", yesNo(message.tracking))
 		}
 		if message.trackingClicksSet {
-			r.AddFormValue("o:tracking-clicks", yesNo(message.trackingClicks))
+			payload.AddValue("o:tracking-clicks", yesNo(message.trackingClicks))
 		}
 		if message.trackingOpensSet {
-			r.AddFormValue("o:tracking-opens", yesNo(message.trackingOpens))
+			payload.AddValue("o:tracking-opens", yesNo(message.trackingOpens))
 		}
 		if message.headers != nil {
 			for header, value := range message.headers {
-				r.AddFormValue("h:"+header, value)
+				payload.AddValue("h:"+header, value)
 			}
 		}
 		if message.variables != nil {
 			for variable, value := range message.variables {
-				r.AddFormValue("v:"+variable, value)
+				payload.AddValue("v:"+variable, value)
 			}
 		}
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 		var response sendMessageResponse
-		err = r.MakeJSONRequest(&response)
+		err = r.PostResponseFromJSON(payload, &response)
 		if err == nil {
 			mes = response.Message
 			id = response.Id

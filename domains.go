@@ -41,7 +41,7 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 }
 
 func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
-	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint))
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint))
 	if limit != -1 {
 		r.AddParameter("limit", strconv.Itoa(limit))
 	}
@@ -51,7 +51,7 @@ func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var envelope domainsEnvelope
-	err := r.MakeJSONRequest(&envelope)
+	err := r.GetResponseFromJSON(&envelope)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -59,10 +59,10 @@ func (m *mailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 }
 
 func (m *mailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
-	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint) + "/" + domain)
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint) + "/" + domain)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	var envelope singleDomainEnvelope
-	err := r.MakeJSONRequest(&envelope)
+	err := r.GetResponseFromJSON(&envelope)
 	if err != nil {
 		return Domain{}, nil, nil, err
 	}
@@ -70,23 +70,25 @@ func (m *mailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNS
 }
 
 func (m *mailgunImpl) CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error {
-	r := simplehttp.NewPostRequest(generatePublicApiUrl(domainsEndpoint))
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	r.AddFormValue("name", name)
-	r.AddFormValue("smtp_password", smtpPassword)
+
+	payload := simplehttp.NewUrlEncodedPayload()
+	payload.AddValue("name", name)
+	payload.AddValue("smtp_password", smtpPassword)
 	if spamAction {
-		r.AddFormValue("spam_action", "tag")
+		payload.AddValue("spam_action", "tag")
 	} else {
-		r.AddFormValue("spam_action", "disabled")
+		payload.AddValue("spam_action", "disabled")
 	}
-	r.AddFormValue("wildcard", strconv.FormatBool(wildcard))
-	_, err := r.MakeRequest()
+	payload.AddValue("wildcard", strconv.FormatBool(wildcard))
+	_, err := r.MakePostRequest(payload)
 	return err
 }
 
 func (m *mailgunImpl) DeleteDomain(name string) error {
-	r := simplehttp.NewGetRequest(generatePublicApiUrl(domainsEndpoint) + "/" + name)
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint) + "/" + name)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeRequest()
+	_, err := r.MakeDeleteRequest()
 	return err
 }

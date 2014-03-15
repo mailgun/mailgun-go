@@ -24,10 +24,11 @@ type campaignsEnvelope struct {
 }
 
 func (m *mailgunImpl) GetCampaigns() (int, []Campaign, error) {
-	r := simplehttp.NewGetRequest(generateApiUrl(m, campaignsEndpoint))
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+
 	var envelope campaignsEnvelope
-	err := r.MakeJSONRequest(&envelope)
+	err := r.GetResponseFromJSON(&envelope)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -35,30 +36,34 @@ func (m *mailgunImpl) GetCampaigns() (int, []Campaign, error) {
 }
 
 func (m *mailgunImpl) CreateCampaign(name, id string) error {
-	r := simplehttp.NewPostRequest(generateApiUrl(m, campaignsEndpoint))
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	r.AddFormValue("name", name)
+
+	payload := simplehttp.NewUrlEncodedPayload()
+	payload.AddValue("name", name)
 	if id != "" {
-		r.AddFormValue("id", id)
+		payload.AddValue("id", id)
 	}
-	_, err := r.MakeRequest()
+	_, err := r.MakePostRequest(payload)
 	return err
 }
 
 func (m *mailgunImpl) UpdateCampaign(oldId, name, newId string) error {
-	r := simplehttp.NewPostRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	r.AddFormValue("name", name)
+
+	payload := simplehttp.NewUrlEncodedPayload()
+	payload.AddValue("name", name)
 	if newId != "" {
-		r.AddFormValue("id", newId)
+		payload.AddValue("id", newId)
 	}
-	_, err := r.MakeRequest()
+	_, err := r.MakePostRequest(payload)
 	return err
 }
 
 func (m *mailgunImpl) DeleteCampaign(id string) error {
-	r := simplehttp.NewDeleteRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeRequest()
+	_, err := r.MakeDeleteRequest()
 	return err
 }

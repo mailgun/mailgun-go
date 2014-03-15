@@ -27,7 +27,7 @@ func (i Bounce) GetCreatedAt() (t time.Time, err error) {
 }
 
 func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
-	r := simplehttp.NewGetRequest(generateApiUrl(m, bouncesEndpoint))
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
 	if limit != -1 {
 		r.AddParameter("limit", strconv.Itoa(limit))
 	}
@@ -38,7 +38,7 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response bounceEnvelope
-	err := r.MakeJSONRequest(&response)
+	err := r.GetResponseFromJSON(&response)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -47,11 +47,11 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 }
 
 func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
-	r := simplehttp.NewGetRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response singleBounceEnvelope
-	err := r.MakeJSONRequest(&response)
+	err := r.GetResponseFromJSON(&response)
 	if err != nil {
 		return Bounce{}, err
 	}
@@ -60,23 +60,24 @@ func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 }
 
 func (m *mailgunImpl) AddBounce(address, code, error string) error {
-	r := simplehttp.NewPostRequest(generateApiUrl(m, bouncesEndpoint))
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
-	r.AddFormValue("address", address)
+	payload := simplehttp.NewUrlEncodedPayload()
+	payload.AddValue("address", address)
 	if code != "" {
-		r.AddFormValue("code", code)
+		payload.AddValue("code", code)
 	}
 	if error != "" {
-		r.AddFormValue("error", error)
+		payload.AddValue("error", error)
 	}
-	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeRequest()
+	_, err := r.MakePostRequest(payload)
 	return err
 }
 
 func (m *mailgunImpl) DeleteBounce(address string) error {
-	r := simplehttp.NewDeleteRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeRequest()
+	_, err := r.MakeDeleteRequest()
 	return err
 }
