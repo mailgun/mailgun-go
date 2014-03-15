@@ -23,6 +23,7 @@ const (
 	basicAuthUser           = "api"
 )
 
+// Mailgun defines the supported subset of the Mailgun API.
 type Mailgun interface {
 	Domain() string
 	ApiKey() string
@@ -34,11 +35,11 @@ type Mailgun interface {
 	GetSingleBounce(address string) (Bounce, error)
 	AddBounce(address, code, error string) error
 	DeleteBounce(address string) error
-	GetStats(limit int, skip int, startDate time.Time, event ...string) (int, []Stat, error)
+	GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error)
 	DeleteTag(tag string) error
 	GetDomains(limit, skip int) (int, []Domain, error)
 	GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
-	CreateDomain(name string, smtpPassword string, spamAction bool, wildcard bool) error
+	CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error
 	DeleteDomain(name string) error
 	GetCampaigns() (int, []Campaign, error)
 	CreateCampaign(name, id string) error
@@ -48,28 +49,32 @@ type Mailgun interface {
 	GetSingleComplaint(address string) (Complaint, error)
 }
 
+// Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
+// mailgunImpl bundles these data together in a convenient place.
+// Colloquially, we refer to instances of this structure as "clients."
 type mailgunImpl struct {
 	domain       string
 	apiKey       string
 	publicApiKey string
 }
 
-// Creates a new Mailgun instance.
+// Creates a new Mailgun client instance.
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
 	m := mailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
 	return &m
 }
 
+// Returns the domain configured for this client.
 func (m *mailgunImpl) Domain() string {
 	return m.domain
 }
 
-// Returns the API key.
+// Returns the API key configured for this client.
 func (m *mailgunImpl) ApiKey() string {
 	return m.apiKey
 }
 
-// Returns the public API key.
+// Returns the public API key configured for this client.
 func (m *mailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
 }
@@ -79,10 +84,12 @@ func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
 }
 
+// As with generateApiUrl, except that generatePublicApiUrl has no need for the domain.
 func generatePublicApiUrl(endpoint string) string {
 	return fmt.Sprintf("%s/%s", apiBase, endpoint)
 }
 
+// parseMailgunTime translates a timestamp as returned by Mailgun into a Go standard timestamp.
 func parseMailgunTime(ts string) (t time.Time, err error) {
 	t, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", ts)
 	return

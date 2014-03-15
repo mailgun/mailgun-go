@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+// Bounce aggregates data relating to undeliverable messages to a specific intended recipient,
+// identified by Address.
+// Code provides the SMTP error code causing the bounce,
+// while Error provides a human readable reason why.
+// CreatedAt provides the time at which Mailgun detected the bounce.
 type Bounce struct {
 	CreatedAt string `json:"created_at"`
 	Code      string `json:"code"`
@@ -22,10 +27,13 @@ type singleBounceEnvelope struct {
 	Bounce Bounce `json:"bounce"`
 }
 
+// GetCreatedAt parses the textual, RFC-822 timestamp into a standard Go-compatible
+// Time structure.
 func (i Bounce) GetCreatedAt() (t time.Time, err error) {
 	return parseMailgunTime(i.CreatedAt)
 }
 
+// GetBounces returns a complete set of bounces logged against the sender's domain, if any.
 func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
 	if limit != -1 {
@@ -46,6 +54,8 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 	return response.TotalCount, response.Items, nil
 }
 
+// GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
+// If none exist, the returned Bounce instance will be empty.
 func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
@@ -59,6 +69,22 @@ func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 	return response.Bounce, nil
 }
 
+// AddBounce files a bounce report.
+// Address identifies the intended recipient of the message that bounced.
+// Code corresponds to the numeric response given by the e-mail server which rejected the message.
+// Error providees the corresponding human readable reason for the problem.
+// For example,
+// here's how the these two fields relate.
+// Suppose the SMTP server responds with an error, as below.
+// Then, . . .
+//
+//      550  Requested action not taken: mailbox unavailable
+//     \___/\_______________________________________________/
+//       |                         |
+//       +-- Code                  +-- Error
+//
+// Note that both code and error exist as strings, even though
+// code will report as a number.
 func (m *mailgunImpl) AddBounce(address, code, error string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
@@ -75,6 +101,7 @@ func (m *mailgunImpl) AddBounce(address, code, error string) error {
 	return err
 }
 
+// DeleteBounce removes all bounces associted with the provided e-mail address.
 func (m *mailgunImpl) DeleteBounce(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
