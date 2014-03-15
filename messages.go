@@ -19,6 +19,7 @@ type Message struct {
 	campaigns    []string
 	dkim         bool
 	deliveryTime *time.Time
+	attachments  []string
 
 	testMode       bool
 	tracking       bool
@@ -40,6 +41,10 @@ type sendMessageResponse struct {
 
 func NewMessage(from string, subject string, text string, to ...string) *Message {
 	return &Message{from: from, subject: subject, text: text, to: to}
+}
+
+func (m *Message) AddAttachment(attachment string) {
+	m.attachments = append(m.attachments, attachment)
 }
 
 func (m *Message) AddRecipient(recipient string) {
@@ -163,6 +168,11 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		if message.variables != nil {
 			for variable, value := range message.variables {
 				payload.AddValue("v:"+variable, value)
+			}
+		}
+		if message.attachments != nil {
+			for _, attachment := range message.attachments {
+				payload.AddFile("attachment", attachment)
 			}
 		}
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
