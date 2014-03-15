@@ -80,6 +80,14 @@ func (m *Message) EnableTestMode() {
 	m.testMode = true
 }
 
+// SetDeliveryTime schedules the message for transmission at the indicated time.
+// Pass nil to remove any installed schedule.
+func (m *Message) SetDeliveryTime(dt time.Time) {
+	pdt := new(time.Time)
+	*pdt = dt
+	m.deliveryTime = pdt
+}
+
 // SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis, whether or not Mailgun will rewrite URLs to facilitate event tracking,
 // such as opens, clicks, unsubscribes, etc.  Note: simply calling this method ensures that the o:tracking header is passed in with the message.  Its yes/no setting
 // is determined by the call's parameter.  Note that this header is not passed on to the final recipient(s).

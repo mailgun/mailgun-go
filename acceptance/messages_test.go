@@ -4,8 +4,9 @@ package acceptance
 
 import (
 	"fmt"
-	"github.com/mailgun/mailgun-go"
+	mailgun "github.com/mailgun/mailgun-go"
 	"testing"
+	"time"
 )
 
 const (
@@ -37,6 +38,21 @@ func TestSendPlain(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
+}
+
+func TestSendPlainAt(t *testing.T) {
+	toUser := reqEnv(t, "MG_EMAIL_TO")
+	domain := reqEnv(t, "MG_DOMAIN")
+	apiKey := reqEnv(t, "MG_API_KEY")
+	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg := mailgun.NewMailgun(domain, apiKey, publicApiKey)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
+	msg, id, err := mg.Send(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("TestSendPlainAt:MSG(" + msg + "),ID(" + id + ")")
 }
 
 func TestSendHtml(t *testing.T) {
