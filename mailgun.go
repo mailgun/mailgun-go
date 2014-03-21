@@ -13,6 +13,7 @@ import (
 const (
 	apiBase                 = "https://api.mailgun.net/v2"
 	messagesEndpoint        = "messages"
+	mimeMessagesEndpoint    = "messages.mime"
 	addressValidateEndpoint = "address/validate"
 	addressParseEndpoint    = "address/parse"
 	bouncesEndpoint         = "bounces"

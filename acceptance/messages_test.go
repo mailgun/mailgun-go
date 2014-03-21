@@ -5,6 +5,8 @@ package acceptance
 import (
 	"fmt"
 	mailgun "github.com/mailgun/mailgun-go"
+	"io/ioutil"
+	"strings"
 	"testing"
 	"time"
 )
@@ -102,15 +104,15 @@ func TestSendTag(t *testing.T) {
 	fmt.Println("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
 }
 
-// TODO(sam-falvo): these require changes to the core library or support for sending multipart/mime-encoded content.
-
-// func TestSendMime(t *testing.T) {
-func testSendMime(t *testing.T) {
-	t.Fatalf("Not Implemented Yet")
+func TestSendMIME(t *testing.T) {
+	toUser := reqEnv(t, "MG_EMAIL_TO")
+	domain := reqEnv(t, "MG_DOMAIN")
+	apiKey := reqEnv(t, "MG_API_KEY")
+	mg := mailgun.NewMailgun(domain, apiKey, "")
+	m := mailgun.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
+	msg, id, err := mg.Send(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
 }
-
-// func TestSendDeliveryTime(t *testing.T) {
-func testSendDeliveryTime(t *testing.T) {
-	t.Fatalf("Not Implemented Yet")
-}
-

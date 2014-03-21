@@ -4,19 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/mbanzon/simplehttp"
+	"io"
 	"time"
 )
 
 // Message structures contain both the message text and the envelop for an e-mail message.
 // At this time, please note that a message may NOT have file attachments.
 type Message struct {
-	from         string
 	to           []string
-	cc           []string
-	bcc          []string
-	subject      string
-	text         string
-	html         string
 	tags         []string
 	campaigns    []string
 	dkim         bool
@@ -35,6 +30,26 @@ type Message struct {
 	trackingSet       bool
 	trackingClicksSet bool
 	trackingOpensSet  bool
+
+	specific features
+}
+
+// plainMessage contains fields relevant to plain API-synthesized messages.
+// You're expected to use various setters to set most of these attributes,
+// although from, subject, and text are set when the message is created with
+// NewMessage.
+type plainMessage struct {
+	from    string
+	cc      []string
+	bcc     []string
+	subject string
+	text    string
+	html    string
+}
+
+// mimeMessage contains fields relevant to pre-packaged MIME messages.
+type mimeMessage struct {
+	body io.ReadCloser
 }
 
 type sendMessageResponse struct {
@@ -42,34 +57,99 @@ type sendMessageResponse struct {
 	Id      string `json:"id"`
 }
 
-// NewMessage returns a new e-mail message with the simplest envelop needed to send.
-func NewMessage(from string, subject string, text string, to ...string) *Message {
-	return &Message{from: from, subject: subject, text: text, to: to}
+// features abstracts the common characteristics between regular and MIME messages.
+// addCC, addBCC, and setHTML are invoked via the package-global AddCC, AddBCC, and
+// SetHtml calls, as these functions are ignored for MIME messages.
+// Send() invokes addValues to add message-type-specific MIME headers for the API call
+// to Mailgun.  isValid yeilds true if and only if the message is valid enough for sending
+// through the API.  Finally, endpoint() tells Send() which endpoint to use to submit the API call.
+type features interface {
+	addCC(string)
+	addBCC(string)
+	setHtml(string)
+	addValues(*simplehttp.FormDataPayload)
+	isValid() bool
+	endpoint() string
 }
 
+// NewMessage returns a new e-mail message with the simplest envelop needed to send.
+func NewMessage(from string, subject string, text string, to ...string) *Message {
+	return &Message{
+		specific: &plainMessage{
+			from:    from,
+			subject: subject,
+			text:    text,
+		},
+		to: to,
+	}
+}
+
+// NewMIMEMessage creates a new MIME message.  These messages are largely canned;
+// you do not need to invoke setters to set message-related headers.
+// However, you do still need to call setters for Mailgun-specific settings.
+func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+	return &Message{
+		specific: &mimeMessage{
+			body: body,
+		},
+		to: to,
+	}
+}
+
+// AddAttachment arranges to send a file along with the e-mail message.
+// The attachment parameter is a filename, which must refer to a file which actually resides
+// in the local filesystem.
 func (m *Message) AddAttachment(attachment string) {
 	m.attachments = append(m.attachments, attachment)
 }
 
+// AddInline arranges to send a file along with the e-mail message, but does so
+// in a way that its data remains "inline" with the rest of the message.  This
+// can be used to send image or font data along with an HTML-encoded message body.
+// The attachment parameter is a filename, which must refer to a file which actually resides
+// in the local filesystem.
 func (m *Message) AddInline(inline string) {
 	m.inlines = append(m.inlines, inline)
 }
 
+// AddRecipient appends a receiver to the To: header of a message.
 func (m *Message) AddRecipient(recipient string) {
 	m.to = append(m.to, recipient)
 }
 
+// AddCC appends a receiver to the carbon-copy header of a message.
 func (m *Message) AddCC(recipient string) {
-	m.cc = append(m.cc, recipient)
+	m.specific.addCC(recipient)
 }
 
+func (pm *plainMessage) addCC(r string) {
+	pm.cc = append(pm.cc, r)
+}
+
+func (mm *mimeMessage) addCC(_ string) {}
+
+// AddBCC appends a receiver to the blind-carbon-copy header of a message.
 func (m *Message) AddBCC(recipient string) {
-	m.bcc = append(m.bcc, recipient)
+	m.specific.addBCC(recipient)
 }
 
-func (m *Message) SetHtml(html string) {
-	m.html = html
+func (pm *plainMessage) addBCC(r string) {
+	pm.bcc = append(pm.bcc, r)
 }
+
+func (mm *mimeMessage) addBCC(_ string) {}
+
+// If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
+// an HTML representation of your message in addition to your plain-text body.
+func (m *Message) SetHtml(html string) {
+	m.specific.setHtml(html)
+}
+
+func (pm *plainMessage) setHtml(h string) {
+	pm.html = h
+}
+
+func (mm *mimeMessage) setHtml(_ string) {}
 
 // AddTag attaches a tag to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -77,21 +157,26 @@ func (m *Message) AddTag(tag string) {
 	m.tags = append(m.tags, tag)
 }
 
+// This feature is deprecated for new software.
 func (m *Message) AddCampaign(campaign string) {
 	m.campaigns = append(m.campaigns, campaign)
 }
 
+// SetDKIM arranges to send the o:dkim header with the message, and sets its value accordingly.
+// Refer to the Mailgun documentation for more information.
 func (m *Message) SetDKIM(dkim bool) {
 	m.dkim = dkim
 	m.dkimSet = true
 }
 
+// Refer to the Mailgun documentation for more information.
 func (m *Message) EnableTestMode() {
 	m.testMode = true
 }
 
 // SetDeliveryTime schedules the message for transmission at the indicated time.
 // Pass nil to remove any installed schedule.
+// Refer to the Mailgun documentation for more information.
 func (m *Message) SetDeliveryTime(dt time.Time) {
 	pdt := new(time.Time)
 	*pdt = dt
@@ -101,21 +186,25 @@ func (m *Message) SetDeliveryTime(dt time.Time) {
 // SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis, whether or not Mailgun will rewrite URLs to facilitate event tracking,
 // such as opens, clicks, unsubscribes, etc.  Note: simply calling this method ensures that the o:tracking header is passed in with the message.  Its yes/no setting
 // is determined by the call's parameter.  Note that this header is not passed on to the final recipient(s).
+// Refer to the Mailgun documentation for more information.
 func (m *Message) SetTracking(tracking bool) {
 	m.tracking = tracking
 	m.trackingSet = true
 }
 
+// Refer to the Mailgun documentation for more information.
 func (m *Message) SetTrackingClicks(trackingClicks bool) {
 	m.trackingClicks = trackingClicks
 	m.trackingClicksSet = true
 }
 
+// Refer to the Mailgun documentation for more information.
 func (m *Message) SetTrackingOpens(trackingOpens bool) {
 	m.trackingOpens = trackingOpens
 	m.trackingOpensSet = true
 }
 
+// AddHeader allows you to send custom MIME headers with the message.
 func (m *Message) AddHeader(header, value string) {
 	if m.headers == nil {
 		m.headers = make(map[string]string)
@@ -123,6 +212,9 @@ func (m *Message) AddHeader(header, value string) {
 	m.headers[header] = value
 }
 
+// AddVariable lets you associate a set of variables with messages you send,
+// which Mailgun can use to, in essence, complete form-mail.
+// Refer to the Mailgun documentation for more information.
 func (m *Message) AddVariable(variable string, value interface{}) error {
 	j, err := json.Marshal(value)
 	if err != nil {
@@ -140,33 +232,20 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 // a human-readable status message, and a message ID.  The status and message ID are set only
 // if no error occurred.
 func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
-	if !message.validateMessage() {
+	if !isValid(message) {
 		err = errors.New("Message not valid")
 	} else {
-		r := simplehttp.NewHTTPRequest(generateApiUrl(m, messagesEndpoint))
-
 		payload := simplehttp.NewFormDataPayload()
 
-		payload.AddValue("from", message.from)
-		payload.AddValue("subject", message.subject)
-		payload.AddValue("text", message.text)
+		message.specific.addValues(payload)
 		for _, to := range message.to {
 			payload.AddValue("to", to)
-		}
-		for _, cc := range message.cc {
-			payload.AddValue("cc", cc)
-		}
-		for _, bcc := range message.bcc {
-			payload.AddValue("bcc", bcc)
 		}
 		for _, tag := range message.tags {
 			payload.AddValue("o:tag", tag)
 		}
 		for _, campaign := range message.campaigns {
 			payload.AddValue("o:campaign", campaign)
-		}
-		if message.html != "" {
-			payload.AddValue("html", message.html)
 		}
 		if message.dkimSet {
 			payload.AddValue("o:dkim", yesNo(message.dkim))
@@ -206,6 +285,8 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 				payload.AddFile("inline", inline)
 			}
 		}
+
+		r := simplehttp.NewHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 		var response sendMessageResponse
@@ -219,6 +300,33 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	return
 }
 
+func (pm *plainMessage) addValues(p *simplehttp.FormDataPayload) {
+	p.AddValue("from", pm.from)
+	p.AddValue("subject", pm.subject)
+	p.AddValue("text", pm.text)
+	for _, cc := range pm.cc {
+		p.AddValue("cc", cc)
+	}
+	for _, bcc := range pm.bcc {
+		p.AddValue("bcc", bcc)
+	}
+	if pm.html != "" {
+		p.AddValue("html", pm.html)
+	}
+}
+
+func (mm *mimeMessage) addValues(p *simplehttp.FormDataPayload) {
+	p.AddReadCloser("message", "message.mime", mm.body)
+}
+
+func (pm *plainMessage) endpoint() string {
+	return messagesEndpoint
+}
+
+func (mm *mimeMessage) endpoint() string {
+	return mimeMessagesEndpoint
+}
+
 // yesNo translates a true/false boolean value into a yes/no setting suitable for the Mailgun API.
 func yesNo(b bool) string {
 	if b {
@@ -228,26 +336,18 @@ func yesNo(b bool) string {
 	}
 }
 
-// validateMessage returns true if, and only if,
+// isValid returns true if, and only if,
 // a Message instance is sufficiently initialized to send via the Mailgun interface.
-func (m *Message) validateMessage() bool {
+func isValid(m *Message) bool {
 	if m == nil {
 		return false
 	}
 
-	if m.from == "" {
+	if !m.specific.isValid() {
 		return false
 	}
 
 	if !validateStringList(m.to, true) {
-		return false
-	}
-
-	if !validateStringList(m.cc, false) {
-		return false
-	}
-
-	if !validateStringList(m.bcc, false) {
 		return false
 	}
 
@@ -259,11 +359,31 @@ func (m *Message) validateMessage() bool {
 		return false
 	}
 
-	if m.text == "" {
+	return true
+}
+
+func (pm *plainMessage) isValid() bool {
+	if pm.from == "" {
+		return false
+	}
+
+	if !validateStringList(pm.cc, false) {
+		return false
+	}
+
+	if !validateStringList(pm.bcc, false) {
+		return false
+	}
+
+	if pm.text == "" {
 		return false
 	}
 
 	return true
+}
+
+func (mm *mimeMessage) isValid() bool {
+	return mm.body != nil
 }
 
 // validateStringList returns true if, and only if,
