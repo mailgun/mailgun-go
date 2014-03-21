@@ -3,8 +3,8 @@
 package acceptance
 
 import (
-	"testing"
 	"github.com/mailgun/mailgun-go"
+	"testing"
 )
 
 func TestGetComplaints(t *testing.T) {

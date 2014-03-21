@@ -1,9 +1,9 @@
 package acceptance
 
 import (
-	"testing"
-	mailgun "github.com/mailgun/mailgun-go"
 	"fmt"
+	mailgun "github.com/mailgun/mailgun-go"
+	"testing"
 )
 
 func TestGetBounces(t *testing.T) {

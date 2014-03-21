@@ -3,11 +3,11 @@
 package acceptance
 
 import (
-	"testing"
-mailgun	"github.com/mailgun/mailgun-go"
-	"text/tabwriter"
 	"fmt"
+	mailgun "github.com/mailgun/mailgun-go"
 	"os"
+	"testing"
+	"text/tabwriter"
 )
 
 func TestGetStats(t *testing.T) {
