@@ -6,10 +6,10 @@ import (
 	"github.com/mbanzon/simplehttp"
 	"io"
 	"time"
+	"fmt"
 )
 
 // Message structures contain both the message text and the envelop for an e-mail message.
-// At this time, please note that a message may NOT have file attachments.
 type Message struct {
 	to           []string
 	tags         []string
@@ -32,6 +32,32 @@ type Message struct {
 	trackingOpensSet  bool
 
 	specific features
+}
+
+// StoredMessage structures contain the (parsed) message content for an email
+// sent to a Mailgun account.
+type StoredMessage struct {
+	Recipients string `json:"recipients"`
+	Sender string `json:"sender"`
+	From string `json:"from"`
+	Subject string `json:"subject"`
+	BodyPlain string `json:"body-plain"`
+	StrippedText string `json:"stripped-text"`
+	StrippedSignature string `json:"stripped-signature"`
+	BodyHtml string `json:"body-html"`
+	StrippedHtml string `json:"stripped-html"`
+	Attachments []StoredAttachment `json:"attachments"`
+	MessageUrl string `json:"message-url"`
+	ContentIDMap map[string]interface{} `json:"content-id-map"`
+	MessageHeaders string `json:"message-headers"`
+}
+
+// StoredAttachment structures contain information on an attachment associated with a stored message.
+type StoredAttachment struct {
+	Size int `json:"size"`
+	Url string `json:"url"`
+	Name string `json:"name"`
+	ContentType string `json:"content-type"`
 }
 
 // plainMessage contains fields relevant to plain API-synthesized messages.
@@ -251,7 +277,7 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 			payload.AddValue("o:dkim", yesNo(message.dkim))
 		}
 		if message.deliveryTime != nil {
-			payload.AddValue("o:deliverytime", message.deliveryTime.Format("Mon, 2 Jan 2006 15:04:05 MST"))
+			payload.AddValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
 		}
 		if message.testMode {
 			payload.AddValue("o:testmode", "yes")
@@ -406,4 +432,15 @@ func validateStringList(list []string, requireOne bool) bool {
 	}
 
 	return hasOne
+}
+
+func (mg *mailgunImpl) GetStoredMessages() ([]StoredMessage, error) {
+	url := generateDomainUrl(mg, messagesEndpoint)
+	fmt.Println("URL="+url)
+	r := simplehttp.NewHTTPRequest(url)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+
+	var response []StoredMessage
+	err := r.PostResponseFromJSON(nil, &response)
+	return response, err
 }

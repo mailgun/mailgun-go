@@ -8,6 +8,7 @@ package mailgun
 import (
 	"fmt"
 	"time"
+	"github.com/mbanzon/simplehttp"
 )
 
 const (
@@ -21,6 +22,7 @@ const (
 	domainsEndpoint         = "domains"
 	deleteTagEndpoint       = "tags"
 	campaignsEndpoint       = "campaigns"
+	eventsEndpoint		= "events"
 	basicAuthUser           = "api"
 )
 
@@ -48,6 +50,8 @@ type Mailgun interface {
 	DeleteCampaign(id string) error
 	GetComplaints(limit, skip int) (int, []Complaint, error)
 	GetSingleComplaint(address string) (Complaint, error)
+	GetStoredMessages() ([]StoredMessage, error)
+	GetEvents(GetEventsOptions) ([]Event, Links, error)
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
@@ -85,13 +89,32 @@ func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
 }
 
+// Generates the URL for the API using the domain and endpoint, under the domains/ namespace.
+func generateDomainUrl(m Mailgun, endpoint string) string {
+	return fmt.Sprintf("%s/domains/%s/%s", apiBase, m.Domain(), endpoint)
+}
+
 // As with generateApiUrl, except that generatePublicApiUrl has no need for the domain.
 func generatePublicApiUrl(endpoint string) string {
 	return fmt.Sprintf("%s/%s", apiBase, endpoint)
+}
+
+func generateParameterizedUrl(m Mailgun, endpoint string, payload simplehttp.Payload) (string, error) {
+	paramBuffer, err := payload.GetPayloadBuffer()
+	if err != nil {
+		return "", err
+	}
+	params := string(paramBuffer.Bytes())
+	return fmt.Sprintf("%s?%s", generateApiUrl(m, eventsEndpoint), params), nil
 }
 
 // parseMailgunTime translates a timestamp as returned by Mailgun into a Go standard timestamp.
 func parseMailgunTime(ts string) (t time.Time, err error) {
 	t, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", ts)
 	return
+}
+
+// formatMailgunTime translates a timestamp into a human-readable form.
+func formatMailgunTime(t *time.Time) string {
+	return t.Format("Mon, 2 Jan 2006 15:04:05 MST")
 }

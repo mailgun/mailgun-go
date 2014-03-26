@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"text/tabwriter"
+	"os"
 )
 
 const (
@@ -115,4 +117,22 @@ func TestSendMIME(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
+}
+
+func TestGetStoredMessage(t *testing.T) {
+	domain := reqEnv(t, "MG_DOMAIN")
+	apiKey := reqEnv(t, "MG_API_KEY")
+	mg := mailgun.NewMailgun(domain, apiKey, "")
+	msgs, err := mg.GetStoredMessages()
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("Number of messages: ", len(msgs))
+	tw := &tabwriter.Writer{}
+	tw.Init(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
+	fmt.Fprintln(tw, "From\tTo\tSubject\t# Attachments\t")
+	for _, m := range msgs {
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%d\t\n", m.From, m.Recipients, m.Subject, len(m.Attachments))
+	}
+	tw.Flush()
 }
