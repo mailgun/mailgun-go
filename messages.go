@@ -6,7 +6,6 @@ import (
 	"github.com/mbanzon/simplehttp"
 	"io"
 	"time"
-	"fmt"
 )
 
 // Message structures contain both the message text and the envelop for an e-mail message.
@@ -36,27 +35,32 @@ type Message struct {
 
 // StoredMessage structures contain the (parsed) message content for an email
 // sent to a Mailgun account.
+//
+// The MessageHeaders field is special, in that its formatted as a slice of pairs.
+// Each pair consists of a name [0] and value [1].  Array notation is used instead of a map
+// because that's how it's sent over the wire, and it's how encoding/json expects this field
+// to be.
 type StoredMessage struct {
-	Recipients string `json:"recipients"`
-	Sender string `json:"sender"`
-	From string `json:"from"`
-	Subject string `json:"subject"`
-	BodyPlain string `json:"body-plain"`
-	StrippedText string `json:"stripped-text"`
-	StrippedSignature string `json:"stripped-signature"`
-	BodyHtml string `json:"body-html"`
-	StrippedHtml string `json:"stripped-html"`
-	Attachments []StoredAttachment `json:"attachments"`
-	MessageUrl string `json:"message-url"`
-	ContentIDMap map[string]interface{} `json:"content-id-map"`
-	MessageHeaders string `json:"message-headers"`
+	Recipients        string                 `json:"recipients"`
+	Sender            string                 `json:"sender"`
+	From              string                 `json:"from"`
+	Subject           string                 `json:"subject"`
+	BodyPlain         string                 `json:"body-plain"`
+	StrippedText      string                 `json:"stripped-text"`
+	StrippedSignature string                 `json:"stripped-signature"`
+	BodyHtml          string                 `json:"body-html"`
+	StrippedHtml      string                 `json:"stripped-html"`
+	Attachments       []StoredAttachment     `json:"attachments"`
+	MessageUrl        string                 `json:"message-url"`
+	ContentIDMap      map[string]interface{} `json:"content-id-map"`
+	MessageHeaders    [][]string             `json:"message-headers"`
 }
 
 // StoredAttachment structures contain information on an attachment associated with a stored message.
 type StoredAttachment struct {
-	Size int `json:"size"`
-	Url string `json:"url"`
-	Name string `json:"name"`
+	Size        int    `json:"size"`
+	Url         string `json:"url"`
+	Name        string `json:"name"`
 	ContentType string `json:"content-type"`
 }
 
@@ -434,13 +438,20 @@ func validateStringList(list []string, requireOne bool) bool {
 	return hasOne
 }
 
-func (mg *mailgunImpl) GetStoredMessages() ([]StoredMessage, error) {
-	url := generateDomainUrl(mg, messagesEndpoint)
-	fmt.Println("URL="+url)
+func (mg *mailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
+	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 
-	var response []StoredMessage
-	err := r.PostResponseFromJSON(nil, &response)
+	var response StoredMessage
+	err := r.GetResponseFromJSON(&response)
 	return response, err
+}
+
+func (mg *mailgunImpl) DeleteStoredMessage(id string) error {
+	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+	r := simplehttp.NewHTTPRequest(url)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	_, err := r.MakeDeleteRequest()
+	return err
 }

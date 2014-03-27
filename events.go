@@ -1,9 +1,9 @@
 package mailgun
 
 import (
+	"fmt"
 	"github.com/mbanzon/simplehttp"
 	"time"
-	"fmt"
 )
 
 // Events are open-ended, loosely-defined JSON documents.
@@ -29,10 +29,10 @@ var noTime time.Time
 // Filter allows the caller to provide more specialized filters on the query.
 // Consult the Mailgun documentation for more details.
 type GetEventsOptions struct {
-	Begin, End	time.Time
-	ForceAscending, ForceDescending, Compact	bool
-	Limit	int
-	Filter map[string]string
+	Begin, End                               time.Time
+	ForceAscending, ForceDescending, Compact bool
+	Limit                                    int
+	Filter                                   map[string]string
 }
 
 func (mg *mailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) {

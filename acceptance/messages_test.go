@@ -9,8 +9,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"text/tabwriter"
-	"os"
 )
 
 const (
@@ -123,16 +121,47 @@ func TestGetStoredMessage(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
 	mg := mailgun.NewMailgun(domain, apiKey, "")
-	msgs, err := mg.GetStoredMessages()
+	id, err := findStoredMessageID(mg) // somehow...
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("Number of messages: ", len(msgs))
-	tw := &tabwriter.Writer{}
-	tw.Init(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
-	fmt.Fprintln(tw, "From\tTo\tSubject\t# Attachments\t")
-	for _, m := range msgs {
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%d\t\n", m.From, m.Recipients, m.Subject, len(m.Attachments))
+
+	// First, get our stored message.
+	msg, err := mg.GetStoredMessage(id)
+	if err != nil {
+		t.Fatal(err)
 	}
-	tw.Flush()
+	fields := map[string]string{
+		"       From": msg.From,
+		"     Sender": msg.Sender,
+		"    Subject": msg.Subject,
+		"Attachments": fmt.Sprintf("%d", len(msg.Attachments)),
+		"    Headers": fmt.Sprintf("%d", len(msg.MessageHeaders)),
+	}
+	for k, v := range fields {
+		fmt.Printf("%13s: %s\n", k, v)
+	}
+
+	// We're done with it; now delete it.
+	err = mg.DeleteStoredMessage(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Tries to locate the first stored event type, returning the associated stored message key.
+func findStoredMessageID(mg mailgun.Mailgun) (string, error) {
+	events, _, err := mg.GetEvents(mailgun.GetEventsOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	for _, event := range events {
+		if event["event"] == "stored" {
+			s := event["storage"].(map[string]interface{})
+			k := s["key"]
+			return k.(string), nil
+		}
+	}
+	return "", fmt.Errorf("No stored messages conveniently found.")
 }

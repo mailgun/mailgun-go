@@ -7,8 +7,8 @@ package mailgun
 
 import (
 	"fmt"
-	"time"
 	"github.com/mbanzon/simplehttp"
+	"time"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 	domainsEndpoint         = "domains"
 	deleteTagEndpoint       = "tags"
 	campaignsEndpoint       = "campaigns"
-	eventsEndpoint		= "events"
+	eventsEndpoint          = "events"
 	basicAuthUser           = "api"
 )
 
@@ -50,7 +50,8 @@ type Mailgun interface {
 	DeleteCampaign(id string) error
 	GetComplaints(limit, skip int) (int, []Complaint, error)
 	GetSingleComplaint(address string) (Complaint, error)
-	GetStoredMessages() ([]StoredMessage, error)
+	GetStoredMessage(id string) (StoredMessage, error)
+	DeleteStoredMessage(id string) error
 	GetEvents(GetEventsOptions) ([]Event, Links, error)
 }
 
@@ -89,9 +90,9 @@ func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
 }
 
-// Generates the URL for the API using the domain and endpoint, under the domains/ namespace.
-func generateDomainUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/domains/%s/%s", apiBase, m.Domain(), endpoint)
+// Generates the URL needed to acquire a copy of a stored message.
+func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
+	return fmt.Sprintf("%s/domains/%s/%s/%s", apiBase, m.Domain(), endpoint, id)
 }
 
 // As with generateApiUrl, except that generatePublicApiUrl has no need for the domain.
