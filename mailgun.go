@@ -23,6 +23,7 @@ const (
 	deleteTagEndpoint       = "tags"
 	campaignsEndpoint       = "campaigns"
 	eventsEndpoint          = "events"
+	credentialsEndpoint     = "credentials"
 	basicAuthUser           = "api"
 )
 
@@ -53,6 +54,10 @@ type Mailgun interface {
 	GetStoredMessage(id string) (StoredMessage, error)
 	DeleteStoredMessage(id string) error
 	GetEvents(GetEventsOptions) ([]Event, Links, error)
+	GetCredentials(limit, skip int) (int, []Credential, error)
+	CreateCredential(login, password string) error
+	ChangeCredentialPassword(id, password string) error
+	DeleteCredential(id string) error
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
@@ -88,6 +93,15 @@ func (m *mailgunImpl) PublicApiKey() string {
 // Generates the URL for the API using the domain and endpoint.
 func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
+}
+
+// Generates a credential URL.
+func generateCredentialsUrl(m Mailgun, id string) string {
+	tail := ""
+	if id != "" {
+		tail = fmt.Sprintf("/%s", id)
+	}
+	return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
 }
 
 // Generates the URL needed to acquire a copy of a stored message.
