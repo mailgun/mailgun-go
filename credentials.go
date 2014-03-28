@@ -48,8 +48,7 @@ func (mg *mailgunImpl) CreateCredential(login, password string) error {
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("login", login)
 	p.AddValue("password", password)
-	response, err := r.MakePostRequest(p)
-	fmt.Printf("CCC  \n\n%d\t%#v\n", response.Code, string(response.Data))
+	_, err := r.MakePostRequest(p)
 	return err
 }
 
@@ -62,8 +61,7 @@ func (mg *mailgunImpl) ChangeCredentialPassword(id, password string) error {
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("password", password)
-	response, err := r.MakePutRequest(p)
-	fmt.Printf("UUU  \n\n%d\t%#v\n", response.Code, string(response.Data))
+	_, err := r.MakePutRequest(p)
 	return err
 }
 
@@ -74,7 +72,6 @@ func (mg *mailgunImpl) DeleteCredential(id string) error {
 	}
 	r := simplehttp.NewHTTPRequest(generateCredentialsUrl(mg, id))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	response, err := r.MakeDeleteRequest()
-	fmt.Printf("DDD  \n\n%d\t%#v\n", response.Code, string(response.Data))
+	_, err := r.MakeDeleteRequest()
 	return err
 }
