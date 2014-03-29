@@ -24,6 +24,7 @@ const (
 	campaignsEndpoint       = "campaigns"
 	eventsEndpoint          = "events"
 	credentialsEndpoint     = "credentials"
+	unsubscribesEndpoint    = "unsubscribes"
 	basicAuthUser           = "api"
 )
 
@@ -58,6 +59,10 @@ type Mailgun interface {
 	CreateCredential(login, password string) error
 	ChangeCredentialPassword(id, password string) error
 	DeleteCredential(id string) error
+	GetUnsubscribes(limit, skip int) (int, []Unsubscription, error)
+	GetUnsubscribesByAddress(string) (int, []Unsubscription, error)
+	Unsubscribe(address, tag string) error
+	RemoveUnsubscribe(string) error
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
@@ -93,6 +98,15 @@ func (m *mailgunImpl) PublicApiKey() string {
 // Generates the URL for the API using the domain and endpoint.
 func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
+}
+
+// Generates a targetted URL for the API using the domain and endpoint.
+func generateApiUrlWithTarget(m Mailgun, endpoint, target string) string {
+	tail := ""
+	if target != "" {
+		tail = fmt.Sprintf("/%s", target)
+	}
+	return fmt.Sprintf("%s%s", generateApiUrl(m, endpoint), tail)
 }
 
 // Generates a credential URL.

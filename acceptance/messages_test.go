@@ -42,6 +42,21 @@ func TestSendPlain(t *testing.T) {
 	fmt.Println("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
 }
 
+func TestSendPlainWithTracking(t *testing.T) {
+	toUser := reqEnv(t, "MG_EMAIL_TO")
+	domain := reqEnv(t, "MG_DOMAIN")
+	apiKey := reqEnv(t, "MG_API_KEY")
+	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg := mailgun.NewMailgun(domain, apiKey, publicApiKey)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m.SetTracking(true)
+	msg, id, err := mg.Send(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("TestSendPlainWithTracking:MSG(" + msg + "),ID(" + id + ")")
+}
+
 func TestSendPlainAt(t *testing.T) {
 	toUser := reqEnv(t, "MG_EMAIL_TO")
 	domain := reqEnv(t, "MG_DOMAIN")
