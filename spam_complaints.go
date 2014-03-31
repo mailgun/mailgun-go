@@ -59,3 +59,23 @@ func (m *mailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 	}
 	return c, nil
 }
+
+// CreateComplaint registers the specified address as a recipient who has complained of receiving spam
+// from your domain.
+func (m *mailgunImpl) CreateComplaint(address string) error {
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint))
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	p := simplehttp.NewUrlEncodedPayload()
+	p.AddValue("address", address)
+	_, err := r.MakePostRequest(p)
+	return err
+}
+
+// DeleteComplaint removes a previously registered e-mail address from the list of people who complained
+// of receiving spam from your domain.
+func (m *mailgunImpl) DeleteComplaint(address string) error {
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	_, err := r.MakeDeleteRequest()
+	return err
+}

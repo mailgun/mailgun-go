@@ -63,6 +63,8 @@ type Mailgun interface {
 	GetUnsubscribesByAddress(string) (int, []Unsubscription, error)
 	Unsubscribe(address, tag string) error
 	RemoveUnsubscribe(string) error
+	CreateComplaint(string) error
+	DeleteComplaint(string) error
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
