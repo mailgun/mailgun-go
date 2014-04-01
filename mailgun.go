@@ -25,6 +25,7 @@ const (
 	eventsEndpoint          = "events"
 	credentialsEndpoint     = "credentials"
 	unsubscribesEndpoint    = "unsubscribes"
+	routesEndpoint			= "routes"
 	basicAuthUser           = "api"
 )
 
@@ -65,6 +66,8 @@ type Mailgun interface {
 	RemoveUnsubscribe(string) error
 	CreateComplaint(string) error
 	DeleteComplaint(string) error
+	GetRoutes(limit, skip int) (int, []Route, error)
+	CreateRoute(Route) (Route, error)
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
