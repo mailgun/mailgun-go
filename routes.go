@@ -69,9 +69,59 @@ func (mg *mailgunImpl) CreateRoute(prototype Route) (Route, error) {
 		p.AddValue("action", action)
 	}
 	var envelope struct {
-		Message string
-		Route
+		Message string `json:"message"`
+		*Route `json:"route"`
 	}
-	_, err := r.MakePostRequest(p)
-	return envelope.Route, err
+	err := r.PostResponseFromJSON(p, &envelope)
+	return *envelope.Route, err
+}
+
+// DeleteRoute removes the specified route from your domain's configuration.
+// To avoid ambiguity, Mailgun identifies the route by unique ID.
+// See the Route structure definition and the Mailgun API documentation for more details.
+func (mg *mailgunImpl) DeleteRoute(id string) error {
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	_, err := r.MakeDeleteRequest()
+	return err
+}
+
+// GetRouteByID retrieves the complete route definition associated with the unique route ID.
+func (mg *mailgunImpl) GetRouteByID(id string) (Route, error) {
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	var envelope struct {
+		Message string `json:"message"`
+		*Route `json:"route"`
+	}
+	err := r.GetResponseFromJSON(&envelope)
+	return *envelope.Route, err
+}
+
+// UpdateRoute provides an "in-place" update of the specified route.
+// Only those route fields which are non-zero or non-empty are updated.
+// All other fields remain as-is.
+func (mg *mailgunImpl) UpdateRoute(id string, route Route) (Route, error) {
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	p := simplehttp.NewUrlEncodedPayload()
+	if route.Priority != 0 {
+		p.AddValue("priority", strconv.Itoa(route.Priority))
+	}
+	if route.Description != "" {
+		p.AddValue("description", route.Description)
+	}
+	if route.Expression != "" {
+		p.AddValue("expression", route.Expression)
+	}
+	if route.Actions != nil {
+		for _, action := range route.Actions {
+			p.AddValue("action", action)
+		}
+	}
+	// For some reason, this API function just returns a bare Route on success.
+	// Unsure why this is the case; it seems like it ought to be a bug.
+	var envelope Route
+	err := r.PutResponseFromJSON(p, &envelope)
+	return envelope, err
 }

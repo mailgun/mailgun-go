@@ -67,7 +67,10 @@ type Mailgun interface {
 	CreateComplaint(string) error
 	DeleteComplaint(string) error
 	GetRoutes(limit, skip int) (int, []Route, error)
+	GetRouteByID(string) (Route, error)
 	CreateRoute(Route) (Route, error)
+	DeleteRoute(string) error
+	UpdateRoute(string, Route) (Route, error)
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
