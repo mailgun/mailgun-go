@@ -26,6 +26,7 @@ const (
 	credentialsEndpoint     = "credentials"
 	unsubscribesEndpoint    = "unsubscribes"
 	routesEndpoint			= "routes"
+	webhooksEndpoint		= "webhooks"
 	basicAuthUser           = "api"
 )
 
@@ -71,6 +72,11 @@ type Mailgun interface {
 	CreateRoute(Route) (Route, error)
 	DeleteRoute(string) error
 	UpdateRoute(string, Route) (Route, error)
+	GetWebhooks() (map[string]string, error)
+	CreateWebhook(kind, url string) error
+	DeleteWebhook(kind string) error
+	GetWebhookByType(kind string) (string, error)
+	UpdateWebhook(kind, url string) error
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
@@ -117,18 +123,23 @@ func generateApiUrlWithTarget(m Mailgun, endpoint, target string) string {
 	return fmt.Sprintf("%s%s", generateApiUrl(m, endpoint), tail)
 }
 
-// Generates a credential URL.
+func generateDomainApiUrl(m Mailgun, endpoint string) string {
+	return fmt.Sprintf("%s/domains/%s/%s", apiBase, m.Domain(), endpoint)
+}
+
 func generateCredentialsUrl(m Mailgun, id string) string {
 	tail := ""
 	if id != "" {
 		tail = fmt.Sprintf("/%s", id)
 	}
-	return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
+	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail))
+	// return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
 }
 
 // Generates the URL needed to acquire a copy of a stored message.
 func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
-	return fmt.Sprintf("%s/domains/%s/%s/%s", apiBase, m.Domain(), endpoint, id)
+	return generateDomainApiUrl(m, fmt.Sprintf("%s/%s", endpoint, id))
+	// return fmt.Sprintf("%s/domains/%s/%s/%s", apiBase, m.Domain(), endpoint, id)
 }
 
 // As with generateApiUrl, except that generatePublicApiUrl has no need for the domain.
