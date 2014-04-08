@@ -27,6 +27,7 @@ const (
 	unsubscribesEndpoint    = "unsubscribes"
 	routesEndpoint			= "routes"
 	webhooksEndpoint		= "webhooks"
+	listsEndpoint			= "lists"
 	basicAuthUser           = "api"
 )
 
@@ -77,6 +78,11 @@ type Mailgun interface {
 	DeleteWebhook(kind string) error
 	GetWebhookByType(kind string) (string, error)
 	UpdateWebhook(kind, url string) error
+	GetLists(limit, skip int, filter string) (int, []List, error)
+	CreateList(List) (List, error)
+	DeleteList(string) error
+	GetListByAddress(string) (List, error)
+	UpdateList(string, List) error
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
