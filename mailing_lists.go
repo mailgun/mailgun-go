@@ -3,7 +3,6 @@ package mailgun
 import (
 	"github.com/mbanzon/simplehttp"
 	"strconv"
-	"fmt"
 )
 
 const (
@@ -13,17 +12,17 @@ const (
 )
 
 type List struct {
-	Address      string
-	Name         string
-	Description  string
-	AccessLevel  string
-	CreatedAt    string
-	MembersCount int
+	Address      string `json:"address",omitempty"`
+	Name         string `json:"name",omitempty"`
+	Description  string `json:"description",omitempty"`
+	AccessLevel  string `json:"access_level",omitempty"`
+	CreatedAt    string `json:"created_at",omitempty"`
+	MembersCount int    `json:"members_count",omitempty"`
 }
 
 
 func (mg *mailgunImpl) GetLists(limit, skip int, filter string) (int, []List, error) {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(mg, listsEndpoint))
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	if limit != DefaultLimit {
@@ -35,48 +34,82 @@ func (mg *mailgunImpl) GetLists(limit, skip int, filter string) (int, []List, er
 	if filter != "" {
 		p.AddValue("address", filter)
 	}
+	var envelope struct {
+		Items []List `json:"items"`
+		TotalCount int `json:"total_count"`
+	}
 	response, err := r.MakeRequest("GET", p)
 	if err != nil {
 		return -1, nil, err
 	}
-	fmt.Printf("@@ CODE(%d) DATA(%s)\n", response.Code, string(response.Data))
-	return -1, nil, fmt.Errorf("Not finished")
+	err = response.ParseFromJSON(&envelope)
+	return envelope.TotalCount, envelope.Items, err
 }
 
 func (mg *mailgunImpl) CreateList(prototype List) (List, error) {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(mg, listsEndpoint))
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
-	p.AddValue("id", prototype.Address)
-	p.AddValue("url", prototype.Name)
-	_, err := r.MakePostRequest(p)
-	return List{}, err
+	if prototype.Address != "" {
+		p.AddValue("address", prototype.Address)
+	}
+	if prototype.Name != "" {
+		p.AddValue("name", prototype.Name)
+	}
+	if prototype.Description != "" {
+		p.AddValue("description", prototype.Description)
+	}
+	if prototype.AccessLevel != "" {
+		p.AddValue("access_level", prototype.AccessLevel)
+	}
+	response, err := r.MakePostRequest(p)
+	if err != nil {
+		return List{}, err
+	}
+	var l List
+	err = response.ParseFromJSON(&l)
+	return l, err
 }
 
 func (mg *mailgunImpl) DeleteList(addr string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(mg, listsEndpoint) + "/ttt")
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := r.MakeDeleteRequest()
 	return err
 }
 
 func (mg *mailgunImpl) GetListByAddress(addr string) (List, error) {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(mg, listsEndpoint) + "/ttt")
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	response, err := r.MakeGetRequest()
 	var envelope struct {
-		List struct{
-			Url *string `json:"url"`
-		} `json:"List"`
+		List `json:"list"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
-	return List{}, err
+	err = response.ParseFromJSON(&envelope)
+	return envelope.List, err
 }
 
-func (mg *mailgunImpl) UpdateList(addr string, prototype List) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(mg, listsEndpoint) + "/ttt")
+func (mg *mailgunImpl) UpdateList(addr string, prototype List) (List, error) {
+	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
-	p.AddValue("url", addr)
-	_, err := r.MakePutRequest(p)
-	return err
+	if prototype.Address != "" {
+		p.AddValue("address", prototype.Address)
+	}
+	if prototype.Name != "" {
+		p.AddValue("name", prototype.Name)
+	}
+	if prototype.Description != "" {
+		p.AddValue("description", prototype.Description)
+	}
+	if prototype.AccessLevel != "" {
+		p.AddValue("access_level", prototype.AccessLevel)
+	}
+	var l List
+	response, err := r.MakePutRequest(p)
+	if err != nil {
+		return l, err
+	}
+	err = response.ParseFromJSON(&l)
+	return l, err
 }

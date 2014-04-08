@@ -82,7 +82,7 @@ type Mailgun interface {
 	CreateList(List) (List, error)
 	DeleteList(string) error
 	GetListByAddress(string) (List, error)
-	UpdateList(string, List) error
+	UpdateList(string, List) (List, error)
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.

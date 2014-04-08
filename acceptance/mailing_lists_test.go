@@ -55,11 +55,12 @@ func TestMailingLists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	protoList.CreatedAt = theList.CreatedAt		// ignore this field when comparing.
 	if theList != protoList {
 		t.Fatalf("Unexpected list descriptor: Expected [%#v], Got [%#v]", protoList, theList)
 	}
 
-	err = mg.UpdateList(listAddr, mailgun.List{
+	_, err = mg.UpdateList(listAddr, mailgun.List{
 		Description: "A list whose description changed",
 	})
 	if err != nil {
