@@ -86,7 +86,9 @@ type Mailgun interface {
 	GetSubscribers(limit, skip int, subfilter *bool, address string) (int, []Subscriber, error)
 	GetSubscriberByAddress(subscriberAddr, listAddr string) (Subscriber, error)
 	CreateSubscriber(merge bool, addr string, prototype Subscriber) error
+	CreateSubscriberList(subscribed *bool, addr string, newMembers []interface{}) error
 	UpdateSubscriber(subscriber, list string, prototype Subscriber) (Subscriber, error)
+	DeleteSubscriber(subscriber, list string) error
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.

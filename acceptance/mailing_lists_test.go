@@ -86,6 +86,52 @@ func TestMailingListSubscribers(t *testing.T) {
 	if theSubscriber.Name != "Joe Cool" {
 		t.Fatal("Expected Joe Cool; got " + theSubscriber.Name)
 	}
+
+	err = mg.DeleteSubscriber("joe@example.com", address)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if countPeople() != startCount {
+		t.Fatalf("Expected %d people; got %d instead", startCount, countPeople())
+	}
+
+	err = mg.CreateSubscriberList(nil, address, []interface{}{
+		mailgun.Subscriber{
+			Address: "joe.user1@example.com",
+			Name: "Joe's debugging account",
+			Subscribed: mailgun.Unsubscribed,
+		},
+		mailgun.Subscriber{
+			Address: "Joe Cool <joe.user2@example.com>",
+			Name: "Joe's Cool Account",
+			Subscribed: mailgun.Subscribed,
+		},
+		mailgun.Subscriber{
+			Address: "joe.user3@example.com",
+			Vars: map[string]interface{}{
+				"packet-email": "KW9ABC @ BOGBBS-4.#NCA.CA.USA.NOAM",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	theSubscriber, err = mg.GetSubscriberByAddress("joe.user2@example.com", address)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if theSubscriber.Name != "Joe's Cool Account" {
+		t.Fatalf("Expected Joe's Cool Account; got %s", theSubscriber.Name)
+	}
+	if theSubscriber.Subscribed != nil {
+		if *theSubscriber.Subscribed != true {
+			t.Fatalf("Expected subscribed to be true; got %v", *theSubscriber.Subscribed)
+		}
+	} else {
+		t.Fatal("Expected some kind of subscription status; got nil.")
+	}
 }
 
 func TestMailingLists(t *testing.T) {

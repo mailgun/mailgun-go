@@ -4,7 +4,7 @@ import (
 	"github.com/mbanzon/simplehttp"
 	"strconv"
 	"encoding/json"
-//	"fmt"
+	"fmt"
 )
 
 // A mailing list may have one of three membership modes.
@@ -270,4 +270,38 @@ func (mg *mailgunImpl) UpdateSubscriber(s, l string, prototype Subscriber) (Subs
 	}
 	err = response.ParseFromJSON(&envelope)
 	return envelope.Member, err
+}
+
+// DeleteSubscriber removes the member from the list.
+func (mg *mailgunImpl) DeleteSubscriber(member, addr string) error {
+	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, addr) + "/" + member)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	_, err := r.MakeDeleteRequest()
+	return err
+}
+
+// CreateSubscriberList registers multiple subscribers and non-subscriber members to a single mailing list
+// in a single round-trip.
+// s indicates the default subscribed status (Subscribed or Unsubscribed).
+// Use All to elect not to provide a default.
+// The newMembers list can take one of two JSON-encodable forms: an slice of strings, or
+// a slice of Subscriber structures.
+// If a simple slice of strings is passed, each string refers to the member's e-mail address.
+// Otherwise, each Subscriber needs to have at least the Address field filled out.
+// Other fields are optional, but may be set according to your needs.
+func (mg *mailgunImpl) CreateSubscriberList(s *bool, addr string, newMembers []interface{}) error {
+	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, addr) + ".json")
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	p := simplehttp.NewFormDataPayload()
+	if s != nil {
+		p.AddValue("subscribed", yesNo(*s))
+	}
+	bs, err := json.Marshal(newMembers)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(bs))
+	p.AddValue("members", string(bs))
+	_, err = r.MakePostRequest(p)
+	return err
 }
