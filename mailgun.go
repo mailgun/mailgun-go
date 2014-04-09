@@ -83,6 +83,10 @@ type Mailgun interface {
 	DeleteList(string) error
 	GetListByAddress(string) (List, error)
 	UpdateList(string, List) (List, error)
+	GetSubscribers(limit, skip int, subfilter *bool, address string) (int, []Subscriber, error)
+	GetSubscriberByAddress(subscriberAddr, listAddr string) (Subscriber, error)
+	CreateSubscriber(merge bool, addr string, prototype Subscriber) error
+	UpdateSubscriber(subscriber, list string, prototype Subscriber) (Subscriber, error)
 }
 
 // Imagine some data needed by a large set of methods in order to interact with the Mailgun API.
@@ -118,6 +122,11 @@ func (m *mailgunImpl) PublicApiKey() string {
 // Generates the URL for the API using the domain and endpoint.
 func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
+}
+
+// Generates the URL to a mailing list subscriber endpoint.
+func generateSubscriberApiUrl(endpoint, address string) string {
+	return fmt.Sprintf("%s/%s/%s/members", apiBase, endpoint, address)
 }
 
 // Generates a targetted URL for the API using the domain and endpoint.
