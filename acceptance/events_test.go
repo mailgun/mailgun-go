@@ -24,7 +24,7 @@ func TestGetEvents(t *testing.T) {
 	tw.Init(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
 	fmt.Fprintln(tw, "Event\tTimestamp\t")
 	for _, event := range events {
-		fmt.Fprintf(tw, "%s\t%v\t\n", event["event"], int64(event["timestamp"].(float64)))
+		fmt.Fprintf(tw, "%s\t%v\t\n", event["event"], event["timestamp"])
 	}
 	tw.Flush()
 	fmt.Printf("%d events dumped\n\n", len(events))

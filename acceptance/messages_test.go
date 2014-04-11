@@ -170,7 +170,6 @@ func findStoredMessageID(mg mailgun.Mailgun) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	for _, event := range events {
 		if event["event"] == "stored" {
 			s := event["storage"].(map[string]interface{})
@@ -178,5 +177,5 @@ func findStoredMessageID(mg mailgun.Mailgun) (string, error) {
 			return k.(string), nil
 		}
 	}
-	return "", fmt.Errorf("No stored messages conveniently found.")
+	return "", fmt.Errorf("No stored messages found.  Try changing MG_EMAIL_TO to an address that stores messages and try again.")
 }
