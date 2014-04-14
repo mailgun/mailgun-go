@@ -8,7 +8,7 @@ import (
 )
 
 // A mailing list may have one of three membership modes.
-// ReadOnly specifies that nobody, including subscribers,
+// ReadOnly specifies that nobody, including Members,
 // may send messages to the mailing list.
 // Messages distributed on such lists come from list administrator accounts only.
 // Members specifies that only those who subscribe to the mailing list may send messages.
@@ -52,9 +52,9 @@ type List struct {
 	MembersCount int    `json:"members_count",omitempty"`
 }
 
-// A Subscriber structure represents a member of the mailing list.
+// A Member structure represents a member of the mailing list.
 // The Vars field can represent any JSON-encodable data.
-type Subscriber struct {
+type Member struct {
 	Address    string `json:"address,omitempty"`
 	Name       string `json:"name,omitempty"`
 	Subscribed *bool `json:"subscribed,omitempty"`
@@ -171,12 +171,12 @@ func (mg *mailgunImpl) UpdateList(addr string, prototype List) (List, error) {
 	return l, err
 }
 
-// GetSubscribers returns the list of members belonging to the indicated mailing list.
+// GetMembers returns the list of members belonging to the indicated mailing list.
 // The s parameter can be set to one of three settings to help narrow the returned data set:
-// All indicates that you want both subscribers and unsubscribed members alike, while
+// All indicates that you want both Members and unsubscribed members alike, while
 // Subscribed and Unsubscribed indicate you want only those eponymous subsets.
-func (mg *mailgunImpl) GetSubscribers(limit, skip int, s *bool, addr string) (int, []Subscriber, error) {
-	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, addr))
+func (mg *mailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, []Member, error) {
+	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	if limit != DefaultLimit {
@@ -190,7 +190,7 @@ func (mg *mailgunImpl) GetSubscribers(limit, skip int, s *bool, addr string) (in
 	}
 	var envelope struct {
 		TotalCount int `json:"total_count"`
-		Items []Subscriber `json:"items"`
+		Items []Member `json:"items"`
 	}
 	response, err := r.MakeRequest("GET", p)
 	if err != nil {
@@ -200,32 +200,32 @@ func (mg *mailgunImpl) GetSubscribers(limit, skip int, s *bool, addr string) (in
 	return envelope.TotalCount, envelope.Items, err
 }
 
-// GetSubscriberByAddress returns a complete Subscriber structure for a member of a mailing list,
+// GetMemberByAddress returns a complete Member structure for a member of a mailing list,
 // given only their subscription e-mail address.
-func (mg *mailgunImpl) GetSubscriberByAddress(s, l string) (Subscriber, error) {
-	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, l) + "/" + s)
+func (mg *mailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
+	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, l) + "/" + s)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	response, err := r.MakeGetRequest()
 	if err != nil {
-		return Subscriber{}, err
+		return Member{}, err
 	}
 	var envelope struct {
-		Member Subscriber `json:"member"`
+		Member Member `json:"member"`
 	}
 	err = response.ParseFromJSON(&envelope)
 	return envelope.Member, err
 }
 
-// CreateSubscriber registers a new member of the indicated mailing list.
-// If merge is set to true, then the registration may update an existing subscriber's settings.
+// CreateMember registers a new member of the indicated mailing list.
+// If merge is set to true, then the registration may update an existing Member's settings.
 // Otherwise, an error will occur if you attempt to add a member with a duplicate e-mail address.
-func (mg *mailgunImpl) CreateSubscriber(merge bool, addr string, prototype Subscriber) error {
+func (mg *mailgunImpl) CreateMember(merge bool, addr string, prototype Member) error {
 	vs, err := json.Marshal(prototype.Vars)
 	if err != nil {
 		return err
 	}
 
-	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, addr))
+	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewFormDataPayload()
 	p.AddValue("upsert", yesNo(merge))
@@ -239,10 +239,10 @@ func (mg *mailgunImpl) CreateSubscriber(merge bool, addr string, prototype Subsc
 	return err
 }
 
-// UpdateSubscriber lets you change certain details about the indicated mailing list member.
+// UpdateMember lets you change certain details about the indicated mailing list member.
 // Address, Name, Vars, and Subscribed fields may be changed.
-func (mg *mailgunImpl) UpdateSubscriber(s, l string, prototype Subscriber) (Subscriber, error) {
-	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, l) + "/" + s)
+func (mg *mailgunImpl) UpdateMember(s, l string, prototype Member) (Member, error) {
+	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, l) + "/" + s)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewFormDataPayload()
 	if prototype.Address != "" {
@@ -254,7 +254,7 @@ func (mg *mailgunImpl) UpdateSubscriber(s, l string, prototype Subscriber) (Subs
 	if prototype.Vars != nil {
 		vs, err := json.Marshal(prototype.Vars)
 		if err != nil {
-			return Subscriber{}, err
+			return Member{}, err
 		}
 		p.AddValue("vars", string(vs))
 	}
@@ -263,34 +263,34 @@ func (mg *mailgunImpl) UpdateSubscriber(s, l string, prototype Subscriber) (Subs
 	}
 	response, err := r.MakePutRequest(p)
 	if err != nil {
-		return Subscriber{}, err
+		return Member{}, err
 	}
 	var envelope struct {
-		Member Subscriber `json:"member"`
+		Member Member `json:"member"`
 	}
 	err = response.ParseFromJSON(&envelope)
 	return envelope.Member, err
 }
 
-// DeleteSubscriber removes the member from the list.
-func (mg *mailgunImpl) DeleteSubscriber(member, addr string) error {
-	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, addr) + "/" + member)
+// DeleteMember removes the member from the list.
+func (mg *mailgunImpl) DeleteMember(member, addr string) error {
+	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr) + "/" + member)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := r.MakeDeleteRequest()
 	return err
 }
 
-// CreateSubscriberList registers multiple subscribers and non-subscriber members to a single mailing list
+// CreateMemberList registers multiple Members and non-Member members to a single mailing list
 // in a single round-trip.
 // s indicates the default subscribed status (Subscribed or Unsubscribed).
 // Use All to elect not to provide a default.
 // The newMembers list can take one of two JSON-encodable forms: an slice of strings, or
-// a slice of Subscriber structures.
+// a slice of Member structures.
 // If a simple slice of strings is passed, each string refers to the member's e-mail address.
-// Otherwise, each Subscriber needs to have at least the Address field filled out.
+// Otherwise, each Member needs to have at least the Address field filled out.
 // Other fields are optional, but may be set according to your needs.
-func (mg *mailgunImpl) CreateSubscriberList(s *bool, addr string, newMembers []interface{}) error {
-	r := simplehttp.NewHTTPRequest(generateSubscriberApiUrl(listsEndpoint, addr) + ".json")
+func (mg *mailgunImpl) CreateMemberList(s *bool, addr string, newMembers []interface{}) error {
+	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr) + ".json")
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewFormDataPayload()
 	if s != nil {

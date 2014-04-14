@@ -17,7 +17,7 @@ func setup(t *testing.T) (mailgun.Mailgun, string) {
 	_, err := mg.CreateList(mailgun.List{
 		Address: address,
 		Name: address,
-		Description: "TestMailingListSubscribers-related mailing list",
+		Description: "TestMailingListMembers-related mailing list",
 		AccessLevel: mailgun.Members,
 	})
 	if err != nil {
@@ -33,12 +33,12 @@ func teardown(t *testing.T, mg mailgun.Mailgun, address string) {
 	}
 }
 
-func TestMailingListSubscribers(t *testing.T) {
+func TestMailingListMembers(t *testing.T) {
 	mg, address := setup(t)
 	defer teardown(t, mg, address)
 
 	var countPeople = func() int {
-		n, _, err := mg.GetSubscribers(mailgun.DefaultLimit, mailgun.DefaultSkip, mailgun.All, address)
+		n, _, err := mg.GetMembers(mailgun.DefaultLimit, mailgun.DefaultSkip, mailgun.All, address)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,12 +46,12 @@ func TestMailingListSubscribers(t *testing.T) {
 	}
 
 	startCount := countPeople()
-	protoJoe := mailgun.Subscriber{
+	protoJoe := mailgun.Member{
 		Address: "joe@example.com",
 		Name: "Joe Example",
 		Subscribed: mailgun.Subscribed,
 	}
-	err := mg.CreateSubscriber(true, address, protoJoe)
+	err := mg.CreateMember(true, address, protoJoe)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,33 +61,33 @@ func TestMailingListSubscribers(t *testing.T) {
 		t.Fatalf("Expected %d people subscribed; got %d", startCount+1, newCount)
 	}
 
-	theSubscriber, err := mg.GetSubscriberByAddress("joe@example.com", address)
+	theMember, err := mg.GetMemberByAddress("joe@example.com", address)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if (theSubscriber.Address != protoJoe.Address) ||
-	   (theSubscriber.Name != protoJoe.Name) ||
-	   (*theSubscriber.Subscribed != *protoJoe.Subscribed) ||
-	   (len(theSubscriber.Vars) != 0) {
-		t.Fatalf("Unexpected Subscriber: Expected [%#v], Got [%#v]", protoJoe, theSubscriber)
+	if (theMember.Address != protoJoe.Address) ||
+	   (theMember.Name != protoJoe.Name) ||
+	   (*theMember.Subscribed != *protoJoe.Subscribed) ||
+	   (len(theMember.Vars) != 0) {
+		t.Fatalf("Unexpected Member: Expected [%#v], Got [%#v]", protoJoe, theMember)
 	}
 
-	_, err = mg.UpdateSubscriber("joe@example.com", address, mailgun.Subscriber{
+	_, err = mg.UpdateMember("joe@example.com", address, mailgun.Member{
 		Name: "Joe Cool",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	theSubscriber, err = mg.GetSubscriberByAddress("joe@example.com", address)
+	theMember, err = mg.GetMemberByAddress("joe@example.com", address)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if theSubscriber.Name != "Joe Cool" {
-		t.Fatal("Expected Joe Cool; got " + theSubscriber.Name)
+	if theMember.Name != "Joe Cool" {
+		t.Fatal("Expected Joe Cool; got " + theMember.Name)
 	}
 
-	err = mg.DeleteSubscriber("joe@example.com", address)
+	err = mg.DeleteMember("joe@example.com", address)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,18 +96,18 @@ func TestMailingListSubscribers(t *testing.T) {
 		t.Fatalf("Expected %d people; got %d instead", startCount, countPeople())
 	}
 
-	err = mg.CreateSubscriberList(nil, address, []interface{}{
-		mailgun.Subscriber{
+	err = mg.CreateMemberList(nil, address, []interface{}{
+		mailgun.Member{
 			Address: "joe.user1@example.com",
 			Name: "Joe's debugging account",
 			Subscribed: mailgun.Unsubscribed,
 		},
-		mailgun.Subscriber{
+		mailgun.Member{
 			Address: "Joe Cool <joe.user2@example.com>",
 			Name: "Joe's Cool Account",
 			Subscribed: mailgun.Subscribed,
 		},
-		mailgun.Subscriber{
+		mailgun.Member{
 			Address: "joe.user3@example.com",
 			Vars: map[string]interface{}{
 				"packet-email": "KW9ABC @ BOGBBS-4.#NCA.CA.USA.NOAM",
@@ -118,16 +118,16 @@ func TestMailingListSubscribers(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	theSubscriber, err = mg.GetSubscriberByAddress("joe.user2@example.com", address)
+	theMember, err = mg.GetMemberByAddress("joe.user2@example.com", address)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if theSubscriber.Name != "Joe's Cool Account" {
-		t.Fatalf("Expected Joe's Cool Account; got %s", theSubscriber.Name)
+	if theMember.Name != "Joe's Cool Account" {
+		t.Fatalf("Expected Joe's Cool Account; got %s", theMember.Name)
 	}
-	if theSubscriber.Subscribed != nil {
-		if *theSubscriber.Subscribed != true {
-			t.Fatalf("Expected subscribed to be true; got %v", *theSubscriber.Subscribed)
+	if theMember.Subscribed != nil {
+		if *theMember.Subscribed != true {
+			t.Fatalf("Expected subscribed to be true; got %v", *theMember.Subscribed)
 		}
 	} else {
 		t.Fatal("Expected some kind of subscription status; got nil.")
