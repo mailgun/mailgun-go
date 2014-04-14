@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	fromUser       = "\"Joe, Example\" <joe@example.com>"
+	// fromUser       = "\"Joe, Example\" <joe@example.com>"
+	fromUser       = "=?utf-8?q?Katie_Brewer=2C_CFP=C2=AE?= <joe@example.com>"
 	exampleSubject = "Joe's Example Subject"
 	exampleText    = "Testing some Mailgun awesomeness!"
 	exampleHtml    = "<html><head /><body><p>Testing some <a href=\"http://google.com?q=abc&r=def&s=ghi\">Mailgun HTML awesomeness!</a> at www.kc5tja@yahoo.com</p></body></html>"
