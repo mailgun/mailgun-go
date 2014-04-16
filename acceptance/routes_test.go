@@ -3,8 +3,8 @@
 package acceptance
 
 import (
-	"testing"
 	"github.com/mailgun/mailgun-go"
+	"testing"
 )
 
 func TestRouteCRUD(t *testing.T) {
@@ -23,9 +23,9 @@ func TestRouteCRUD(t *testing.T) {
 	routeCount := countRoutes()
 
 	newRoute, err := mg.CreateRoute(mailgun.Route{
-		Priority: 1,
+		Priority:    1,
 		Description: "Sample Route",
-		Expression: "match_recipient(\".*@samples.mailgun.org\")",
+		Expression:  "match_recipient(\".*@samples.mailgun.org\")",
 		Actions: []string{
 			"forward(\"http://example.com/messages/\")",
 			"stop()",
@@ -59,11 +59,11 @@ func TestRouteCRUD(t *testing.T) {
 		t.Fatal(err)
 	}
 	if ((newRoute.Priority) != (theRoute.Priority)) ||
-	   ((newRoute.Description) != (theRoute.Description)) ||
-	   ((newRoute.Expression) != (theRoute.Expression)) ||
-	   (len(newRoute.Actions) != len(theRoute.Actions)) ||
-	   ((newRoute.CreatedAt) != (theRoute.CreatedAt)) ||
-	   ((newRoute.ID) != (theRoute.ID)) {
+		((newRoute.Description) != (theRoute.Description)) ||
+		((newRoute.Expression) != (theRoute.Expression)) ||
+		(len(newRoute.Actions) != len(theRoute.Actions)) ||
+		((newRoute.CreatedAt) != (theRoute.CreatedAt)) ||
+		((newRoute.ID) != (theRoute.ID)) {
 		t.Fatalf("Expected %#v, got %#v", newRoute, theRoute)
 	}
 	for i, action := range newRoute.Actions {

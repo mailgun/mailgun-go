@@ -42,7 +42,7 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var res statsEnvelope
-	err := r.GetResponseFromJSON(&res)
+	err := getResponseFromJSON(r, &res)
 	if err != nil {
 		return -1, nil, err
 	} else {
@@ -54,6 +54,6 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 func (m *mailgunImpl) DeleteTag(tag string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, deleteTagEndpoint) + "/" + tag)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }

@@ -46,7 +46,7 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response bounceEnvelope
-	err := r.GetResponseFromJSON(&response)
+	err := getResponseFromJSON(r, &response)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -61,12 +61,12 @@ func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response singleBounceEnvelope
-	err := r.GetResponseFromJSON(&response)
-	if err != nil {
-		return Bounce{}, err
+	err := getResponseFromJSON(r, &response)
+	ure, ok := err.(*UnexpectedResponseError)
+	if ok && (ure.Actual == 404) {
+		return Bounce{}, nil
 	}
-
-	return response.Bounce, nil
+	return response.Bounce, err
 }
 
 // AddBounce files a bounce report.
@@ -97,7 +97,7 @@ func (m *mailgunImpl) AddBounce(address, code, error string) error {
 	if error != "" {
 		payload.AddValue("error", error)
 	}
-	_, err := r.MakePostRequest(payload)
+	_, err := makePostRequest(r, payload)
 	return err
 }
 
@@ -105,6 +105,6 @@ func (m *mailgunImpl) AddBounce(address, code, error string) error {
 func (m *mailgunImpl) DeleteBounce(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }

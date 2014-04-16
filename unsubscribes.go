@@ -27,7 +27,7 @@ func (mg *mailgunImpl) GetUnsubscribes(limit, skip int) (int, []Unsubscription, 
 		TotalCount int              `json:"total_count"`
 		Items      []Unsubscription `json:"items"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	return envelope.TotalCount, envelope.Items, err
 }
 
@@ -40,7 +40,7 @@ func (mg *mailgunImpl) GetUnsubscribesByAddress(a string) (int, []Unsubscription
 		TotalCount int              `json:"total_count"`
 		Items      []Unsubscription `json:"items"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	return envelope.TotalCount, envelope.Items, err
 }
 
@@ -51,7 +51,7 @@ func (mg *mailgunImpl) Unsubscribe(a, t string) error {
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("address", a)
 	p.AddValue("tag", t)
-	_, err := r.MakePostRequest(p)
+	_, err := makePostRequest(r, p)
 	return err
 }
 
@@ -61,6 +61,6 @@ func (mg *mailgunImpl) Unsubscribe(a, t string) error {
 func (mg *mailgunImpl) RemoveUnsubscribe(a string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, a))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }

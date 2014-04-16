@@ -3,9 +3,9 @@
 package acceptance
 
 import (
-	"testing"
-	mailgun "github.com/mailgun/mailgun-go"
 	"fmt"
+	mailgun "github.com/mailgun/mailgun-go"
+	"testing"
 )
 
 func setup(t *testing.T) (mailgun.Mailgun, string) {
@@ -15,8 +15,8 @@ func setup(t *testing.T) (mailgun.Mailgun, string) {
 
 	address := fmt.Sprintf("list5@%s", domain)
 	_, err := mg.CreateList(mailgun.List{
-		Address: address,
-		Name: address,
+		Address:     address,
+		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
 		AccessLevel: mailgun.Members,
 	})
@@ -47,8 +47,8 @@ func TestMailingListMembers(t *testing.T) {
 
 	startCount := countPeople()
 	protoJoe := mailgun.Member{
-		Address: "joe@example.com",
-		Name: "Joe Example",
+		Address:    "joe@example.com",
+		Name:       "Joe Example",
 		Subscribed: mailgun.Subscribed,
 	}
 	err := mg.CreateMember(true, address, protoJoe)
@@ -66,9 +66,9 @@ func TestMailingListMembers(t *testing.T) {
 		t.Fatal(err)
 	}
 	if (theMember.Address != protoJoe.Address) ||
-	   (theMember.Name != protoJoe.Name) ||
-	   (*theMember.Subscribed != *protoJoe.Subscribed) ||
-	   (len(theMember.Vars) != 0) {
+		(theMember.Name != protoJoe.Name) ||
+		(*theMember.Subscribed != *protoJoe.Subscribed) ||
+		(len(theMember.Vars) != 0) {
 		t.Fatalf("Unexpected Member: Expected [%#v], Got [%#v]", protoJoe, theMember)
 	}
 
@@ -98,13 +98,13 @@ func TestMailingListMembers(t *testing.T) {
 
 	err = mg.CreateMemberList(nil, address, []interface{}{
 		mailgun.Member{
-			Address: "joe.user1@example.com",
-			Name: "Joe's debugging account",
+			Address:    "joe.user1@example.com",
+			Name:       "Joe's debugging account",
 			Subscribed: mailgun.Unsubscribed,
 		},
 		mailgun.Member{
-			Address: "Joe Cool <joe.user2@example.com>",
-			Name: "Joe's Cool Account",
+			Address:    "Joe Cool <joe.user2@example.com>",
+			Name:       "Joe's Cool Account",
 			Subscribed: mailgun.Subscribed,
 		},
 		mailgun.Member{
@@ -140,8 +140,8 @@ func TestMailingLists(t *testing.T) {
 	mg := mailgun.NewMailgun(domain, apiKey, "")
 	listAddr := fmt.Sprintf("list2@%s", domain)
 	protoList := mailgun.List{
-		Address: listAddr,
-		Name: "List1",
+		Address:     listAddr,
+		Name:        "List1",
 		Description: "A list created by an acceptance test.",
 		AccessLevel: mailgun.Members,
 	}
@@ -181,7 +181,7 @@ func TestMailingLists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	protoList.CreatedAt = theList.CreatedAt		// ignore this field when comparing.
+	protoList.CreatedAt = theList.CreatedAt // ignore this field when comparing.
 	if theList != protoList {
 		t.Fatalf("Unexpected list descriptor: Expected [%#v], Got [%#v]", protoList, theList)
 	}

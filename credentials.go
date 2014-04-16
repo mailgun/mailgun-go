@@ -31,7 +31,7 @@ func (mg *mailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error
 		TotalCount int          `json:"total_count"`
 		Items      []Credential `json:"items"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -48,7 +48,7 @@ func (mg *mailgunImpl) CreateCredential(login, password string) error {
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("login", login)
 	p.AddValue("password", password)
-	_, err := r.MakePostRequest(p)
+	_, err := makePostRequest(r, p)
 	return err
 }
 
@@ -61,7 +61,7 @@ func (mg *mailgunImpl) ChangeCredentialPassword(id, password string) error {
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("password", password)
-	_, err := r.MakePutRequest(p)
+	_, err := makePutRequest(r, p)
 	return err
 }
 
@@ -72,6 +72,6 @@ func (mg *mailgunImpl) DeleteCredential(id string) error {
 	}
 	r := simplehttp.NewHTTPRequest(generateCredentialsUrl(mg, id))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }

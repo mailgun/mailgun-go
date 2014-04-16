@@ -35,6 +35,11 @@ type GetEventsOptions struct {
 	Filter                                   map[string]string
 }
 
+// GetEvents provides the caller with a list of log entries.
+// See the GetEventsOptions structure for information on how to customize the list returned.
+// Note that the API responds with events with open definitions;
+// that is, no specific standard structure exists for them.
+// Thus, you'll need to provide your own accessors to the information of interest.
 func (mg *mailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) {
 	if opts.ForceAscending && opts.ForceDescending {
 		return nil, nil, fmt.Errorf("collation cannot at once be both ascending and descending")
@@ -72,7 +77,7 @@ func (mg *mailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) 
 	r := simplehttp.NewHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var response map[string]interface{}
-	err = r.GetResponseFromJSON(&response)
+	err = getResponseFromJSON(r, &response)
 	if err != nil {
 		return nil, nil, err
 	}

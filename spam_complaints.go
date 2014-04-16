@@ -39,7 +39,7 @@ func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 	}
 
 	var envelope complaintsEnvelope
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -53,11 +53,14 @@ func (m *mailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var c Complaint
-	err := r.GetResponseFromJSON(&c)
-	if err != nil {
-		return Complaint{}, err
+	err := getResponseFromJSON(r, &c)
+	ure, ok := err.(*UnexpectedResponseError)
+	if (err != nil) && ok {
+		if ure.Actual == 404 {
+			return c, nil
+		}
 	}
-	return c, nil
+	return c, err
 }
 
 // CreateComplaint registers the specified address as a recipient who has complained of receiving spam
@@ -67,7 +70,7 @@ func (m *mailgunImpl) CreateComplaint(address string) error {
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("address", address)
-	_, err := r.MakePostRequest(p)
+	_, err := makePostRequest(r, p)
 	return err
 }
 
@@ -76,6 +79,6 @@ func (m *mailgunImpl) CreateComplaint(address string) error {
 func (m *mailgunImpl) DeleteComplaint(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }

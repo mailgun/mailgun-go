@@ -25,9 +25,9 @@ const (
 	eventsEndpoint          = "events"
 	credentialsEndpoint     = "credentials"
 	unsubscribesEndpoint    = "unsubscribes"
-	routesEndpoint			= "routes"
-	webhooksEndpoint		= "webhooks"
-	listsEndpoint			= "lists"
+	routesEndpoint          = "routes"
+	webhooksEndpoint        = "webhooks"
+	listsEndpoint           = "lists"
 	basicAuthUser           = "api"
 )
 

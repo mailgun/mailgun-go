@@ -3,8 +3,8 @@
 package acceptance
 
 import (
-	"testing"
 	"github.com/mailgun/mailgun-go"
+	"testing"
 )
 
 func TestEmailValidation(t *testing.T) {
@@ -39,7 +39,7 @@ func TestParseAddresses(t *testing.T) {
 	}
 	hittest := map[string]bool{
 		"Alice <alice@example.com>": true,
-		"bob@example.com": true,
+		"bob@example.com":           true,
 	}
 	for _, a := range addressesThatParsed {
 		if !hittest[a] {

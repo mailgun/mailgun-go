@@ -9,10 +9,10 @@ import (
 func (mg *mailgunImpl) GetWebhooks() (map[string]string, error) {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	var envelope struct{
+	var envelope struct {
 		Webhooks map[string]interface{} `json:"webhooks"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	hooks := make(map[string]string, 0)
 	if err != nil {
 		return hooks, err
@@ -32,7 +32,7 @@ func (mg *mailgunImpl) CreateWebhook(t, u string) error {
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("id", t)
 	p.AddValue("url", u)
-	_, err := r.MakePostRequest(p)
+	_, err := makePostRequest(r, p)
 	return err
 }
 
@@ -40,7 +40,7 @@ func (mg *mailgunImpl) CreateWebhook(t, u string) error {
 func (mg *mailgunImpl) DeleteWebhook(t string) error {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }
 
@@ -49,11 +49,11 @@ func (mg *mailgunImpl) GetWebhookByType(t string) (string, error) {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
-		Webhook struct{
+		Webhook struct {
 			Url *string `json:"url"`
 		} `json:"webhook"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	return *envelope.Webhook.Url, err
 }
 
@@ -63,6 +63,6 @@ func (mg *mailgunImpl) UpdateWebhook(t, u string) error {
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("url", u)
-	_, err := r.MakePutRequest(p)
+	_, err := makePutRequest(r, p)
 	return err
 }

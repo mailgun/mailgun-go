@@ -29,7 +29,7 @@ func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())
 
 	var response EmailVerification
-	err := r.GetResponseFromJSON(&response)
+	err := getResponseFromJSON(r, &response)
 	if err != nil {
 		return EmailVerification{}, err
 	}
@@ -43,7 +43,7 @@ func (m *mailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, e
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())
 
 	var response AddressParseResult
-	err := r.GetResponseFromJSON(&response)
+	err := getResponseFromJSON(r, &response)
 	if err != nil {
 		return nil, nil, err
 	}

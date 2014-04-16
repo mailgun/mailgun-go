@@ -320,7 +320,7 @@ func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 		var response sendMessageResponse
-		err = r.PostResponseFromJSON(payload, &response)
+		err = postResponseFromJSON(r, payload, &response)
 		if err == nil {
 			mes = response.Message
 			id = response.Id
@@ -438,20 +438,25 @@ func validateStringList(list []string, requireOne bool) bool {
 	return hasOne
 }
 
+// GetStoredMessage retrieves information about a received e-mail message.
+// This provides visibility into, e.g., replies to a message sent to a mailing list.
 func (mg *mailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 
 	var response StoredMessage
-	err := r.GetResponseFromJSON(&response)
+	err := getResponseFromJSON(r, &response)
 	return response, err
 }
 
+// DeleteStoredMessage removes a previously stored message.
+// Note that Mailgun institutes a policy of automatically deleting messages after a set time.
+// Consult the current Mailgun API documentation for more details.
 func (mg *mailgunImpl) DeleteStoredMessage(id string) error {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }

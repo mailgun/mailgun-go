@@ -20,13 +20,13 @@ import (
 // In particular, CreatedAt and ID are meaningless in this context, and will be ignored.
 // Only Priority, Description, Expression, and Actions need be provided.
 type Route struct {
-	Priority int `json:"priority,omitempty"`
-	Description string `json:"description,omitempty"`
-	Expression string `json:"expression,omitempty"`
-	Actions []string `json:"actions,omitempty"`
+	Priority    int      `json:"priority,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Expression  string   `json:"expression,omitempty"`
+	Actions     []string `json:"actions,omitempty"`
 
 	CreatedAt string `json:"created_at,omitempty"`
-	ID string `json:"id,omitempty"`
+	ID        string `json:"id,omitempty"`
 }
 
 // GetRoutes returns the complete set of routes configured for your domain.
@@ -43,11 +43,11 @@ func (mg *mailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
 	}
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 
-	var envelope struct{
-		TotalCount int `json:"total_count"`
-		Items []Route `json:"items"`
+	var envelope struct {
+		TotalCount int     `json:"total_count"`
+		Items      []Route `json:"items"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -70,9 +70,9 @@ func (mg *mailgunImpl) CreateRoute(prototype Route) (Route, error) {
 	}
 	var envelope struct {
 		Message string `json:"message"`
-		*Route `json:"route"`
+		*Route  `json:"route"`
 	}
-	err := r.PostResponseFromJSON(p, &envelope)
+	err := postResponseFromJSON(r, p, &envelope)
 	return *envelope.Route, err
 }
 
@@ -82,7 +82,7 @@ func (mg *mailgunImpl) CreateRoute(prototype Route) (Route, error) {
 func (mg *mailgunImpl) DeleteRoute(id string) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }
 
@@ -92,9 +92,9 @@ func (mg *mailgunImpl) GetRouteByID(id string) (Route, error) {
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
 		Message string `json:"message"`
-		*Route `json:"route"`
+		*Route  `json:"route"`
 	}
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	return *envelope.Route, err
 }
 
@@ -122,6 +122,6 @@ func (mg *mailgunImpl) UpdateRoute(id string, route Route) (Route, error) {
 	// For some reason, this API function just returns a bare Route on success.
 	// Unsure why this is the case; it seems like it ought to be a bug.
 	var envelope Route
-	err := r.PutResponseFromJSON(p, &envelope)
+	err := putResponseFromJSON(r, p, &envelope)
 	return envelope, err
 }

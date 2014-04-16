@@ -50,7 +50,7 @@ func TestAddDeleteDomain(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
 	mg := mailgun.NewMailgun(domain, apiKey, "")
-	randomDomainName := randomString(16, "DOMAIN")
+	randomDomainName := randomString(16, "DOMAIN") + ".example.com"
 	randomPassword := randomString(16, "PASSWD")
 	err := mg.CreateDomain(randomDomainName, randomPassword, mailgun.Tag, false)
 	if err != nil {

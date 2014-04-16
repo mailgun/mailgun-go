@@ -1,10 +1,10 @@
 package mailgun
 
 import (
-	"github.com/mbanzon/simplehttp"
-	"strconv"
 	"encoding/json"
 	"fmt"
+	"github.com/mbanzon/simplehttp"
+	"strconv"
 )
 
 // A mailing list may have one of three membership modes.
@@ -16,7 +16,7 @@ import (
 // to the mailing list, including non-subscribers.
 const (
 	ReadOnly = "readonly"
-	Members = "members"
+	Members  = "members"
 	Everyone = "everyone"
 )
 
@@ -24,8 +24,8 @@ const (
 // This attribute may be used to filter the results returned by GetSubscribers().
 // All, Subscribed, and Unsubscribed provides a convenient and readable syntax for specifying the scope of the search.
 var (
-	All *bool = nil
-	Subscribed *bool = &yes
+	All          *bool = nil
+	Subscribed   *bool = &yes
 	Unsubscribed *bool = &no
 )
 
@@ -37,7 +37,7 @@ var (
 // Otherwise, its value is either true or false.
 var (
 	yes bool = true
-	no bool = false
+	no  bool = false
 )
 
 // A List structure provides information for a mailing list.
@@ -55,9 +55,9 @@ type List struct {
 // A Member structure represents a member of the mailing list.
 // The Vars field can represent any JSON-encodable data.
 type Member struct {
-	Address    string `json:"address,omitempty"`
-	Name       string `json:"name,omitempty"`
-	Subscribed *bool `json:"subscribed,omitempty"`
+	Address    string                 `json:"address,omitempty"`
+	Name       string                 `json:"name,omitempty"`
+	Subscribed *bool                  `json:"subscribed,omitempty"`
 	Vars       map[string]interface{} `json:"vars,omitempty"`
 }
 
@@ -76,10 +76,10 @@ func (mg *mailgunImpl) GetLists(limit, skip int, filter string) (int, []List, er
 		p.AddValue("address", filter)
 	}
 	var envelope struct {
-		Items []List `json:"items"`
-		TotalCount int `json:"total_count"`
+		Items      []List `json:"items"`
+		TotalCount int    `json:"total_count"`
 	}
-	response, err := r.MakeRequest("GET", p)
+	response, err := makeRequest(r, "GET", p)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -108,7 +108,7 @@ func (mg *mailgunImpl) CreateList(prototype List) (List, error) {
 	if prototype.AccessLevel != "" {
 		p.AddValue("access_level", prototype.AccessLevel)
 	}
-	response, err := r.MakePostRequest(p)
+	response, err := makePostRequest(r, p)
 	if err != nil {
 		return List{}, err
 	}
@@ -122,7 +122,7 @@ func (mg *mailgunImpl) CreateList(prototype List) (List, error) {
 func (mg *mailgunImpl) DeleteList(addr string) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }
 
@@ -131,7 +131,7 @@ func (mg *mailgunImpl) DeleteList(addr string) error {
 func (mg *mailgunImpl) GetListByAddress(addr string) (List, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	response, err := r.MakeGetRequest()
+	response, err := makeGetRequest(r)
 	var envelope struct {
 		List `json:"list"`
 	}
@@ -163,7 +163,7 @@ func (mg *mailgunImpl) UpdateList(addr string, prototype List) (List, error) {
 		p.AddValue("access_level", prototype.AccessLevel)
 	}
 	var l List
-	response, err := r.MakePutRequest(p)
+	response, err := makePutRequest(r, p)
 	if err != nil {
 		return l, err
 	}
@@ -189,10 +189,10 @@ func (mg *mailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, [
 		p.AddValue("subscribed", yesNo(*s))
 	}
 	var envelope struct {
-		TotalCount int `json:"total_count"`
-		Items []Member `json:"items"`
+		TotalCount int      `json:"total_count"`
+		Items      []Member `json:"items"`
 	}
-	response, err := r.MakeRequest("GET", p)
+	response, err := makeRequest(r, "GET", p)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -205,7 +205,7 @@ func (mg *mailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, [
 func (mg *mailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, l) + "/" + s)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	response, err := r.MakeGetRequest()
+	response, err := makeGetRequest(r)
 	if err != nil {
 		return Member{}, err
 	}
@@ -235,7 +235,7 @@ func (mg *mailgunImpl) CreateMember(merge bool, addr string, prototype Member) e
 	if prototype.Subscribed != nil {
 		p.AddValue("subscribed", yesNo(*prototype.Subscribed))
 	}
-	_, err = r.MakePostRequest(p)
+	_, err = makePostRequest(r, p)
 	return err
 }
 
@@ -261,7 +261,7 @@ func (mg *mailgunImpl) UpdateMember(s, l string, prototype Member) (Member, erro
 	if prototype.Subscribed != nil {
 		p.AddValue("subscribed", yesNo(*prototype.Subscribed))
 	}
-	response, err := r.MakePutRequest(p)
+	response, err := makePutRequest(r, p)
 	if err != nil {
 		return Member{}, err
 	}
@@ -276,7 +276,7 @@ func (mg *mailgunImpl) UpdateMember(s, l string, prototype Member) (Member, erro
 func (mg *mailgunImpl) DeleteMember(member, addr string) error {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr) + "/" + member)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }
 
@@ -302,6 +302,6 @@ func (mg *mailgunImpl) CreateMemberList(s *bool, addr string, newMembers []inter
 	}
 	fmt.Println(string(bs))
 	p.AddValue("members", string(bs))
-	_, err = r.MakePostRequest(p)
+	_, err = makePostRequest(r, p)
 	return err
 }

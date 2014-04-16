@@ -28,7 +28,7 @@ func (m *mailgunImpl) GetCampaigns() (int, []Campaign, error) {
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var envelope campaignsEnvelope
-	err := r.GetResponseFromJSON(&envelope)
+	err := getResponseFromJSON(r, &envelope)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -44,7 +44,7 @@ func (m *mailgunImpl) CreateCampaign(name, id string) error {
 	if id != "" {
 		payload.AddValue("id", id)
 	}
-	_, err := r.MakePostRequest(payload)
+	_, err := makePostRequest(r, payload)
 	return err
 }
 
@@ -57,13 +57,13 @@ func (m *mailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 	if newId != "" {
 		payload.AddValue("id", newId)
 	}
-	_, err := r.MakePostRequest(payload)
+	_, err := makePostRequest(r, payload)
 	return err
 }
 
 func (m *mailgunImpl) DeleteCampaign(id string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := r.MakeDeleteRequest()
+	_, err := makeDeleteRequest(r)
 	return err
 }
