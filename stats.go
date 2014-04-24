@@ -22,7 +22,7 @@ type statsEnvelope struct {
 // GetStats returns a basic set of statistics for different events.
 // Events start at the given start date, if one is provided.
 // If not, this function will consider all stated events dating to the creation of the sending domain.
-func (m *mailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error) {
+func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, statsEndpoint))
 
 	if limit != -1 {
@@ -51,7 +51,7 @@ func (m *mailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 }
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
-func (m *mailgunImpl) DeleteTag(tag string) error {
+func (m *MailgunImpl) DeleteTag(tag string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, deleteTagEndpoint) + "/" + tag)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)

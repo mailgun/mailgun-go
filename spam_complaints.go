@@ -27,7 +27,7 @@ type complaintsEnvelope struct {
 // GetComplaints returns a set of spam complaints registered against your domain.
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
-func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
+func (m *MailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -48,7 +48,7 @@ func (m *mailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 
 // GetSingleComplaint returns a single complaint record filed by a recipient at the email address provided.
 // If no complaint exists, the Complaint instance returned will be empty.
-func (m *mailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
+func (m *MailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -65,7 +65,7 @@ func (m *mailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 
 // CreateComplaint registers the specified address as a recipient who has complained of receiving spam
 // from your domain.
-func (m *mailgunImpl) CreateComplaint(address string) error {
+func (m *MailgunImpl) CreateComplaint(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
@@ -76,7 +76,7 @@ func (m *mailgunImpl) CreateComplaint(address string) error {
 
 // DeleteComplaint removes a previously registered e-mail address from the list of people who complained
 // of receiving spam from your domain.
-func (m *mailgunImpl) DeleteComplaint(address string) error {
+func (m *MailgunImpl) DeleteComplaint(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)

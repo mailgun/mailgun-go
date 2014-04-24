@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// A Credential structure describes a principle allowed to receive mail at the domain.
+// A Credential structure describes a principle allowed to send or receive mail at the domain.
 type Credential struct {
 	SizeBytes *int64 `json:"size_bytes"`
 	CreatedAt string `json:"created_at"`
@@ -18,7 +18,7 @@ type Credential struct {
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
 // GetCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *mailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error) {
+func (mg *MailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error) {
 	r := simplehttp.NewHTTPRequest(generateCredentialsUrl(mg, ""))
 	if limit != DefaultLimit {
 		r.AddParameter("limit", strconv.Itoa(limit))
@@ -39,7 +39,7 @@ func (mg *mailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.
-func (mg *mailgunImpl) CreateCredential(login, password string) error {
+func (mg *MailgunImpl) CreateCredential(login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
@@ -53,7 +53,7 @@ func (mg *mailgunImpl) CreateCredential(login, password string) error {
 }
 
 // ChangeCredentialPassword attempts to alter the indicated credential's password.
-func (mg *mailgunImpl) ChangeCredentialPassword(id, password string) error {
+func (mg *MailgunImpl) ChangeCredentialPassword(id, password string) error {
 	if (id == "") || (password == "") {
 		return ErrEmptyParam
 	}
@@ -66,7 +66,7 @@ func (mg *mailgunImpl) ChangeCredentialPassword(id, password string) error {
 }
 
 // DeleteCredential attempts to remove the indicated principle from the domain.
-func (mg *mailgunImpl) DeleteCredential(id string) error {
+func (mg *MailgunImpl) DeleteCredential(id string) error {
 	if id == "" {
 		return ErrEmptyParam
 	}

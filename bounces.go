@@ -34,7 +34,10 @@ func (i Bounce) GetCreatedAt() (t time.Time, err error) {
 }
 
 // GetBounces returns a complete set of bounces logged against the sender's domain, if any.
-func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
+// The results include the total number of bounces (regardless of skip or limit settings),
+// and the slice of bounces specified, if successful.
+// Note that the length of the slice may be smaller than the total number of bounces.
+func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
 	if limit != -1 {
 		r.AddParameter("limit", strconv.Itoa(limit))
@@ -56,7 +59,7 @@ func (m *mailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 
 // GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
 // If none exist, the returned Bounce instance will be empty.
-func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
+func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -81,11 +84,11 @@ func (m *mailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 //      550  Requested action not taken: mailbox unavailable
 //     \___/\_______________________________________________/
 //       |                         |
-//       +-- Code                  +-- Error
+//       `-- Code                  `-- Error
 //
 // Note that both code and error exist as strings, even though
 // code will report as a number.
-func (m *mailgunImpl) AddBounce(address, code, error string) error {
+func (m *MailgunImpl) AddBounce(address, code, error string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -102,7 +105,7 @@ func (m *mailgunImpl) AddBounce(address, code, error string) error {
 }
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
-func (m *mailgunImpl) DeleteBounce(address string) error {
+func (m *MailgunImpl) DeleteBounce(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)

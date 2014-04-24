@@ -33,7 +33,7 @@ type Route struct {
 // You use routes to configure how to handle returned messages, or
 // messages sent to a specfic address on your domain.
 // See the Mailgun documentation for more information.
-func (mg *mailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
+func (mg *MailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint))
 	if limit != DefaultLimit {
 		r.AddParameter("limit", strconv.Itoa(limit))
@@ -58,7 +58,7 @@ func (mg *mailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
 // The route structure you provide serves as a template, and
 // only a subset of the fields influence the operation.
 // See the Route structure definition for more details.
-func (mg *mailgunImpl) CreateRoute(prototype Route) (Route, error) {
+func (mg *MailgunImpl) CreateRoute(prototype Route) (Route, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
@@ -79,7 +79,7 @@ func (mg *mailgunImpl) CreateRoute(prototype Route) (Route, error) {
 // DeleteRoute removes the specified route from your domain's configuration.
 // To avoid ambiguity, Mailgun identifies the route by unique ID.
 // See the Route structure definition and the Mailgun API documentation for more details.
-func (mg *mailgunImpl) DeleteRoute(id string) error {
+func (mg *MailgunImpl) DeleteRoute(id string) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
@@ -87,7 +87,7 @@ func (mg *mailgunImpl) DeleteRoute(id string) error {
 }
 
 // GetRouteByID retrieves the complete route definition associated with the unique route ID.
-func (mg *mailgunImpl) GetRouteByID(id string) (Route, error) {
+func (mg *MailgunImpl) GetRouteByID(id string) (Route, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
@@ -101,7 +101,7 @@ func (mg *mailgunImpl) GetRouteByID(id string) (Route, error) {
 // UpdateRoute provides an "in-place" update of the specified route.
 // Only those route fields which are non-zero or non-empty are updated.
 // All other fields remain as-is.
-func (mg *mailgunImpl) UpdateRoute(id string, route Route) (Route, error) {
+func (mg *MailgunImpl) UpdateRoute(id string, route Route) (Route, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()

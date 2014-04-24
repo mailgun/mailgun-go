@@ -4,6 +4,8 @@ import (
 	"github.com/mbanzon/simplehttp"
 )
 
+// Campaigns have been deprecated since development work on this SDK commenced.
+// Please refer to http://documentation.mailgun.com/api_reference .
 type Campaign struct {
 	Id                string `json:"id"`
 	Name              string `json:"name"`
@@ -23,7 +25,9 @@ type campaignsEnvelope struct {
 	Items      []Campaign `json:"items"`
 }
 
-func (m *mailgunImpl) GetCampaigns() (int, []Campaign, error) {
+// Campaigns have been deprecated since development work on this SDK commenced.
+// Please refer to http://documentation.mailgun.com/api_reference .
+func (m *MailgunImpl) GetCampaigns() (int, []Campaign, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -35,7 +39,9 @@ func (m *mailgunImpl) GetCampaigns() (int, []Campaign, error) {
 	return envelope.TotalCount, envelope.Items, nil
 }
 
-func (m *mailgunImpl) CreateCampaign(name, id string) error {
+// Campaigns have been deprecated since development work on this SDK commenced.
+// Please refer to http://documentation.mailgun.com/api_reference .
+func (m *MailgunImpl) CreateCampaign(name, id string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -48,7 +54,9 @@ func (m *mailgunImpl) CreateCampaign(name, id string) error {
 	return err
 }
 
-func (m *mailgunImpl) UpdateCampaign(oldId, name, newId string) error {
+// Campaigns have been deprecated since development work on this SDK commenced.
+// Please refer to http://documentation.mailgun.com/api_reference .
+func (m *MailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
@@ -61,7 +69,9 @@ func (m *mailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 	return err
 }
 
-func (m *mailgunImpl) DeleteCampaign(id string) error {
+// Campaigns have been deprecated since development work on this SDK commenced.
+// Please refer to http://documentation.mailgun.com/api_reference .
+func (m *MailgunImpl) DeleteCampaign(id string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)

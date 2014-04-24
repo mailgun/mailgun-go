@@ -23,7 +23,10 @@ type AddressParseResult struct {
 	Unparseable []string `json:"unparseable"`
 }
 
-func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
+// ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.
+// It may also be used to break an email address into its sub-components.  (See example.)
+// NOTE: Use of this function requires a proper public API key.  The private API key will not work.
+func (m *MailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(addressValidateEndpoint))
 	r.AddParameter("address", email)
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())
@@ -37,7 +40,9 @@ func (m *mailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	return response, nil
 }
 
-func (m *mailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
+// ParseAddresses takes a list of addresses and sorts them into valid and invalid address categories.
+// NOTE: Use of this function requires a proper public API key.  The private API key will not work.
+func (m *MailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(addressParseEndpoint))
 	r.AddParameter("addresses", strings.Join(addresses, ","))
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())

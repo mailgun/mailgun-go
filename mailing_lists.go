@@ -62,7 +62,7 @@ type Member struct {
 }
 
 // GetLists returns the specified set of mailing lists administered by your account.
-func (mg *mailgunImpl) GetLists(limit, skip int, filter string) (int, []List, error) {
+func (mg *MailgunImpl) GetLists(limit, skip int, filter string) (int, []List, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
@@ -92,7 +92,7 @@ func (mg *mailgunImpl) GetLists(limit, skip int, filter string) (int, []List, er
 // Description, and AccessLevel are optional.
 // If unspecified, Description remains blank,
 // while AccessLevel defaults to Everyone.
-func (mg *mailgunImpl) CreateList(prototype List) (List, error) {
+func (mg *MailgunImpl) CreateList(prototype List) (List, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
@@ -119,7 +119,7 @@ func (mg *mailgunImpl) CreateList(prototype List) (List, error) {
 
 // DeleteList removes all current members of the list, then removes the list itself.
 // Attempts to send e-mail to the list will fail subsequent to this call.
-func (mg *mailgunImpl) DeleteList(addr string) error {
+func (mg *MailgunImpl) DeleteList(addr string) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
@@ -128,7 +128,7 @@ func (mg *mailgunImpl) DeleteList(addr string) error {
 
 // GetListByAddress allows your application to recover the complete List structure
 // representing a mailing list, so long as you have its e-mail address.
-func (mg *mailgunImpl) GetListByAddress(addr string) (List, error) {
+func (mg *MailgunImpl) GetListByAddress(addr string) (List, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	response, err := makeGetRequest(r)
@@ -146,7 +146,7 @@ func (mg *mailgunImpl) GetListByAddress(addr string) (List, error) {
 // Be careful!  If changing the address of a mailing list,
 // e-mail sent to the old address will not succeed.
 // Make sure you account for the change accordingly.
-func (mg *mailgunImpl) UpdateList(addr string, prototype List) (List, error) {
+func (mg *MailgunImpl) UpdateList(addr string, prototype List) (List, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
@@ -175,7 +175,7 @@ func (mg *mailgunImpl) UpdateList(addr string, prototype List) (List, error) {
 // The s parameter can be set to one of three settings to help narrow the returned data set:
 // All indicates that you want both Members and unsubscribed members alike, while
 // Subscribed and Unsubscribed indicate you want only those eponymous subsets.
-func (mg *mailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, []Member, error) {
+func (mg *MailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, []Member, error) {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
@@ -202,7 +202,7 @@ func (mg *mailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, [
 
 // GetMemberByAddress returns a complete Member structure for a member of a mailing list,
 // given only their subscription e-mail address.
-func (mg *mailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
+func (mg *MailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, l) + "/" + s)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	response, err := makeGetRequest(r)
@@ -219,7 +219,7 @@ func (mg *mailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
 // CreateMember registers a new member of the indicated mailing list.
 // If merge is set to true, then the registration may update an existing Member's settings.
 // Otherwise, an error will occur if you attempt to add a member with a duplicate e-mail address.
-func (mg *mailgunImpl) CreateMember(merge bool, addr string, prototype Member) error {
+func (mg *MailgunImpl) CreateMember(merge bool, addr string, prototype Member) error {
 	vs, err := json.Marshal(prototype.Vars)
 	if err != nil {
 		return err
@@ -241,7 +241,7 @@ func (mg *mailgunImpl) CreateMember(merge bool, addr string, prototype Member) e
 
 // UpdateMember lets you change certain details about the indicated mailing list member.
 // Address, Name, Vars, and Subscribed fields may be changed.
-func (mg *mailgunImpl) UpdateMember(s, l string, prototype Member) (Member, error) {
+func (mg *MailgunImpl) UpdateMember(s, l string, prototype Member) (Member, error) {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, l) + "/" + s)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewFormDataPayload()
@@ -273,7 +273,7 @@ func (mg *mailgunImpl) UpdateMember(s, l string, prototype Member) (Member, erro
 }
 
 // DeleteMember removes the member from the list.
-func (mg *mailgunImpl) DeleteMember(member, addr string) error {
+func (mg *MailgunImpl) DeleteMember(member, addr string) error {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr) + "/" + member)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
@@ -289,7 +289,7 @@ func (mg *mailgunImpl) DeleteMember(member, addr string) error {
 // If a simple slice of strings is passed, each string refers to the member's e-mail address.
 // Otherwise, each Member needs to have at least the Address field filled out.
 // Other fields are optional, but may be set according to your needs.
-func (mg *mailgunImpl) CreateMemberList(s *bool, addr string, newMembers []interface{}) error {
+func (mg *MailgunImpl) CreateMemberList(s *bool, addr string, newMembers []interface{}) error {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr) + ".json")
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewFormDataPayload()

@@ -6,7 +6,7 @@ import (
 
 // GetWebhooks returns the complete set of webhooks configured for your domain.
 // Note that a zero-length mapping is not an error.
-func (mg *mailgunImpl) GetWebhooks() (map[string]string, error) {
+func (mg *MailgunImpl) GetWebhooks() (map[string]string, error) {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
@@ -26,7 +26,7 @@ func (mg *mailgunImpl) GetWebhooks() (map[string]string, error) {
 }
 
 // CreateWebhook installs a new webhook for your domain.
-func (mg *mailgunImpl) CreateWebhook(t, u string) error {
+func (mg *MailgunImpl) CreateWebhook(t, u string) error {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
@@ -37,7 +37,7 @@ func (mg *mailgunImpl) CreateWebhook(t, u string) error {
 }
 
 // DeleteWebhook removes the specified webhook from your domain's configuration.
-func (mg *mailgunImpl) DeleteWebhook(t string) error {
+func (mg *MailgunImpl) DeleteWebhook(t string) error {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
@@ -45,7 +45,7 @@ func (mg *mailgunImpl) DeleteWebhook(t string) error {
 }
 
 // GetWebhookByType retrieves the currently assigned webhook URL associated with the provided type of webhook.
-func (mg *mailgunImpl) GetWebhookByType(t string) (string, error) {
+func (mg *MailgunImpl) GetWebhookByType(t string) (string, error) {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
@@ -58,7 +58,7 @@ func (mg *mailgunImpl) GetWebhookByType(t string) (string, error) {
 }
 
 // UpdateWebhook replaces one webhook setting for another.
-func (mg *mailgunImpl) UpdateWebhook(t, u string) error {
+func (mg *MailgunImpl) UpdateWebhook(t, u string) error {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()

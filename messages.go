@@ -261,7 +261,7 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 // It returns the Mailgun server response, which consists of two components:
 // a human-readable status message, and a message ID.  The status and message ID are set only
 // if no error occurred.
-func (m *mailgunImpl) Send(message *Message) (mes string, id string, err error) {
+func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !isValid(message) {
 		err = errors.New("Message not valid")
 	} else {
@@ -440,7 +440,7 @@ func validateStringList(list []string, requireOne bool) bool {
 
 // GetStoredMessage retrieves information about a received e-mail message.
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *mailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
+func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
@@ -453,7 +453,7 @@ func (mg *mailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 // DeleteStoredMessage removes a previously stored message.
 // Note that Mailgun institutes a policy of automatically deleting messages after a set time.
 // Consult the current Mailgun API documentation for more details.
-func (mg *mailgunImpl) DeleteStoredMessage(id string) error {
+func (mg *MailgunImpl) DeleteStoredMessage(id string) error {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
