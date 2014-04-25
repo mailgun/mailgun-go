@@ -5,19 +5,22 @@ import (
 	"strings"
 )
 
-type EmailVarificationParts struct {
+// TODO(sfalvo): Document me.
+type EmailVerificationParts struct {
 	LocalPart   string `json:"local_part"`
 	Domain      string `json:"domain"`
 	DisplayName string `json:"display_name"`
 }
 
+// TODO(sfalvo): Document me.
 type EmailVerification struct {
 	IsValid    bool                   `json:"is_valid"`
-	Parts      EmailVarificationParts `json:"parts"`
+	Parts      EmailVerificationParts `json:"parts"`
 	Address    string                 `json:"address"`
 	DidYouMean string                 `json:"did_you_mean"`
 }
 
+// TODO(sfalvo): Document me.
 type AddressParseResult struct {
 	Parsed      []string `json:"parsed"`
 	Unparseable []string `json:"unparseable"`

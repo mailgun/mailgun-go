@@ -267,6 +267,24 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	} else {
 		payload := simplehttp.NewFormDataPayload()
 
+		// TODO(sfalvo):
+		// To support recipient messages:
+		// Add recipient variables
+		// Add header option
+		// Wrap in a separate function
+
+		// TODO(sfalvo):
+		// Examine User's Guide for tag limits, etc.
+		// Return error for discrepencies.
+		// recipients, bccs, ccs, etc.
+
+		// TODO(sfalvo):
+		// Check Python package mgcore.lib.constants.constraints
+
+		// TODO(sfalvo):
+		// Add SDK version as an HTTP header to the API.
+		// Set user-agent to something like mailgun-go/vX.Y
+
 		message.specific.addValues(payload)
 		for _, to := range message.to {
 			payload.AddValue("to", to)

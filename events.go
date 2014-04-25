@@ -6,12 +6,17 @@ import (
 	"time"
 )
 
+// TODO(sfalvo):
+// Abstract Paging/Links into an interface type or something which lets you page through
+// data.  Borrow from Gophercloud's data interpreters.
+
 // Events are open-ended, loosely-defined JSON documents.
 // They will always have an event and a timestamp field, however.
 type Event map[string]interface{}
 
 // Links encapsulates navigation opportunities to find more information
 // about things.
+// TODO(sfalvo): Rename to Paging
 type Links map[string]string
 
 // noTime always equals an uninitialized Time structure.

@@ -66,8 +66,8 @@ func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 	var response singleBounceEnvelope
 	err := getResponseFromJSON(r, &response)
 	ure, ok := err.(*UnexpectedResponseError)
-	if ok && (ure.Actual == 404) {
-		return Bounce{}, nil
+	if ok && (ure.Actual == 404) { // TODO(sfalvo): return error on not-found
+		return Bounce{}, nil // breaking API change
 	}
 	return response.Bounce, err
 }

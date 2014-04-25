@@ -1,3 +1,6 @@
+// TODO(sfalvo):
+// Document how to run acceptance tests.
+
 // The mailgun package provides methods for interacting with the Mailgun API.
 // It automates the HTTP request/response cycle, encodings, and other details needed by the API.
 // This SDK lets you do everything the API lets you, in a more Go-friendly way.
@@ -192,22 +195,22 @@ type MailgunImpl struct {
 
 // NewMailGun creates a new client instance.
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
-	m := mailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
+	m := MailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
 	return &m
 }
 
 // Domain returns the domain configured for this client.
-func (m *mailgunImpl) Domain() string {
+func (m *MailgunImpl) Domain() string {
 	return m.domain
 }
 
 // ApiKey returns the API key configured for this client.
-func (m *mailgunImpl) ApiKey() string {
+func (m *MailgunImpl) ApiKey() string {
 	return m.apiKey
 }
 
 // PublicApiKey returns the public API key configured for this client.
-func (m *mailgunImpl) PublicApiKey() string {
+func (m *MailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
 }
 

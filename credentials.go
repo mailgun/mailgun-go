@@ -8,10 +8,9 @@ import (
 
 // A Credential structure describes a principle allowed to send or receive mail at the domain.
 type Credential struct {
-	SizeBytes *int64 `json:"size_bytes"`
 	CreatedAt string `json:"created_at"`
 	Login     string `json:"login"`
-	Mailbox   string `json:"mailbox"`
+	Password  string `json:"password"`
 }
 
 // ErrEmptyParam results occur when a required parameter is missing.

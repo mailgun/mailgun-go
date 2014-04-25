@@ -1,7 +1,9 @@
 package mailgun
 
 import (
+	"io/ioutil"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -22,7 +24,7 @@ func ExampleMailgunImpl_ValidateEmail() {
 }
 
 func ExampleMailgunImpl_ParseAddresses() {
-	mg := mailgun.NewMailgun("example.com", "", "my_public_api_key")
+	mg := NewMailgun("example.com", "", "my_public_api_key")
 	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses("Alice <alice@example.com>", "bob@example.com", "example.com")
 	if err != nil {
 		log.Fatal(err)
@@ -54,7 +56,7 @@ func ExampleMailgunImpl_UpdateList() {
 
 func ExampleMailgunImpl_Send_constructed() {
 	mg := NewMailgun("example.com", "my_api_key", "")
-	m := mailgun.NewMessage(
+	m := NewMessage(
 		"Excited User <me@example.com>",
 		"Hello World",
 		"Testing some Mailgun Awesomeness!",
@@ -82,7 +84,7 @@ Date: Thu, 6 Mar 2014 00:37:52 +0000
 Testing some Mailgun MIME awesomeness!
 `
 	mg := NewMailgun("example.com", "my_api_key", "")
-	m := mailgun.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
+	m := NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
 	_, id, err := mg.Send(m)
 	if err != nil {
 		log.Fatal(err)

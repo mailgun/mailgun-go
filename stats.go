@@ -32,6 +32,9 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 		r.AddParameter("skip", strconv.Itoa(skip))
 	}
 
+	// TODO(sfalvo):
+	// Use Time.RFC3339 for format?
+
 	if startDate != nil {
 		r.AddParameter("start-date", startDate.Format("2006-02-01"))
 	}
@@ -49,6 +52,10 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 		return res.TotalCount, res.Items, nil
 	}
 }
+
+// TODO(sfalvo):
+// Test: can spaces in tag work?
+// Test: can unicode work?
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
 func (m *MailgunImpl) DeleteTag(tag string) error {
