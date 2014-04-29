@@ -5,18 +5,10 @@ import (
 	"strings"
 )
 
-// EmailVerificationParts once consisted of up to three segments, as illustrated below:
-//
-//      Frog, Kermit <kermit.frog@muppets.example.com>
-//      \__________/  \_________/ \_________________/
-//           |             |               |
-//           |             |               `-- Domain
-//           |             `-- LocalPart
-//           `-- DisplayName
-//
-// As of this writing, the ValidateEmail method no longer works with addresses with a display name.
-// All e-mail addresses that validate will have at least LocalPart and Domain filled in;
-// but, DisplayName will be hardcoded to "".
+// The EmailVerificationParts structure breaks out the basic elements of an email address.
+// LocalPart includes everything up to the '@' in an e-mail address.
+// Domain includes everything after the '@'.
+// DisplayName is no longer used, and will appear as "".
 type EmailVerificationParts struct {
 	LocalPart   string `json:"local_part"`
 	Domain      string `json:"domain"`
