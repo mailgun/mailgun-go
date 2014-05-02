@@ -18,9 +18,9 @@ func TestGetCredentials(t *testing.T) {
 	}
 	tw := &tabwriter.Writer{}
 	tw.Init(os.Stdout, 2, 8, 2, ' ', 0)
-	fmt.Fprintf(tw, "Login\tMailbox\tCreated At\t\n")
+	fmt.Fprintf(tw, "Login\tCreated At\t\n")
 	for _, c := range cs {
-		fmt.Fprintf(tw, "%s\t%s\t%s\t\n", c.Login, c.Mailbox, c.CreatedAt)
+		fmt.Fprintf(tw, "%s\t%s\t\n", c.Login, c.CreatedAt)
 	}
 	tw.Flush()
 	fmt.Printf("%d credentials listed out of %d\n", len(cs), n)
