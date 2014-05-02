@@ -95,6 +95,7 @@ package mailgun
 import (
 	"fmt"
 	"github.com/mbanzon/simplehttp"
+	"io"
 	"time"
 )
 
@@ -183,6 +184,8 @@ type Mailgun interface {
 	CreateMemberList(subscribed *bool, addr string, newMembers []interface{}) error
 	UpdateMember(Member, list string, prototype Member) (Member, error)
 	DeleteMember(Member, list string) error
+	NewMessage(from, subject, text string, to ...string) *Message
+	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
