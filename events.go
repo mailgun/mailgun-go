@@ -10,10 +10,6 @@ import (
 // They will always have an event and a timestamp field, however.
 type Event map[string]interface{}
 
-// Links encapsulates navigation opportunities to find more information
-// about things.
-type Links map[string]string
-
 // noTime always equals an uninitialized Time structure.
 // It's used to detect when a time parameter is provided.
 var noTime time.Time
@@ -39,27 +35,6 @@ type EventIterator struct {
 	events []Event
 	nextURL, prevURL string
 	mg Mailgun
-}
-
-// GetEvents provides the caller with a list of log entries.
-// See the GetEventsOptions structure for information on how to customize the list returned.
-// Note that the API responds with events with open definitions;
-// that is, no specific standard structure exists for them.
-// Thus, you'll need to provide your own accessors to the information of interest.
-//
-// DEPRECATED.  Use GetEventsIterator() instead.
-func (mg *MailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) {
-	ei, err := mg.GetEventsIterator(opts)
-	if err != nil {
-		return nil, nil, err
-	}
-	return ei.Events(), nil, nil
-}
-
-func (mg *MailgunImpl) GetEventsIterator(opts GetEventsOptions) (*EventIterator, error) {
-	ei := mg.NewEventIterator()
-	err := ei.GetFirstPage(opts)
-	return ei, err
 }
 
 func (mg *MailgunImpl) NewEventIterator() *EventIterator {

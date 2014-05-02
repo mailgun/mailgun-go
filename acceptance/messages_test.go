@@ -167,16 +167,23 @@ func TestGetStoredMessage(t *testing.T) {
 
 // Tries to locate the first stored event type, returning the associated stored message key.
 func findStoredMessageID(mg mailgun.Mailgun) (string, error) {
-	events, _, err := mg.GetEvents(mailgun.GetEventsOptions{})
-	if err != nil {
-		return "", err
-	}
-	for _, event := range events {
-		if event["event"] == "stored" {
-			s := event["storage"].(map[string]interface{})
-			k := s["key"]
-			return k.(string), nil
+	ei := mg.NewEventIterator()
+	err := ei.GetFirstPage(mailgun.GetEventsOptions{})
+	for{
+		if err != nil {
+			return "", err
 		}
+		if len(ei.Events()) == 0 {
+			break
+		}
+		for _, event := range ei.Events() {
+			if event["event"] == "stored" {
+				s := event["storage"].(map[string]interface{})
+				k := s["key"]
+				return k.(string), nil
+			}
+		}
+		err = ei.GetNext()
 	}
 	return "", fmt.Errorf("No stored messages found.  Try changing MG_EMAIL_TO to an address that stores messages and try again.")
 }
