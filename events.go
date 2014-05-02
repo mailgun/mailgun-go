@@ -6,17 +6,12 @@ import (
 	"time"
 )
 
-// TODO(sfalvo):
-// Abstract Paging/Links into an interface type or something which lets you page through
-// data.  Borrow from Gophercloud's data interpreters.
-
 // Events are open-ended, loosely-defined JSON documents.
 // They will always have an event and a timestamp field, however.
 type Event map[string]interface{}
 
 // Links encapsulates navigation opportunities to find more information
 // about things.
-// TODO(sfalvo): Rename to Paging
 type Links map[string]string
 
 // noTime always equals an uninitialized Time structure.
@@ -75,14 +70,6 @@ func (ei *EventIterator) Events() []Event {
 	return ei.events
 }
 
-func (ei *EventIterator) IsAtBeginning() bool {
-	return ei.prevURL == ""
-}
-
-func (ei *EventIterator) IsAtEnd() bool {
-	return ei.nextURL == ""
-}
-
 func (ei *EventIterator) GetFirstPage(opts GetEventsOptions) error {
 	if opts.ForceAscending && opts.ForceDescending {
 		return fmt.Errorf("collation cannot at once be both ascending and descending")
@@ -117,10 +104,22 @@ func (ei *EventIterator) GetFirstPage(opts GetEventsOptions) error {
 	if err != nil {
 		return err
 	}
+	return ei.fetch(url)
+}
+
+func (ei *EventIterator) GetPrevious() error {
+	return ei.fetch(ei.prevURL)
+}
+
+func (ei *EventIterator) GetNext() error {
+	return ei.fetch(ei.nextURL)
+}
+
+func (ei *EventIterator) fetch(url string) error {
 	r := simplehttp.NewHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, ei.mg.ApiKey())
 	var response map[string]interface{}
-	err = getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(r, &response)
 	if err != nil {
 		return err
 	}
