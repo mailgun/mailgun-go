@@ -40,14 +40,52 @@ type GetEventsOptions struct {
 	Filter                                   map[string]string
 }
 
+type EventIterator struct {
+	events []Event
+	nextURL, prevURL string
+	mg Mailgun
+}
+
 // GetEvents provides the caller with a list of log entries.
 // See the GetEventsOptions structure for information on how to customize the list returned.
 // Note that the API responds with events with open definitions;
 // that is, no specific standard structure exists for them.
 // Thus, you'll need to provide your own accessors to the information of interest.
+//
+// DEPRECATED.  Use GetEventsIterator() instead.
 func (mg *MailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) {
+	ei, err := mg.GetEventsIterator(opts)
+	if err != nil {
+		return nil, nil, err
+	}
+	return ei.Events(), nil, nil
+}
+
+func (mg *MailgunImpl) GetEventsIterator(opts GetEventsOptions) (*EventIterator, error) {
+	ei := mg.NewEventIterator()
+	err := ei.GetFirstPage(opts)
+	return ei, err
+}
+
+func (mg *MailgunImpl) NewEventIterator() *EventIterator {
+	return &EventIterator{mg: mg}
+}
+
+func (ei *EventIterator) Events() []Event {
+	return ei.events
+}
+
+func (ei *EventIterator) IsAtBeginning() bool {
+	return ei.prevURL == ""
+}
+
+func (ei *EventIterator) IsAtEnd() bool {
+	return ei.nextURL == ""
+}
+
+func (ei *EventIterator) GetFirstPage(opts GetEventsOptions) error {
 	if opts.ForceAscending && opts.ForceDescending {
-		return nil, nil, fmt.Errorf("collation cannot at once be both ascending and descending")
+		return fmt.Errorf("collation cannot at once be both ascending and descending")
 	}
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -75,29 +113,30 @@ func (mg *MailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) 
 		}
 	}
 
-	url, err := generateParameterizedUrl(mg, eventsEndpoint, payload)
+	url, err := generateParameterizedUrl(ei.mg, eventsEndpoint, payload)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 	r := simplehttp.NewHTTPRequest(url)
-	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	r.SetBasicAuth(basicAuthUser, ei.mg.ApiKey())
 	var response map[string]interface{}
 	err = getResponseFromJSON(r, &response)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 
 	items := response["items"].([]interface{})
-	events := make([]Event, len(items))
+	ei.events = make([]Event, len(items))
 	for i, item := range items {
-		events[i] = item.(map[string]interface{})
+		ei.events[i] = item.(map[string]interface{})
 	}
 
 	pagings := response["paging"].(map[string]interface{})
-	var links = make(Links, len(pagings))
+	links := make(map[string]string, len(pagings))
 	for key, page := range pagings {
 		links[key] = page.(string)
 	}
-
-	return events, links, err
+	ei.nextURL = links["next"]
+	ei.prevURL = links["previous"]
+	return err
 }
