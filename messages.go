@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+// MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
+// This figure includes To:, Cc:, Bcc:, etc. recipients.
+const MaxNumberOfRecipients = 1000
+
 // Message structures contain both the message text and the envelop for an e-mail message.
 type Message struct {
 	to           []string
@@ -24,6 +28,7 @@ type Message struct {
 	trackingOpens  bool
 	headers        map[string]string
 	variables      map[string]string
+	recipientVariables map[string]map[string]interface{}
 
 	dkimSet           bool
 	trackingSet       bool
@@ -31,6 +36,7 @@ type Message struct {
 	trackingOpensSet  bool
 
 	specific features
+	mg Mailgun
 }
 
 // StoredMessage structures contain the (parsed) message content for an email
@@ -103,6 +109,12 @@ type features interface {
 }
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
+//
+// DEPRECATED.
+// The package will panic if you use AddRecipient(), AddBcc(), AddCc(), et. al.
+// on a message already equipped with MaxNumberOfRecipients recipients.
+// Use Mailgun.NewMessage() instead.
+// It works similarly to this function, but supports larger lists of recipients.
 func NewMessage(from string, subject string, text string, to ...string) *Message {
 	return &Message{
 		specific: &plainMessage{
@@ -114,15 +126,75 @@ func NewMessage(from string, subject string, text string, to ...string) *Message
 	}
 }
 
+// NewMessage returns a new e-mail message with the simplest envelop needed to send.
+//
+// Unlike the global function,
+// this method supports arbitrary-sized recipient lists by
+// automatically sending mail in batches of up to MaxNumberOfRecipients.
+//
+// To support batch sending, you don't want to provide a fixed To: header at this point.
+// Pass nil as the to parameter to skip adding the To: header at this stage.
+// You can do this explicitly, or implicitly, as follows:
+//
+//     // Note absence of To parameter(s)!
+//     m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//
+// Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
+// before sending, though.
+func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
+	return &Message{
+		specific: &plainMessage{
+			from: from,
+			subject: subject,
+			text: text,
+		},
+		to: to,
+		mg: mg,
+	}
+}
+
 // NewMIMEMessage creates a new MIME message.  These messages are largely canned;
 // you do not need to invoke setters to set message-related headers.
 // However, you do still need to call setters for Mailgun-specific settings.
+//
+// DEPRECATED.
+// The package will panic if you use AddRecipient(), AddBcc(), AddCc(), et. al.
+// on a message already equipped with MaxNumberOfRecipients recipients.
+// Use Mailgun.NewMIMEMessage() instead.
+// It works similarly to this function, but supports larger lists of recipients.
 func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
 		specific: &mimeMessage{
 			body: body,
 		},
 		to: to,
+	}
+}
+
+// NewMIMEMessage creates a new MIME message.  These messages are largely canned;
+// you do not need to invoke setters to set message-related headers.
+// However, you do still need to call setters for Mailgun-specific settings.
+//
+// Unlike the global function,
+// this method supports arbitrary-sized recipient lists by
+// automatically sending mail in batches of up to MaxNumberOfRecipients.
+//
+// To support batch sending, you don't want to provide a fixed To: header at this point.
+// Pass nil as the to parameter to skip adding the To: header at this stage.
+// You can do this explicitly, or implicitly, as follows:
+//
+//     // Note absence of To parameter(s)!
+//     m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//
+// Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
+// before sending, though.
+func (mg *MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+	return &Message{
+		specific: &mimeMessage{
+			body: body,
+		},
+		to: to,
+		mg: mg,
 	}
 }
 
@@ -143,8 +215,41 @@ func (m *Message) AddInline(inline string) {
 }
 
 // AddRecipient appends a receiver to the To: header of a message.
-func (m *Message) AddRecipient(recipient string) {
-	m.to = append(m.to, recipient)
+//
+// NOTE: Above a certain limit (currently 1000 recipients),
+// this function will cause the message as it's currently defined to be sent.
+// This allows you to support large mailing lists without running into Mailgun's API limitations.
+func (m *Message) AddRecipient(recipient string) error {
+	return m.AddRecipientAndVariables(recipient, nil)
+}
+
+// AddRecipientAndVariables appends a receiver to the To: header of a message,
+// and as well attaches a set of variables relevant for this recipient.
+//
+// NOTE: Above a certain limit (see MaxNumberOfRecipients),
+// this function will cause the message as it's currently defined to be sent.
+// This allows you to support large mailing lists without running into Mailgun's API limitations.
+func (m *Message) AddRecipientAndVariables(r string, vars map[string]interface{}) error {
+	if len(m.to) >= MaxNumberOfRecipients {
+		_, _, err := m.send()
+		if err != nil {
+			return err
+		}
+		m.to = make([]string, len(m.to))
+		m.recipientVariables = make(map[string]map[string]interface{}, len(m.recipientVariables))
+	}
+	m.to = append(m.to, r)
+	if vars != nil {
+		if m.recipientVariables == nil {
+			m.recipientVariables = make(map[string]map[string]interface{})
+		}
+		m.recipientVariables[r] = vars
+	}
+	return nil
+}
+
+func (m *Message) send() (string, string, error) {
+	return m.mg.Send(m)
 }
 
 // AddCC appends a receiver to the carbon-copy header of a message.
@@ -267,24 +372,6 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	} else {
 		payload := simplehttp.NewFormDataPayload()
 
-		// TODO(sfalvo):
-		// To support recipient messages:
-		// Add recipient variables
-		// Add header option
-		// Wrap in a separate function
-
-		// TODO(sfalvo):
-		// Examine User's Guide for tag limits, etc.
-		// Return error for discrepencies.
-		// recipients, bccs, ccs, etc.
-
-		// TODO(sfalvo):
-		// Check Python package mgcore.lib.constants.constraints
-
-		// TODO(sfalvo):
-		// Add SDK version as an HTTP header to the API.
-		// Set user-agent to something like mailgun-go/vX.Y
-
 		message.specific.addValues(payload)
 		for _, to := range message.to {
 			payload.AddValue("to", to)
@@ -322,6 +409,13 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 			for variable, value := range message.variables {
 				payload.AddValue("v:"+variable, value)
 			}
+		}
+		if message.recipientVariables != nil {
+			j, err := json.Marshal(message.recipientVariables)
+			if err != nil {
+				return "", "", err
+			}
+			payload.AddValue("recipient-variables", string(j))
 		}
 		if message.attachments != nil {
 			for _, attachment := range message.attachments {
