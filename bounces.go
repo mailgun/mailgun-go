@@ -58,17 +58,12 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 }
 
 // GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
-// If none exist, the returned Bounce instance will be empty.
 func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response singleBounceEnvelope
 	err := getResponseFromJSON(r, &response)
-	ure, ok := err.(*UnexpectedResponseError)
-	if ok && (ure.Actual == 404) { // TODO(sfalvo): return error on not-found
-		return Bounce{}, nil // breaking API change
-	}
 	return response.Bounce, err
 }
 

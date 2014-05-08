@@ -29,12 +29,16 @@ func TestGetSingleBounce(t *testing.T) {
 	apiKey := reqEnv(t, "MG_API_KEY")
 	mg := mailgun.NewMailgun(domain, apiKey, "")
 	exampleEmail := fmt.Sprintf("baz@%s", domain)
-	bounce, err := mg.GetSingleBounce(exampleEmail)
-	if err != nil {
-		t.Fatal(err)
+	_, err := mg.GetSingleBounce(exampleEmail)
+	if err == nil {
+		t.Fatal("Did not expect a bounce to exist")
 	}
-	if bounce.CreatedAt != "" {
-		t.Fatalf("Expected no bounces for %s", exampleEmail)
+	ure, ok := err.(*mailgun.UnexpectedResponseError)
+	if !ok {
+		t.Fatal("Expected UnexpectedResponseError")
+	}
+	if ure.Actual != 404 {
+		t.Fatalf("Expected 404 response code; got %d", ure.Actual)
 	}
 }
 

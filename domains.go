@@ -89,10 +89,7 @@ func (m *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNS
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	var envelope singleDomainEnvelope
 	err := getResponseFromJSON(r, &envelope)
-	if err != nil {
-		return Domain{}, nil, nil, err
-	}
-	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, nil
+	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, err
 }
 
 // CreateDomain instructs Mailgun to create a new domain for your account.

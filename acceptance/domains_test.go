@@ -45,6 +45,23 @@ func TestGetSingleDomain(t *testing.T) {
 	}
 }
 
+func TestGetSingleDomainNotExist(t *testing.T) {
+	domain := reqEnv(t, "MG_DOMAIN")
+	apiKey := reqEnv(t, "MG_API_KEY")
+	mg := mailgun.NewMailgun(domain, apiKey, "")
+	_, _, _, err := mg.GetSingleDomain(randomString(32, "com.edu.org.")+".com")
+	if err == nil {
+		t.Fatal("Did not expect a domain to exist")
+	}
+	ure, ok := err.(*mailgun.UnexpectedResponseError)
+	if !ok {
+		t.Fatal("Expected UnexpectedResponseError")
+	}
+	if ure.Actual != 404 {
+		t.Fatalf("Expected 404 response code; got %d", ure.Actual)
+	}
+}
+
 func TestAddDeleteDomain(t *testing.T) {
 	// First, we need to add the domain.
 	domain := reqEnv(t, "MG_DOMAIN")
