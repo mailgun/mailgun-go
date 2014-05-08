@@ -22,12 +22,12 @@ type Message struct {
 	attachments  []string
 	inlines      []string
 
-	testMode       bool
-	tracking       bool
-	trackingClicks bool
-	trackingOpens  bool
-	headers        map[string]string
-	variables      map[string]string
+	testMode           bool
+	tracking           bool
+	trackingClicks     bool
+	trackingOpens      bool
+	headers            map[string]string
+	variables          map[string]string
 	recipientVariables map[string]map[string]interface{}
 
 	dkimSet           bool
@@ -36,7 +36,7 @@ type Message struct {
 	trackingOpensSet  bool
 
 	specific features
-	mg Mailgun
+	mg       Mailgun
 }
 
 // StoredMessage structures contain the (parsed) message content for an email
@@ -145,9 +145,9 @@ func NewMessage(from string, subject string, text string, to ...string) *Message
 func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
 		specific: &plainMessage{
-			from: from,
+			from:    from,
 			subject: subject,
-			text: text,
+			text:    text,
 		},
 		to: to,
 		mg: mg,

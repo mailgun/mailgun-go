@@ -33,9 +33,9 @@ type GetEventsOptions struct {
 
 // EventIterator maintains the state necessary for paging though small parcels of a larger set of events.
 type EventIterator struct {
-	events []Event
+	events           []Event
 	nextURL, prevURL string
-	mg Mailgun
+	mg               Mailgun
 }
 
 // NewEventIterator creates a new iterator for events.
