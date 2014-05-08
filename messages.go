@@ -94,8 +94,8 @@ type sendMessageResponse struct {
 }
 
 // features abstracts the common characteristics between regular and MIME messages.
-// addCC, addBCC, and setHTML are invoked via the package-global AddCC, AddBCC, and
-// SetHtml calls, as these functions are ignored for MIME messages.
+// addCC, addBCC, recipientCount, and setHTML are invoked via the package-global AddCC, AddBCC,
+// RecipientCount, and SetHtml calls, as these functions are ignored for MIME messages.
 // Send() invokes addValues to add message-type-specific MIME headers for the API call
 // to Mailgun.  isValid yeilds true if and only if the message is valid enough for sending
 // through the API.  Finally, endpoint() tells Send() which endpoint to use to submit the API call.
@@ -106,6 +106,7 @@ type features interface {
 	addValues(*simplehttp.FormDataPayload)
 	isValid() bool
 	endpoint() string
+	recipientCount() int
 }
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
@@ -230,7 +231,7 @@ func (m *Message) AddRecipient(recipient string) error {
 // this function will cause the message as it's currently defined to be sent.
 // This allows you to support large mailing lists without running into Mailgun's API limitations.
 func (m *Message) AddRecipientAndVariables(r string, vars map[string]interface{}) error {
-	if len(m.to) >= MaxNumberOfRecipients {
+	if m.RecipientCount() >= MaxNumberOfRecipients {
 		_, _, err := m.send()
 		if err != nil {
 			return err
@@ -246,6 +247,29 @@ func (m *Message) AddRecipientAndVariables(r string, vars map[string]interface{}
 		m.recipientVariables[r] = vars
 	}
 	return nil
+}
+
+// RecipientCount returns the total number of recipients for the message.
+// This includes To:, Cc:, and Bcc: fields.
+//
+// NOTE: At present, this method is reliable only for non-MIME messages, as the
+// Bcc: and Cc: fields are easily accessible.
+// For MIME messages, only the To: field is considered.
+// A fix for this issue is planned for a future release.
+// For now, MIME messages are always assumed to have 10 recipients between Cc: and Bcc: fields.
+// If your MIME messages have more than 10 non-To: field recipients,
+// you may find that some recipients will not receive your e-mail.
+// It's perfectly OK, of course, for a MIME message to not have any Cc: or Bcc: recipients.
+func (m *Message) RecipientCount() int {
+	return len(m.to) + m.specific.recipientCount()
+}
+
+func (pm *plainMessage) recipientCount() int {
+	return len(pm.bcc) + len(pm.cc)
+}
+
+func (mm *mimeMessage) recipientCount() int {
+	return 10
 }
 
 func (m *Message) send() (string, string, error) {
