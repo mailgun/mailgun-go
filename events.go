@@ -6,18 +6,9 @@ import (
 	"time"
 )
 
-// TODO(sfalvo):
-// Abstract Paging/Links into an interface type or something which lets you page through
-// data.  Borrow from Gophercloud's data interpreters.
-
 // Events are open-ended, loosely-defined JSON documents.
 // They will always have an event and a timestamp field, however.
 type Event map[string]interface{}
-
-// Links encapsulates navigation opportunities to find more information
-// about things.
-// TODO(sfalvo): Rename to Paging
-type Links map[string]string
 
 // noTime always equals an uninitialized Time structure.
 // It's used to detect when a time parameter is provided.
@@ -40,14 +31,31 @@ type GetEventsOptions struct {
 	Filter                                   map[string]string
 }
 
-// GetEvents provides the caller with a list of log entries.
-// See the GetEventsOptions structure for information on how to customize the list returned.
-// Note that the API responds with events with open definitions;
-// that is, no specific standard structure exists for them.
-// Thus, you'll need to provide your own accessors to the information of interest.
-func (mg *MailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) {
+// EventIterator maintains the state necessary for paging though small parcels of a larger set of events.
+type EventIterator struct {
+	events []Event
+	nextURL, prevURL string
+	mg Mailgun
+}
+
+// NewEventIterator creates a new iterator for events.
+// Use GetFirstPage to retrieve the first batch of events.
+// Use Next and Previous thereafter as appropriate to iterate through sets of data.
+func (mg *MailgunImpl) NewEventIterator() *EventIterator {
+	return &EventIterator{mg: mg}
+}
+
+// Events returns the most recently retrieved batch of events.
+// The length is guaranteed to fall between 0 and the limit set in the GetEventsOptions structure passed to GetFirstPage.
+func (ei *EventIterator) Events() []Event {
+	return ei.events
+}
+
+// GetFirstPage retrieves the first batch of events, according to your criteria.
+// See the GetEventsOptions structure for more details on how the fields affect the data returned.
+func (ei *EventIterator) GetFirstPage(opts GetEventsOptions) error {
 	if opts.ForceAscending && opts.ForceDescending {
-		return nil, nil, fmt.Errorf("collation cannot at once be both ascending and descending")
+		return fmt.Errorf("collation cannot at once be both ascending and descending")
 	}
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -75,29 +83,48 @@ func (mg *MailgunImpl) GetEvents(opts GetEventsOptions) ([]Event, Links, error) 
 		}
 	}
 
-	url, err := generateParameterizedUrl(mg, eventsEndpoint, payload)
+	url, err := generateParameterizedUrl(ei.mg, eventsEndpoint, payload)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
+	return ei.fetch(url)
+}
+
+// Retrieves the chronologically previous batch of events, if any exist.
+// You know you're at the end of the list when len(Events())==0.
+func (ei *EventIterator) GetPrevious() error {
+	return ei.fetch(ei.prevURL)
+}
+
+// Retrieves the chronologically next batch of events, if any exist.
+// You know you're at the end of the list when len(Events())==0.
+func (ei *EventIterator) GetNext() error {
+	return ei.fetch(ei.nextURL)
+}
+
+// GetFirstPage, GetPrevious, and GetNext all have a common body of code.
+// fetch completes the API fetch common to all three of these functions.
+func (ei *EventIterator) fetch(url string) error {
 	r := simplehttp.NewHTTPRequest(url)
-	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	r.SetBasicAuth(basicAuthUser, ei.mg.ApiKey())
 	var response map[string]interface{}
-	err = getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(r, &response)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 
 	items := response["items"].([]interface{})
-	events := make([]Event, len(items))
+	ei.events = make([]Event, len(items))
 	for i, item := range items {
-		events[i] = item.(map[string]interface{})
+		ei.events[i] = item.(map[string]interface{})
 	}
 
 	pagings := response["paging"].(map[string]interface{})
-	var links = make(Links, len(pagings))
+	links := make(map[string]string, len(pagings))
 	for key, page := range pagings {
 		links[key] = page.(string)
 	}
-
-	return events, links, err
+	ei.nextURL = links["next"]
+	ei.prevURL = links["previous"]
+	return err
 }

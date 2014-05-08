@@ -152,7 +152,6 @@ type Mailgun interface {
 	GetSingleComplaint(address string) (Complaint, error)
 	GetStoredMessage(id string) (StoredMessage, error)
 	DeleteStoredMessage(id string) error
-	GetEvents(GetEventsOptions) ([]Event, Links, error)
 	GetCredentials(limit, skip int) (int, []Credential, error)
 	CreateCredential(login, password string) error
 	ChangeCredentialPassword(id, password string) error
@@ -186,6 +185,7 @@ type Mailgun interface {
 	DeleteMember(Member, list string) error
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
+	NewEventIterator() *EventIterator
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
