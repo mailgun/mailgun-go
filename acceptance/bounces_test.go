@@ -63,10 +63,7 @@ func TestAddDelBounces(t *testing.T) {
 	}
 
 	bounce, err := mg.GetSingleBounce(exampleEmail)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if bounce.CreatedAt != "" {
+	if err == nil {
 		t.Fatalf("Expected no bounces for %s", exampleEmail)
 	}
 
@@ -115,11 +112,8 @@ func TestAddDelBounces(t *testing.T) {
 		t.Fatal("Expected no bounces for what should be a clean domain.")
 	}
 
-	bounce, err = mg.GetSingleBounce(exampleEmail)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if bounce.CreatedAt != "" {
+	_, err = mg.GetSingleBounce(exampleEmail)
+	if err == nil {
 		t.Fatalf("Expected no bounces for %s", exampleEmail)
 	}
 }
