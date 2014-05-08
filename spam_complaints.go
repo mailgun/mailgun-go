@@ -54,12 +54,6 @@ func (m *MailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 
 	var c Complaint
 	err := getResponseFromJSON(r, &c)
-	ure, ok := err.(*UnexpectedResponseError)
-	if (err != nil) && ok {
-		if ure.Actual == 404 {
-			return c, nil
-		}
-	}
 	return c, err
 }
 
