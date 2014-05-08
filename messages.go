@@ -42,7 +42,7 @@ type Message struct {
 // StoredMessage structures contain the (parsed) message content for an email
 // sent to a Mailgun account.
 //
-// The MessageHeaders field is special, in that its formatted as a slice of pairs.
+// The MessageHeaders field is special, in that it's formatted as a slice of pairs.
 // Each pair consists of a name [0] and value [1].  Array notation is used instead of a map
 // because that's how it's sent over the wire, and it's how encoding/json expects this field
 // to be.
@@ -328,7 +328,8 @@ func (m *Message) SetDKIM(dkim bool) {
 	m.dkimSet = true
 }
 
-// Refer to the Mailgun documentation for more information.
+// EnableTestMode allows submittal of a message, such that it will be discarded by Mailgun.
+// This facilitates testing client-side software without actually consuming e-mail resources.
 func (m *Message) EnableTestMode() {
 	m.testMode = true
 }
@@ -342,9 +343,12 @@ func (m *Message) SetDeliveryTime(dt time.Time) {
 	m.deliveryTime = pdt
 }
 
-// SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis, whether or not Mailgun will rewrite URLs to facilitate event tracking,
-// such as opens, clicks, unsubscribes, etc.  Note: simply calling this method ensures that the o:tracking header is passed in with the message.  Its yes/no setting
-// is determined by the call's parameter.  Note that this header is not passed on to the final recipient(s).
+// SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis,
+// whether or not Mailgun will rewrite URLs to facilitate event tracking.
+// Events tracked includes opens, clicks, unsubscribes, etc.
+// Note: simply calling this method ensures that the o:tracking header is passed in with the message.
+// Its yes/no setting is determined by the call's parameter.
+// Note that this header is not passed on to the final recipient(s).
 // Refer to the Mailgun documentation for more information.
 func (m *Message) SetTracking(tracking bool) {
 	m.tracking = tracking
