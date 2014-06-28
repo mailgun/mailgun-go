@@ -12,10 +12,10 @@ import (
 // while Error provides a human readable reason why.
 // CreatedAt provides the time at which Mailgun detected the bounce.
 type Bounce struct {
-	CreatedAt string `json:"created_at"`
-	Code      string `json:"code"`
-	Address   string `json:"address"`
-	Error     string `json:"error"`
+	CreatedAt string      `json:"created_at"`
+	Code      interface{} `json:"code"`
+	Address   string      `json:"address"`
+	Error     string      `json:"error"`
 }
 
 type bounceEnvelope struct {
