@@ -14,13 +14,14 @@ const MaxNumberOfRecipients = 1000
 
 // Message structures contain both the message text and the envelop for an e-mail message.
 type Message struct {
-	to           []string
-	tags         []string
-	campaigns    []string
-	dkim         bool
-	deliveryTime *time.Time
-	attachments  []string
-	inlines      []string
+	to                []string
+	tags              []string
+	campaigns         []string
+	dkim              bool
+	deliveryTime      *time.Time
+	attachments       []string
+	readerAttachments []ReaderAttachment
+	inlines           []string
 
 	testMode           bool
 	tracking           bool
@@ -37,6 +38,11 @@ type Message struct {
 
 	specific features
 	mg       Mailgun
+}
+
+type ReaderAttachment struct {
+	Filename   string
+	ReadCloser io.ReadCloser
 }
 
 // StoredMessage structures contain the (parsed) message content for an email
@@ -199,7 +205,17 @@ func (mg *MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 	}
 }
 
-// AddAttachment arranges to send a file along with the e-mail message.
+// AddReaderAttachment arranges to send a file along with the e-mail message.
+// File contents are read from a io.ReadCloser.
+// The filename parameter is the resulting filename of the attachment.
+// The readCloser parameter is the io.ReadCloser which reads the actual bytes to be used
+// as the contents of the attached file.
+func (m *Message) AddReaderAttachment(filename string, readCloser io.ReadCloser) {
+	ra := ReaderAttachment{Filename: filename, ReadCloser: readCloser}
+	m.readerAttachments = append(m.readerAttachments, ra)
+}
+
+// AddAttachment arranges to send a file from the filesystem along with the e-mail message.
 // The attachment parameter is a filename, which must refer to a file which actually resides
 // in the local filesystem.
 func (m *Message) AddAttachment(attachment string) {
@@ -448,6 +464,11 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		if message.attachments != nil {
 			for _, attachment := range message.attachments {
 				payload.AddFile("attachment", attachment)
+			}
+		}
+		if message.readerAttachments != nil {
+			for _, readerAttachment := range message.readerAttachments {
+				payload.AddReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
 			}
 		}
 		if message.inlines != nil {
