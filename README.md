@@ -13,6 +13,7 @@ See these examples on how how to use use the library with various parts of the M
 * [E-mail validation](https://gist.github.com/mbanzon/8179989 "mailgun-validation-example.go")
 * [Bounces](https://gist.github.com/mbanzon/8179951 "mailgun-bounces-example.go")
 * [Stats](https://gist.github.com/mbanzon/8206266 "mailgun-stats-example.go")
+* [File Attachment from Memory](https://gist.github.com/sym3tri/8a29ddecd65ec4f8ccfc)
 
 More examples are coming soon.
 
