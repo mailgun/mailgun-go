@@ -76,6 +76,14 @@ type StoredAttachment struct {
 	ContentType string `json:"content-type"`
 }
 
+type StoredMessageRaw struct {
+	Recipients string `json:"recipients"`
+	Sender     string `json:"sender"`
+	From       string `json:"from"`
+	Subject    string `json:"subject"`
+	BodyMime   string `json:"body-mime"`
+}
+
 // plainMessage contains fields relevant to plain API-synthesized messages.
 // You're expected to use various setters to set most of these attributes,
 // although from, subject, and text are set when the message is created with
@@ -609,6 +617,20 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	var response StoredMessage
 	err := getResponseFromJSON(r, &response)
 	return response, err
+}
+
+// GetStoredMessage retrieves information about a received e-mail message.
+// This provides visibility into, e.g., replies to a message sent to a mailing list.
+func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
+	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+	r := simplehttp.NewHTTPRequest(url)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	r.AddHeader("Accept", "message/rfc2822")
+
+	var response StoredMessageRaw
+	err := getResponseFromJSON(r, &response)
+	return response, err
+
 }
 
 // DeleteStoredMessage removes a previously stored message.
