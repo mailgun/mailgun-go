@@ -72,7 +72,13 @@ func (mg *MailgunImpl) CreateRoute(prototype Route) (Route, error) {
 		Message string `json:"message"`
 		*Route  `json:"route"`
 	}
+
 	err := postResponseFromJSON(r, p, &envelope)
+
+	if err != nil {
+		return Route{}, err
+	}
+
 	return *envelope.Route, err
 }
 
@@ -95,6 +101,11 @@ func (mg *MailgunImpl) GetRouteByID(id string) (Route, error) {
 		*Route  `json:"route"`
 	}
 	err := getResponseFromJSON(r, &envelope)
+
+	if err != nil {
+		return Route{}, err
+	}
+
 	return *envelope.Route, err
 }
 
