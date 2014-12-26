@@ -1,7 +1,7 @@
 Mailgun with Go
 ===============
 
-[![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go)
+[![GoDoc](http://godoc.org/github.com/mailgun/mailgun-go?status.svg)](http://godoc.org/github.com/mailgun/mailgun-go)
 
 Go library for sending mail with the Mailgun API.
 
