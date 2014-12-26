@@ -8,6 +8,7 @@ import (
 // Note that a zero-length mapping is not an error.
 func (mg *MailgunImpl) GetWebhooks() (map[string]string, error) {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
 		Webhooks map[string]interface{} `json:"webhooks"`
@@ -28,6 +29,7 @@ func (mg *MailgunImpl) GetWebhooks() (map[string]string, error) {
 // CreateWebhook installs a new webhook for your domain.
 func (mg *MailgunImpl) CreateWebhook(t, u string) error {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("id", t)
@@ -39,6 +41,7 @@ func (mg *MailgunImpl) CreateWebhook(t, u string) error {
 // DeleteWebhook removes the specified webhook from your domain's configuration.
 func (mg *MailgunImpl) DeleteWebhook(t string) error {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
@@ -47,6 +50,7 @@ func (mg *MailgunImpl) DeleteWebhook(t string) error {
 // GetWebhookByType retrieves the currently assigned webhook URL associated with the provided type of webhook.
 func (mg *MailgunImpl) GetWebhookByType(t string) (string, error) {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
 		Webhook struct {
@@ -60,6 +64,7 @@ func (mg *MailgunImpl) GetWebhookByType(t string) (string, error) {
 // UpdateWebhook replaces one webhook setting for another.
 func (mg *MailgunImpl) UpdateWebhook(t, u string) error {
 	r := simplehttp.NewHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("url", u)

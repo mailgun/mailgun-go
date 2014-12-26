@@ -29,6 +29,7 @@ type campaignsEnvelope struct {
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) GetCampaigns() (int, []Campaign, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var envelope campaignsEnvelope
@@ -43,6 +44,7 @@ func (m *MailgunImpl) GetCampaigns() (int, []Campaign, error) {
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) CreateCampaign(name, id string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -58,6 +60,7 @@ func (m *MailgunImpl) CreateCampaign(name, id string) error {
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -73,6 +76,7 @@ func (m *MailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) DeleteCampaign(id string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err

@@ -42,6 +42,7 @@ type addressParseResult struct {
 // NOTE: Use of this function requires a proper public API key.  The private API key will not work.
 func (m *MailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(addressValidateEndpoint))
+	r.SetClient(m.client)
 	r.AddParameter("address", email)
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())
 
@@ -58,6 +59,7 @@ func (m *MailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 // NOTE: Use of this function requires a proper public API key.  The private API key will not work.
 func (m *MailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(addressParseEndpoint))
+	r.SetClient(m.client)
 	r.AddParameter("addresses", strings.Join(addresses, ","))
 	r.SetBasicAuth(basicAuthUser, m.PublicApiKey())
 

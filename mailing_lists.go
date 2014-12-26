@@ -64,6 +64,7 @@ type Member struct {
 // GetLists returns the specified set of mailing lists administered by your account.
 func (mg *MailgunImpl) GetLists(limit, skip int, filter string) (int, []List, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint))
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	if limit != DefaultLimit {
@@ -121,6 +122,7 @@ func (mg *MailgunImpl) CreateList(prototype List) (List, error) {
 // Attempts to send e-mail to the list will fail subsequent to this call.
 func (mg *MailgunImpl) DeleteList(addr string) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
@@ -130,6 +132,7 @@ func (mg *MailgunImpl) DeleteList(addr string) error {
 // representing a mailing list, so long as you have its e-mail address.
 func (mg *MailgunImpl) GetListByAddress(addr string) (List, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(listsEndpoint) + "/" + addr)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	response, err := makeGetRequest(r)
 	var envelope struct {
@@ -177,6 +180,7 @@ func (mg *MailgunImpl) UpdateList(addr string, prototype List) (List, error) {
 // Subscribed and Unsubscribed indicate you want only those eponymous subsets.
 func (mg *MailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, []Member, error) {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr))
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	if limit != DefaultLimit {
@@ -204,6 +208,7 @@ func (mg *MailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, [
 // given only their subscription e-mail address.
 func (mg *MailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, l) + "/" + s)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	response, err := makeGetRequest(r)
 	if err != nil {
@@ -227,6 +232,7 @@ func (mg *MailgunImpl) CreateMember(merge bool, addr string, prototype Member) e
 
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr))
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	r.SetClient(m.client)
 	p := simplehttp.NewFormDataPayload()
 	p.AddValue("upsert", yesNo(merge))
 	p.AddValue("address", prototype.Address)
@@ -243,6 +249,7 @@ func (mg *MailgunImpl) CreateMember(merge bool, addr string, prototype Member) e
 // Address, Name, Vars, and Subscribed fields may be changed.
 func (mg *MailgunImpl) UpdateMember(s, l string, prototype Member) (Member, error) {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, l) + "/" + s)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewFormDataPayload()
 	if prototype.Address != "" {
@@ -275,6 +282,7 @@ func (mg *MailgunImpl) UpdateMember(s, l string, prototype Member) (Member, erro
 // DeleteMember removes the member from the list.
 func (mg *MailgunImpl) DeleteMember(member, addr string) error {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr) + "/" + member)
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
@@ -291,6 +299,7 @@ func (mg *MailgunImpl) DeleteMember(member, addr string) error {
 // Other fields are optional, but may be set according to your needs.
 func (mg *MailgunImpl) CreateMemberList(s *bool, addr string, newMembers []interface{}) error {
 	r := simplehttp.NewHTTPRequest(generateMemberApiUrl(listsEndpoint, addr) + ".json")
+	r.SetClient(m.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewFormDataPayload()
 	if s != nil {
