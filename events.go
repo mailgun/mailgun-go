@@ -2,8 +2,9 @@ package mailgun
 
 import (
 	"fmt"
-	"github.com/mbanzon/simplehttp"
 	"time"
+
+	"github.com/mbanzon/simplehttp"
 )
 
 // Events are open-ended, loosely-defined JSON documents.
@@ -106,7 +107,7 @@ func (ei *EventIterator) GetNext() error {
 // fetch completes the API fetch common to all three of these functions.
 func (ei *EventIterator) fetch(url string) error {
 	r := simplehttp.NewHTTPRequest(url)
-	r.SetClient(m.client)
+	r.SetClient(ei.mg.(*MailgunImpl).client)
 	r.SetBasicAuth(basicAuthUser, ei.mg.ApiKey())
 	var response map[string]interface{}
 	err := getResponseFromJSON(r, &response)

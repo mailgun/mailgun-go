@@ -3,9 +3,10 @@ package mailgun
 import (
 	"encoding/json"
 	"errors"
-	"github.com/mbanzon/simplehttp"
 	"io"
 	"time"
+
+	"github.com/mbanzon/simplehttp"
 )
 
 // MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
@@ -605,7 +606,7 @@ func validateStringList(list []string, requireOne bool) bool {
 func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
-	r.SetClient(m.client)
+	r.SetClient(mg.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 
 	var response StoredMessage
@@ -619,7 +620,7 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 func (mg *MailgunImpl) DeleteStoredMessage(id string) error {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
-	r.SetClient(m.client)
+	r.SetClient(mg.client)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
