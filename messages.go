@@ -3,9 +3,10 @@ package mailgun
 import (
 	"encoding/json"
 	"errors"
-	"github.com/mbanzon/simplehttp"
 	"io"
 	"time"
+
+	"github.com/mbanzon/simplehttp"
 )
 
 // MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
@@ -619,8 +620,9 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	return response, err
 }
 
-// GetStoredMessage retrieves information about a received e-mail message.
-// This provides visibility into, e.g., replies to a message sent to a mailing list.
+// GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
+// Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
+// thus delegates to the caller the required parsing.
 func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
