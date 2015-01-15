@@ -3,9 +3,10 @@ package mailgun
 import (
 	"encoding/json"
 	"errors"
-	"github.com/mbanzon/simplehttp"
 	"io"
 	"time"
+
+	"github.com/mbanzon/simplehttp"
 )
 
 // MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
@@ -74,6 +75,14 @@ type StoredAttachment struct {
 	Url         string `json:"url"`
 	Name        string `json:"name"`
 	ContentType string `json:"content-type"`
+}
+
+type StoredMessageRaw struct {
+	Recipients string `json:"recipients"`
+	Sender     string `json:"sender"`
+	From       string `json:"from"`
+	Subject    string `json:"subject"`
+	BodyMime   string `json:"body-mime"`
 }
 
 // plainMessage contains fields relevant to plain API-synthesized messages.
@@ -609,6 +618,21 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	var response StoredMessage
 	err := getResponseFromJSON(r, &response)
 	return response, err
+}
+
+// GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
+// Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
+// thus delegates to the caller the required parsing.
+func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
+	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+	r := simplehttp.NewHTTPRequest(url)
+	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
+	r.AddHeader("Accept", "message/rfc2822")
+
+	var response StoredMessageRaw
+	err := getResponseFromJSON(r, &response)
+	return response, err
+
 }
 
 // DeleteStoredMessage removes a previously stored message.

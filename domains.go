@@ -39,6 +39,7 @@ type DNSRecord struct {
 	Priority   string
 	RecordType string `json:"record_type"`
 	Valid      string
+	Name       string
 	Value      string
 }
 

@@ -151,6 +151,7 @@ type Mailgun interface {
 	GetComplaints(limit, skip int) (int, []Complaint, error)
 	GetSingleComplaint(address string) (Complaint, error)
 	GetStoredMessage(id string) (StoredMessage, error)
+	GetStoredMessageRaw(id string) (StoredMessageRaw, error)
 	DeleteStoredMessage(id string) error
 	GetCredentials(limit, skip int) (int, []Credential, error)
 	CreateCredential(login, password string) error
@@ -286,5 +287,5 @@ func parseMailgunTime(ts string) (t time.Time, err error) {
 
 // formatMailgunTime translates a timestamp into a human-readable form.
 func formatMailgunTime(t *time.Time) string {
-	return t.Format("Mon, 2 Jan 2006 15:04:05 MST")
+	return t.Format("Mon, 2 Jan 2006 15:04:05 -0700")
 }
