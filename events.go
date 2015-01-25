@@ -3,6 +3,7 @@ package mailgun
 import (
 	"fmt"
 	"github.com/mbanzon/simplehttp"
+	"net/http"
 	"time"
 )
 
@@ -36,13 +37,14 @@ type EventIterator struct {
 	events           []Event
 	nextURL, prevURL string
 	mg               Mailgun
+	client           *http.Client
 }
 
 // NewEventIterator creates a new iterator for events.
 // Use GetFirstPage to retrieve the first batch of events.
 // Use Next and Previous thereafter as appropriate to iterate through sets of data.
 func (mg *MailgunImpl) NewEventIterator() *EventIterator {
-	return &EventIterator{mg: mg}
+	return &EventIterator{mg: mg, client: mg.client}
 }
 
 // Events returns the most recently retrieved batch of events.
@@ -106,6 +108,7 @@ func (ei *EventIterator) GetNext() error {
 // fetch completes the API fetch common to all three of these functions.
 func (ei *EventIterator) fetch(url string) error {
 	r := simplehttp.NewHTTPRequest(url)
+	r.SetClient(ei.client)
 	r.SetBasicAuth(basicAuthUser, ei.mg.ApiKey())
 	var response map[string]interface{}
 	err := getResponseFromJSON(r, &response)

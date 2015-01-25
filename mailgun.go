@@ -94,9 +94,11 @@ package mailgun
 
 import (
 	"fmt"
-	"github.com/mbanzon/simplehttp"
 	"io"
+	"net/http"
 	"time"
+
+	"github.com/mbanzon/simplehttp"
 )
 
 const (
@@ -187,6 +189,7 @@ type Mailgun interface {
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 	NewEventIterator() *EventIterator
+	SetClient(*http.Client)
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
@@ -195,11 +198,12 @@ type MailgunImpl struct {
 	domain       string
 	apiKey       string
 	publicApiKey string
+	client       *http.Client
 }
 
 // NewMailGun creates a new client instance.
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
-	m := MailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
+	m := MailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey, client: http.DefaultClient}
 	return &m
 }
 
@@ -216,6 +220,11 @@ func (m *MailgunImpl) ApiKey() string {
 // PublicApiKey returns the public API key configured for this client.
 func (m *MailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
+}
+
+// SetClient sets the internal http.Client to be used to connect to the API. Default client is http.DefaultClient
+func (m *MailgunImpl) SetClient(c *http.Client) {
+	m.client = c
 }
 
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
@@ -288,4 +297,11 @@ func parseMailgunTime(ts string) (t time.Time, err error) {
 // formatMailgunTime translates a timestamp into a human-readable form.
 func formatMailgunTime(t *time.Time) string {
 	return t.Format("Mon, 2 Jan 2006 15:04:05 -0700")
+}
+
+// newHTTPRequest creates a new simplehttp http request with the appropriate client
+func (m *MailgunImpl) newHTTPRequest(url string) *simplehttp.HTTPRequest {
+	r := simplehttp.NewHTTPRequest(url)
+	r.SetClient(m.client)
+	return r
 }

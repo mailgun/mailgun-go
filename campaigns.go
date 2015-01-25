@@ -28,7 +28,7 @@ type campaignsEnvelope struct {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) GetCampaigns() (int, []Campaign, error) {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
+	r := m.newHTTPRequest(generateApiUrl(m, campaignsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var envelope campaignsEnvelope
@@ -42,7 +42,7 @@ func (m *MailgunImpl) GetCampaigns() (int, []Campaign, error) {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) CreateCampaign(name, id string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
+	r := m.newHTTPRequest(generateApiUrl(m, campaignsEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -57,7 +57,7 @@ func (m *MailgunImpl) CreateCampaign(name, id string) error {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) UpdateCampaign(oldId, name, newId string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
+	r := m.newHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -72,7 +72,7 @@ func (m *MailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) DeleteCampaign(id string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
+	r := m.newHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err

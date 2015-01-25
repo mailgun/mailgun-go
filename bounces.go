@@ -38,7 +38,7 @@ func (i Bounce) GetCreatedAt() (t time.Time, err error) {
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
 func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
+	r := m.newHTTPRequest(generateApiUrl(m, bouncesEndpoint))
 	if limit != -1 {
 		r.AddParameter("limit", strconv.Itoa(limit))
 	}
@@ -59,7 +59,7 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 
 // GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
 func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+	r := m.newHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response singleBounceEnvelope
@@ -84,7 +84,7 @@ func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 // Note that both code and error exist as strings, even though
 // code will report as a number.
 func (m *MailgunImpl) AddBounce(address, code, error string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
+	r := m.newHTTPRequest(generateApiUrl(m, bouncesEndpoint))
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -101,7 +101,7 @@ func (m *MailgunImpl) AddBounce(address, code, error string) error {
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
 func (m *MailgunImpl) DeleteBounce(address string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+	r := m.newHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
