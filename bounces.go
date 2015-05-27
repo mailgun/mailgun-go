@@ -12,10 +12,10 @@ import (
 // while Error provides a human readable reason why.
 // CreatedAt provides the time at which Mailgun detected the bounce.
 type Bounce struct {
-	CreatedAt string `json:"created_at"`
-	Code      string `json:"code"`
-	Address   string `json:"address"`
-	Error     string `json:"error"`
+	CreatedAt string      `json:"created_at"`
+	code      interface{} `json:"code"`
+	Address   string      `json:"address"`
+	Error     string      `json:"error"`
 }
 
 type bounceEnvelope struct {
@@ -31,6 +31,20 @@ type singleBounceEnvelope struct {
 // Time structure.
 func (i Bounce) GetCreatedAt() (t time.Time, err error) {
 	return parseMailgunTime(i.CreatedAt)
+}
+
+// GetCode will return the bounce code for the message, regardless if it was
+// returned as a string or as an integer.  This method overcomes a protocol
+// bug in the Mailgun API.
+func (b Bounce) GetCode() (int, error) {
+	switch c := b.code.(type) {
+	case int:
+		return c, nil
+	case string:
+		return strconv.Atoi(c)
+	default:
+		return -1, strconv.ErrSyntax
+	}
 }
 
 // GetBounces returns a complete set of bounces logged against the sender's domain, if any.
