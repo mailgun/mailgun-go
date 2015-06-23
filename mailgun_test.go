@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -21,5 +22,47 @@ func TestMailgun(t *testing.T) {
 
 	if publicApiKey != m.PublicApiKey() {
 		t.Fatal("PublicApiKey not equal!")
+	}
+}
+
+func TestBounceGetCode(t *testing.T) {
+	b1 := &Bounce{
+		CreatedAt: "blah",
+		code:      123,
+		Address:   "blort",
+		Error:     "bletch",
+	}
+	c, err := b1.GetCode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c != 123 {
+		t.Fatal("Expected 123; got ", c)
+	}
+
+	b2 := &Bounce{
+		CreatedAt: "blah",
+		code:      "456",
+		Address:   "blort",
+		Error:     "Bletch",
+	}
+	c, err = b2.GetCode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c != 456 {
+		t.Fatal("Expected 456; got ", c)
+	}
+
+	b3 := &Bounce{
+		CreatedAt: "blah",
+		code:      "456H",
+		Address:   "blort",
+		Error:     "Bletch",
+	}
+	c, err = b3.GetCode()
+	e, ok := err.(*strconv.NumError)
+	if !ok && e != nil {
+		t.Fatal("Expected a syntax error in numeric conversion: got ", err)
 	}
 }
