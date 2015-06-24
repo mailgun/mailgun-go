@@ -2,7 +2,7 @@ package mailgun
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -108,19 +108,31 @@ type sendMessageResponse struct {
 	Id      string `json:"id"`
 }
 
-// features abstracts the common characteristics between regular and MIME messages.
-// addCC, addBCC, recipientCount, and setHTML are invoked via the package-global AddCC, AddBCC,
-// RecipientCount, and SetHtml calls, as these functions are ignored for MIME messages.
-// Send() invokes addValues to add message-type-specific MIME headers for the API call
-// to Mailgun.  isValid yeilds true if and only if the message is valid enough for sending
-// through the API.  Finally, endpoint() tells Send() which endpoint to use to submit the API call.
+// features abstracts the common characteristics between regular and MIME
+// messages.  addCC, addBCC, recipientCount, and setHTML may be invoked via the
+// package-global AddCC, AddBCC, RecipientCount, and SetHtml calls. These
+// functions are ignored for MIME messages.
+//
+// Send() invokes addValues to add message-type-specific MIME headers for the
+// API call to Mailgun.
 type features interface {
+	// addCC adds a CC email.
 	addCC(string)
+
+	// addBCC adds a BCC email.
 	addBCC(string)
+
+	// setHTML sets the email's HTML.
 	setHtml(string)
 	addValues(*simplehttp.FormDataPayload)
-	isValid() bool
+
+	// validate returns an error if the message is not valid, nil otherwise.
+	validate() error
+
+	// endpoint returns which endpoint to use to submit the API call.
 	endpoint() string
+
+	// recipientCount returns the total number of recepients
 	recipientCount() int
 }
 
@@ -420,84 +432,84 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 // a human-readable status message, and a message ID.  The status and message ID are set only
 // if no error occurred.
 func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) {
-	if !isValid(message) {
-		err = errors.New("Message not valid")
-	} else {
-		payload := simplehttp.NewFormDataPayload()
+	err = validate(message)
+	if err != nil {
+		err = fmt.Errorf("Message not valid: %s", err)
+		return "", "", err
+	}
 
-		message.specific.addValues(payload)
-		for _, to := range message.to {
-			payload.AddValue("to", to)
-		}
-		for _, tag := range message.tags {
-			payload.AddValue("o:tag", tag)
-		}
-		for _, campaign := range message.campaigns {
-			payload.AddValue("o:campaign", campaign)
-		}
-		if message.dkimSet {
-			payload.AddValue("o:dkim", yesNo(message.dkim))
-		}
-		if message.deliveryTime != nil {
-			payload.AddValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
-		}
-		if message.testMode {
-			payload.AddValue("o:testmode", "yes")
-		}
-		if message.trackingSet {
-			payload.AddValue("o:tracking", yesNo(message.tracking))
-		}
-		if message.trackingClicksSet {
-			payload.AddValue("o:tracking-clicks", yesNo(message.trackingClicks))
-		}
-		if message.trackingOpensSet {
-			payload.AddValue("o:tracking-opens", yesNo(message.trackingOpens))
-		}
-		if message.headers != nil {
-			for header, value := range message.headers {
-				payload.AddValue("h:"+header, value)
-			}
-		}
-		if message.variables != nil {
-			for variable, value := range message.variables {
-				payload.AddValue("v:"+variable, value)
-			}
-		}
-		if message.recipientVariables != nil {
-			j, err := json.Marshal(message.recipientVariables)
-			if err != nil {
-				return "", "", err
-			}
-			payload.AddValue("recipient-variables", string(j))
-		}
-		if message.attachments != nil {
-			for _, attachment := range message.attachments {
-				payload.AddFile("attachment", attachment)
-			}
-		}
-		if message.readerAttachments != nil {
-			for _, readerAttachment := range message.readerAttachments {
-				payload.AddReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
-			}
-		}
-		if message.inlines != nil {
-			for _, inline := range message.inlines {
-				payload.AddFile("inline", inline)
-			}
-		}
+	payload := simplehttp.NewFormDataPayload()
 
-		r := simplehttp.NewHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
-		r.SetBasicAuth(basicAuthUser, m.ApiKey())
-
-		var response sendMessageResponse
-		err = postResponseFromJSON(r, payload, &response)
-		if err == nil {
-			mes = response.Message
-			id = response.Id
+	message.specific.addValues(payload)
+	for _, to := range message.to {
+		payload.AddValue("to", to)
+	}
+	for _, tag := range message.tags {
+		payload.AddValue("o:tag", tag)
+	}
+	for _, campaign := range message.campaigns {
+		payload.AddValue("o:campaign", campaign)
+	}
+	if message.dkimSet {
+		payload.AddValue("o:dkim", yesNo(message.dkim))
+	}
+	if message.deliveryTime != nil {
+		payload.AddValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
+	}
+	if message.testMode {
+		payload.AddValue("o:testmode", "yes")
+	}
+	if message.trackingSet {
+		payload.AddValue("o:tracking", yesNo(message.tracking))
+	}
+	if message.trackingClicksSet {
+		payload.AddValue("o:tracking-clicks", yesNo(message.trackingClicks))
+	}
+	if message.trackingOpensSet {
+		payload.AddValue("o:tracking-opens", yesNo(message.trackingOpens))
+	}
+	if message.headers != nil {
+		for header, value := range message.headers {
+			payload.AddValue("h:"+header, value)
+		}
+	}
+	if message.variables != nil {
+		for variable, value := range message.variables {
+			payload.AddValue("v:"+variable, value)
+		}
+	}
+	if message.recipientVariables != nil {
+		j, err := json.Marshal(message.recipientVariables)
+		if err != nil {
+			return "", "", err
+		}
+		payload.AddValue("recipient-variables", string(j))
+	}
+	if message.attachments != nil {
+		for _, attachment := range message.attachments {
+			payload.AddFile("attachment", attachment)
+		}
+	}
+	if message.readerAttachments != nil {
+		for _, readerAttachment := range message.readerAttachments {
+			payload.AddReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
+		}
+	}
+	if message.inlines != nil {
+		for _, inline := range message.inlines {
+			payload.AddFile("inline", inline)
 		}
 	}
 
-	return
+	r := simplehttp.NewHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
+	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+
+	var response sendMessageResponse
+	err = postResponseFromJSON(r, payload, &response)
+	if err != nil {
+		return "", "", err
+	}
+	return response.Message, response.Id, nil
 }
 
 func (pm *plainMessage) addValues(p *simplehttp.FormDataPayload) {
@@ -536,76 +548,77 @@ func yesNo(b bool) string {
 	}
 }
 
-// isValid returns true if, and only if,
-// a Message instance is sufficiently initialized to send via the Mailgun interface.
-func isValid(m *Message) bool {
+// validate returns an appropriate error upon invalid Message, nil otherwise.
+// Messages are considered valid if they are sufficiently initialized to send
+// to the Mailgun interface.
+func validate(m *Message) error {
 	if m == nil {
-		return false
+		return fmt.Errorf("Message is nil")
 	}
 
-	if !m.specific.isValid() {
-		return false
+	err := m.specific.validate()
+	if err != nil {
+		return err
 	}
 
-	if !validateStringList(m.to, true) {
-		return false
+	if len(m.to) < 1 {
+		return fmt.Errorf(`At least one "to" entry is required`)
+	} else if containsEmptyString(m.to) {
+		return fmt.Errorf(`Empty string in "to" list`)
 	}
 
-	if !validateStringList(m.tags, false) {
-		return false
+	if containsEmptyString(m.tags) {
+		return fmt.Errorf(`Empty string in "tags" list`)
 	}
 
-	if !validateStringList(m.campaigns, false) || len(m.campaigns) > 3 {
-		return false
+	if containsEmptyString(m.campaigns) {
+		return fmt.Errorf(`Empty string in "campaigns" list`)
+	} else if len(m.campaigns) > 3 {
+		return fmt.Errorf("Number of campaigns over limit of 3 (%d in list)", len(m.campaigns))
 	}
 
-	return true
+	return nil
 }
 
-func (pm *plainMessage) isValid() bool {
+// validate returns an appropriate error upon invalid plainMessage, nil otherwise.
+func (pm *plainMessage) validate() error {
 	if pm.from == "" {
-		return false
+		return fmt.Errorf(`Empty "from" field in plainMessage`)
 	}
 
-	if !validateStringList(pm.cc, false) {
-		return false
+	if containsEmptyString(pm.cc) {
+		return fmt.Errorf(`Empty string in plainMessage "cc" list`)
 	}
 
-	if !validateStringList(pm.bcc, false) {
-		return false
+	if containsEmptyString(pm.bcc) {
+		return fmt.Errorf(`Empty string in plainMessage "bcc" list`)
 	}
 
 	if pm.text == "" {
-		return false
+		return fmt.Errorf(`Empty "text" field in plainMessage`)
 	}
 
-	return true
+	return nil
 }
 
-func (mm *mimeMessage) isValid() bool {
-	return mm.body != nil
+// validate returns an appropriate error upon invalid mimeMessage, nil otherwise.
+func (mm *mimeMessage) validate() error {
+	if mm.body == nil {
+		return fmt.Errorf(`Empty "body" field in mimeMessage`)
+	}
+
+	return nil
 }
 
-// validateStringList returns true if, and only if,
-// a slice of strings exists AND all of its elements exist,
-// OR if the slice doesn't exist AND it's not required to exist.
-// The requireOne parameter indicates whether the list is required to exist.
-func validateStringList(list []string, requireOne bool) bool {
-	hasOne := false
-
-	if list == nil {
-		return !requireOne
-	} else {
-		for _, a := range list {
-			if a == "" {
-				return false
-			} else {
-				hasOne = hasOne || true
-			}
+// containsEmptyString returns true if there is a zero-value string in a
+// string slice (""), false otherwise.
+func containsEmptyString(ss []string) bool {
+	for _, s := range ss {
+		if s == "" {
+			return true
 		}
 	}
-
-	return hasOne
+	return false
 }
 
 // GetStoredMessage retrieves information about a received e-mail message.
