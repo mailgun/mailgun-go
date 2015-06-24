@@ -486,7 +486,7 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 			}
 		}
 
-		r := simplehttp.NewHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
+		r := m.newHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 		var response sendMessageResponse
@@ -612,7 +612,7 @@ func validateStringList(list []string, requireOne bool) bool {
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
 func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
-	r := simplehttp.NewHTTPRequest(url)
+	r := mg.newHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 
 	var response StoredMessage
@@ -625,7 +625,7 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 // thus delegates to the caller the required parsing.
 func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
-	r := simplehttp.NewHTTPRequest(url)
+	r := mg.newHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	r.AddHeader("Accept", "message/rfc2822")
 
@@ -640,7 +640,7 @@ func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) 
 // Consult the current Mailgun API documentation for more details.
 func (mg *MailgunImpl) DeleteStoredMessage(id string) error {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
-	r := simplehttp.NewHTTPRequest(url)
+	r := mg.newHTTPRequest(url)
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
