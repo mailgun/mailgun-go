@@ -29,6 +29,7 @@ type complaintsEnvelope struct {
 // indicating that the message they received is, to them, spam.
 func (m *MailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint))
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	if limit != -1 {
@@ -50,6 +51,7 @@ func (m *MailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
 // If no complaint exists, the Complaint instance returned will be empty.
 func (m *MailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var c Complaint
@@ -61,6 +63,7 @@ func (m *MailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
 // from your domain.
 func (m *MailgunImpl) CreateComplaint(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint))
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("address", address)
@@ -72,6 +75,7 @@ func (m *MailgunImpl) CreateComplaint(address string) error {
 // of receiving spam from your domain.
 func (m *MailgunImpl) DeleteComplaint(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err

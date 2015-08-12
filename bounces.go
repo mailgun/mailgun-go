@@ -60,6 +60,7 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 		r.AddParameter("skip", strconv.Itoa(skip))
 	}
 
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response bounceEnvelope
@@ -74,6 +75,7 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 // GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
 func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var response singleBounceEnvelope
@@ -99,6 +101,7 @@ func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 // code will report as a number.
 func (m *MailgunImpl) AddBounce(address, code, error string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint))
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -116,6 +119,7 @@ func (m *MailgunImpl) AddBounce(address, code, error string) error {
 // DeleteBounce removes all bounces associted with the provided e-mail address.
 func (m *MailgunImpl) DeleteBounce(address string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err

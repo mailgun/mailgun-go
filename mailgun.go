@@ -96,6 +96,7 @@ import (
 	"fmt"
 	"github.com/mbanzon/simplehttp"
 	"io"
+	"net/http"
 	"time"
 )
 
@@ -131,6 +132,8 @@ type Mailgun interface {
 	Domain() string
 	ApiKey() string
 	PublicApiKey() string
+	Client() *http.Client
+	SetClient(client *http.Client)
 	Send(m *Message) (string, string, error)
 	ValidateEmail(email string) (EmailVerification, error)
 	ParseAddresses(addresses ...string) ([]string, []string, error)
@@ -195,11 +198,17 @@ type MailgunImpl struct {
 	domain       string
 	apiKey       string
 	publicApiKey string
+	client       *http.Client
 }
 
 // NewMailGun creates a new client instance.
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
-	m := MailgunImpl{domain: domain, apiKey: apiKey, publicApiKey: publicApiKey}
+	m := MailgunImpl{
+		domain:       domain,
+		apiKey:       apiKey,
+		publicApiKey: publicApiKey,
+		client:       http.DefaultClient,
+	}
 	return &m
 }
 
@@ -216,6 +225,16 @@ func (m *MailgunImpl) ApiKey() string {
 // PublicApiKey returns the public API key configured for this client.
 func (m *MailgunImpl) PublicApiKey() string {
 	return m.publicApiKey
+}
+
+// Client returns the HTTP client configured for this client.
+func (m *MailgunImpl) Client() *http.Client {
+	return m.client
+}
+
+// SetClient updates the HTTP client for this client.
+func (m *MailgunImpl) SetClient(c *http.Client) {
+	m.client = c
 }
 
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.

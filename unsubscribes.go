@@ -22,6 +22,7 @@ func (mg *MailgunImpl) GetUnsubscribes(limit, skip int) (int, []Unsubscription, 
 	if skip != DefaultSkip {
 		r.AddParameter("skip", strconv.Itoa(skip))
 	}
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
 		TotalCount int              `json:"total_count"`
@@ -35,6 +36,7 @@ func (mg *MailgunImpl) GetUnsubscribes(limit, skip int) (int, []Unsubscription, 
 // Zero is a valid list length.
 func (mg *MailgunImpl) GetUnsubscribesByAddress(a string) (int, []Unsubscription, error) {
 	r := simplehttp.NewHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, a))
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
 		TotalCount int              `json:"total_count"`
@@ -47,6 +49,7 @@ func (mg *MailgunImpl) GetUnsubscribesByAddress(a string) (int, []Unsubscription
 // Unsubscribe adds an e-mail address to the domain's unsubscription table.
 func (mg *MailgunImpl) Unsubscribe(a, t string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("address", a)
@@ -60,6 +63,7 @@ func (mg *MailgunImpl) Unsubscribe(a, t string) error {
 // with the given ID will be removed.
 func (mg *MailgunImpl) RemoveUnsubscribe(a string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, a))
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
