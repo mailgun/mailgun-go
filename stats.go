@@ -39,6 +39,7 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 	for _, e := range event {
 		r.AddParameter("event", e)
 	}
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	var res statsEnvelope
@@ -53,6 +54,7 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
 func (m *MailgunImpl) DeleteTag(tag string) error {
 	r := simplehttp.NewHTTPRequest(generateApiUrl(m, deleteTagEndpoint) + "/" + tag)
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err

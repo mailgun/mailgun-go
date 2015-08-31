@@ -68,6 +68,7 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 // Except for the error itself, all results are undefined in the event of an error.
 func (m *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint))
+	r.SetClient(m.Client())
 	if limit != DefaultLimit {
 		r.AddParameter("limit", strconv.Itoa(limit))
 	}
@@ -87,6 +88,7 @@ func (m *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 // Retrieve detailed information about the named domain.
 func (m *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint) + "/" + domain)
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	var envelope singleDomainEnvelope
 	err := getResponseFromJSON(r, &envelope)
@@ -101,6 +103,7 @@ func (m *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNS
 // and as different domains if false.
 func (m *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint))
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 	payload := simplehttp.NewUrlEncodedPayload()
@@ -115,6 +118,7 @@ func (m *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction 
 // DeleteDomain instructs Mailgun to dispose of the named domain name.
 func (m *MailgunImpl) DeleteDomain(name string) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(domainsEndpoint) + "/" + name)
+	r.SetClient(m.Client())
 	r.SetBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err

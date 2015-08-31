@@ -106,6 +106,7 @@ func (ei *EventIterator) GetNext() error {
 // fetch completes the API fetch common to all three of these functions.
 func (ei *EventIterator) fetch(url string) error {
 	r := simplehttp.NewHTTPRequest(url)
+	r.SetClient(ei.mg.Client())
 	r.SetBasicAuth(basicAuthUser, ei.mg.ApiKey())
 	var response map[string]interface{}
 	err := getResponseFromJSON(r, &response)

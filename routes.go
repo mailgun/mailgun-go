@@ -41,6 +41,7 @@ func (mg *MailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
 	if skip != DefaultSkip {
 		r.AddParameter("skip", strconv.Itoa(skip))
 	}
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 
 	var envelope struct {
@@ -60,6 +61,7 @@ func (mg *MailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
 // See the Route structure definition for more details.
 func (mg *MailgunImpl) CreateRoute(prototype Route) (Route, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint))
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	p.AddValue("priority", strconv.Itoa(prototype.Priority))
@@ -81,6 +83,7 @@ func (mg *MailgunImpl) CreateRoute(prototype Route) (Route, error) {
 // See the Route structure definition and the Mailgun API documentation for more details.
 func (mg *MailgunImpl) DeleteRoute(id string) error {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
@@ -89,6 +92,7 @@ func (mg *MailgunImpl) DeleteRoute(id string) error {
 // GetRouteByID retrieves the complete route definition associated with the unique route ID.
 func (mg *MailgunImpl) GetRouteByID(id string) (Route, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
 		Message string `json:"message"`
@@ -103,6 +107,7 @@ func (mg *MailgunImpl) GetRouteByID(id string) (Route, error) {
 // All other fields remain as-is.
 func (mg *MailgunImpl) UpdateRoute(id string, route Route) (Route, error) {
 	r := simplehttp.NewHTTPRequest(generatePublicApiUrl(routesEndpoint) + "/" + id)
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	p := simplehttp.NewUrlEncodedPayload()
 	if route.Priority != 0 {

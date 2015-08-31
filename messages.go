@@ -487,6 +487,7 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 
 		r := simplehttp.NewHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
+		r.SetClient(m.Client())
 		r.SetBasicAuth(basicAuthUser, m.ApiKey())
 
 		var response sendMessageResponse
@@ -613,6 +614,7 @@ func validateStringList(list []string, requireOne bool) bool {
 func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 
 	var response StoredMessage
@@ -626,6 +628,7 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	r.AddHeader("Accept", "message/rfc2822")
 
@@ -641,6 +644,7 @@ func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) 
 func (mg *MailgunImpl) DeleteStoredMessage(id string) error {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := simplehttp.NewHTTPRequest(url)
+	r.SetClient(mg.Client())
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
