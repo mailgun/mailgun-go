@@ -54,11 +54,11 @@ func (mg *MailgunImpl) GetWebhookByType(t string) (string, error) {
 	r.SetBasicAuth(basicAuthUser, mg.ApiKey())
 	var envelope struct {
 		Webhook struct {
-			Url *string `json:"url"`
+			Url string `json:"url"`
 		} `json:"webhook"`
 	}
 	err := getResponseFromJSON(r, &envelope)
-	return *envelope.Webhook.Url, err
+	return envelope.Webhook.Url, err
 }
 
 // UpdateWebhook replaces one webhook setting for another.
