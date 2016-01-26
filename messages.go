@@ -23,6 +23,7 @@ type Message struct {
 	attachments       []string
 	readerAttachments []ReaderAttachment
 	inlines           []string
+	readerInlines     []ReaderAttachment
 
 	testMode           bool
 	tracking           bool
@@ -229,6 +230,16 @@ func (m *Message) AddReaderAttachment(filename string, readCloser io.ReadCloser)
 // in the local filesystem.
 func (m *Message) AddAttachment(attachment string) {
 	m.attachments = append(m.attachments, attachment)
+}
+
+// AddReaderInline arranges to send a file along with the e-mail message.
+// File contents are read from a io.ReadCloser.
+// The filename parameter is the resulting filename of the attachment.
+// The readCloser parameter is the io.ReadCloser which reads the actual bytes to be used
+// as the contents of the attached file.
+func (m *Message) AddReaderInline(filename string, readCloser io.ReadCloser) {
+    ra := ReaderAttachment{Filename: filename, ReadCloser: readCloser}
+    m.readerInlines = append(m.readerInlines, ra)
 }
 
 // AddInline arranges to send a file along with the e-mail message, but does so
@@ -485,6 +496,12 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 				payload.AddFile("inline", inline)
 			}
 		}
+		
+	        if message.readerInlines != nil {
+	            for _, readerAttachment := range message.readerInlines {
+	                payload.AddReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
+	            }
+	        }
 
 		r := simplehttp.NewHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
 		r.SetClient(m.Client())
