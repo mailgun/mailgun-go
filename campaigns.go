@@ -1,9 +1,5 @@
 package mailgun
 
-import (
-	"github.com/mbanzon/simplehttp"
-)
-
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 type Campaign struct {
@@ -28,9 +24,9 @@ type campaignsEnvelope struct {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) GetCampaigns() (int, []Campaign, error) {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
-	r.SetClient(m.Client())
-	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	r := newHTTPRequest(generateApiUrl(m, campaignsEndpoint))
+	r.setClient(m.Client())
+	r.setBasicAuth(basicAuthUser, m.ApiKey())
 
 	var envelope campaignsEnvelope
 	err := getResponseFromJSON(r, &envelope)
@@ -43,14 +39,14 @@ func (m *MailgunImpl) GetCampaigns() (int, []Campaign, error) {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) CreateCampaign(name, id string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint))
-	r.SetClient(m.Client())
-	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	r := newHTTPRequest(generateApiUrl(m, campaignsEndpoint))
+	r.setClient(m.Client())
+	r.setBasicAuth(basicAuthUser, m.ApiKey())
 
-	payload := simplehttp.NewUrlEncodedPayload()
-	payload.AddValue("name", name)
+	payload := newUrlEncodedPayload()
+	payload.addValue("name", name)
 	if id != "" {
-		payload.AddValue("id", id)
+		payload.addValue("id", id)
 	}
 	_, err := makePostRequest(r, payload)
 	return err
@@ -59,14 +55,14 @@ func (m *MailgunImpl) CreateCampaign(name, id string) error {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) UpdateCampaign(oldId, name, newId string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
-	r.SetClient(m.Client())
-	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	r := newHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + oldId)
+	r.setClient(m.Client())
+	r.setBasicAuth(basicAuthUser, m.ApiKey())
 
-	payload := simplehttp.NewUrlEncodedPayload()
-	payload.AddValue("name", name)
+	payload := newUrlEncodedPayload()
+	payload.addValue("name", name)
 	if newId != "" {
-		payload.AddValue("id", newId)
+		payload.addValue("id", newId)
 	}
 	_, err := makePostRequest(r, payload)
 	return err
@@ -75,9 +71,9 @@ func (m *MailgunImpl) UpdateCampaign(oldId, name, newId string) error {
 // Campaigns have been deprecated since development work on this SDK commenced.
 // Please refer to http://documentation.mailgun.com/api_reference .
 func (m *MailgunImpl) DeleteCampaign(id string) error {
-	r := simplehttp.NewHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
-	r.SetClient(m.Client())
-	r.SetBasicAuth(basicAuthUser, m.ApiKey())
+	r := newHTTPRequest(generateApiUrl(m, campaignsEndpoint) + "/" + id)
+	r.setClient(m.Client())
+	r.setBasicAuth(basicAuthUser, m.ApiKey())
 	_, err := makeDeleteRequest(r)
 	return err
 }
