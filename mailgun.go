@@ -94,7 +94,6 @@ package mailgun
 
 import (
 	"fmt"
-	"github.com/mbanzon/simplehttp"
 	"io"
 	"net/http"
 	"time"
@@ -289,8 +288,8 @@ func generatePublicApiUrl(endpoint string) string {
 }
 
 // generateParameterizedUrl works as generateApiUrl, but supports query parameters.
-func generateParameterizedUrl(m Mailgun, endpoint string, payload simplehttp.Payload) (string, error) {
-	paramBuffer, err := payload.GetPayloadBuffer()
+func generateParameterizedUrl(m Mailgun, endpoint string, payload payload) (string, error) {
+	paramBuffer, err := payload.getPayloadBuffer()
 	if err != nil {
 		return "", err
 	}
