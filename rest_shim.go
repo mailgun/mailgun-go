@@ -16,12 +16,13 @@ type UnexpectedResponseError struct {
 	Expected []int
 	Actual   int
 	URL      string
+	Data     []byte
 }
 
 // String() converts the error into a human-readable, logfmt-compliant string.
 // See http://godoc.org/github.com/kr/logfmt for details on logfmt formatting.
 func (e *UnexpectedResponseError) String() string {
-	return fmt.Sprintf("UnexpectedResponseError URL=%s ExpectedOneOf=%#v Got=%d", e.URL, e.Expected, e.Actual)
+	return fmt.Sprintf("UnexpectedResponseError URL=%s ExpectedOneOf=%#v Got=%d Error: %s", e.URL, e.Expected, e.Actual, string(e.Data))
 }
 
 // Error() performs as String().
@@ -30,11 +31,12 @@ func (e *UnexpectedResponseError) Error() string {
 }
 
 // newError creates a new error condition to be returned.
-func newError(url string, expected []int, got int) error {
+func newError(url string, expected []int, got *simplehttp.HTTPResponse) error {
 	return &UnexpectedResponseError{
 		URL:      url,
 		Expected: expected,
-		Actual:   got,
+		Actual:   got.Code,
+		Data:     got.Data,
 	}
 }
 
@@ -59,7 +61,7 @@ func makeRequest(r *httpRequest, kind string, p payload) (*httpResponse, error) 
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makeRequest(kind, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp.Code)
+		return rsp, newError(r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -73,7 +75,7 @@ func getResponseFromJSON(r *httpRequest, v interface{}) error {
 		return err
 	}
 	if notGood(response.Code, expected) {
-		return newError(r.URL, expected, response.Code)
+		return newError(r.URL, expected, response)
 	}
 	return response.parseFromJSON(v)
 }
@@ -87,7 +89,7 @@ func postResponseFromJSON(r *httpRequest, p payload, v interface{}) error {
 		return err
 	}
 	if notGood(response.Code, expected) {
-		return newError(r.URL, expected, response.Code)
+		return newError(r.URL, expected, response)
 	}
 	return response.parseFromJSON(v)
 }
@@ -101,7 +103,7 @@ func putResponseFromJSON(r *httpRequest, p payload, v interface{}) error {
 		return err
 	}
 	if notGood(response.Code, expected) {
-		return newError(r.URL, expected, response.Code)
+		return newError(r.URL, expected, response)
 	}
 	return response.parseFromJSON(v)
 }
@@ -112,7 +114,7 @@ func makeGetRequest(r *httpRequest) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makeGetRequest()
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp.Code)
+		return rsp, newError(r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -123,7 +125,7 @@ func makePostRequest(r *httpRequest, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makePostRequest(p)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp.Code)
+		return rsp, newError(r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -134,7 +136,7 @@ func makePutRequest(r *httpRequest, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makePutRequest(p)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp.Code)
+		return rsp, newError(r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -145,7 +147,7 @@ func makeDeleteRequest(r *httpRequest) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makeDeleteRequest()
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp.Code)
+		return rsp, newError(r.URL, expected, rsp)
 	}
 	return rsp, err
 }
