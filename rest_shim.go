@@ -31,7 +31,7 @@ func (e *UnexpectedResponseError) Error() string {
 }
 
 // newError creates a new error condition to be returned.
-func newError(url string, expected []int, got *simplehttp.HTTPResponse) error {
+func newError(url string, expected []int, got *httpResponse) error {
 	return &UnexpectedResponseError{
 		URL:      url,
 		Expected: expected,
