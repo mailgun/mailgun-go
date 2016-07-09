@@ -67,3 +67,15 @@ func (mg *MailgunImpl) RemoveUnsubscribe(a string) error {
 	_, err := makeDeleteRequest(r)
 	return err
 }
+
+// RemoveUnsubscribe removes the e-mail address given from the domain's unsubscription table with a matching tag.
+// If passing in an ID (discoverable from, e.g., GetUnsubscribes()), the e-mail address associated
+// with the given ID will be removed.
+func (mg *MailgunImpl) RemoveUnsubscribeWithTag(a, t string) error {
+	r := newHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, a))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.addParameter("tag", t)
+	_, err := makeDeleteRequest(r)
+	return err
+}
