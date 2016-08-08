@@ -236,8 +236,8 @@ func (m *Message) AddAttachment(attachment string) {
 // The readCloser parameter is the io.ReadCloser which reads the actual bytes to be used
 // as the contents of the attached file.
 func (m *Message) AddReaderInline(filename string, readCloser io.ReadCloser) {
-    ra := ReaderAttachment{Filename: filename, ReadCloser: readCloser}
-    m.readerInlines = append(m.readerInlines, ra)
+	ra := ReaderAttachment{Filename: filename, ReadCloser: readCloser}
+	m.readerInlines = append(m.readerInlines, ra)
 }
 
 // AddInline arranges to send a file along with the e-mail message, but does so
@@ -494,12 +494,12 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 				payload.addFile("inline", inline)
 			}
 		}
-		
-	        if message.readerInlines != nil {
-	            for _, readerAttachment := range message.readerInlines {
-	                payload.AddReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
-	            }
-	        }
+
+		if message.readerInlines != nil {
+			for _, readerAttachment := range message.readerInlines {
+				payload.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
+			}
+		}
 
 		r := newHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
 		r.setClient(m.Client())
