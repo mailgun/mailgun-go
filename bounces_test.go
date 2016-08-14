@@ -1,23 +1,17 @@
-// +build acceptance
-
-package acceptance
+package mailgun
 
 import (
 	"fmt"
-	mailgun "github.com/mailgun/mailgun-go"
 	"testing"
 )
 
 func TestGetBounces(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
+	mg := NewMailgun(domain, apiKey, "")
 	n, bounces, err := mg.GetBounces(-1, -1)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if n > 0 {
-		t.Fatal("Expected no bounces for what should be a clean domain.")
 	}
 	if n != len(bounces) {
 		t.Fatalf("Expected length of bounces %d to equal returned length %d", len(bounces), n)
@@ -27,13 +21,13 @@ func TestGetBounces(t *testing.T) {
 func TestGetSingleBounce(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
-	exampleEmail := fmt.Sprintf("baz@%s", domain)
+	mg := NewMailgun(domain, apiKey, "")
+	exampleEmail := fmt.Sprintf("%s@%s", randomString(64, ""), domain)
 	_, err := mg.GetSingleBounce(exampleEmail)
 	if err == nil {
 		t.Fatal("Did not expect a bounce to exist")
 	}
-	ure, ok := err.(*mailgun.UnexpectedResponseError)
+	ure, ok := err.(*UnexpectedResponseError)
 	if !ok {
 		t.Fatal("Expected UnexpectedResponseError")
 	}
@@ -45,7 +39,7 @@ func TestGetSingleBounce(t *testing.T) {
 func TestAddDelBounces(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
+	mg := NewMailgun(domain, apiKey, "")
 
 	// Compute an e-mail address for our domain.
 
@@ -58,15 +52,6 @@ func TestAddDelBounces(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if n > 0 {
-		t.Fatal("Expected no bounces for what should be a clean domain.")
-	}
-
-	bounce, err := mg.GetSingleBounce(exampleEmail)
-	if err == nil {
-		t.Fatalf("Expected no bounces for %s", exampleEmail)
-	}
-
 	// Add the bounce for our address.
 
 	err = mg.AddBounce(exampleEmail, "550", "TestAddDelBounces-generated error")
@@ -80,14 +65,14 @@ func TestAddDelBounces(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if n != 1 {
-		t.Fatal("Expected one bounce for this domain.")
+	if n == 0 {
+		t.Fatal("Expected at least one bounce for this domain.")
 	}
 	if bounces[0].Address != exampleEmail {
 		t.Fatalf("Expected bounce for address %s; got %s", exampleEmail, bounces[0].Address)
 	}
 
-	bounce, err = mg.GetSingleBounce(exampleEmail)
+	bounce, err := mg.GetSingleBounce(exampleEmail)
 	if err != nil {
 		t.Fatal(err)
 	}

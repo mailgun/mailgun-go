@@ -1,24 +1,21 @@
-// +build acceptance,spendMoney
-
-package acceptance
+package mailgun
 
 import (
 	"fmt"
-	mailgun "github.com/mailgun/mailgun-go"
 	"testing"
 )
 
-func setup(t *testing.T) (mailgun.Mailgun, string) {
+func setup(t *testing.T) (Mailgun, string) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
+	mg := NewMailgun(domain, apiKey, "")
 
 	address := fmt.Sprintf("list5@%s", domain)
-	_, err := mg.CreateList(mailgun.List{
+	_, err := mg.CreateList(List{
 		Address:     address,
 		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
-		AccessLevel: mailgun.Members,
+		AccessLevel: Members,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -26,7 +23,7 @@ func setup(t *testing.T) (mailgun.Mailgun, string) {
 	return mg, address
 }
 
-func teardown(t *testing.T, mg mailgun.Mailgun, address string) {
+func teardown(t *testing.T, mg Mailgun, address string) {
 	err := mg.DeleteList(address)
 	if err != nil {
 		t.Fatal(err)
@@ -38,7 +35,7 @@ func TestMailingListMembers(t *testing.T) {
 	defer teardown(t, mg, address)
 
 	var countPeople = func() int {
-		n, _, err := mg.GetMembers(mailgun.DefaultLimit, mailgun.DefaultSkip, mailgun.All, address)
+		n, _, err := mg.GetMembers(DefaultLimit, DefaultSkip, All, address)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -46,10 +43,10 @@ func TestMailingListMembers(t *testing.T) {
 	}
 
 	startCount := countPeople()
-	protoJoe := mailgun.Member{
+	protoJoe := Member{
 		Address:    "joe@example.com",
 		Name:       "Joe Example",
-		Subscribed: mailgun.Subscribed,
+		Subscribed: Subscribed,
 	}
 	err := mg.CreateMember(true, address, protoJoe)
 	if err != nil {
@@ -72,7 +69,7 @@ func TestMailingListMembers(t *testing.T) {
 		t.Fatalf("Unexpected Member: Expected [%#v], Got [%#v]", protoJoe, theMember)
 	}
 
-	_, err = mg.UpdateMember("joe@example.com", address, mailgun.Member{
+	_, err = mg.UpdateMember("joe@example.com", address, Member{
 		Name: "Joe Cool",
 	})
 	if err != nil {
@@ -97,17 +94,17 @@ func TestMailingListMembers(t *testing.T) {
 	}
 
 	err = mg.CreateMemberList(nil, address, []interface{}{
-		mailgun.Member{
+		Member{
 			Address:    "joe.user1@example.com",
 			Name:       "Joe's debugging account",
-			Subscribed: mailgun.Unsubscribed,
+			Subscribed: Unsubscribed,
 		},
-		mailgun.Member{
+		Member{
 			Address:    "Joe Cool <joe.user2@example.com>",
 			Name:       "Joe's Cool Account",
-			Subscribed: mailgun.Subscribed,
+			Subscribed: Subscribed,
 		},
-		mailgun.Member{
+		Member{
 			Address: "joe.user3@example.com",
 			Vars: map[string]interface{}{
 				"packet-email": "KW9ABC @ BOGBBS-4.#NCA.CA.USA.NOAM",
@@ -137,17 +134,17 @@ func TestMailingListMembers(t *testing.T) {
 func TestMailingLists(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
+	mg := NewMailgun(domain, apiKey, "")
 	listAddr := fmt.Sprintf("list2@%s", domain)
-	protoList := mailgun.List{
+	protoList := List{
 		Address:     listAddr,
 		Name:        "List1",
 		Description: "A list created by an acceptance test.",
-		AccessLevel: mailgun.Members,
+		AccessLevel: Members,
 	}
 
 	var countLists = func() int {
-		total, _, err := mg.GetLists(mailgun.DefaultLimit, mailgun.DefaultSkip, "")
+		total, _, err := mg.GetLists(DefaultLimit, DefaultSkip, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -186,7 +183,7 @@ func TestMailingLists(t *testing.T) {
 		t.Fatalf("Unexpected list descriptor: Expected [%#v], Got [%#v]", protoList, theList)
 	}
 
-	_, err = mg.UpdateList(listAddr, mailgun.List{
+	_, err = mg.UpdateList(listAddr, List{
 		Description: "A list whose description changed",
 	})
 	if err != nil {

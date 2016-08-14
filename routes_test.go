@@ -1,19 +1,16 @@
-// +build acceptance
-
-package acceptance
+package mailgun
 
 import (
-	"github.com/mailgun/mailgun-go"
 	"testing"
 )
 
 func TestRouteCRUD(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
+	mg := NewMailgun(domain, apiKey, "")
 
 	var countRoutes = func() int {
-		count, _, err := mg.GetRoutes(mailgun.DefaultLimit, mailgun.DefaultSkip)
+		count, _, err := mg.GetRoutes(DefaultLimit, DefaultSkip)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -22,7 +19,7 @@ func TestRouteCRUD(t *testing.T) {
 
 	routeCount := countRoutes()
 
-	newRoute, err := mg.CreateRoute(mailgun.Route{
+	newRoute, err := mg.CreateRoute(Route{
 		Priority:    1,
 		Description: "Sample Route",
 		Expression:  "match_recipient(\".*@samples.mailgun.org\")",
@@ -72,7 +69,7 @@ func TestRouteCRUD(t *testing.T) {
 		}
 	}
 
-	changedRoute, err := mg.UpdateRoute(newRoute.ID, mailgun.Route{
+	changedRoute, err := mg.UpdateRoute(newRoute.ID, Route{
 		Priority: 2,
 	})
 	if err != nil {

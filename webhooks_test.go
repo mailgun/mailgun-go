@@ -1,16 +1,13 @@
-// +build acceptance
-
-package acceptance
+package mailgun
 
 import (
-	"github.com/mailgun/mailgun-go"
 	"testing"
 )
 
 func TestWebhookCRUD(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
+	mg := NewMailgun(domain, apiKey, "")
 
 	var countHooks = func() int {
 		hooks, err := mg.GetWebhooks()
