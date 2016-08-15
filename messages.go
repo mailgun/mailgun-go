@@ -595,7 +595,7 @@ func (pm *plainMessage) isValid() bool {
 		return false
 	}
 
-	if pm.text == "" {
+	if pm.text == "" && pm.html == "" {
 		return false
 	}
 
