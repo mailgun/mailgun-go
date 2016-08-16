@@ -315,6 +315,10 @@ func (m *Message) send() (string, string, error) {
 	return m.mg.Send(m)
 }
 
+func (m *Message) SetReplyTo(recipient string) {
+	m.AddHeader("Reply-To", recipient)
+}
+
 // AddCC appends a receiver to the carbon-copy header of a message.
 func (m *Message) AddCC(recipient string) {
 	m.specific.addCC(recipient)
@@ -596,7 +600,7 @@ func (pm *plainMessage) isValid() bool {
 		return false
 	}
 
-	if pm.text == "" {
+	if pm.text == "" && pm.html == "" {
 		return false
 	}
 

@@ -1,9 +1,6 @@
-// +build acceptance
-
-package acceptance
+package mailgun
 
 import (
-	"github.com/mailgun/mailgun-go"
 	"testing"
 )
 
@@ -11,7 +8,7 @@ func TestGetComplaints(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
 	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, publicApiKey)
+	mg := NewMailgun(domain, apiKey, publicApiKey)
 	n, complaints, err := mg.GetComplaints(-1, -1)
 	if err != nil {
 		t.Fatal(err)
@@ -21,16 +18,16 @@ func TestGetComplaints(t *testing.T) {
 	}
 }
 
-func TestGetComplaintFromBazNoComplaint(t *testing.T) {
+func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
 	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, publicApiKey)
-	_, err := mg.GetSingleComplaint("baz@example.com")
+	mg := NewMailgun(domain, apiKey, publicApiKey)
+	_, err := mg.GetSingleComplaint(randomString(64, "") + "@example.com")
 	if err == nil {
 		t.Fatal("Expected not-found error for missing complaint")
 	}
-	ure, ok := err.(*mailgun.UnexpectedResponseError)
+	ure, ok := err.(*UnexpectedResponseError)
 	if !ok {
 		t.Fatal("Expected UnexpectedResponseError")
 	}
@@ -42,30 +39,33 @@ func TestGetComplaintFromBazNoComplaint(t *testing.T) {
 func TestCreateDeleteComplaint(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := mailgun.NewMailgun(domain, apiKey, "")
-	var check = func(count int) {
-		c, _, err := mg.GetComplaints(mailgun.DefaultLimit, mailgun.DefaultSkip)
+	mg := NewMailgun(domain, apiKey, "")
+	var check = func(count int) int {
+		c, _, err := mg.GetComplaints(DefaultLimit, DefaultSkip)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if c != count {
+		if count != -1 && c != count {
 			t.Fatalf("Expected baz@example.com to have %d complaints; got %d", count, c)
 		}
+
+		return c
 	}
 
-	check(0)
+	randomMail := randomString(64, "") + "@example.com"
 
-	err := mg.CreateComplaint("baz@example.com")
+	origCount := check(-1)
+	err := mg.CreateComplaint(randomMail)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	check(1)
+	newCount := check(origCount + 1)
 
-	err = mg.DeleteComplaint("baz@example.com")
+	err = mg.DeleteComplaint(randomMail)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	check(0)
+	check(newCount - 1)
 }

@@ -1,16 +1,13 @@
-// +build acceptance
-
-package acceptance
+package mailgun
 
 import (
-	"github.com/mailgun/mailgun-go"
 	"testing"
 )
 
 func TestEmailValidation(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := mailgun.NewMailgun(domain, "", apiKey)
+	mg := NewMailgun(domain, "", apiKey)
 	ev, err := mg.ValidateEmail("foo@mailgun.com")
 	if err != nil {
 		t.Fatal(err)
@@ -32,7 +29,7 @@ func TestEmailValidation(t *testing.T) {
 func TestParseAddresses(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := mailgun.NewMailgun(domain, "", apiKey)
+	mg := NewMailgun(domain, "", apiKey)
 	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses("Alice <alice@example.com>", "bob@example.com", "example.com")
 	if err != nil {
 		t.Fatal(err)
