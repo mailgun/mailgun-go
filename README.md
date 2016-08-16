@@ -1,11 +1,26 @@
 Mailgun with Go
 ===============
 
-[![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go)
+[![GoDoc](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1?status.svg)](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1)
 
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/api_reference.html).
 
+Download the library
+
+```
+go get gopkg.in/mailgun/mailgun-go.v1
+```
+
+# Sending mail
+
+You just need your domain, public and private API key from the Mailgun admin interface to get started sending using the
+library:
+
+```Go
+mg := mailgun.NewMailgun(domain, apiKey, publicApiKey)
+message := mailgun.NewMessage("sender@example.com", "Fancy subject!", "Hello from Mailgun Go!", "recipient@example.com")
+```
 
 # Testing
 
