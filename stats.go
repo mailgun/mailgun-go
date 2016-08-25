@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const statTimeLayout = "2006-01-02"
+
 type Stat struct {
 	Event      string         `json:"event"`
 	TotalCount int            `json:"total_count"`
@@ -32,7 +34,7 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 	}
 
 	if startDate != nil {
-		r.addParameter("start-date", startDate.Format(time.RFC3339))
+		r.addParameter("start-date", startDate.Format(statTimeLayout))
 	}
 
 	for _, e := range event {
