@@ -99,6 +99,8 @@ import (
 	"time"
 )
 
+var Debug = false
+
 const (
 	apiBase                 = "https://api.mailgun.net/v3"
 	messagesEndpoint        = "messages"
