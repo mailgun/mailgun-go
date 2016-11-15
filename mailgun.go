@@ -206,6 +206,7 @@ type MailgunImpl struct {
 	apiKey       string
 	publicApiKey string
 	client       *http.Client
+	baseURL      string
 }
 
 // NewMailGun creates a new client instance.
