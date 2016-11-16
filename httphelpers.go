@@ -73,7 +73,7 @@ func (r *httpRequest) setBasicAuth(user, password string) {
 	r.BasicAuthPassword = password
 }
 
-func newUrlEncodedPayload() *urlEncodedPayload {
+func newURLEncodedPayload() *urlEncodedPayload {
 	return &urlEncodedPayload{}
 }
 
@@ -128,11 +128,11 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 
 	for _, file := range f.Files {
 		if tmp, err := writer.CreateFormFile(file.key, path.Base(file.value)); err == nil {
-			if fp, err := os.Open(file.value); err == nil {
+			if fp, ferr := os.Open(file.value); ferr == nil {
 				defer fp.Close()
 				io.Copy(tmp, fp)
 			} else {
-				return nil, err
+				return nil, ferr
 			}
 		} else {
 			return nil, err
@@ -184,7 +184,7 @@ func (r *httpRequest) makeDeleteRequest() (*httpResponse, error) {
 }
 
 func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse, error) {
-	url, err := r.generateUrlWithParameters()
+	url, err := r.generateURLWithParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse
 	return &response, nil
 }
 
-func (r *httpRequest) generateUrlWithParameters() (string, error) {
+func (r *httpRequest) generateURLWithParameters() (string, error) {
 	url, err := url.Parse(r.URL)
 	if err != nil {
 		return "", err

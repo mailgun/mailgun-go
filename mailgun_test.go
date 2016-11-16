@@ -8,20 +8,20 @@ import (
 
 const domain = "valid-mailgun-domain"
 const apiKey = "valid-mailgun-api-key"
-const publicApiKey = "valid-mailgun-public-api-key"
+const publicAPIKey = "valid-mailgun-public-api-key"
 
 func TestMailgun(t *testing.T) {
-	m := NewMailgun(domain, apiKey, publicApiKey)
+	m := NewMailgun(domain, apiKey, publicAPIKey)
 
 	if domain != m.Domain() {
 		t.Fatal("Domain not equal!")
 	}
 
-	if apiKey != m.ApiKey() {
+	if apiKey != m.APIKey() {
 		t.Fatal("ApiKey not equal!")
 	}
 
-	if publicApiKey != m.PublicApiKey() {
+	if publicAPIKey != m.PublicAPIKey() {
 		t.Fatal("PublicApiKey not equal!")
 	}
 
@@ -38,7 +38,7 @@ func TestMailgun(t *testing.T) {
 func TestBounceGetCode(t *testing.T) {
 	b1 := &Bounce{
 		CreatedAt: "blah",
-		code:      123,
+		Code:      123,
 		Address:   "blort",
 		Error:     "bletch",
 	}
@@ -52,7 +52,7 @@ func TestBounceGetCode(t *testing.T) {
 
 	b2 := &Bounce{
 		CreatedAt: "blah",
-		code:      "456",
+		Code:      "456",
 		Address:   "blort",
 		Error:     "Bletch",
 	}
@@ -66,11 +66,11 @@ func TestBounceGetCode(t *testing.T) {
 
 	b3 := &Bounce{
 		CreatedAt: "blah",
-		code:      "456H",
+		Code:      "456H",
 		Address:   "blort",
 		Error:     "Bletch",
 	}
-	c, err = b3.GetCode()
+	_, err = b3.GetCode()
 	e, ok := err.(*strconv.NumError)
 	if !ok && e != nil {
 		t.Fatal("Expected a syntax error in numeric conversion: got ", err)

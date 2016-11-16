@@ -7,8 +7,8 @@ import (
 func TestGetComplaints(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := NewMailgun(domain, apiKey, publicApiKey)
+	publicAPIKey := reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg := NewMailgun(domain, apiKey, publicAPIKey)
 	n, complaints, err := mg.GetComplaints(-1, -1)
 	if err != nil {
 		t.Fatal(err)
@@ -21,8 +21,8 @@ func TestGetComplaints(t *testing.T) {
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	apiKey := reqEnv(t, "MG_API_KEY")
-	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := NewMailgun(domain, apiKey, publicApiKey)
+	publicAPIKey := reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg := NewMailgun(domain, apiKey, publicAPIKey)
 	_, err := mg.GetSingleComplaint(randomString(64, "") + "@example.com")
 	if err == nil {
 		t.Fatal("Expected not-found error for missing complaint")

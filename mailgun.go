@@ -1,7 +1,7 @@
 // TODO(sfalvo):
 // Document how to run acceptance tests.
 
-// The mailgun package provides methods for interacting with the Mailgun API.
+// Package mailgun provides methods for interacting with the Mailgun API.
 // It automates the HTTP request/response cycle, encodings, and other details needed by the API.
 // This SDK lets you do everything the API lets you, in a more Go-friendly way.
 //
@@ -129,8 +129,8 @@ const (
 // determine the currently supported feature set.
 type Mailgun interface {
 	Domain() string
-	ApiKey() string
-	PublicApiKey() string
+	APIKey() string
+	PublicAPIKey() string
 	Client() *http.Client
 	SetClient(client *http.Client)
 	Send(m *Message) (string, string, error)
@@ -148,7 +148,7 @@ type Mailgun interface {
 	DeleteDomain(name string) error
 	GetCampaigns() (int, []Campaign, error)
 	CreateCampaign(name, id string) error
-	UpdateCampaign(oldId, name, newId string) error
+	UpdateCampaign(oldID, name, newID string) error
 	DeleteCampaign(id string) error
 	GetComplaints(limit, skip int) (int, []Complaint, error)
 	GetSingleComplaint(address string) (Complaint, error)
@@ -192,110 +192,110 @@ type Mailgun interface {
 	NewEventIterator() *EventIterator
 }
 
-// MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
+// Impl bundles data needed by a large number of methods in order to interact with the Mailgun API.
 // Colloquially, we refer to instances of this structure as "clients."
-type MailgunImpl struct {
+type Impl struct {
 	domain       string
 	apiKey       string
-	publicApiKey string
+	publicAPIKey string
 	client       *http.Client
 }
 
-// NewMailGun creates a new client instance.
-func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
-	m := MailgunImpl{
+// NewMailgun creates a new client instance.
+func NewMailgun(domain, apiKey, publicAPIKey string) Mailgun {
+	m := Impl{
 		domain:       domain,
 		apiKey:       apiKey,
-		publicApiKey: publicApiKey,
+		publicAPIKey: publicAPIKey,
 		client:       http.DefaultClient,
 	}
 	return &m
 }
 
 // Domain returns the domain configured for this client.
-func (m *MailgunImpl) Domain() string {
+func (m *Impl) Domain() string {
 	return m.domain
 }
 
-// ApiKey returns the API key configured for this client.
-func (m *MailgunImpl) ApiKey() string {
+// APIKey returns the API key configured for this client.
+func (m *Impl) APIKey() string {
 	return m.apiKey
 }
 
-// PublicApiKey returns the public API key configured for this client.
-func (m *MailgunImpl) PublicApiKey() string {
-	return m.publicApiKey
+// PublicAPIKey returns the public API key configured for this client.
+func (m *Impl) PublicAPIKey() string {
+	return m.publicAPIKey
 }
 
 // Client returns the HTTP client configured for this client.
-func (m *MailgunImpl) Client() *http.Client {
+func (m *Impl) Client() *http.Client {
 	return m.client
 }
 
 // SetClient updates the HTTP client for this client.
-func (m *MailgunImpl) SetClient(c *http.Client) {
+func (m *Impl) SetClient(c *http.Client) {
 	m.client = c
 }
 
-// generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
-func generateApiUrl(m Mailgun, endpoint string) string {
+// generateAPIUrl renders a URL for an API endpoint using the domain and endpoint name.
+func generateAPIUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
 }
 
-// generateMemberApiUrl renders a URL relevant for specifying mailing list members.
+// generateMemberAPIUrl renders a URL relevant for specifying mailing list members.
 // The address parameter refers to the mailing list in question.
-func generateMemberApiUrl(endpoint, address string) string {
+func generateMemberAPIUrl(endpoint, address string) string {
 	return fmt.Sprintf("%s/%s/%s/members", apiBase, endpoint, address)
 }
 
-// generateApiUrlWithTarget works as generateApiUrl,
+// generateAPIUrlWithTarget works as generateAPIUrl,
 // but consumes an additional resource parameter called 'target'.
-func generateApiUrlWithTarget(m Mailgun, endpoint, target string) string {
+func generateAPIUrlWithTarget(m Mailgun, endpoint, target string) string {
 	tail := ""
 	if target != "" {
 		tail = fmt.Sprintf("/%s", target)
 	}
-	return fmt.Sprintf("%s%s", generateApiUrl(m, endpoint), tail)
+	return fmt.Sprintf("%s%s", generateAPIUrl(m, endpoint), tail)
 }
 
-// generateDomainApiUrl renders a URL as generateApiUrl, but
+// generateDomainAPIUrl renders a URL as generateAPIUrl, but
 // addresses a family of functions which have a non-standard URL structure.
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.
-func generateDomainApiUrl(m Mailgun, endpoint string) string {
+func generateDomainAPIUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/domains/%s/%s", apiBase, m.Domain(), endpoint)
 }
 
-// generateCredentialsUrl renders a URL as generateDomainApiUrl,
+// generateCredentialsURL renders a URL as generateDomainAPIUrl,
 // but focuses on the SMTP credentials family of API functions.
-func generateCredentialsUrl(m Mailgun, id string) string {
+func generateCredentialsURL(m Mailgun, id string) string {
 	tail := ""
 	if id != "" {
 		tail = fmt.Sprintf("/%s", id)
 	}
-	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail))
+	return generateDomainAPIUrl(m, fmt.Sprintf("credentials%s", tail))
 	// return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
 }
 
-// generateStoredMessageUrl generates the URL needed to acquire a copy of a stored message.
-func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
-	return generateDomainApiUrl(m, fmt.Sprintf("%s/%s", endpoint, id))
+// generateStoredMessageURL generates the URL needed to acquire a copy of a stored message.
+func generateStoredMessageURL(m Mailgun, endpoint, id string) string {
+	return generateDomainAPIUrl(m, fmt.Sprintf("%s/%s", endpoint, id))
 	// return fmt.Sprintf("%s/domains/%s/%s/%s", apiBase, m.Domain(), endpoint, id)
 }
 
-// generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
-func generatePublicApiUrl(endpoint string) string {
+// generatePublicAPIUrl works as generateAPIUrl, except that .generatePublicAPIUrl has no need for the domain.
+func generatePublicAPIUrl(endpoint string) string {
 	return fmt.Sprintf("%s/%s", apiBase, endpoint)
 }
 
-// generateParameterizedUrl works as generateApiUrl, but supports query parameters.
-func generateParameterizedUrl(m Mailgun, endpoint string, payload payload) (string, error) {
+// generateParameterizedURL works as generateAPIUrl, but supports query parameters.
+func generateParameterizedURL(m Mailgun, endpoint string, payload payload) (string, error) {
 	paramBuffer, err := payload.getPayloadBuffer()
 	if err != nil {
 		return "", err
 	}
 	params := string(paramBuffer.Bytes())
-	return fmt.Sprintf("%s?%s", generateApiUrl(m, eventsEndpoint), params), nil
+	return fmt.Sprintf("%s?%s", generateAPIUrl(m, eventsEndpoint), params), nil
 }
 
 // parseMailgunTime translates a timestamp as returned by Mailgun into a Go standard timestamp.

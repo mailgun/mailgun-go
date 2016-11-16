@@ -65,8 +65,8 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 // The number of items returned may be less than the specified limit, if it's specified.
 // Note that zero items and a zero-length slice do not necessarily imply an error occurred.
 // Except for the error itself, all results are undefined in the event of an error.
-func (m *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
-	r := newHTTPRequest(generatePublicApiUrl(domainsEndpoint))
+func (m *Impl) GetDomains(limit, skip int) (int, []Domain, error) {
+	r := newHTTPRequest(generatePublicAPIUrl(domainsEndpoint))
 	r.setClient(m.Client())
 	if limit != DefaultLimit {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -74,7 +74,7 @@ func (m *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	if skip != DefaultSkip {
 		r.addParameter("skip", strconv.Itoa(skip))
 	}
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var envelope domainsEnvelope
 	err := getResponseFromJSON(r, &envelope)
@@ -84,11 +84,11 @@ func (m *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	return envelope.TotalCount, envelope.Items, nil
 }
 
-// Retrieve detailed information about the named domain.
-func (m *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
-	r := newHTTPRequest(generatePublicApiUrl(domainsEndpoint) + "/" + domain)
+// GetSingleDomain retrieves detailed information about the named domain.
+func (m *Impl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
+	r := newHTTPRequest(generatePublicAPIUrl(domainsEndpoint) + "/" + domain)
 	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 	var envelope singleDomainEnvelope
 	err := getResponseFromJSON(r, &envelope)
 	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, err
@@ -100,12 +100,12 @@ func (m *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNS
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (m *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error {
-	r := newHTTPRequest(generatePublicApiUrl(domainsEndpoint))
+func (m *Impl) CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error {
+	r := newHTTPRequest(generatePublicAPIUrl(domainsEndpoint))
 	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 
-	payload := newUrlEncodedPayload()
+	payload := newURLEncodedPayload()
 	payload.addValue("name", name)
 	payload.addValue("smtp_password", smtpPassword)
 	payload.addValue("spam_action", spamAction)
@@ -115,10 +115,10 @@ func (m *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction 
 }
 
 // DeleteDomain instructs Mailgun to dispose of the named domain name.
-func (m *MailgunImpl) DeleteDomain(name string) error {
-	r := newHTTPRequest(generatePublicApiUrl(domainsEndpoint) + "/" + name)
+func (m *Impl) DeleteDomain(name string) error {
+	r := newHTTPRequest(generatePublicAPIUrl(domainsEndpoint) + "/" + name)
 	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
 }

@@ -26,16 +26,16 @@ func TestGetSingleDomain(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dr, rxDnsRecords, txDnsRecords, err := mg.GetSingleDomain(domains[0].Name)
+	dr, rxDNSRecords, txDNSRecords, err := mg.GetSingleDomain(domains[0].Name)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Logf("TestGetSingleDomain: %#v\n", dr)
-	for _, rxd := range rxDnsRecords {
+	for _, rxd := range rxDNSRecords {
 		t.Logf("TestGetSingleDomains:   %#v\n", rxd)
 	}
-	for _, txd := range txDnsRecords {
+	for _, txd := range txDNSRecords {
 		t.Logf("TestGetSingleDomains:   %#v\n", txd)
 	}
 }

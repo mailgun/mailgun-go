@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func ExampleMailgunImpl_ValidateEmail() {
+func ExampleImpl_ValidateEmail() {
 	mg := NewMailgun("example.com", "", "my_public_api_key")
 	ev, err := mg.ValidateEmail("joe@example.com")
 	if err != nil {
@@ -23,7 +23,7 @@ func ExampleMailgunImpl_ValidateEmail() {
 	}
 }
 
-func ExampleMailgunImpl_ParseAddresses() {
+func ExampleImpl_ParseAddresses() {
 	mg := NewMailgun("example.com", "", "my_public_api_key")
 	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses("Alice <alice@example.com>", "bob@example.com", "example.com")
 	if err != nil {
@@ -43,7 +43,7 @@ func ExampleMailgunImpl_ParseAddresses() {
 	}
 }
 
-func ExampleMailgunImpl_UpdateList() {
+func ExampleImpl_UpdateList() {
 	mg := NewMailgun("example.com", "my_api_key", "")
 	_, err := mg.UpdateList("joe-stat@example.com", List{
 		Name:        "Joe Stat",
@@ -54,7 +54,7 @@ func ExampleMailgunImpl_UpdateList() {
 	}
 }
 
-func ExampleMailgunImpl_Send_constructed() {
+func ExampleImpl_Send_constructed() {
 	mg := NewMailgun("example.com", "my_api_key", "")
 	m := NewMessage(
 		"Excited User <me@example.com>",
@@ -73,7 +73,7 @@ func ExampleMailgunImpl_Send_constructed() {
 	log.Printf("Message id=%s", id)
 }
 
-func ExampleMailgunImpl_Send_mime() {
+func ExampleImpl_Send_mime() {
 	exampleMime := `Content-Type: text/plain; charset="ascii"
 Subject: Joe's Example Subject
 From: Joe Example <joe@example.com>
@@ -92,7 +92,7 @@ Testing some Mailgun MIME awesomeness!
 	log.Printf("Message id=%s", id)
 }
 
-func ExampleMailgunImpl_GetRoutes() {
+func ExampleImpl_GetRoutes() {
 	mg := NewMailgun("example.com", "my_api_key", "")
 	n, routes, err := mg.GetRoutes(DefaultLimit, DefaultSkip)
 	if err != nil {
@@ -106,7 +106,7 @@ func ExampleMailgunImpl_GetRoutes() {
 	}
 }
 
-func ExampleMailgunImpl_UpdateRoute() {
+func ExampleImpl_UpdateRoute() {
 	mg := NewMailgun("example.com", "my_api_key", "")
 	_, err := mg.UpdateRoute("route-id-here", Route{
 		Priority: 2,
