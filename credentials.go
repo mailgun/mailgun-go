@@ -16,8 +16,8 @@ type Credential struct {
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
 // GetCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error) {
-	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
+func (mg *Impl) GetCredentials(limit, skip int) (int, []Credential, error) {
+	r := newHTTPRequest(generateCredentialsURL(mg, ""))
 	r.setClient(mg.Client())
 	if limit != DefaultLimit {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -25,7 +25,7 @@ func (mg *MailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error
 	if skip != DefaultSkip {
 		r.addParameter("skip", strconv.Itoa(skip))
 	}
-	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var envelope struct {
 		TotalCount int          `json:"total_count"`
 		Items      []Credential `json:"items"`
@@ -38,14 +38,14 @@ func (mg *MailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.
-func (mg *MailgunImpl) CreateCredential(login, password string) error {
+func (mg *Impl) CreateCredential(login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
+	r := newHTTPRequest(generateCredentialsURL(mg, ""))
 	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.ApiKey())
-	p := newUrlEncodedPayload()
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	p := newURLEncodedPayload()
 	p.addValue("login", login)
 	p.addValue("password", password)
 	_, err := makePostRequest(r, p)
@@ -53,27 +53,27 @@ func (mg *MailgunImpl) CreateCredential(login, password string) error {
 }
 
 // ChangeCredentialPassword attempts to alter the indicated credential's password.
-func (mg *MailgunImpl) ChangeCredentialPassword(id, password string) error {
+func (mg *Impl) ChangeCredentialPassword(id, password string) error {
 	if (id == "") || (password == "") {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, id))
+	r := newHTTPRequest(generateCredentialsURL(mg, id))
 	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.ApiKey())
-	p := newUrlEncodedPayload()
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	p := newURLEncodedPayload()
 	p.addValue("password", password)
 	_, err := makePutRequest(r, p)
 	return err
 }
 
 // DeleteCredential attempts to remove the indicated principle from the domain.
-func (mg *MailgunImpl) DeleteCredential(id string) error {
+func (mg *Impl) DeleteCredential(id string) error {
 	if id == "" {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, id))
+	r := newHTTPRequest(generateCredentialsURL(mg, id))
 	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
 }

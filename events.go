@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Events are open-ended, loosely-defined JSON documents.
+// Event is open-ended, loosely-defined JSON documents.
 // They will always have an event and a timestamp field, however.
 type Event map[string]interface{}
 
@@ -40,7 +40,7 @@ type EventIterator struct {
 // NewEventIterator creates a new iterator for events.
 // Use GetFirstPage to retrieve the first batch of events.
 // Use Next and Previous thereafter as appropriate to iterate through sets of data.
-func (mg *MailgunImpl) NewEventIterator() *EventIterator {
+func (mg *Impl) NewEventIterator() *EventIterator {
 	return &EventIterator{mg: mg}
 }
 
@@ -57,7 +57,7 @@ func (ei *EventIterator) GetFirstPage(opts GetEventsOptions) error {
 		return fmt.Errorf("collation cannot at once be both ascending and descending")
 	}
 
-	payload := newUrlEncodedPayload()
+	payload := newURLEncodedPayload()
 	if opts.Limit != 0 {
 		payload.addValue("limit", fmt.Sprintf("%d", opts.Limit))
 	}
@@ -82,20 +82,20 @@ func (ei *EventIterator) GetFirstPage(opts GetEventsOptions) error {
 		}
 	}
 
-	url, err := generateParameterizedUrl(ei.mg, eventsEndpoint, payload)
+	url, err := generateParameterizedURL(ei.mg, eventsEndpoint, payload)
 	if err != nil {
 		return err
 	}
 	return ei.fetch(url)
 }
 
-// Retrieves the chronologically previous batch of events, if any exist.
+// GetPrevious retrieves the chronologically previous batch of events, if any exist.
 // You know you're at the end of the list when len(Events())==0.
 func (ei *EventIterator) GetPrevious() error {
 	return ei.fetch(ei.prevURL)
 }
 
-// Retrieves the chronologically next batch of events, if any exist.
+// GetNext retrieves the chronologically next batch of events, if any exist.
 // You know you're at the end of the list when len(Events())==0.
 func (ei *EventIterator) GetNext() error {
 	return ei.fetch(ei.nextURL)
@@ -106,7 +106,7 @@ func (ei *EventIterator) GetNext() error {
 func (ei *EventIterator) fetch(url string) error {
 	r := newHTTPRequest(url)
 	r.setClient(ei.mg.Client())
-	r.setBasicAuth(basicAuthUser, ei.mg.ApiKey())
+	r.setBasicAuth(basicAuthUser, ei.mg.APIKey())
 	var response map[string]interface{}
 	err := getResponseFromJSON(r, &response)
 	if err != nil {

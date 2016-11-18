@@ -60,12 +60,12 @@ type StoredMessage struct {
 	BodyPlain         string             `json:"body-plain"`
 	StrippedText      string             `json:"stripped-text"`
 	StrippedSignature string             `json:"stripped-signature"`
-	BodyHtml          string             `json:"body-html"`
-	StrippedHtml      string             `json:"stripped-html"`
+	BodyHTML          string             `json:"body-html"`
+	StrippedHTML      string             `json:"stripped-html"`
 	Attachments       []StoredAttachment `json:"attachments"`
-	MessageUrl        string             `json:"message-url"`
+	MessageURL        string             `json:"message-url"`
 	ContentIDMap      map[string]struct {
-		Url         string `json:"url"`
+		URL         string `json:"url"`
 		ContentType string `json:"content-type"`
 		Name        string `json:"name"`
 		Size        int64  `json:"size"`
@@ -76,7 +76,7 @@ type StoredMessage struct {
 // StoredAttachment structures contain information on an attachment associated with a stored message.
 type StoredAttachment struct {
 	Size        int    `json:"size"`
-	Url         string `json:"url"`
+	URL         string `json:"url"`
 	Name        string `json:"name"`
 	ContentType string `json:"content-type"`
 }
@@ -109,19 +109,19 @@ type mimeMessage struct {
 
 type sendMessageResponse struct {
 	Message string `json:"message"`
-	Id      string `json:"id"`
+	ID      string `json:"id"`
 }
 
 // features abstracts the common characteristics between regular and MIME messages.
 // addCC, addBCC, recipientCount, and setHTML are invoked via the package-global AddCC, AddBCC,
-// RecipientCount, and SetHtml calls, as these functions are ignored for MIME messages.
+// RecipientCount, and SetHTML calls, as these functions are ignored for MIME messages.
 // Send() invokes addValues to add message-type-specific MIME headers for the API call
 // to Mailgun.  isValid yeilds true if and only if the message is valid enough for sending
 // through the API.  Finally, endpoint() tells Send() which endpoint to use to submit the API call.
 type features interface {
 	addCC(string)
 	addBCC(string)
-	setHtml(string)
+	setHTML(string)
 	addValues(*formDataPayload)
 	isValid() bool
 	endpoint() string
@@ -161,7 +161,7 @@ func NewMessage(from string, subject string, text string, to ...string) *Message
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
+func (mg *Impl) NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
 		specific: &plainMessage{
 			from:    from,
@@ -208,7 +208,7 @@ func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-func (mg *MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+func (mg *Impl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
 		specific: &mimeMessage{
 			body: body,
@@ -341,17 +341,17 @@ func (pm *plainMessage) addBCC(r string) {
 
 func (mm *mimeMessage) addBCC(_ string) {}
 
-// If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
-// an HTML representation of your message in addition to your plain-text body.
-func (m *Message) SetHtml(html string) {
-	m.specific.setHtml(html)
+// SetHTML will arrange to bundle an HTML representation of your message in addition to your plain-text body,
+// if you're sending a message that isn't already MIME encoded
+func (m *Message) SetHTML(html string) {
+	m.specific.setHTML(html)
 }
 
-func (pm *plainMessage) setHtml(h string) {
+func (pm *plainMessage) setHTML(h string) {
 	pm.html = h
 }
 
-func (mm *mimeMessage) setHtml(_ string) {}
+func (mm *mimeMessage) setHTML(_ string) {}
 
 // AddTag attaches a tag to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -437,7 +437,7 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 // It returns the Mailgun server response, which consists of two components:
 // a human-readable status message, and a message ID.  The status and message ID are set only
 // if no error occurred.
-func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) {
+func (mg *Impl) Send(message *Message) (mes string, id string, err error) {
 	if !isValid(message) {
 		err = errors.New("Message not valid")
 	} else {
@@ -482,9 +482,9 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 			}
 		}
 		if message.recipientVariables != nil {
-			j, err := json.Marshal(message.recipientVariables)
-			if err != nil {
-				return "", "", err
+			j, jerr := json.Marshal(message.recipientVariables)
+			if jerr != nil {
+				return "", "", jerr
 			}
 			payload.addValue("recipient-variables", string(j))
 		}
@@ -510,15 +510,15 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 			}
 		}
 
-		r := newHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
-		r.setClient(m.Client())
-		r.setBasicAuth(basicAuthUser, m.ApiKey())
+		r := newHTTPRequest(generateAPIUrl(mg, message.specific.endpoint()))
+		r.setClient(mg.Client())
+		r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 		var response sendMessageResponse
 		err = postResponseFromJSON(r, payload, &response)
 		if err == nil {
 			mes = response.Message
-			id = response.Id
+			id = response.ID
 		}
 	}
 
@@ -556,9 +556,8 @@ func (mm *mimeMessage) endpoint() string {
 func yesNo(b bool) string {
 	if b {
 		return "yes"
-	} else {
-		return "no"
 	}
+	return "no"
 }
 
 // isValid returns true if, and only if,
@@ -618,28 +617,25 @@ func (mm *mimeMessage) isValid() bool {
 func validateStringList(list []string, requireOne bool) bool {
 	hasOne := false
 
-	if list == nil {
-		return !requireOne
-	} else {
+	if list != nil {
 		for _, a := range list {
 			if a == "" {
 				return false
-			} else {
-				hasOne = hasOne || true
 			}
+			hasOne = hasOne || true
 		}
+		return hasOne
 	}
-
-	return hasOne
+	return !requireOne
 }
 
 // GetStoredMessage retrieves information about a received e-mail message.
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
-	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+func (mg *Impl) GetStoredMessage(id string) (StoredMessage, error) {
+	url := generateStoredMessageURL(mg, messagesEndpoint, id)
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response StoredMessage
 	err := getResponseFromJSON(r, &response)
@@ -649,11 +645,11 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
 // Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
 // thus delegates to the caller the required parsing.
-func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
-	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+func (mg *Impl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
+	url := generateStoredMessageURL(mg, messagesEndpoint, id)
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addHeader("Accept", "message/rfc2822")
 
 	var response StoredMessageRaw
@@ -665,11 +661,11 @@ func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) 
 // DeleteStoredMessage removes a previously stored message.
 // Note that Mailgun institutes a policy of automatically deleting messages after a set time.
 // Consult the current Mailgun API documentation for more details.
-func (mg *MailgunImpl) DeleteStoredMessage(id string) error {
-	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+func (mg *Impl) DeleteStoredMessage(id string) error {
+	url := generateStoredMessageURL(mg, messagesEndpoint, id)
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
 }

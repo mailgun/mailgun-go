@@ -17,7 +17,7 @@ func TestGetStats(t *testing.T) {
 	t.Logf("Total Count: %d\n", totalCount)
 	t.Logf("Id\tEvent\tCreatedAt\tTotalCount\t\n")
 	for _, stat := range stats {
-		t.Logf("%s\t%s\t%s\t%d\t\n", stat.Id, stat.Event, stat.CreatedAt, stat.TotalCount)
+		t.Logf("%s\t%s\t%s\t%d\t\n", stat.ID, stat.Event, stat.CreatedAt, stat.TotalCount)
 	}
 }
 

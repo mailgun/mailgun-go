@@ -39,11 +39,11 @@ type addressParseResult struct {
 // ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.
 // It may also be used to break an email address into its sub-components.  (See example.)
 // NOTE: Use of this function requires a proper public API key.  The private API key will not work.
-func (m *MailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
-	r := newHTTPRequest(generatePublicApiUrl(addressValidateEndpoint))
+func (m *Impl) ValidateEmail(email string) (EmailVerification, error) {
+	r := newHTTPRequest(generatePublicAPIUrl(addressValidateEndpoint))
 	r.setClient(m.Client())
 	r.addParameter("address", email)
-	r.setBasicAuth(basicAuthUser, m.PublicApiKey())
+	r.setBasicAuth(basicAuthUser, m.PublicAPIKey())
 
 	var response EmailVerification
 	err := getResponseFromJSON(r, &response)
@@ -56,11 +56,11 @@ func (m *MailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 
 // ParseAddresses takes a list of addresses and sorts them into valid and invalid address categories.
 // NOTE: Use of this function requires a proper public API key.  The private API key will not work.
-func (m *MailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
-	r := newHTTPRequest(generatePublicApiUrl(addressParseEndpoint))
+func (m *Impl) ParseAddresses(addresses ...string) ([]string, []string, error) {
+	r := newHTTPRequest(generatePublicAPIUrl(addressParseEndpoint))
 	r.setClient(m.Client())
 	r.addParameter("addresses", strings.Join(addresses, ","))
-	r.setBasicAuth(basicAuthUser, m.PublicApiKey())
+	r.setBasicAuth(basicAuthUser, m.PublicAPIKey())
 
 	var response addressParseResult
 	err := getResponseFromJSON(r, &response)

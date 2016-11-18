@@ -1,7 +1,7 @@
 Mailgun with Go
 ===============
 
-[![GoDoc](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1?status.svg)](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1)
+[![GoDoc](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1?status.svg)](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1) [![Go Report Card](https://goreportcard.com/badge/mailgun/mailgun-go)](https://goreportcard.com/report/mailgun/mailgun-go)
 
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/api_reference.html).

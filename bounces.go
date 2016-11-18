@@ -12,7 +12,7 @@ import (
 // CreatedAt provides the time at which Mailgun detected the bounce.
 type Bounce struct {
 	CreatedAt string      `json:"created_at"`
-	code      interface{} `json:"code"`
+	Code      interface{} `json:"code"`
 	Address   string      `json:"address"`
 	Error     string      `json:"error"`
 }
@@ -31,15 +31,15 @@ type bounceEnvelope struct {
 
 // GetCreatedAt parses the textual, RFC-822 timestamp into a standard Go-compatible
 // Time structure.
-func (i Bounce) GetCreatedAt() (t time.Time, err error) {
-	return parseMailgunTime(i.CreatedAt)
+func (b Bounce) GetCreatedAt() (t time.Time, err error) {
+	return parseMailgunTime(b.CreatedAt)
 }
 
 // GetCode will return the bounce code for the message, regardless if it was
 // returned as a string or as an integer.  This method overcomes a protocol
 // bug in the Mailgun API.
 func (b Bounce) GetCode() (int, error) {
-	switch c := b.code.(type) {
+	switch c := b.Code.(type) {
 	case int:
 		return c, nil
 	case string:
@@ -53,8 +53,8 @@ func (b Bounce) GetCode() (int, error) {
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
-func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint))
+func (m *Impl) GetBounces(limit, skip int) (int, []Bounce, error) {
+	r := newHTTPRequest(generateAPIUrl(m, bouncesEndpoint))
 	if limit != -1 {
 		r.addParameter("limit", strconv.Itoa(limit))
 	}
@@ -63,7 +63,7 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 	}
 
 	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var response bounceEnvelope
 	err := getResponseFromJSON(r, &response)
@@ -75,10 +75,10 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 }
 
 // GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
-func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+func (m *Impl) GetSingleBounce(address string) (Bounce, error) {
+	r := newHTTPRequest(generateAPIUrl(m, bouncesEndpoint) + "/" + address)
 	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var response Bounce
 	err := getResponseFromJSON(r, &response)
@@ -101,12 +101,12 @@ func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 //
 // Note that both code and error exist as strings, even though
 // code will report as a number.
-func (m *MailgunImpl) AddBounce(address, code, error string) error {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint))
+func (m *Impl) AddBounce(address, code, error string) error {
+	r := newHTTPRequest(generateAPIUrl(m, bouncesEndpoint))
 	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 
-	payload := newUrlEncodedPayload()
+	payload := newURLEncodedPayload()
 	payload.addValue("address", address)
 	if code != "" {
 		payload.addValue("code", code)
@@ -119,10 +119,10 @@ func (m *MailgunImpl) AddBounce(address, code, error string) error {
 }
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
-func (m *MailgunImpl) DeleteBounce(address string) error {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
+func (m *Impl) DeleteBounce(address string) error {
+	r := newHTTPRequest(generateAPIUrl(m, bouncesEndpoint) + "/" + address)
 	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
+	r.setBasicAuth(basicAuthUser, m.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
 }
