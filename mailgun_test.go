@@ -6,11 +6,18 @@ import (
 	"testing"
 
 	"github.com/facebookgo/ensure"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 const domain = "valid-mailgun-domain"
 const apiKey = "valid-mailgun-api-key"
 const publicApiKey = "valid-mailgun-public-api-key"
+
+func TestMailgunGinkgo(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Mailgun Test Suite")
+}
 
 func TestMailgun(t *testing.T) {
 	m := NewMailgun(domain, apiKey, publicApiKey)

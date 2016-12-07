@@ -37,7 +37,7 @@ func main() {
 
 	parser := args.NewParser(args.EnvPrefix("MG_"), args.Desc(desc, args.IsFormated))
 	parser.AddOption("--verbose").Alias("-v").IsTrue().Help("be verbose")
-	parser.AddOption("--url").Alias("-u").Env("URL").Default(mailgun.BaseURL).Help("url to the mailgun api")
+	parser.AddOption("--url").Alias("-u").Env("URL").Default(mailgun.ApiBase).Help("url to the mailgun api")
 	parser.AddOption("--api-key").Alias("-a").Env("API_KEY").Help("mailgun api key")
 	parser.AddOption("--public-api-key").Alias("-p").Env("PUBLIC_API_KEY").Help("mailgun public api key")
 	parser.AddOption("--domain").Alias("-d").Env("DOMAIN").Help("mailgun api key")
@@ -114,13 +114,9 @@ func Send(parser *args.ArgParser, data interface{}) int {
 		opts.Set("from", fmt.Sprintf("%s@%s", os.Getenv("USER"), host))
 	}
 
-	// Read the content from stdin
-	if !opts.Bool("lorem") {
-		// If stdin is not open and character device
-		if !args.IsCharDevice(os.Stdin) {
-			parser.PrintHelp()
-			return 1
-		}
+	// If stdin is not open and character device
+	if args.IsCharDevice(os.Stdin) {
+		// Read the content from stdin
 		content, err = ioutil.ReadAll(os.Stdin)
 		checkErr("Error reading stdin", err)
 	}
