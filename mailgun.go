@@ -128,6 +128,7 @@ const (
 // Always double-check with the Mailgun API Documentation to
 // determine the currently supported feature set.
 type Mailgun interface {
+	ApiBase() string
 	Domain() string
 	ApiKey() string
 	PublicApiKey() string
@@ -190,11 +191,13 @@ type Mailgun interface {
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 	NewEventIterator() *EventIterator
+	SetAPIBase(url string)
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
 // Colloquially, we refer to instances of this structure as "clients."
 type MailgunImpl struct {
+	apiBase      string
 	domain       string
 	apiKey       string
 	publicApiKey string
@@ -204,12 +207,18 @@ type MailgunImpl struct {
 // NewMailGun creates a new client instance.
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
 	m := MailgunImpl{
+		apiBase:      apiBase,
 		domain:       domain,
 		apiKey:       apiKey,
 		publicApiKey: publicApiKey,
 		client:       http.DefaultClient,
 	}
 	return &m
+}
+
+// ApiBase returns the API Base URL configured for this client.
+func (m *MailgunImpl) ApiBase() string {
+	return m.apiBase
 }
 
 // Domain returns the domain configured for this client.
@@ -237,15 +246,20 @@ func (m *MailgunImpl) SetClient(c *http.Client) {
 	m.client = c
 }
 
+// SetAPIBase updates the API Base URL for this client.
+func (m *MailgunImpl) SetAPIBase(address string) {
+	m.apiBase = address
+}
+
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
 func generateApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/%s/%s", apiBase, m.Domain(), endpoint)
+	return fmt.Sprintf("%s/%s/%s", m.ApiBase(), m.Domain(), endpoint)
 }
 
 // generateMemberApiUrl renders a URL relevant for specifying mailing list members.
 // The address parameter refers to the mailing list in question.
-func generateMemberApiUrl(endpoint, address string) string {
-	return fmt.Sprintf("%s/%s/%s/members", apiBase, endpoint, address)
+func generateMemberApiUrl(m Mailgun, endpoint, address string) string {
+	return fmt.Sprintf("%s/%s/%s/members", m.ApiBase(), endpoint, address)
 }
 
 // generateApiUrlWithTarget works as generateApiUrl,
@@ -263,7 +277,7 @@ func generateApiUrlWithTarget(m Mailgun, endpoint, target string) string {
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.
 func generateDomainApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/domains/%s/%s", apiBase, m.Domain(), endpoint)
+	return fmt.Sprintf("%s/domains/%s/%s", m.ApiBase(), m.Domain(), endpoint)
 }
 
 // generateCredentialsUrl renders a URL as generateDomainApiUrl,
@@ -284,8 +298,8 @@ func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
 }
 
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
-func generatePublicApiUrl(endpoint string) string {
-	return fmt.Sprintf("%s/%s", apiBase, endpoint)
+func generatePublicApiUrl(m Mailgun, endpoint string) string {
+	return fmt.Sprintf("%s/%s", m.ApiBase(), endpoint)
 }
 
 // generateParameterizedUrl works as generateApiUrl, but supports query parameters.
