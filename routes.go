@@ -99,7 +99,11 @@ func (mg *MailgunImpl) GetRouteByID(id string) (Route, error) {
 		*Route  `json:"route"`
 	}
 	err := getResponseFromJSON(r, &envelope)
+	if err != nil {
+		return Route{}, err
+	}
 	return *envelope.Route, err
+
 }
 
 // UpdateRoute provides an "in-place" update of the specified route.
