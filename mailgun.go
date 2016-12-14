@@ -99,8 +99,10 @@ import (
 	"time"
 )
 
+var Debug = false
+
 const (
-	apiBase                 = "https://api.mailgun.net/v3"
+	ApiBase                 = "https://api.mailgun.net/v3"
 	messagesEndpoint        = "messages"
 	mimeMessagesEndpoint    = "messages.mime"
 	addressValidateEndpoint = "address/validate"
@@ -207,7 +209,7 @@ type MailgunImpl struct {
 // NewMailGun creates a new client instance.
 func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
 	m := MailgunImpl{
-		apiBase:      apiBase,
+		apiBase:      ApiBase,
 		domain:       domain,
 		apiKey:       apiKey,
 		publicApiKey: publicApiKey,
