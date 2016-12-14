@@ -5,10 +5,11 @@ import (
 )
 
 func TestGetComplaints(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := NewMailgun(domain, apiKey, publicApiKey)
+	reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	n, complaints, err := mg.GetComplaints(-1, -1)
 	if err != nil {
 		t.Fatal(err)
@@ -19,11 +20,12 @@ func TestGetComplaints(t *testing.T) {
 }
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := NewMailgun(domain, apiKey, publicApiKey)
-	_, err := mg.GetSingleComplaint(randomString(64, "") + "@example.com")
+	reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
+	_, err = mg.GetSingleComplaint(randomString(64, "") + "@example.com")
 	if err == nil {
 		t.Fatal("Expected not-found error for missing complaint")
 	}
@@ -37,9 +39,10 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	var check = func(count int) int {
 		c, _, err := mg.GetComplaints(DefaultLimit, DefaultSkip)
 		if err != nil {
@@ -55,7 +58,7 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	randomMail := randomString(64, "") + "@example.com"
 
 	origCount := check(-1)
-	err := mg.CreateComplaint(randomMail)
+	err = mg.CreateComplaint(randomMail)
 	if err != nil {
 		t.Fatal(err)
 	}

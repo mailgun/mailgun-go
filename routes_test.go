@@ -5,9 +5,10 @@ import (
 )
 
 func TestRouteCRUD(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 
 	var countRoutes = func() int {
 		count, _, err := mg.GetRoutes(DefaultLimit, DefaultSkip)

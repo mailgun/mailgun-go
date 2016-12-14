@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -42,13 +43,13 @@ func (mg *MailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
 	}
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.ApiKey())
-
 	var envelope struct {
 		TotalCount int     `json:"total_count"`
 		Items      []Route `json:"items"`
 	}
 	err := getResponseFromJSON(r, &envelope)
 	if err != nil {
+		fmt.Printf("err here\n")
 		return -1, nil, err
 	}
 	return envelope.TotalCount, envelope.Items, nil
