@@ -37,7 +37,7 @@ func main() {
 
 	parser := args.NewParser(args.EnvPrefix("MG_"), args.Desc(desc, args.IsFormated))
 	parser.AddOption("--verbose").Alias("-v").IsTrue().Help("be verbose")
-	parser.AddOption("--url").Alias("-u").Env("URL").Default(mailgun.BaseURL).Help("url to the mailgun api")
+	parser.AddOption("--url").Alias("-u").Env("URL").Default(mailgun.ApiBase).Help("url to the mailgun api")
 	parser.AddOption("--api-key").Alias("-a").Env("API_KEY").Help("mailgun api key")
 	parser.AddOption("--public-api-key").Alias("-p").Env("PUBLIC_API_KEY").Help("mailgun public api key")
 	parser.AddOption("--domain").Alias("-d").Env("DOMAIN").Help("mailgun api key")
@@ -47,7 +47,6 @@ func main() {
 
 	// Parser and set global options
 	opts := parser.ParseArgsSimple(nil)
-	mailgun.BaseURL = opts.String("url")
 	if opts.Bool("verbose") {
 		mailgun.Debug = true
 	}
@@ -57,6 +56,9 @@ func main() {
 		opts.String("domain"),
 		opts.String("api-key"),
 		opts.String("public-api-key"))
+
+	// Set our api url
+	mg.SetAPIBase(opts.String("url"))
 
 	// Run the command chosen by our user
 	retCode, err := parser.RunCommand(mg)
@@ -112,23 +114,34 @@ func Send(parser *args.ArgParser, data interface{}) int {
 		opts.Set("from", fmt.Sprintf("%s@%s", os.Getenv("USER"), host))
 	}
 
-	// Read the content from stdin
-	if !opts.Bool("lorem") {
-		// If stdin is not open and character device
-		if !args.IsCharDevice(os.Stdin) {
-			parser.PrintHelp()
-			return 1
-		}
+	// If stdin is not open and character device
+	if args.IsCharDevice(os.Stdin) {
+		// Read the content from stdin
 		content, err = ioutil.ReadAll(os.Stdin)
 		checkErr("Error reading stdin", err)
 	}
 
 	subject := opts.String("subject")
-	for i := 0; i < count; i++ {
-		if opts.Bool("lorem") {
+
+	if opts.Bool("lorem") {
+		if len(subject) == 0 {
 			subject = lorem.Sentence(3, 5)
+		}
+		if len(content) == 0 {
 			content = []byte(lorem.Paragraph(10, 50))
 		}
+	} else {
+		if len(content) == 0 {
+			fmt.Fprintln(os.Stderr, "Must provide email body, or use --lorem")
+			os.Exit(1)
+		}
+		if len(subject) == 0 {
+			fmt.Fprintln(os.Stderr, "Must provide subject, or use --lorem")
+			os.Exit(1)
+		}
+	}
+
+	for i := 0; i < count; i++ {
 		resp, id, err := mg.Send(mg.NewMessage(
 			opts.String("from"),
 			subject,
