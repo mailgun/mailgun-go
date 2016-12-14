@@ -10,7 +10,7 @@ import (
 
 const (
 	fromUser       = "=?utf-8?q?Katie_Brewer=2C_CFP=C2=AE?= <joe@example.com>"
-	exampleSubject = "Joe's Example Subject"
+	exampleSubject = "Mailgun-go Example Subject"
 	exampleText    = "Testing some Mailgun awesomeness!"
 	exampleHtml    = "<html><head /><body><p>Testing some <a href=\"http://google.com?q=abc&r=def&s=ghi\">Mailgun HTML awesomeness!</a> at www.kc5tja@yahoo.com</p></body></html>"
 
@@ -29,10 +29,10 @@ Testing some Mailgun MIME awesomeness!
 func TestSendLegacyPlain(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		msg, id, err := mg.Send(m)
 		if err != nil {
@@ -45,10 +45,10 @@ func TestSendLegacyPlain(t *testing.T) {
 func TestSendLegacyPlainWithTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
 		msg, id, err := mg.Send(m)
@@ -62,10 +62,10 @@ func TestSendLegacyPlainWithTracking(t *testing.T) {
 func TestSendLegacyPlainAt(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
 		msg, id, err := mg.Send(m)
@@ -79,10 +79,10 @@ func TestSendLegacyPlainAt(t *testing.T) {
 func TestSendLegacyHtml(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
 		msg, id, err := mg.Send(m)
@@ -96,10 +96,10 @@ func TestSendLegacyHtml(t *testing.T) {
 func TestSendLegacyTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
 		msg, id, err := mg.Send(m)
@@ -113,10 +113,10 @@ func TestSendLegacyTracking(t *testing.T) {
 func TestSendLegacyTag(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
 		m.AddTag("FooTag")
 		m.AddTag("BarTag")
@@ -132,9 +132,10 @@ func TestSendLegacyTag(t *testing.T) {
 func TestSendLegacyMIME(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		mg := NewMailgun(domain, apiKey, "")
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
 		msg, id, err := mg.Send(m)
 		if err != nil {
@@ -146,9 +147,10 @@ func TestSendLegacyMIME(t *testing.T) {
 
 func TestGetStoredMessage(t *testing.T) {
 	spendMoney(t, func() {
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		mg := NewMailgun(domain, apiKey, "")
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		id, err := findStoredMessageID(mg) // somehow...
 		if err != nil {
 			t.Log(err)
@@ -205,10 +207,10 @@ func findStoredMessageID(mg Mailgun) (string, error) {
 func TestSendMGPlain(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		msg, id, err := mg.Send(m)
 		if err != nil {
@@ -221,10 +223,10 @@ func TestSendMGPlain(t *testing.T) {
 func TestSendMGPlainWithTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
 		msg, id, err := mg.Send(m)
@@ -238,10 +240,10 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 func TestSendMGPlainAt(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
 		msg, id, err := mg.Send(m)
@@ -255,10 +257,10 @@ func TestSendMGPlainAt(t *testing.T) {
 func TestSendMGHtml(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
 		msg, id, err := mg.Send(m)
@@ -272,10 +274,10 @@ func TestSendMGHtml(t *testing.T) {
 func TestSendMGTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
 		msg, id, err := mg.Send(m)
@@ -289,10 +291,10 @@ func TestSendMGTracking(t *testing.T) {
 func TestSendMGTag(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		publicApiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-		mg := NewMailgun(domain, apiKey, publicApiKey)
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
 		m.AddTag("FooTag")
 		m.AddTag("BarTag")
@@ -308,9 +310,10 @@ func TestSendMGTag(t *testing.T) {
 func TestSendMGMIME(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		mg := NewMailgun(domain, apiKey, "")
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
 		msg, id, err := mg.Send(m)
 		if err != nil {
@@ -323,14 +326,15 @@ func TestSendMGMIME(t *testing.T) {
 func TestSendMGBatchFailRecipients(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		mg := NewMailgun(domain, apiKey, "")
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Batch\n")
 		for i := 0; i < MaxNumberOfRecipients; i++ {
 			m.AddRecipient("") // We expect this to indicate a failure at the API
 		}
-		err := m.AddRecipientAndVariables(toUser, nil)
+		err = m.AddRecipientAndVariables(toUser, nil)
 		if err == nil {
 			// If we're here, either the SDK didn't send the message,
 			// OR the API didn't check for empty To: headers.
@@ -342,11 +346,12 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 func TestSendMGBatchRecipientVariables(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
-		domain := reqEnv(t, "MG_DOMAIN")
-		apiKey := reqEnv(t, "MG_API_KEY")
-		mg := NewMailgun(domain, apiKey, "")
+		mg, err := NewMailgunFromEnv()
+		if err != nil {
+			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+		}
 		m := mg.NewMessage(fromUser, exampleSubject, templateText)
-		err := m.AddRecipientAndVariables(toUser, map[string]interface{}{
+		err = m.AddRecipientAndVariables(toUser, map[string]interface{}{
 			"name":  "Joe Cool Example",
 			"table": 42,
 		})

@@ -6,9 +6,10 @@ import (
 )
 
 func TestGetBounces(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	n, bounces, err := mg.GetBounces(-1, -1)
 	if err != nil {
 		t.Fatal(err)
@@ -19,11 +20,12 @@ func TestGetBounces(t *testing.T) {
 }
 
 func TestGetSingleBounce(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	exampleEmail := fmt.Sprintf("%s@%s", randomString(64, ""), domain)
-	_, err := mg.GetSingleBounce(exampleEmail)
+	_, err = mg.GetSingleBounce(exampleEmail)
 	if err == nil {
 		t.Fatal("Did not expect a bounce to exist")
 	}
@@ -37,9 +39,10 @@ func TestGetSingleBounce(t *testing.T) {
 }
 
 func TestAddDelBounces(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 
 	// Compute an e-mail address for our domain.
 
@@ -68,8 +71,17 @@ func TestAddDelBounces(t *testing.T) {
 	if n == 0 {
 		t.Fatal("Expected at least one bounce for this domain.")
 	}
-	if bounces[0].Address != exampleEmail {
-		t.Fatalf("Expected bounce for address %s; got %s", exampleEmail, bounces[0].Address)
+
+	found := 0
+	for _, bounce := range bounces {
+		t.Logf("Bounce Address: %s\n", bounce.Address)
+		if bounce.Address == exampleEmail {
+			found++
+		}
+	}
+
+	if found == 0 {
+		t.Fatalf("Expected bounce for address %s in list of bounces", exampleEmail)
 	}
 
 	bounce, err := mg.GetSingleBounce(exampleEmail)
@@ -89,12 +101,21 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Make sure we're back to the way we were.
 
-	n, _, err = mg.GetBounces(-1, -1)
+	n, bounces, err = mg.GetBounces(-1, -1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if n > 0 {
-		t.Fatal("Expected no bounces for what should be a clean domain.")
+
+	found = 0
+	for _, bounce := range bounces {
+		t.Logf("Bounce Address: %s\n", bounce.Address)
+		if bounce.Address == exampleEmail {
+			found++
+		}
+	}
+
+	if found != 0 {
+		t.Fatalf("Expected no bounce for address %s in list of bounces", exampleEmail)
 	}
 
 	_, err = mg.GetSingleBounce(exampleEmail)

@@ -7,11 +7,13 @@ import (
 
 func setup(t *testing.T) (Mailgun, string) {
 	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 
 	address := fmt.Sprintf("list5@%s", domain)
-	_, err := mg.CreateList(List{
+	_, err = mg.CreateList(List{
 		Address:     address,
 		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
@@ -133,8 +135,10 @@ func TestMailingListMembers(t *testing.T) {
 
 func TestMailingLists(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	listAddr := fmt.Sprintf("list2@%s", domain)
 	protoList := List{
 		Address:     listAddr,
@@ -153,7 +157,7 @@ func TestMailingLists(t *testing.T) {
 
 	startCount := countLists()
 
-	_, err := mg.CreateList(protoList)
+	_, err = mg.CreateList(protoList)
 	if err != nil {
 		t.Fatal(err)
 	}

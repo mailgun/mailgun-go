@@ -5,9 +5,10 @@ import (
 )
 
 func TestGetDomains(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	n, domains, err := mg.GetDomains(DefaultLimit, DefaultSkip)
 	if err != nil {
 		t.Fatal(err)
@@ -19,9 +20,10 @@ func TestGetDomains(t *testing.T) {
 }
 
 func TestGetSingleDomain(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	_, domains, err := mg.GetDomains(DefaultLimit, DefaultSkip)
 	if err != nil {
 		t.Fatal(err)
@@ -41,10 +43,11 @@ func TestGetSingleDomain(t *testing.T) {
 }
 
 func TestGetSingleDomainNotExist(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
-	_, _, _, err := mg.GetSingleDomain(randomString(32, "com.edu.org.") + ".com")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
+	_, _, _, err = mg.GetSingleDomain(randomString(32, "com.edu.org.") + ".com")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
@@ -58,13 +61,14 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 }
 
 func TestAddDeleteDomain(t *testing.T) {
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	// First, we need to add the domain.
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
 	randomDomainName := randomString(16, "DOMAIN") + ".example.com"
 	randomPassword := randomString(16, "PASSWD")
-	err := mg.CreateDomain(randomDomainName, randomPassword, Tag, false)
+	err = mg.CreateDomain(randomDomainName, randomPassword, Tag, false)
 	if err != nil {
 		t.Fatal(err)
 	}

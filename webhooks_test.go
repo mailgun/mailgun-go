@@ -5,9 +5,10 @@ import (
 )
 
 func TestWebhookCRUD(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 
 	var countHooks = func() int {
 		hooks, err := mg.GetWebhooks()
@@ -19,7 +20,7 @@ func TestWebhookCRUD(t *testing.T) {
 
 	hookCount := countHooks()
 
-	err := mg.CreateWebhook("deliver", "http://www.example.com")
+	err = mg.CreateWebhook("deliver", "http://www.example.com")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,9 +5,11 @@ import (
 )
 
 func TestEmailValidation(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := NewMailgun(domain, "", apiKey)
+	reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	ev, err := mg.ValidateEmail("foo@mailgun.com")
 	if err != nil {
 		t.Fatal(err)
@@ -27,10 +29,15 @@ func TestEmailValidation(t *testing.T) {
 }
 
 func TestParseAddresses(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg := NewMailgun(domain, "", apiKey)
-	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses("Alice <alice@example.com>", "bob@example.com", "example.com")
+	reqEnv(t, "MG_PUBLIC_API_KEY")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
+	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses(
+		"Alice <alice@example.com>",
+		"bob@example.com",
+		"example.com")
 	if err != nil {
 		t.Fatal(err)
 	}

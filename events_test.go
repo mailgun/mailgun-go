@@ -5,12 +5,14 @@ import (
 )
 
 func TestEventIterator(t *testing.T) {
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
+
 	// Grab the list of events (as many as we can get)
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
 	ei := mg.NewEventIterator()
-	err := ei.GetFirstPage(GetEventsOptions{})
+	err = ei.GetFirstPage(GetEventsOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}

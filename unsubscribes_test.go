@@ -5,22 +5,24 @@ import (
 )
 
 func TestCreateUnsubscriber(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
 	email := reqEnv(t, "MG_EMAIL_ADDR")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 
 	// Create unsubscription record
-	err := mg.Unsubscribe(email, "*")
+	err = mg.Unsubscribe(email, "*")
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestGetUnsubscribes(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	n, us, err := mg.GetUnsubscribes(DefaultLimit, DefaultSkip)
 	if err != nil {
 		t.Fatal(err)
@@ -35,10 +37,11 @@ func TestGetUnsubscribes(t *testing.T) {
 }
 
 func TestGetUnsubscriptionByAddress(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
 	email := reqEnv(t, "MG_EMAIL_ADDR")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 	n, us, err := mg.GetUnsubscribesByAddress(email)
 	if err != nil {
 		t.Fatal(err)
@@ -53,13 +56,14 @@ func TestGetUnsubscriptionByAddress(t *testing.T) {
 }
 
 func TestCreateDestroyUnsubscription(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	apiKey := reqEnv(t, "MG_API_KEY")
 	email := reqEnv(t, "MG_EMAIL_ADDR")
-	mg := NewMailgun(domain, apiKey, "")
+	mg, err := NewMailgunFromEnv()
+	if err != nil {
+		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
+	}
 
 	// Create unsubscription record
-	err := mg.Unsubscribe(email, "*")
+	err = mg.Unsubscribe(email, "*")
 	if err != nil {
 		t.Fatal(err)
 	}

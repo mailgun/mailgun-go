@@ -93,9 +93,11 @@
 package mailgun
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -216,6 +218,31 @@ func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
 		client:       http.DefaultClient,
 	}
 	return &m
+}
+
+// Return a new Mailgun client using the environment variables
+// MG_API_KEY, MG_DOMAIN, MG_PUBLIC_API_KEY and MG_URL
+func NewMailgunFromEnv() (Mailgun, error) {
+	apiKey := os.Getenv("MG_API_KEY")
+	if apiKey == "" {
+		return nil, errors.New("required environment variable MG_API_KEY not defined")
+	}
+	domain := os.Getenv("MG_DOMAIN")
+	if domain == "" {
+		return nil, errors.New("required environment variable MG_DOMAIN not defined")
+	}
+
+	mg := MailgunImpl{
+		domain:       domain,
+		apiKey:       apiKey,
+		publicApiKey: os.Getenv("MG_PUBLIC_API_KEY"),
+		client:       http.DefaultClient,
+	}
+	url := os.Getenv("MG_URL")
+	if url != "" {
+		mg.SetAPIBase(url)
+	}
+	return &mg, nil
 }
 
 // ApiBase returns the API Base URL configured for this client.
