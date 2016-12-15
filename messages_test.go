@@ -367,7 +367,7 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 	})
 }
 
-func TestEmailSendOffline(t *testing.T) {
+func TestSendMGOffline(t *testing.T) {
 	const (
 		exampleDomain       = "testDomain"
 		exampleAPIKey       = "testAPIKey"
