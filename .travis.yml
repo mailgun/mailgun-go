@@ -7,5 +7,4 @@ go:
 sudo: false
 
 script:
-    - go get -t .
-    - go test .
+    - make
