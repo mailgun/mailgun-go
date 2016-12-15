@@ -2,7 +2,9 @@ package mailgun
 
 import (
 	"crypto/rand"
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -28,6 +30,10 @@ func randomString(n int, prefix string) string {
 		bytes[i] = alphanum[b%byte(len(alphanum))]
 	}
 	return prefix + string(bytes)
+}
+
+func randomEmail(prefix, domain string) string {
+	return strings.ToLower(fmt.Sprintf("%s@%s", randomString(20, prefix), domain))
 }
 
 func spendMoney(t *testing.T, tFunc func()) {
