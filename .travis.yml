@@ -6,5 +6,8 @@ go:
 
 sudo: false
 
+before_script:
+  - sudo apt-get install haveged && sudo service haveged start
+
 script:
-    - make
+  - make
