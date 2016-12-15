@@ -135,6 +135,10 @@ func (mg *MailgunImpl) GetListByAddress(addr string) (List, error) {
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.ApiKey())
 	response, err := makeGetRequest(r)
+	if err != nil {
+		return List{}, err
+	}
+
 	var envelope struct {
 		List `json:"list"`
 	}
