@@ -36,14 +36,14 @@ func TestRouteCRUD(t *testing.T) {
 		t.Fatal("I expected the route created to have an ID associated with it.")
 	}
 	defer func() {
-		err = mg.DeleteRoute(newRoute.ID)
+		err := mg.DeleteRoute(newRoute.ID)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		newCount := countRoutes()
-		if newCount != routeCount {
-			t.Fatalf("Expected %d routes defined; got %d", routeCount, newCount)
+		_, err = mg.GetRouteByID(newRoute.ID)
+		if err == nil {
+			t.Fatalf("Expected route %d deleted", newRoute.ID)
 		}
 	}()
 
