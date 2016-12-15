@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -12,7 +13,7 @@ func setup(t *testing.T) (Mailgun, string) {
 		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
 	}
 
-	address := fmt.Sprintf("list5@%s", domain)
+	address := fmt.Sprintf("%s@%s", strings.ToLower(randomString(6, "list")), domain)
 	_, err = mg.CreateList(List{
 		Address:     address,
 		Name:        address,
@@ -139,7 +140,7 @@ func TestMailingLists(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
 	}
-	listAddr := fmt.Sprintf("list2@%s", domain)
+	listAddr := fmt.Sprintf("%s@%s", strings.ToLower(randomString(7, "list")), domain)
 	protoList := List{
 		Address:     listAddr,
 		Name:        "List1",
@@ -155,8 +156,6 @@ func TestMailingLists(t *testing.T) {
 		return total
 	}
 
-	startCount := countLists()
-
 	_, err = mg.CreateList(protoList)
 	if err != nil {
 		t.Fatal(err)
@@ -167,15 +166,15 @@ func TestMailingLists(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		newCount := countLists()
-		if newCount != startCount {
-			t.Fatalf("Expected %d lists defined; got %d", startCount, newCount)
+		theList, err := mg.GetListByAddress(listAddr)
+		if err == nil {
+			t.Fatalf("Expected list %s deleted", theList.Address)
 		}
 	}()
 
-	newCount := countLists()
-	if newCount <= startCount {
-		t.Fatalf("Expected %d lists defined; got %d", startCount+1, newCount)
+	actualCount := countLists()
+	if actualCount < 1 {
+		t.Fatalf("Expected atleast 1 lists defined; got %d", actualCount)
 	}
 
 	theList, err := mg.GetListByAddress(listAddr)

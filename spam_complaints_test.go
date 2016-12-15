@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -43,32 +44,43 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
 	}
-	var check = func(count int) int {
-		c, _, err := mg.GetComplaints(DefaultLimit, DefaultSkip)
+	var hasComplaint = func(email string) bool {
+		t.Logf("hasComplaint: %s\n", email)
+		_, complaints, err := mg.GetComplaints(DefaultLimit, DefaultSkip)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if count != -1 && c != count {
-			t.Fatalf("Expected baz@example.com to have %d complaints; got %d", count, c)
-		}
 
-		return c
+		for _, complaint := range complaints {
+			t.Logf("Complaint Address: %s\n", complaint.Address)
+			if complaint.Address == email {
+				return true
+			}
+		}
+		return false
 	}
 
-	randomMail := randomString(64, "") + "@example.com"
+	randomMail := strings.ToLower(randomString(64, "")) + "@example.com"
 
-	origCount := check(-1)
+	if hasComplaint(randomMail) {
+		t.Fatalf("Expected no complaints from '%s'", randomMail)
+	}
+
 	err = mg.CreateComplaint(randomMail)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	newCount := check(origCount + 1)
+	if !hasComplaint(randomMail) {
+		t.Fatalf("Expected complaint from '%s'; but got none", randomMail)
+	}
 
 	err = mg.DeleteComplaint(randomMail)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	check(newCount - 1)
+	if hasComplaint(randomMail) {
+		t.Fatalf("Expected no complaints after delete from '%s'", randomMail)
+	}
 }

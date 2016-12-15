@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -28,7 +29,7 @@ func TestCreateDeleteCredentials(t *testing.T) {
 		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
 	}
 	randomPassword := randomString(16, "pw")
-	randomID := randomString(16, "usr")
+	randomID := strings.ToLower(randomString(16, "usr"))
 	randomLogin := fmt.Sprintf("%s@%s", randomID, domain)
 
 	err = mg.CreateCredential(randomLogin, randomPassword)

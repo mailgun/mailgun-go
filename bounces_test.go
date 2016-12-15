@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -20,11 +21,12 @@ func TestGetBounces(t *testing.T) {
 }
 
 func TestGetSingleBounce(t *testing.T) {
+	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	if err != nil {
 		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
 	}
-	exampleEmail := fmt.Sprintf("%s@%s", randomString(64, ""), domain)
+	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")), domain)
 	_, err = mg.GetSingleBounce(exampleEmail)
 	if err == nil {
 		t.Fatal("Did not expect a bounce to exist")
@@ -39,14 +41,14 @@ func TestGetSingleBounce(t *testing.T) {
 }
 
 func TestAddDelBounces(t *testing.T) {
+	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	if err != nil {
 		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
 	}
 
 	// Compute an e-mail address for our domain.
-
-	exampleEmail := fmt.Sprintf("baz@%s", domain)
+	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
 
 	// First, basic sanity check.
 	// Fail early if we have bounces for a fictitious e-mail address.
