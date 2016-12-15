@@ -3,6 +3,8 @@ package mailgun
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -363,4 +365,58 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+}
+
+func TestEmailSendOffline(t *testing.T) {
+	const (
+		exampleDomain       = "testDomain"
+		exampleAPIKey       = "testAPIKey"
+		examplePublicAPIKey = "testPublicAPIKey"
+		toUser              = "test@test.com"
+		exampleMessage      = "Queue. Thank you"
+		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.Method != http.MethodPost {
+			t.Fatalf("invalid `Method` \nACTUAL:\n%v\nEXPECTED:\n%v", req.URL.Path, http.MethodPost)
+		}
+		d := fmt.Sprintf("/%s/messages", exampleDomain)
+		if req.URL.Path != d {
+			t.Fatalf("invalid `Path` \nACTUAL:\n%v\nEXPECTED:\n%v", req.URL.Path, d)
+		}
+		values, err := parseContentType(req)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if values.Get("from") != fromUser {
+			t.Fatalf("invalid `from` \nACTUAL:\n%v\nEXPECTED:\n%v", values.Get("subject"), fromUser)
+		}
+		if values.Get("subject") != exampleSubject {
+			t.Fatalf("invalid `subject` \nACTUAL:\n%v\nEXPECTED:\n%v", values.Get("subject"), exampleSubject)
+		}
+		if values.Get("text") != exampleText {
+			t.Fatalf("invalid `text` \nACTUAL:\n%v\nEXPECTED:\n%v", values.Get("text"), exampleText)
+		}
+		if values.Get("to") != toUser {
+			t.Fatalf("invalid `to` \nACTUAL:\n%v\nEXPECTED:\n%v", values.Get("to"), toUser)
+		}
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey, examplePublicAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	msg, id, err := mg.Send(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if msg != exampleMessage {
+		t.Fatalf("invalid `msg` \nACTUAL:\n%v\nEXPECTED:\n%v", msg, exampleMessage)
+	}
+	if id != exampleID {
+		t.Fatalf("invalid `id` \nACTUAL:\n%v\nEXPECTED:\n%v", id, exampleID)
+	}
 }
