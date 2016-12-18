@@ -13,15 +13,15 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 // Many tests require configuration settings unique to the user, passed in via
 // environment variables.  If these variables aren't set, we need to fail the test early.
 func reqEnv(t *testing.T, variableName string) string {
 	value := os.Getenv(variableName)
-	if value == "" {
-		t.Fatalf("Expected environment variable %s to be set", variableName)
-	}
+	ensure.True(t, value != "")
 	return value
 }
 

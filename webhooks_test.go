@@ -2,63 +2,40 @@ package mailgun
 
 import (
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 func TestWebhookCRUD(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
 
 	var countHooks = func() int {
 		hooks, err := mg.GetWebhooks()
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		return len(hooks)
 	}
 
 	hookCount := countHooks()
 
-	err = mg.CreateWebhook("deliver", "http://www.example.com")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.CreateWebhook("deliver", "http://www.example.com"))
 	defer func() {
-		err = mg.DeleteWebhook("deliver")
-		if err != nil {
-			t.Fatal(err)
-		}
-
+		ensure.Nil(t, mg.DeleteWebhook("deliver"))
 		newCount := countHooks()
-		if newCount != hookCount {
-			t.Fatalf("Expected %d routes defined; got %d", hookCount, newCount)
-		}
+		ensure.DeepEqual(t, newCount, hookCount)
 	}()
 
 	newCount := countHooks()
-	if newCount <= hookCount {
-		t.Fatalf("Expected %d routes defined; got %d", hookCount+1, newCount)
-	}
+	ensure.False(t, newCount <= hookCount)
 
 	theURL, err := mg.GetWebhookByType("deliver")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if theURL != "http://www.example.com" {
-		t.Fatalf("Expected http://www.example.com, got %#v", theURL)
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, theURL, "http://www.example.com")
 
-	err = mg.UpdateWebhook("deliver", "http://api.example.com")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.UpdateWebhook("deliver", "http://api.example.com"))
 
 	hooks, err := mg.GetWebhooks()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if hooks["deliver"] != "http://api.example.com" {
-		t.Fatalf("Expected http://api.example.com, got %#v", hooks["deliver"])
-	}
+	ensure.Nil(t, err)
+
+	ensure.DeepEqual(t, hooks["deliver"], "http://api.example.com")
 }

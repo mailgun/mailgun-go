@@ -1,30 +1,26 @@
 package mailgun
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/facebookgo/ensure"
+)
 
 func TestCreateUnsubscriber(t *testing.T) {
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
-
+	ensure.Nil(t, err)
 	// Create unsubscription record
-	err = mg.Unsubscribe(email, "*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.Unsubscribe(email, "*"))
 }
 
 func TestGetUnsubscribes(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	n, us, err := mg.GetUnsubscribes(DefaultLimit, DefaultSkip)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
+
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
 	if len(us) > 0 {
 		t.Log("ID\tAddress\tCreated At\tTag\t")
@@ -37,19 +33,14 @@ func TestGetUnsubscribes(t *testing.T) {
 func TestGetUnsubscriptionByAddress(t *testing.T) {
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	// Create unsubscription record
-	err = mg.Unsubscribe(email, "*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.Unsubscribe(email, "*"))
 
 	n, us, err := mg.GetUnsubscribesByAddress(email)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
+
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
 	if len(us) > 0 {
 		t.Log("ID\tAddress\tCreated At\tTag\t")
@@ -57,36 +48,22 @@ func TestGetUnsubscriptionByAddress(t *testing.T) {
 			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tag)
 		}
 	}
-
 	// Destroy the unsubscription record
-	err = mg.RemoveUnsubscribe(email)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.RemoveUnsubscribe(email))
 }
 
 func TestCreateDestroyUnsubscription(t *testing.T) {
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
 
 	// Create unsubscription record
-	err = mg.Unsubscribe(email, "*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.Unsubscribe(email, "*"))
 
 	n, us, err := mg.GetUnsubscribesByAddress(email)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
 
 	// Destroy the unsubscription record
-	err = mg.RemoveUnsubscribe(email)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.RemoveUnsubscribe(email))
 }

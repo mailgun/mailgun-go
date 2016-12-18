@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 func setup(t *testing.T) (Mailgun, string) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
 
 	address := fmt.Sprintf("%s@%s", strings.ToLower(randomString(6, "list")), domain)
 	_, err = mg.CreateList(List{
@@ -20,17 +20,12 @@ func setup(t *testing.T) (Mailgun, string) {
 		Description: "TestMailingListMembers-related mailing list",
 		AccessLevel: Members,
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 	return mg, address
 }
 
 func teardown(t *testing.T, mg Mailgun, address string) {
-	err := mg.DeleteList(address)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, mg.DeleteList(address))
 }
 
 func TestMailingListMembers(t *testing.T) {
@@ -39,9 +34,7 @@ func TestMailingListMembers(t *testing.T) {
 
 	var countPeople = func() int {
 		n, _, err := mg.GetMembers(DefaultLimit, DefaultSkip, All, address)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		return n
 	}
 
@@ -51,50 +44,27 @@ func TestMailingListMembers(t *testing.T) {
 		Name:       "Joe Example",
 		Subscribed: Subscribed,
 	}
-	err := mg.CreateMember(true, address, protoJoe)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	ensure.Nil(t, mg.CreateMember(true, address, protoJoe))
 	newCount := countPeople()
-	if newCount <= startCount {
-		t.Fatalf("Expected %d people subscribed; got %d", startCount+1, newCount)
-	}
+	ensure.False(t, newCount <= startCount)
 
 	theMember, err := mg.GetMemberByAddress("joe@example.com", address)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if (theMember.Address != protoJoe.Address) ||
-		(theMember.Name != protoJoe.Name) ||
-		(*theMember.Subscribed != *protoJoe.Subscribed) ||
-		(len(theMember.Vars) != 0) {
-		t.Fatalf("Unexpected Member: Expected [%#v], Got [%#v]", protoJoe, theMember)
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, theMember.Address, protoJoe.Address)
+	ensure.DeepEqual(t, theMember.Name, protoJoe.Name)
+	ensure.DeepEqual(t, theMember.Subscribed, protoJoe.Subscribed)
+	ensure.True(t, len(theMember.Vars) == 0)
 
 	_, err = mg.UpdateMember("joe@example.com", address, Member{
 		Name: "Joe Cool",
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 
 	theMember, err = mg.GetMemberByAddress("joe@example.com", address)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if theMember.Name != "Joe Cool" {
-		t.Fatal("Expected Joe Cool; got " + theMember.Name)
-	}
-
-	err = mg.DeleteMember("joe@example.com", address)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if countPeople() != startCount {
-		t.Fatalf("Expected %d people; got %d instead", startCount, countPeople())
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, theMember.Name, "Joe Cool")
+	ensure.Nil(t, mg.DeleteMember("joe@example.com", address))
+	ensure.DeepEqual(t, countPeople(), startCount)
 
 	err = mg.CreateMemberList(nil, address, []interface{}{
 		Member{
@@ -114,32 +84,20 @@ func TestMailingListMembers(t *testing.T) {
 			},
 		},
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 
 	theMember, err = mg.GetMemberByAddress("joe.user2@example.com", address)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if theMember.Name != "Joe's Cool Account" {
-		t.Fatalf("Expected Joe's Cool Account; got %s", theMember.Name)
-	}
-	if theMember.Subscribed != nil {
-		if *theMember.Subscribed != true {
-			t.Fatalf("Expected subscribed to be true; got %v", *theMember.Subscribed)
-		}
-	} else {
-		t.Fatal("Expected some kind of subscription status; got nil.")
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, theMember.Name, "Joe's Cool Account")
+	ensure.NotNil(t, theMember.Subscribed)
+	ensure.True(t, *theMember.Subscribed)
 }
 
 func TestMailingLists(t *testing.T) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	listAddr := fmt.Sprintf("%s@%s", strings.ToLower(randomString(7, "list")), domain)
 	protoList := List{
 		Address:     listAddr,
@@ -150,56 +108,37 @@ func TestMailingLists(t *testing.T) {
 
 	var countLists = func() int {
 		total, _, err := mg.GetLists(DefaultLimit, DefaultSkip, "")
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		return total
 	}
 
 	_, err = mg.CreateList(protoList)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 	defer func() {
-		err = mg.DeleteList(listAddr)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, mg.DeleteList(listAddr))
 
-		theList, err := mg.GetListByAddress(listAddr)
-		if err == nil {
-			t.Fatalf("Expected list %s deleted", theList.Address)
-		}
+		_, err := mg.GetListByAddress(listAddr)
+		ensure.NotNil(t, err)
 	}()
 
 	actualCount := countLists()
-	if actualCount < 1 {
-		t.Fatalf("Expected atleast 1 lists defined; got %d", actualCount)
-	}
+	ensure.False(t, actualCount < 1)
 
 	theList, err := mg.GetListByAddress(listAddr)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
+
 	protoList.CreatedAt = theList.CreatedAt // ignore this field when comparing.
-	if theList != protoList {
-		t.Fatalf("Unexpected list descriptor: Expected [%#v], Got [%#v]", protoList, theList)
-	}
+	ensure.DeepEqual(t, theList, protoList)
 
 	_, err = mg.UpdateList(listAddr, List{
 		Description: "A list whose description changed",
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 
 	theList, err = mg.GetListByAddress(listAddr)
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
+
 	newList := protoList
 	newList.Description = "A list whose description changed"
-	if theList != newList {
-		t.Fatalf("Expected [%#v], Got [%#v]", newList, theList)
-	}
+	ensure.DeepEqual(t, theList, newList)
 }

@@ -2,19 +2,17 @@ package mailgun
 
 import (
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 func TestRouteCRUD(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
 
 	var countRoutes = func() int {
 		count, _, err := mg.GetRoutes(DefaultLimit, DefaultSkip)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		return count
 	}
 
@@ -29,57 +27,26 @@ func TestRouteCRUD(t *testing.T) {
 			"stop()",
 		},
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if newRoute.ID == "" {
-		t.Fatal("I expected the route created to have an ID associated with it.")
-	}
-	defer func() {
-		err := mg.DeleteRoute(newRoute.ID)
-		if err != nil {
-			t.Fatal(err)
-		}
+	ensure.Nil(t, err)
+	ensure.True(t, newRoute.ID != "")
 
+	defer func() {
+		ensure.Nil(t, mg.DeleteRoute(newRoute.ID))
 		_, err = mg.GetRouteByID(newRoute.ID)
-		if err == nil {
-			t.Fatalf("Expected route %d deleted", newRoute.ID)
-		}
+		ensure.NotNil(t, err)
 	}()
 
 	newCount := countRoutes()
-	if newCount <= routeCount {
-		t.Fatalf("Expected %d routes defined; got %d", routeCount+1, newCount)
-	}
+	ensure.False(t, newCount <= routeCount)
 
 	theRoute, err := mg.GetRouteByID(newRoute.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if ((newRoute.Priority) != (theRoute.Priority)) ||
-		((newRoute.Description) != (theRoute.Description)) ||
-		((newRoute.Expression) != (theRoute.Expression)) ||
-		(len(newRoute.Actions) != len(theRoute.Actions)) ||
-		((newRoute.CreatedAt) != (theRoute.CreatedAt)) ||
-		((newRoute.ID) != (theRoute.ID)) {
-		t.Fatalf("Expected %#v, got %#v", newRoute, theRoute)
-	}
-	for i, action := range newRoute.Actions {
-		if action != theRoute.Actions[i] {
-			t.Fatalf("Expected %#v, got %#v", newRoute, theRoute)
-		}
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, newRoute, theRoute)
 
 	changedRoute, err := mg.UpdateRoute(newRoute.ID, Route{
 		Priority: 2,
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if changedRoute.Priority != 2 {
-		t.Fatalf("Expected a priority of 2; got %d", changedRoute.Priority)
-	}
-	if len(changedRoute.Actions) != 2 {
-		t.Fatalf("Expected actions to not be touched; got %d entries now", len(changedRoute.Actions))
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, changedRoute.Priority, 2)
+	ensure.DeepEqual(t, len(changedRoute.Actions), 2)
 }
