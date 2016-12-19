@@ -2,55 +2,40 @@ package mailgun
 
 import (
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 func TestEmailValidation(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	ev, err := mg.ValidateEmail("foo@mailgun.com")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if ev.IsValid != true {
-		t.Fatal("Expected a valid e-mail address")
-	}
-	if ev.Parts.DisplayName != "" {
-		t.Fatal("No display name should exist")
-	}
-	if ev.Parts.LocalPart != "foo" {
-		t.Fatal("Expected local part of foo; got ", ev.Parts.LocalPart)
-	}
-	if ev.Parts.Domain != "mailgun.com" {
-		t.Fatal("Expected mailgun.com domain; got ", ev.Parts.Domain)
-	}
+	ensure.Nil(t, err)
+
+	ensure.True(t, ev.IsValid)
+	ensure.True(t, ev.Parts.DisplayName == "")
+	ensure.DeepEqual(t, ev.Parts.LocalPart, "foo")
+	ensure.DeepEqual(t, ev.Parts.Domain, "mailgun.com")
 }
 
 func TestParseAddresses(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses(
 		"Alice <alice@example.com>",
 		"bob@example.com",
 		"example.com")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 	hittest := map[string]bool{
 		"Alice <alice@example.com>": true,
 		"bob@example.com":           true,
 	}
 	for _, a := range addressesThatParsed {
-		if !hittest[a] {
-			t.Fatalf("Expected %s to be parsable", a)
-		}
+		ensure.True(t, hittest[a])
 	}
-	if len(unparsableAddresses) != 1 {
-		t.Fatalf("Expected 1 address to be unparsable; got %d", len(unparsableAddresses))
-	}
+	ensure.True(t, len(unparsableAddresses) == 1)
 }

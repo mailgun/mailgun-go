@@ -1,55 +1,44 @@
 package mailgun
 
 import (
+	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 func TestGetComplaints(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	n, complaints, err := mg.GetComplaints(-1, -1)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(complaints) != n {
-		t.Fatalf("Expected %d complaints; got %d", n, len(complaints))
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, len(complaints), n)
 }
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	_, err = mg.GetSingleComplaint(randomString(64, "") + "@example.com")
-	if err == nil {
-		t.Fatal("Expected not-found error for missing complaint")
-	}
+	ensure.NotNil(t, err)
+
 	ure, ok := err.(*UnexpectedResponseError)
-	if !ok {
-		t.Fatal("Expected UnexpectedResponseError")
-	}
-	if ure.Actual != 404 {
-		t.Fatalf("Expected 404 response code; got %d", ure.Actual)
-	}
+	ensure.True(t, ok)
+	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
+
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
 		_, complaints, err := mg.GetComplaints(DefaultLimit, DefaultSkip)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 
 		for _, complaint := range complaints {
 			t.Logf("Complaint Address: %s\n", complaint.Address)
@@ -61,26 +50,10 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	}
 
 	randomMail := strings.ToLower(randomString(64, "")) + "@example.com"
+	ensure.False(t, hasComplaint(randomMail))
 
-	if hasComplaint(randomMail) {
-		t.Fatalf("Expected no complaints from '%s'", randomMail)
-	}
-
-	err = mg.CreateComplaint(randomMail)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !hasComplaint(randomMail) {
-		t.Fatalf("Expected complaint from '%s'; but got none", randomMail)
-	}
-
-	err = mg.DeleteComplaint(randomMail)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if hasComplaint(randomMail) {
-		t.Fatalf("Expected no complaints after delete from '%s'", randomMail)
-	}
+	ensure.Nil(t, mg.CreateComplaint(randomMail))
+	ensure.True(t, hasComplaint(randomMail))
+	ensure.Nil(t, mg.DeleteComplaint(randomMail))
+	ensure.False(t, hasComplaint(randomMail))
 }

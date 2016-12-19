@@ -13,6 +13,7 @@ Export your API keys and domain
 $ export MG_API_KEY=your-api-key
 $ export MG_DOMAIN=your-domain
 $ export MG_PUBLIC_API_KEY=your-public-key
+$ export MG_URL="https://api.mailgun.net/v3"
 ```
 Send an email
 ```bash

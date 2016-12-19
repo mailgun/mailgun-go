@@ -3,9 +3,13 @@ package mailgun
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/facebookgo/ensure"
 )
 
 const (
@@ -30,14 +34,11 @@ func TestSendLegacyPlain(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -46,15 +47,12 @@ func TestSendLegacyPlainWithTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendPlainWithTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -63,15 +61,12 @@ func TestSendLegacyPlainAt(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendPlainAt:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -80,15 +75,12 @@ func TestSendLegacyHtml(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -97,15 +89,12 @@ func TestSendLegacyTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -114,17 +103,14 @@ func TestSendLegacyTag(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
 		m.AddTag("FooTag")
 		m.AddTag("BarTag")
 		m.AddTag("BlortTag")
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -133,14 +119,11 @@ func TestSendLegacyMIME(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -148,9 +131,8 @@ func TestSendLegacyMIME(t *testing.T) {
 func TestGetStoredMessage(t *testing.T) {
 	spendMoney(t, func() {
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		id, err := findStoredMessageID(mg) // somehow...
 		if err != nil {
 			t.Log(err)
@@ -159,9 +141,8 @@ func TestGetStoredMessage(t *testing.T) {
 
 		// First, get our stored message.
 		msg, err := mg.GetStoredMessage(id)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
+
 		fields := map[string]string{
 			"       From": msg.From,
 			"     Sender": msg.Sender,
@@ -174,10 +155,7 @@ func TestGetStoredMessage(t *testing.T) {
 		}
 
 		// We're done with it; now delete it.
-		err = mg.DeleteStoredMessage(id)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, mg.DeleteStoredMessage(id))
 	})
 }
 
@@ -208,14 +186,11 @@ func TestSendMGPlain(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -224,15 +199,12 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendPlainWithTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -241,15 +213,12 @@ func TestSendMGPlainAt(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendPlainAt:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -258,15 +227,12 @@ func TestSendMGHtml(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -275,15 +241,12 @@ func TestSendMGTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -292,17 +255,14 @@ func TestSendMGTag(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
 		m.AddTag("FooTag")
 		m.AddTag("BarTag")
 		m.AddTag("BlortTag")
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -311,14 +271,11 @@ func TestSendMGMIME(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
 		msg, id, err := mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -327,19 +284,16 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Batch\n")
 		for i := 0; i < MaxNumberOfRecipients; i++ {
 			m.AddRecipient("") // We expect this to indicate a failure at the API
 		}
 		err = m.AddRecipientAndVariables(toUser, nil)
-		if err == nil {
-			// If we're here, either the SDK didn't send the message,
-			// OR the API didn't check for empty To: headers.
-			t.Fatal("Expected to fail!!")
-		}
+		// In case of error the SDK didn't send the message,
+		// OR the API didn't check for empty To: headers.
+		ensure.NotNil(t, err)
 	})
 }
 
@@ -347,20 +301,49 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
-		if err != nil {
-			t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-		}
+		ensure.Nil(t, err)
+
 		m := mg.NewMessage(fromUser, exampleSubject, templateText)
 		err = m.AddRecipientAndVariables(toUser, map[string]interface{}{
 			"name":  "Joe Cool Example",
 			"table": 42,
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 		_, _, err = mg.Send(m)
-		if err != nil {
-			t.Fatal(err)
-		}
+		ensure.Nil(t, err)
 	})
+}
+
+func TestSendMGOffline(t *testing.T) {
+	const (
+		exampleDomain       = "testDomain"
+		exampleAPIKey       = "testAPIKey"
+		examplePublicAPIKey = "testPublicAPIKey"
+		toUser              = "test@test.com"
+		exampleMessage      = "Queue. Thank you"
+		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", exampleDomain))
+		values, err := parseContentType(req)
+		ensure.Nil(t, err)
+		ensure.True(t, len(values) != 0)
+		ensure.DeepEqual(t, values.Get("from"), fromUser)
+		ensure.DeepEqual(t, values.Get("subject"), exampleSubject)
+		ensure.DeepEqual(t, values.Get("text"), exampleText)
+		ensure.DeepEqual(t, values.Get("to"), toUser)
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey, examplePublicAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	msg, id, err := mg.Send(m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
 }

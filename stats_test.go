@@ -2,18 +2,16 @@ package mailgun
 
 import (
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 func TestGetStats(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
+	ensure.Nil(t, err)
 
 	totalCount, stats, err := mg.GetStats(-1, -1, nil, "sent", "opened")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
 
 	t.Logf("Total Count: %d\n", totalCount)
 	t.Logf("Id\tEvent\tCreatedAt\tTotalCount\t\n")
@@ -24,11 +22,6 @@ func TestGetStats(t *testing.T) {
 
 func TestDeleteTag(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
-	if err != nil {
-		t.Fatalf("NewMailgunFromEnv() error - %s", err.Error())
-	}
-	err = mg.DeleteTag("newsletter")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ensure.Nil(t, err)
+	ensure.Nil(t, mg.DeleteTag("newsletter"))
 }

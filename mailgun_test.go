@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+
+	"github.com/facebookgo/ensure"
 )
 
 const domain = "valid-mailgun-domain"
@@ -13,26 +15,14 @@ const publicApiKey = "valid-mailgun-public-api-key"
 func TestMailgun(t *testing.T) {
 	m := NewMailgun(domain, apiKey, publicApiKey)
 
-	if domain != m.Domain() {
-		t.Fatal("Domain not equal!")
-	}
+	ensure.DeepEqual(t, m.Domain(), domain)
+	ensure.DeepEqual(t, m.ApiKey(), apiKey)
+	ensure.DeepEqual(t, m.PublicApiKey(), publicApiKey)
+	ensure.DeepEqual(t, m.Client(), http.DefaultClient)
 
-	if apiKey != m.ApiKey() {
-		t.Fatal("ApiKey not equal!")
-	}
-
-	if publicApiKey != m.PublicApiKey() {
-		t.Fatal("PublicApiKey not equal!")
-	}
-
-	if http.DefaultClient != m.Client() {
-		t.Fatal("HTTP client not default!")
-	}
 	client := new(http.Client)
 	m.SetClient(client)
-	if client != m.Client() {
-		t.Fatal("HTTP client not equal!")
-	}
+	ensure.DeepEqual(t, client, m.Client())
 }
 
 func TestBounceGetCode(t *testing.T) {
@@ -43,12 +33,8 @@ func TestBounceGetCode(t *testing.T) {
 		Error:     "bletch",
 	}
 	c, err := b1.GetCode()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if c != 123 {
-		t.Fatal("Expected 123; got ", c)
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, c, 123)
 
 	b2 := &Bounce{
 		CreatedAt: "blah",
@@ -57,12 +43,8 @@ func TestBounceGetCode(t *testing.T) {
 		Error:     "Bletch",
 	}
 	c, err = b2.GetCode()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if c != 456 {
-		t.Fatal("Expected 456; got ", c)
-	}
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, c, 456)
 
 	b3 := &Bounce{
 		CreatedAt: "blah",
@@ -71,6 +53,8 @@ func TestBounceGetCode(t *testing.T) {
 		Error:     "Bletch",
 	}
 	c, err = b3.GetCode()
+	ensure.NotNil(t, err)
+
 	e, ok := err.(*strconv.NumError)
 	if !ok && e != nil {
 		t.Fatal("Expected a syntax error in numeric conversion: got ", err)
