@@ -23,6 +23,14 @@ var noTime time.Time
 // Otherwise, the JSON is spaced appropriately for human consumption.
 // Filter allows the caller to provide more specialized filters on the query.
 // Consult the Mailgun documentation for more details.
+type EventsOptions struct {
+	Begin, End                               time.Time
+	ForceAscending, ForceDescending, Compact bool
+	Limit                                    int
+	Filter                                   map[string]string
+}
+
+// Depreciated See `ListEvents()`
 type GetEventsOptions struct {
 	Begin, End                               time.Time
 	ForceAscending, ForceDescending, Compact bool
@@ -32,16 +40,75 @@ type GetEventsOptions struct {
 
 // EventIterator maintains the state necessary for paging though small parcels of a larger set of events.
 type EventIterator struct {
-	events           []Event
-	nextURL, prevURL string
-	mg               Mailgun
+	events                              []Event
+	NextURL, PrevURL, FirstURL, LastURL string
+	mg                                  Mailgun
+	err                                 error
 }
 
 // NewEventIterator creates a new iterator for events.
 // Use GetFirstPage to retrieve the first batch of events.
-// Use Next and Previous thereafter as appropriate to iterate through sets of data.
+// Use GetNext and GetPrevious thereafter as appropriate to iterate through sets of data.
+//
+// *This call is Deprecated, use ListEvents() instead*
 func (mg *MailgunImpl) NewEventIterator() *EventIterator {
 	return &EventIterator{mg: mg}
+}
+
+// Create an new iterator to fetch a page of events from the events api
+//	it := mg.ListEvents(EventsOptions{})
+//	var events []Event
+//	for it.Next(&events) {
+//	    	for _, event := range events {
+//		        // Do things with events
+//		}
+//	}
+//	if it.Err() != nil {
+//		log.Fatal(it.Err())
+//	}
+func (mg *MailgunImpl) ListEvents(opts *EventsOptions) *EventIterator {
+	req := newHTTPRequest(generateApiUrl(mg, eventsEndpoint))
+	if opts != nil {
+		if opts.Limit != 0 {
+			req.addParameter("limit", fmt.Sprintf("%d", opts.Limit))
+		}
+		if opts.Compact {
+			req.addParameter("pretty", "no")
+		}
+		if opts.ForceAscending {
+			req.addParameter("ascending", "yes")
+		}
+		if opts.ForceDescending {
+			req.addParameter("ascending", "no")
+		}
+		if opts.Begin != noTime {
+			req.addParameter("begin", formatMailgunTime(&opts.Begin))
+		}
+		if opts.End != noTime {
+			req.addParameter("end", formatMailgunTime(&opts.End))
+		}
+		if opts.Filter != nil {
+			for k, v := range opts.Filter {
+				req.addParameter(k, v)
+			}
+		}
+	}
+
+	url, err := req.generateUrlWithParameters()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+	}
+	return &EventIterator{
+		mg:       mg,
+		NextURL:  url,
+		FirstURL: url,
+		PrevURL:  "",
+	}
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ei *EventIterator) Err() error {
+	return ei.err
 }
 
 // Events returns the most recently retrieved batch of events.
@@ -92,13 +159,71 @@ func (ei *EventIterator) GetFirstPage(opts GetEventsOptions) error {
 // Retrieves the chronologically previous batch of events, if any exist.
 // You know you're at the end of the list when len(Events())==0.
 func (ei *EventIterator) GetPrevious() error {
-	return ei.fetch(ei.prevURL)
+	return ei.fetch(ei.PrevURL)
 }
 
 // Retrieves the chronologically next batch of events, if any exist.
 // You know you're at the end of the list when len(Events())==0.
 func (ei *EventIterator) GetNext() error {
-	return ei.fetch(ei.nextURL)
+	return ei.fetch(ei.NextURL)
+}
+
+// Retrieves the next page of events from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ei *EventIterator) Next(events *[]Event) bool {
+	ei.err = ei.fetch(ei.NextURL)
+	if ei.err != nil {
+		return false
+	}
+	*events = ei.events
+	if len(ei.events) == 0 {
+		return false
+	}
+	return true
+}
+
+// Retrieves the first page of events from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ei *EventIterator) First(events *[]Event) bool {
+	ei.err = ei.fetch(ei.FirstURL)
+	if ei.err != nil {
+		return false
+	}
+	*events = ei.events
+	return true
+}
+
+// Retrieves the last page of events from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ei *EventIterator) Last(events *[]Event) bool {
+	ei.err = ei.fetch(ei.LastURL)
+	if ei.err != nil {
+		return false
+	}
+	*events = ei.events
+	return true
+}
+
+// Retrieves the previous page of events from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ei *EventIterator) Previous(events *[]Event) bool {
+	if ei.PrevURL == "" {
+		return false
+	}
+	ei.err = ei.fetch(ei.PrevURL)
+	if ei.err != nil {
+		return false
+	}
+	*events = ei.events
+	if len(ei.events) == 0 {
+		return false
+	}
+	return true
 }
 
 // GetFirstPage, GetPrevious, and GetNext all have a common body of code.
@@ -124,7 +249,9 @@ func (ei *EventIterator) fetch(url string) error {
 	for key, page := range pagings {
 		links[key] = page.(string)
 	}
-	ei.nextURL = links["next"]
-	ei.prevURL = links["previous"]
+	ei.NextURL = links["next"]
+	ei.PrevURL = links["previous"]
+	ei.FirstURL = links["first"]
+	ei.LastURL = links["last"]
 	return err
 }
