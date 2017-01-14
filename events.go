@@ -3,11 +3,39 @@ package mailgun
 import (
 	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // Events are open-ended, loosely-defined JSON documents.
 // They will always have an event and a timestamp field, however.
 type Event map[string]interface{}
+
+// Parse the timestamp field for this event into a Time object
+func (e Event) ParseTimeStamp() (time.Time, error) {
+	obj, ok := e["timestamp"]
+	if !ok {
+		return time.Time{}, errors.New("'timestamp' field not found in event")
+	}
+	timestamp, ok := obj.(float64)
+	if !ok {
+		return time.Time{}, errors.New("'timestamp' field not a float64")
+	}
+	microseconds := int64(timestamp * 1000000)
+	return time.Unix(0, microseconds*int64(time.Microsecond/time.Nanosecond)).UTC(), nil
+}
+
+func (e Event) ParseMessageId() (string, error) {
+	message, err := toMapInterface("message", e)
+	if err != nil {
+		return "", err
+	}
+	headers, err := toMapInterface("headers", message)
+	if err != nil {
+		return "", err
+	}
+	return headers["message-id"].(string), nil
+}
 
 // noTime always equals an uninitialized Time structure.
 // It's used to detect when a time parameter is provided.
@@ -28,6 +56,8 @@ type EventsOptions struct {
 	ForceAscending, ForceDescending, Compact bool
 	Limit                                    int
 	Filter                                   map[string]string
+	ThresholdAge                             time.Duration
+	PollInterval                             time.Duration
 }
 
 // Depreciated See `ListEvents()`
@@ -93,16 +123,13 @@ func (mg *MailgunImpl) ListEvents(opts *EventsOptions) *EventIterator {
 			}
 		}
 	}
-
 	url, err := req.generateUrlWithParameters()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-	}
 	return &EventIterator{
 		mg:       mg,
 		NextURL:  url,
 		FirstURL: url,
 		PrevURL:  "",
+		err:      err,
 	}
 }
 
@@ -172,6 +199,9 @@ func (ei *EventIterator) GetNext() error {
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (ei *EventIterator) Next(events *[]Event) bool {
+	if ei.err != nil {
+		return false
+	}
 	ei.err = ei.fetch(ei.NextURL)
 	if ei.err != nil {
 		return false
@@ -187,6 +217,9 @@ func (ei *EventIterator) Next(events *[]Event) bool {
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (ei *EventIterator) First(events *[]Event) bool {
+	if ei.err != nil {
+		return false
+	}
 	ei.err = ei.fetch(ei.FirstURL)
 	if ei.err != nil {
 		return false
@@ -200,6 +233,9 @@ func (ei *EventIterator) First(events *[]Event) bool {
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
 func (ei *EventIterator) Last(events *[]Event) bool {
+	if ei.err != nil {
+		return false
+	}
 	ei.err = ei.fetch(ei.LastURL)
 	if ei.err != nil {
 		return false
@@ -212,6 +248,9 @@ func (ei *EventIterator) Last(events *[]Event) bool {
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (ei *EventIterator) Previous(events *[]Event) bool {
+	if ei.err != nil {
+		return false
+	}
 	if ei.PrevURL == "" {
 		return false
 	}
@@ -224,6 +263,115 @@ func (ei *EventIterator) Previous(events *[]Event) bool {
 		return false
 	}
 	return true
+}
+
+// EventPoller maintains the state necessary for polling events
+type EventPoller struct {
+	it            *EventIterator
+	opts          EventsOptions
+	thresholdTime time.Time
+	sleepUntil    time.Time
+	mg            Mailgun
+	err           error
+}
+
+// Poll the events api and return new events as they occur
+// 	it = mg.PollEvents(&EventsOptions{
+//			// Poll() returns after this threshold is met, or events older than this threshold appear
+// 			ThresholdAge: time.Second * 10,
+//			// Only events with a timestamp after this date/time will be returned
+//			Begin:        time.Now().Add(time.Second * -3),
+//			// How often we poll the api for new events
+//			PollInterval: time.Second * 4})
+//	var events []Event
+//	// Blocks until new events appear
+//	for it.Poll(&events) {
+//		for _, event := range(events) {
+//			fmt.Printf("Event %+v\n", event)
+//		}
+//	}
+//	if it.Err() != nil {
+//		log.Fatal(it.Err())
+//	}
+func (mg *MailgunImpl) PollEvents(opts *EventsOptions) *EventPoller {
+	now := time.Now()
+	// ForceAscending must be set
+	opts.ForceAscending = true
+
+	// Default begin time is 30 minutes ago
+	if opts.Begin == noTime {
+		opts.Begin = now.Add(time.Minute * -30)
+	}
+
+	// Default threshold age is 30 minutes
+	if opts.ThresholdAge.Nanoseconds() == 0 {
+		opts.ThresholdAge = time.Duration(time.Minute * 30)
+	}
+
+	// Set a 15 second poll interval if none set
+	if opts.PollInterval.Nanoseconds() == 0 {
+		opts.PollInterval = time.Duration(time.Second * 15)
+	}
+
+	return &EventPoller{
+		it:   mg.ListEvents(opts),
+		opts: *opts,
+		mg:   mg,
+	}
+}
+
+// If an error occurred during polling `Err()` will return non nil
+func (ep *EventPoller) Err() error {
+	return ep.err
+}
+
+func (ep *EventPoller) Poll(events *[]Event) bool {
+	var currentPage string
+	ep.thresholdTime = time.Now().UTC().Add(ep.opts.ThresholdAge)
+	for {
+		if ep.sleepUntil != noTime {
+			// Sleep the rest of our duration
+			time.Sleep(ep.sleepUntil.Sub(time.Now()))
+		}
+
+		// Remember our current page url
+		currentPage = ep.it.NextURL
+
+		// Attempt to get a page of events
+		var page []Event
+		if ep.it.Next(&page) == false {
+			if ep.it.Err() == nil && len(page) == 0 {
+				// No events, sleep for our poll interval
+				ep.sleepUntil = time.Now().Add(ep.opts.PollInterval)
+				continue
+			}
+			ep.err = ep.it.Err()
+			return false
+		}
+
+		// Last event on the page
+		lastEvent := page[len(page)-1]
+
+		timeStamp, err := lastEvent.ParseTimeStamp()
+		if err != nil {
+			ep.err = errors.Wrap(err, "event timestamp error")
+			return false
+		}
+		// Record the next time we should query for new events
+		ep.sleepUntil = time.Now().Add(ep.opts.PollInterval)
+
+		// If the last event on the page is older than our threshold time
+		// or we have been polling for longer than our threshold time
+		if timeStamp.After(ep.thresholdTime) || time.Now().UTC().After(ep.thresholdTime) {
+			ep.thresholdTime = time.Now().UTC().Add(ep.opts.ThresholdAge)
+			// Return the page of events to the user
+			*events = page
+			return true
+		}
+		// Since we didn't find an event older than our
+		// threshold, fetch this same page again
+		ep.it.NextURL = currentPage
+	}
 }
 
 // GetFirstPage, GetPrevious, and GetNext all have a common body of code.
@@ -254,4 +402,17 @@ func (ei *EventIterator) fetch(url string) error {
 	ei.FirstURL = links["first"]
 	ei.LastURL = links["last"]
 	return err
+}
+
+func toMapInterface(field string, thingy map[string]interface{}) (map[string]interface{}, error) {
+	var empty map[string]interface{}
+	obj, ok := thingy[field]
+	if !ok {
+		return empty, errors.Errorf("'%s' field not found in event", field)
+	}
+	result, ok := obj.(map[string]interface{})
+	if !ok {
+		return empty, errors.Errorf("'%s' field not a map[string]interface{}", field)
+	}
+	return result, nil
 }

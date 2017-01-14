@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"log"
+	"time"
 
 	"github.com/facebookgo/ensure"
 	. "github.com/onsi/ginkgo"
@@ -15,6 +16,7 @@ var _ = Describe("ListEvents()", func() {
 	var err error
 
 	BeforeEach(func() {
+		t = GinkgoT()
 		mg, err = NewMailgunFromEnv()
 		Expect(err).To(BeNil())
 		it = mg.ListEvents(&EventsOptions{Limit: 5})
@@ -66,12 +68,20 @@ var _ = Describe("ListEvents()", func() {
 	})
 
 	Describe("it.Last()", func() {
+		Context("If First() or Next() was not called first", func() {
+			It("Should fail with error", func() {
+				var lastPage []Event
+				// Calling Last() is invalid unless you first use First() or Next()
+				ensure.False(t, it.Last(&lastPage))
+				ensure.True(t, len(lastPage) == 0)
+			})
+
+		})
+	})
+
+	Describe("it.Last()", func() {
 		It("Should retrieve the last page of events", func() {
 			var firstPage, lastPage, previousPage []Event
-			// Calling Last() is invalid unless you first use First() or Next()
-			ensure.False(t, it.Last(&lastPage))
-			ensure.True(t, len(lastPage) == 0)
-
 			ensure.True(t, it.Next(&firstPage))
 			ensure.True(t, len(firstPage) != 0)
 
@@ -118,6 +128,115 @@ var _ = Describe("EventIterator()", func() {
 				// the more I doubt it will ever work consistently
 				//ei.GetPrevious()
 			})
+		})
+	})
+})
+
+var _ = Describe("Event{}", func() {
+	var t GinkgoTInterface
+
+	BeforeEach(func() {
+		t = GinkgoT()
+	})
+
+	Describe("ParseTimeStamp()", func() {
+		Context("When 'timestamp' exists and is valid", func() {
+			It("Should parse the timestamp into time.Time{}", func() {
+				event := Event{
+					"timestamp": 1476380259.578017,
+				}
+				timestamp, err := event.ParseTimeStamp()
+				ensure.Nil(t, err)
+				ensure.DeepEqual(t, timestamp, time.Date(2016, 10, 13, 17, 37, 39,
+					578017*int(time.Microsecond/time.Nanosecond), time.UTC))
+
+				event = Event{
+					"timestamp": 1377211256.096436,
+				}
+				timestamp, err = event.ParseTimeStamp()
+				ensure.Nil(t, err)
+				ensure.DeepEqual(t, timestamp, time.Date(2013, 8, 22, 22, 40, 56,
+					96436*int(time.Microsecond/time.Nanosecond), time.UTC))
+			})
+		})
+		Context("When 'timestamp' is missing", func() {
+			It("Should return error", func() {
+				event := Event{
+					"blah": "",
+				}
+				_, err := event.ParseTimeStamp()
+				ensure.NotNil(t, err)
+				ensure.DeepEqual(t, err.Error(), "'timestamp' field not found in event")
+			})
+		})
+		Context("When 'timestamp' is not a float64", func() {
+			It("Should return error", func() {
+				event := Event{
+					"timestamp": "1476380259.578017",
+				}
+				_, err := event.ParseTimeStamp()
+				ensure.NotNil(t, err)
+				ensure.DeepEqual(t, err.Error(), "'timestamp' field not a float64")
+			})
+		})
+	})
+})
+
+var _ = Describe("PollEvents()", func() {
+	log := log.New(GinkgoWriter, "PollEvents() - ", 0)
+	var t GinkgoTInterface
+	var it *EventPoller
+	var mg Mailgun
+	var err error
+
+	BeforeEach(func() {
+		t = GinkgoT()
+	})
+
+	Describe("it.Poll()", func() {
+		It("Should return events once the threshold age has expired", func() {
+			mg, err = NewMailgunFromEnv()
+			Expect(err).To(BeNil())
+
+			// Very short poll interval
+			it = mg.PollEvents(&EventsOptions{
+				// Poll() returns after this threshold is met
+				// or events older than this threshold appear
+				ThresholdAge: time.Second * 10,
+				// Only events with a timestamp after this date/time will be returned
+				Begin: time.Now().Add(time.Second * -3),
+				// How often we poll the api for new events
+				PollInterval: time.Second * 4})
+
+			// Send an email
+			toUser := reqEnv(t, "MG_EMAIL_TO")
+			m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+			msg, id, err := mg.Send(m)
+			ensure.Nil(t, err)
+
+			log.Printf("New Email: %s Id: %s\n", msg, id)
+
+			// Wait for our email event to arrive
+			var events []Event
+			it.Poll(&events)
+
+			var found bool
+			// Log the events we received
+			for _, event := range events {
+				eventMsg, err := event.ParseMessageId()
+				ensure.Nil(t, err)
+				timeStamp, err := event.ParseTimeStamp()
+				ensure.Nil(t, err)
+
+				log.Printf("Event: %s <%s> - %s", eventMsg, event["event"], timeStamp)
+				// If we find our accepted email event
+				if id == ("<"+eventMsg+">") && event["event"] == "accepted" {
+					found = true
+				}
+			}
+			// Ensure we found our email
+			ensure.Nil(t, it.Err())
+			ensure.True(t, found)
 		})
 	})
 })
