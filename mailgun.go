@@ -196,6 +196,7 @@ type Mailgun interface {
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 	NewEventIterator() *EventIterator
 	ListEvents(*EventsOptions) *EventIterator
+	PollEvents(*EventsOptions) *EventPoller
 	SetAPIBase(url string)
 }
 
