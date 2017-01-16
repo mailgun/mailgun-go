@@ -23,9 +23,9 @@ func TestGetUnsubscribes(t *testing.T) {
 
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
 	if len(us) > 0 {
-		t.Log("ID\tAddress\tCreated At\tTag\t")
+		t.Log("ID\tAddress\tCreated At\tTags\t")
 		for _, u := range us {
-			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tag)
+			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
 		}
 	}
 }
@@ -43,9 +43,9 @@ func TestGetUnsubscriptionByAddress(t *testing.T) {
 
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
 	if len(us) > 0 {
-		t.Log("ID\tAddress\tCreated At\tTag\t")
+		t.Log("ID\tAddress\tCreated At\tTags\t")
 		for _, u := range us {
-			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tag)
+			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
 		}
 	}
 	// Destroy the unsubscription record
