@@ -83,12 +83,24 @@ func Send(parser *args.ArgParser, data interface{}) int {
 		}
 	}
 
+	var tags []string
+	if opts.IsSet("tags") {
+		tags = opts.StringSlice("tags")
+	}
+
 	for i := 0; i < count; i++ {
-		resp, id, err := mg.Send(mg.NewMessage(
+		msg := mg.NewMessage(
 			opts.String("from"),
 			subject,
 			string(content),
-			opts.StringSlice("addresses")...))
+			opts.StringSlice("addresses")...)
+
+		// Add any tags if provided
+		for _, tag := range tags {
+			msg.AddTag(tag)
+		}
+
+		resp, id, err := mg.Send(msg)
 		checkErr("Message Error", err)
 		fmt.Printf("Id: %s Resp: %s\n", id, resp)
 	}
