@@ -196,6 +196,8 @@ type Mailgun interface {
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 	NewEventIterator() *EventIterator
+	ListEvents(*EventsOptions) *EventIterator
+	PollEvents(*EventsOptions) *EventPoller
 	SetAPIBase(url string)
 }
 
@@ -207,6 +209,7 @@ type MailgunImpl struct {
 	apiKey       string
 	publicApiKey string
 	client       *http.Client
+	baseURL      string
 }
 
 // NewMailGun creates a new client instance.
