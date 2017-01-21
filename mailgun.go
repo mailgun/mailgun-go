@@ -181,6 +181,7 @@ type Mailgun interface {
 	DeleteWebhook(kind string) error
 	GetWebhookByType(kind string) (string, error)
 	UpdateWebhook(kind, url string) error
+	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
 	GetLists(limit, skip int, filter string) (int, []List, error)
 	CreateList(List) (List, error)
 	DeleteList(string) error
