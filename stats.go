@@ -51,12 +51,3 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 		return res.TotalCount, res.Items, nil
 	}
 }
-
-// DeleteTag removes all counters for a particular tag, including the tag itself.
-func (m *MailgunImpl) DeleteTag(tag string) error {
-	r := newHTTPRequest(generateApiUrl(m, deleteTagEndpoint) + "/" + tag)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := makeDeleteRequest(r)
-	return err
-}
