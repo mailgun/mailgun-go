@@ -26,6 +26,16 @@ func reqEnv(t ginkgo.GinkgoTInterface, variableName string) string {
 	return value
 }
 
+func randomDomainURL(n int) string {
+	const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	var bytes = make([]byte, n)
+	rand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = alpha[b%byte(len(alpha))]
+	}
+	return "http://" + string(bytes) + ".com"
+}
+
 // randomString generates a string of given length, but random content.
 // All content will be within the ASCII graphic character set.
 // (Implementation from Even Shaw's contribution on

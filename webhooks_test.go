@@ -27,7 +27,8 @@ func TestWebhookCRUD(t *testing.T) {
 
 	hookCount := countHooks()
 
-	ensure.Nil(t, mg.CreateWebhook("deliver", "http://www.example.com"))
+	domainURL := randomDomainURL(10)
+	ensure.Nil(t, mg.CreateWebhook("deliver", domainURL))
 	defer func() {
 		ensure.Nil(t, mg.DeleteWebhook("deliver"))
 		newCount := countHooks()
@@ -39,14 +40,15 @@ func TestWebhookCRUD(t *testing.T) {
 
 	theURL, err := mg.GetWebhookByType("deliver")
 	ensure.Nil(t, err)
-	ensure.DeepEqual(t, theURL, "http://www.example.com")
+	ensure.DeepEqual(t, theURL, domainURL)
 
-	ensure.Nil(t, mg.UpdateWebhook("deliver", "http://api.example.com"))
+	updatedDomainURL := randomDomainURL(10)
+	ensure.Nil(t, mg.UpdateWebhook("deliver", updatedDomainURL))
 
 	hooks, err := mg.GetWebhooks()
 	ensure.Nil(t, err)
 
-	ensure.DeepEqual(t, hooks["deliver"], "http://api.example.com")
+	ensure.DeepEqual(t, hooks["deliver"], updatedDomainURL)
 }
 
 var signedTests = []bool{
@@ -66,7 +68,7 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 		ensure.Nil(t, err)
 
 		if v != verified {
-			t.Errorf("VerifyWebhookRequest should return '%v' but get '%v'", v, verified)
+			t.Errorf("VerifyWebhookRequest should return '%v' but got '%v'", v, verified)
 		}
 	}
 }
@@ -83,7 +85,8 @@ func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
 		ensure.Nil(t, err)
 
 		if v == verified {
-			t.Errorf("VerifyWebhookRequest should return '%v' but get '%v'", v, verified)
+			t.Errorf("VerifyWebhookRequest should return '%v' but got '%v'", v, verified)
+
 		}
 	}
 }
@@ -122,7 +125,7 @@ func getSignatureFields(key string, signed bool) map[string]string {
 	badSignature := hex.EncodeToString([]byte("badsignature"))
 
 	fields := map[string]string{
-		"token": "token",
+		"token":     "token",
 		"timestamp": "123456789",
 		"signature": badSignature,
 	}

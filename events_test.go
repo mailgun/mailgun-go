@@ -58,8 +58,7 @@ var _ = Describe("ListEvents()", func() {
 		It("Should retrieve the first page of events", func() {
 			var firstPage, secondPage []Event
 			ensure.True(t, it.First(&firstPage))
-			ensure.True(t, it.First(&secondPage))
-			ensure.DeepEqual(t, firstPage, secondPage)
+			ensure.True(t, len(firstPage) != 0)
 
 			// Calling first resets the iterator to the first page
 			ensure.True(t, it.Next(&secondPage))
@@ -223,12 +222,10 @@ var _ = Describe("PollEvents()", func() {
 			var found bool
 			// Log the events we received
 			for _, event := range events {
-				eventMsg, err := event.ParseMessageId()
-				ensure.Nil(t, err)
-				timeStamp, err := event.ParseTimeStamp()
-				ensure.Nil(t, err)
-
+				eventMsg, _ := event.ParseMessageId()
+				timeStamp, _ := event.ParseTimeStamp()
 				log.Printf("Event: %s <%s> - %s", eventMsg, event["event"], timeStamp)
+
 				// If we find our accepted email event
 				if id == ("<"+eventMsg+">") && event["event"] == "accepted" {
 					found = true
