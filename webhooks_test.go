@@ -84,9 +84,8 @@ func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
 		verified, err := mg.VerifyWebhookRequest(req)
 		ensure.Nil(t, err)
 
-		if v == verified {
+		if v != verified {
 			t.Errorf("VerifyWebhookRequest should return '%v' but got '%v'", v, verified)
-
 		}
 	}
 }
