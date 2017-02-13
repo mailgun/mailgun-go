@@ -95,6 +95,10 @@ func ListTag(parser *args.ArgParser, data interface{}) int {
 			}
 		}
 	}
+	if it.Err() != nil {
+		fmt.Fprint(os.Stderr, it.Err().Error())
+		return 1
+	}
 	return 0
 }
 
