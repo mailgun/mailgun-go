@@ -179,6 +179,46 @@ var _ = Describe("Event{}", func() {
 			})
 		})
 	})
+
+	Describe("ParseEventType()", func() {
+		Context("When 'event' exists and is valid", func() {
+			It("Should parse the event into string", func() {
+				event := Event{
+					"event": "delivered",
+				}
+				eventType, err := event.ParseEventType()
+				ensure.Nil(t, err)
+				ensure.Equal(t, eventType, "delivered")
+
+				event = Event{
+					"event": "rejected",
+				}
+				eventType, err = event.ParseEventType()
+				ensure.Nil(t, err)
+				ensure.Equal(t, eventType, "rejected")
+			})
+		})
+		Context("When 'event' is missing", func() {
+			It("Should return error", func() {
+				event := Event{
+					"blah": "",
+				}
+				_, err := event.ParseEventType()
+				ensure.NotNil(t, err)
+				ensure.DeepEqual(t, err.Error(), "'event' field not found in event")
+			})
+		})
+		Context("When 'event' is not a string", func() {
+			It("Should return error", func() {
+				event := Event{
+					"event": 10,
+				}
+				_, err := event.ParseEvent()
+				ensure.NotNil(t, err)
+				ensure.DeepEqual(t, err.Error(), "'event' field not a string")
+			})
+		})
+	})
 })
 
 var _ = Describe("PollEvents()", func() {

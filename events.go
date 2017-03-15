@@ -37,6 +37,20 @@ func (e Event) ParseMessageId() (string, error) {
 	return headers["message-id"].(string), nil
 }
 
+func (e Event) ParseEventType() (string, error) {
+	obj, ok := e["event"]
+	if !ok {
+		return "", errors.New("'event' field not found in event")
+	}
+
+	eventType, ok := obj.(string)
+	if !ok {
+		return "", errors.New("'event' field a string")
+	}
+
+	return eventType, nil
+}
+
 // noTime always equals an uninitialized Time structure.
 // It's used to detect when a time parameter is provided.
 var noTime time.Time
