@@ -167,14 +167,12 @@ func findStoredMessageID(mg Mailgun) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if len(ei.Events()) == 0 {
+		if len(ei.Events) == 0 {
 			break
 		}
-		for _, event := range ei.Events() {
-			if event["event"] == "stored" {
-				s := event["storage"].(map[string]interface{})
-				k := s["key"]
-				return k.(string), nil
+		for _, event := range ei.Events {
+			if event.Event == EventStored {
+				return event.Storage.Key, nil
 			}
 		}
 		err = ei.GetNext()
