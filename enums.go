@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"strconv"
@@ -61,7 +62,8 @@ type TimestampNano time.Time
 // MarshalText satisfies TextMarshaler
 func (tn TimestampNano) MarshalText() ([]byte, error) {
 	t := time.Time(tn)
-	return []byte(fmt.Sprintf("%d.%d", t.Unix(), t.Nanosecond())), nil
+	v := float64(t.Unix()) + float64(t.Nanosecond())/float64(time.Nanosecond)
+	return json.Marshal(v)
 }
 
 // UnmarshalText satisfies TextUnmarshaler
