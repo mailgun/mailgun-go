@@ -35,7 +35,8 @@ type Event struct {
 
 	// Message
 	// TODO: unify message types
-	Message       *EventMessage
+	Message       *EventMessage                `json:"message,omitempty"`
+	Batch         *Batch                       `json:"batch,omitempty"`
 	Recipient     *Recipient                   `json:"recipient,omitempty"`
 	Routes        []Route                      `json:"routes,omitempty"`
 	Storage       *Storage                     `json:"storage,omitempty"`
@@ -82,6 +83,10 @@ type Storage struct {
 	Key string `json:"key"`
 }
 
+type Batch struct {
+	ID string `json:"id"`
+}
+
 type Envelope struct {
 	Sender      *string          `json:"sender,omitempty"`
 	SendingHost *string          `json:"sending-host,omitempty"`
@@ -94,7 +99,7 @@ type EventMessage struct {
 	Headers     map[string]string  `json:"headers,omitempty"`
 	Recipients  []string           `json:"recipients,omitempty"`
 	Attachments []StoredAttachment `json:"attachments,omitempty"`
-	Size        int                `json:"size,omitempty"`
+	Size        *int               `json:"size,omitempty"`
 }
 
 func (em *EventMessage) ID() (string, error) {

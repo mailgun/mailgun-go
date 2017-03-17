@@ -174,6 +174,7 @@ const (
 	ReasonSuppressComplaint
 	ReasonSuppressUnsubscribe
 	ReasonOld
+	ReasonHardFail
 )
 
 var eventReasons = []string{
@@ -185,6 +186,7 @@ var eventReasons = []string{
 	"suppress-complaint",
 	"suppress-unsubscribe",
 	"old",
+	"hardfail",
 }
 
 func (er EventReason) String() string {
