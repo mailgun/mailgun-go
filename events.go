@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type EventResponse struct {
+type eventResponse struct {
 	Events []Event `json:"items"`
 	Paging
 }
@@ -36,7 +36,7 @@ type Event struct {
 	// Message
 	// TODO: unify message types
 	Message       *EventMessage
-	Recipient     *string                      `json:"recipient,omitempty"`
+	Recipient     *Recipient                   `json:"recipient,omitempty"`
 	Routes        []Route                      `json:"routes,omitempty"`
 	Storage       *Storage                     `json:"storage,omitempty"`
 	UserVariables map[string]map[string]string `json:"user-variables"`
@@ -135,7 +135,7 @@ type GetEventsOptions struct {
 
 // EventIterator maintains the state necessary for paging though small parcels of a larger set of events.
 type EventIterator struct {
-	EventResponse
+	eventResponse
 	mg  Mailgun
 	err error
 }
@@ -189,7 +189,7 @@ func (mg *MailgunImpl) ListEvents(opts *EventsOptions) *EventIterator {
 	url, err := req.generateUrlWithParameters()
 	return &EventIterator{
 		mg:            mg,
-		EventResponse: EventResponse{Paging: Paging{Next: url, First: url}},
+		eventResponse: eventResponse{Paging: Paging{Next: url, First: url}},
 		err:           err,
 	}
 }
@@ -433,18 +433,5 @@ func (ei *EventIterator) fetch(url string) error {
 	r.setClient(ei.mg.Client())
 	r.setBasicAuth(basicAuthUser, ei.mg.ApiKey())
 
-	return getResponseFromJSON(r, &ei.EventResponse)
-}
-
-func toMapInterface(field string, thingy map[string]interface{}) (map[string]interface{}, error) {
-	var empty map[string]interface{}
-	obj, ok := thingy[field]
-	if !ok {
-		return empty, errors.Errorf("'%s' field not found in event", field)
-	}
-	result, ok := obj.(map[string]interface{})
-	if !ok {
-		return empty, errors.Errorf("'%s' field not a map[string]interface{}", field)
-	}
-	return result, nil
+	return getResponseFromJSON(r, &ei.eventResponse)
 }
