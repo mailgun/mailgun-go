@@ -21,6 +21,7 @@ const (
 	EventUnsubscribed
 	EventComplained
 	EventStored
+	EventDropped
 )
 
 var eventTypes = []string{
@@ -34,6 +35,7 @@ var eventTypes = []string{
 	"unsubscribed",
 	"complained",
 	"stored",
+	"dropped",
 }
 
 func (et EventType) String() string {
