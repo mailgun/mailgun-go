@@ -23,6 +23,7 @@ type Message struct {
 	inlines           []string
 	readerInlines     []ReaderAttachment
 
+	nativeSend         bool
 	testMode           bool
 	tracking           bool
 	trackingClicks     bool
@@ -371,6 +372,12 @@ func (m *Message) SetDKIM(dkim bool) {
 	m.dkimSet = true
 }
 
+// EnableNativeSend allow the return path to match the address in the Message.Headers.From: 
+// field when sending from Mailgun rather than the usual bounce+ address in the return path.
+func (m *Message) EnableNativeSend() {
+	m.nativeSend = true
+}
+
 // EnableTestMode allows submittal of a message, such that it will be discarded by Mailgun.
 // This facilitates testing client-side software without actually consuming e-mail resources.
 func (m *Message) EnableTestMode() {
@@ -458,6 +465,9 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		if message.deliveryTime != nil {
 			payload.addValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
+		}		
+		if message.nativeSend {
+			payload.addValue("o:native-send", "yes")
 		}
 		if message.testMode {
 			payload.addValue("o:testmode", "yes")
