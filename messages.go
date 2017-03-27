@@ -372,7 +372,7 @@ func (m *Message) SetDKIM(dkim bool) {
 	m.dkimSet = true
 }
 
-// EnableNativeSend allow the return path to match the address in the Message.Headers.From: 
+// EnableNativeSend allows the return path to match the address in the Message.Headers.From: 
 // field when sending from Mailgun rather than the usual bounce+ address in the return path.
 func (m *Message) EnableNativeSend() {
 	m.nativeSend = true
