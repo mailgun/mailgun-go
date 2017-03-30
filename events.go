@@ -35,12 +35,12 @@ type Event struct {
 
 	// Message
 	// TODO: unify message types
-	Message       *EventMessage                `json:"message,omitempty"`
-	Batch         *Batch                       `json:"batch,omitempty"`
-	Recipient     *Recipient                   `json:"recipient,omitempty"`
-	Routes        []Route                      `json:"routes,omitempty"`
-	Storage       *Storage                     `json:"storage,omitempty"`
-	UserVariables map[string]map[string]string `json:"user-variables"`
+	Message       *EventMessage     `json:"message,omitempty"`
+	Batch         *Batch            `json:"batch,omitempty"`
+	Recipient     *Recipient        `json:"recipient,omitempty"`
+	Routes        []Route           `json:"routes,omitempty"`
+	Storage       *Storage          `json:"storage,omitempty"`
+	UserVariables map[string]string `json:"user-variables"`
 
 	// API
 	Method *Method     `json:"method,omitempty"`

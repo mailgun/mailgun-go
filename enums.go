@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"strconv"
 	"time"
 )
 
@@ -61,16 +60,17 @@ func (et *EventType) UnmarshalText(text []byte) error {
 
 type TimestampNano time.Time
 
-// MarshalText satisfies TextMarshaler
-func (tn TimestampNano) MarshalText() ([]byte, error) {
+// MarshalText satisfies JSONMarshaler
+func (tn TimestampNano) MarshalJSON() ([]byte, error) {
 	t := time.Time(tn)
 	v := float64(t.Unix()) + float64(t.Nanosecond())/float64(time.Nanosecond)
 	return json.Marshal(v)
 }
 
-// UnmarshalText satisfies TextUnmarshaler
-func (tn *TimestampNano) UnmarshalText(text []byte) error {
-	v, err := strconv.ParseFloat(string(text), 64)
+// UnmarshalText satisfies JSONUnmarshaler
+func (tn *TimestampNano) UnmarshalJSON(data []byte) error {
+	var v float64
+	err := json.Unmarshal(data, &v)
 	if err == nil {
 		*tn = TimestampNano(time.Unix(0, int64(v*float64(time.Second))))
 	}
@@ -98,13 +98,13 @@ type Method uint8
 const (
 	MethodUnknown Method = iota
 	MethodSMTP
-	MethodAPI
+	MethodHTTP
 )
 
 var methods = []string{
 	"unknown",
 	"smtp",
-	"api",
+	"http",
 }
 
 func (m Method) String() string {
