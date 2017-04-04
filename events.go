@@ -9,7 +9,7 @@ import (
 
 type eventResponse struct {
 	Events []Event `json:"items"`
-	Paging
+	Paging Paging  `json:"paging"`
 }
 
 type Event struct {
