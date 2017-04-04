@@ -30,6 +30,7 @@ type Message struct {
 	headers            map[string]string
 	variables          map[string]string
 	recipientVariables map[string]map[string]interface{}
+	domain             string
 
 	dkimSet           bool
 	trackingSet       bool
@@ -433,6 +434,11 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 	return nil
 }
 
+// AddDomain allows you to use a separate domain for the type of messages you are sending.
+func (m *Message) AddDomain(domain string) {
+	m.domain = domain
+}
+
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
 // a human-readable status message, and a message ID.  The status and message ID are set only
@@ -440,88 +446,90 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !isValid(message) {
 		err = errors.New("Message not valid")
-	} else {
-		payload := newFormDataPayload()
+		return
+	}
+	payload := newFormDataPayload()
 
-		message.specific.addValues(payload)
-		for _, to := range message.to {
-			payload.addValue("to", to)
+	message.specific.addValues(payload)
+	for _, to := range message.to {
+		payload.addValue("to", to)
+	}
+	for _, tag := range message.tags {
+		payload.addValue("o:tag", tag)
+	}
+	for _, campaign := range message.campaigns {
+		payload.addValue("o:campaign", campaign)
+	}
+	if message.dkimSet {
+		payload.addValue("o:dkim", yesNo(message.dkim))
+	}
+	if message.deliveryTime != nil {
+		payload.addValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
+	}
+	if message.testMode {
+		payload.addValue("o:testmode", "yes")
+	}
+	if message.trackingSet {
+		payload.addValue("o:tracking", yesNo(message.tracking))
+	}
+	if message.trackingClicksSet {
+		payload.addValue("o:tracking-clicks", yesNo(message.trackingClicks))
+	}
+	if message.trackingOpensSet {
+		payload.addValue("o:tracking-opens", yesNo(message.trackingOpens))
+	}
+	if message.headers != nil {
+		for header, value := range message.headers {
+			payload.addValue("h:"+header, value)
 		}
-		for _, tag := range message.tags {
-			payload.addValue("o:tag", tag)
+	}
+	if message.variables != nil {
+		for variable, value := range message.variables {
+			payload.addValue("v:"+variable, value)
 		}
-		for _, campaign := range message.campaigns {
-			payload.addValue("o:campaign", campaign)
+	}
+	if message.recipientVariables != nil {
+		j, err := json.Marshal(message.recipientVariables)
+		if err != nil {
+			return "", "", err
 		}
-		if message.dkimSet {
-			payload.addValue("o:dkim", yesNo(message.dkim))
+		payload.addValue("recipient-variables", string(j))
+	}
+	if message.attachments != nil {
+		for _, attachment := range message.attachments {
+			payload.addFile("attachment", attachment)
 		}
-		if message.deliveryTime != nil {
-			payload.addValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
+	}
+	if message.readerAttachments != nil {
+		for _, readerAttachment := range message.readerAttachments {
+			payload.addReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
 		}
-		if message.testMode {
-			payload.addValue("o:testmode", "yes")
-		}
-		if message.trackingSet {
-			payload.addValue("o:tracking", yesNo(message.tracking))
-		}
-		if message.trackingClicksSet {
-			payload.addValue("o:tracking-clicks", yesNo(message.trackingClicks))
-		}
-		if message.trackingOpensSet {
-			payload.addValue("o:tracking-opens", yesNo(message.trackingOpens))
-		}
-		if message.headers != nil {
-			for header, value := range message.headers {
-				payload.addValue("h:"+header, value)
-			}
-		}
-		if message.variables != nil {
-			for variable, value := range message.variables {
-				payload.addValue("v:"+variable, value)
-			}
-		}
-		if message.recipientVariables != nil {
-			j, err := json.Marshal(message.recipientVariables)
-			if err != nil {
-				return "", "", err
-			}
-			payload.addValue("recipient-variables", string(j))
-		}
-		if message.attachments != nil {
-			for _, attachment := range message.attachments {
-				payload.addFile("attachment", attachment)
-			}
-		}
-		if message.readerAttachments != nil {
-			for _, readerAttachment := range message.readerAttachments {
-				payload.addReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
-			}
-		}
-		if message.inlines != nil {
-			for _, inline := range message.inlines {
-				payload.addFile("inline", inline)
-			}
-		}
-
-		if message.readerInlines != nil {
-			for _, readerAttachment := range message.readerInlines {
-				payload.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
-			}
-		}
-
-		r := newHTTPRequest(generateApiUrl(m, message.specific.endpoint()))
-		r.setClient(m.Client())
-		r.setBasicAuth(basicAuthUser, m.ApiKey())
-
-		var response sendMessageResponse
-		err = postResponseFromJSON(r, payload, &response)
-		if err == nil {
-			mes = response.Message
-			id = response.Id
+	}
+	if message.inlines != nil {
+		for _, inline := range message.inlines {
+			payload.addFile("inline", inline)
 		}
 	}
 
+	if message.readerInlines != nil {
+		for _, readerAttachment := range message.readerInlines {
+			payload.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
+		}
+	}
+	if message.domain == "" {
+		message.domain = m.Domain()
+	}
+
+	r := newHTTPRequest(generateApiUrlWithDomain(m, message.specific.endpoint(), message.domain))
+	r.setClient(m.Client())
+	r.setBasicAuth(basicAuthUser, m.ApiKey())
+
+	var response sendMessageResponse
+	err = postResponseFromJSON(r, payload, &response)
+	if err == nil {
+		mes = response.Message
+		id = response.Id
+	}
 	return
 }
 

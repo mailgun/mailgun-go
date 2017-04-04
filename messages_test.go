@@ -347,3 +347,41 @@ func TestSendMGOffline(t *testing.T) {
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
+
+func TestSendMGSeparateDomain(t *testing.T) {
+	const (
+		exampleDomain = "testDomain"
+		signingDomain = "signingDomain"
+
+		exampleAPIKey       = "testAPIKey"
+		examplePublicAPIKey = "testPublicAPIKey"
+		toUser              = "test@test.com"
+		exampleMessage      = "Queue. Thank you"
+		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", signingDomain))
+		values, err := parseContentType(req)
+		ensure.Nil(t, err)
+		ensure.True(t, len(values) != 0)
+		ensure.DeepEqual(t, values.Get("from"), fromUser)
+		ensure.DeepEqual(t, values.Get("subject"), exampleSubject)
+		ensure.DeepEqual(t, values.Get("text"), exampleText)
+		ensure.DeepEqual(t, values.Get("to"), toUser)
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey, examplePublicAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m.AddDomain(signingDomain)
+
+	msg, id, err := mg.Send(m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
+}
