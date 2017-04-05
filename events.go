@@ -27,11 +27,14 @@ type Event struct {
 	Tags      []string   `json:"tags,omitempty"`
 	Campaigns []Campaign `json:"campaigns,omitempty"`
 
-	// Client information (for client-initiated events)
+	// Recipient information (for recipient-initiated events: opens, clicks etc)
 	ClientInfo  *ClientInfo  `json:"client-info,omitempty"`
 	Geolocation *Geolocation `json:"geolocation,omitempty"`
 	IP          *IP          `json:"ip,omitempty"`
 	Envelope    *Envelope    `json:"envelope,omitempty"`
+
+	// Clicked
+	URL *string `json:"url,omitempty"`
 
 	// Message
 	// TODO: unify message types
