@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -86,7 +87,8 @@ func (i IP) MarshalText() ([]byte, error) {
 
 // UnmarshalText satisfies TextUnmarshaler
 func (i *IP) UnmarshalText(text []byte) error {
-	v := net.ParseIP(string(text))
+	s := strings.Trim(string(text), "\"")
+	v := net.ParseIP(s)
 	if v != nil {
 		*i = IP(v)
 	}
