@@ -27,7 +27,7 @@ var _ = Describe("ListEvents()", func() {
 			var firstPage, secondPage []Event
 
 			ensure.True(t, it.Next(&firstPage))
-			ensure.True(t, it.NextURL != "")
+			ensure.True(t, it.Paging.Next != "")
 			ensure.True(t, len(firstPage) != 0)
 			firstIterator := *it
 
@@ -36,8 +36,8 @@ var _ = Describe("ListEvents()", func() {
 
 			// Pages should be different
 			ensure.NotDeepEqual(t, firstPage, secondPage)
-			ensure.True(t, firstIterator.NextURL != it.NextURL)
-			ensure.True(t, firstIterator.PrevURL != it.PrevURL)
+			ensure.True(t, firstIterator.Paging.Next != it.Paging.Next)
+			ensure.True(t, firstIterator.Paging.Previous != it.Paging.Previous)
 			ensure.Nil(t, it.Err())
 		})
 	})
@@ -115,10 +115,10 @@ var _ = Describe("EventIterator()", func() {
 
 				// Print out the kind of event and timestamp.
 				// Specifics about each event will depend on the "event" type.
-				events := ei.Events()
+				events := ei.Events
 				log.Printf("Event\tTimestamp\t")
 				for _, event := range events {
-					log.Printf("%s\t%v\t\n", event["event"], event["timestamp"])
+					log.Printf("%s\t%v\t\n", event.Event, event.Timestamp)
 				}
 				log.Printf("%d events dumped\n\n", len(events))
 				ensure.True(t, len(events) != 0)
@@ -126,56 +126,6 @@ var _ = Describe("EventIterator()", func() {
 				// TODO: (thrawn01) The more I look at this and test it,
 				// the more I doubt it will ever work consistently
 				//ei.GetPrevious()
-			})
-		})
-	})
-})
-
-var _ = Describe("Event{}", func() {
-	var t GinkgoTInterface
-
-	BeforeEach(func() {
-		t = GinkgoT()
-	})
-
-	Describe("ParseTimeStamp()", func() {
-		Context("When 'timestamp' exists and is valid", func() {
-			It("Should parse the timestamp into time.Time{}", func() {
-				event := Event{
-					"timestamp": 1476380259.578017,
-				}
-				timestamp, err := event.ParseTimeStamp()
-				ensure.Nil(t, err)
-				ensure.DeepEqual(t, timestamp, time.Date(2016, 10, 13, 17, 37, 39,
-					578017*int(time.Microsecond/time.Nanosecond), time.UTC))
-
-				event = Event{
-					"timestamp": 1377211256.096436,
-				}
-				timestamp, err = event.ParseTimeStamp()
-				ensure.Nil(t, err)
-				ensure.DeepEqual(t, timestamp, time.Date(2013, 8, 22, 22, 40, 56,
-					96436*int(time.Microsecond/time.Nanosecond), time.UTC))
-			})
-		})
-		Context("When 'timestamp' is missing", func() {
-			It("Should return error", func() {
-				event := Event{
-					"blah": "",
-				}
-				_, err := event.ParseTimeStamp()
-				ensure.NotNil(t, err)
-				ensure.DeepEqual(t, err.Error(), "'timestamp' field not found in event")
-			})
-		})
-		Context("When 'timestamp' is not a float64", func() {
-			It("Should return error", func() {
-				event := Event{
-					"timestamp": "1476380259.578017",
-				}
-				_, err := event.ParseTimeStamp()
-				ensure.NotNil(t, err)
-				ensure.DeepEqual(t, err.Error(), "'timestamp' field not a float64")
 			})
 		})
 	})
@@ -195,6 +145,7 @@ var _ = Describe("PollEvents()", func() {
 	Describe("it.Poll()", func() {
 		It("Should return events once the threshold age has expired", func() {
 			mg, err = NewMailgunFromEnv()
+			b := time.Now().Add(time.Second * -3)
 			Expect(err).To(BeNil())
 
 			// Very short poll interval
@@ -203,7 +154,7 @@ var _ = Describe("PollEvents()", func() {
 				// or events older than this threshold appear
 				ThresholdAge: time.Second * 10,
 				// Only events with a timestamp after this date/time will be returned
-				Begin: time.Now().Add(time.Second * -3),
+				Begin: &b,
 				// How often we poll the api for new events
 				PollInterval: time.Second * 4})
 
@@ -222,12 +173,11 @@ var _ = Describe("PollEvents()", func() {
 			var found bool
 			// Log the events we received
 			for _, event := range events {
-				eventMsg, _ := event.ParseMessageId()
-				timeStamp, _ := event.ParseTimeStamp()
-				log.Printf("Event: %s <%s> - %s", eventMsg, event["event"], timeStamp)
+				messageID, _ := event.Message.ID()
+				log.Printf("Event: %s <%s> - %s", messageID, event.Event, event.Timestamp)
 
 				// If we find our accepted email event
-				if id == ("<"+eventMsg+">") && event["event"] == "accepted" {
+				if id == ("<"+messageID+">") && event.Event == EventAccepted {
 					found = true
 				}
 			}
