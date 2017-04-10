@@ -3,6 +3,7 @@ package mailgun
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 )
@@ -10,6 +11,9 @@ import (
 // MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
 // This figure includes To:, Cc:, Bcc:, etc. recipients.
 const MaxNumberOfRecipients = 1000
+
+// MaxNumberOfTags represents the maximum number of tags that can be added for a message
+const MaxNumberOfTags = 3
 
 // Message structures contain both the message text and the envelop for an e-mail message.
 type Message struct {
@@ -354,10 +358,15 @@ func (pm *plainMessage) setHtml(h string) {
 
 func (mm *mimeMessage) setHtml(_ string) {}
 
-// AddTag attaches a tag to the message.  Tags are useful for metrics gathering and event tracking purposes.
+// AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
-func (m *Message) AddTag(tag string) {
-	m.tags = append(m.tags, tag)
+func (m *Message) AddTag(tag ...string) error {
+	if len(m.tags) >= MaxNumberOfTags {
+		return fmt.Errorf("Cannot add any new tags. Message tag limit (%b) reached.", MaxNumberOfTags)
+	}
+
+	m.tags = append(m.tags, tag...)
+	return nil
 }
 
 // This feature is deprecated for new software.
@@ -372,7 +381,7 @@ func (m *Message) SetDKIM(dkim bool) {
 	m.dkimSet = true
 }
 
-// EnableNativeSend allows the return path to match the address in the Message.Headers.From: 
+// EnableNativeSend allows the return path to match the address in the Message.Headers.From:
 // field when sending from Mailgun rather than the usual bounce+ address in the return path.
 func (m *Message) EnableNativeSend() {
 	m.nativeSend = true
@@ -465,7 +474,7 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 		}
 		if message.deliveryTime != nil {
 			payload.addValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
-		}		
+		}
 		if message.nativeSend {
 			payload.addValue("o:native-send", "yes")
 		}
