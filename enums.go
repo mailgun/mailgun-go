@@ -141,8 +141,8 @@ const (
 
 var severities = []string{
 	"unknown",
-	"permanent",
 	"temporary",
+	"permanent",
 	"internal",
 }
 
