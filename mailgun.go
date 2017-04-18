@@ -291,6 +291,11 @@ func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", m.ApiBase(), m.Domain(), endpoint)
 }
 
+// generateApiUrlWithDomain renders a URL for an API endpoint using a separate domain and endpoint name.
+func generateApiUrlWithDomain(m Mailgun, endpoint, domain string) string {
+	return fmt.Sprintf("%s/%s/%s", m.ApiBase(), domain, endpoint)
+}
+
 // generateMemberApiUrl renders a URL relevant for specifying mailing list members.
 // The address parameter refers to the mailing list in question.
 func generateMemberApiUrl(m Mailgun, endpoint, address string) string {
