@@ -222,6 +222,7 @@ const (
 	ClientBrowser
 	ClientEmail
 	ClientLibrary
+	ClientRobot
 )
 
 var clientTypes = []string{
@@ -230,6 +231,7 @@ var clientTypes = []string{
 	"browser",
 	"email client",
 	"library",
+	"robot",
 }
 
 func (ct ClientType) String() string {
