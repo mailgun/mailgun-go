@@ -256,14 +256,14 @@ func (ct *ClientType) UnmarshalText(text []byte) error {
 type DeviceType uint
 
 const (
-	DeviceUnknown DeviceType = iota
+	DeviceOther DeviceType = iota
 	DeviceMobileBrowser
 	DeviceBrowser
 	DeviceEmail
 )
 
 var deviceTypes = []string{
-	"unknown",
+	"other",
 	"desktop",
 	"mobile",
 	"tablet",
