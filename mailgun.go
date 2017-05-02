@@ -161,6 +161,8 @@ type Mailgun interface {
 	GetSingleComplaint(address string) (Complaint, error)
 	GetStoredMessage(id string) (StoredMessage, error)
 	GetStoredMessageRaw(id string) (StoredMessageRaw, error)
+	GetStoredMessageForURL(url string) (StoredMessage, error)
+	GetStoredMessageRawForURL(url string) (StoredMessageRaw, error)
 	DeleteStoredMessage(id string) error
 	GetCredentials(limit, skip int) (int, []Credential, error)
 	CreateCredential(login, password string) error

@@ -679,6 +679,32 @@ func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) 
 	var response StoredMessageRaw
 	err := getResponseFromJSON(r, &response)
 	return response, err
+}
+
+// GetStoredMessageForURL retrieves information about a received e-mail message.
+// This provides visibility into, e.g., replies to a message sent to a mailing list.
+func (mg *MailgunImpl) GetStoredMessageForURL(url string) (StoredMessage, error) {
+	r := newHTTPRequest(url)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+
+	var response StoredMessage
+	err := getResponseFromJSON(r, &response)
+	return response, err
+}
+
+// GetStoredMessageRawForURL retrieves the raw MIME body of a received e-mail message.
+// Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
+// thus delegates to the caller the required parsing.
+func (mg *MailgunImpl) GetStoredMessageRawForURL(url string) (StoredMessageRaw, error) {
+	r := newHTTPRequest(url)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.addHeader("Accept", "message/rfc2822")
+
+	var response StoredMessageRaw
+	err := getResponseFromJSON(r, &response)
+	return response, err
 
 }
 
