@@ -6,18 +6,17 @@ import (
 	"os"
 
 	"github.com/drhodes/golorem"
-	"github.com/mailgun/log"
 	"github.com/mailgun/mailgun-go"
+	"github.com/pkg/errors"
 	"github.com/thrawn01/args"
 )
 
-func Send(parser *args.ArgParser, data interface{}) int {
+func Send(parser *args.ArgParser, data interface{}) (int, error) {
 	mg := data.(mailgun.Mailgun)
 	var content []byte
 	var err error
 	var count int
 
-	log.InitWithConfig(log.Config{Name: "console"})
 	desc := args.Dedent(`Send emails via the mailgun HTTP API
 
 	Examples:
@@ -41,26 +40,31 @@ func Send(parser *args.ArgParser, data interface{}) int {
 	parser.AddOption("--count").StoreInt(&count).Default("1").Alias("-c").Help("send the email x number of counts")
 	parser.AddArgument("addresses").IsStringSlice().Required().Help("a list of email addresses")
 
-	opts := parser.ParseArgsSimple(nil)
+	opts := parser.ParseSimple(nil)
+	if opts == nil {
+		return 1, nil
+	}
 
 	// Required for send
 	if err := opts.Required([]string{"domain", "api-key"}); err != nil {
-		fmt.Fprintf(os.Stderr, "Missing Required option '%s'", err)
-		return 1
+		return 1, fmt.Errorf("Missing Required option '%s'", err)
 	}
 
 	// Default to user@hostname if no from address provided
 	if !opts.IsSet("from") {
 		host, err := os.Hostname()
-		checkErr("Hostname Error", err)
+		if err != nil {
+			return 1, errors.Wrapf(err, "during hostname lookup")
+		}
 		opts.Set("from", fmt.Sprintf("%s@%s", os.Getenv("USER"), host))
 	}
 
 	// If stdin is not open and character device
 	if args.IsCharDevice(os.Stdin) {
 		// Read the content from stdin
-		content, err = ioutil.ReadAll(os.Stdin)
-		checkErr("Error reading stdin", err)
+		if content, err = ioutil.ReadAll(os.Stdin); err != nil {
+			return 1, errors.Wrap(err, "while reading from stdin")
+		}
 	}
 
 	subject := opts.String("subject")
@@ -74,12 +78,10 @@ func Send(parser *args.ArgParser, data interface{}) int {
 		}
 	} else {
 		if len(content) == 0 {
-			fmt.Fprintln(os.Stderr, "Must provide email body, or use --lorem")
-			os.Exit(1)
+			return 1, fmt.Errorf("Must provide email body, or use --lorem")
 		}
 		if len(subject) == 0 {
-			fmt.Fprintln(os.Stderr, "Must provide subject, or use --lorem")
-			os.Exit(1)
+			return 1, fmt.Errorf("Must provide subject, or use --lorem")
 		}
 	}
 
@@ -101,8 +103,10 @@ func Send(parser *args.ArgParser, data interface{}) int {
 		}
 
 		resp, id, err := mg.Send(msg)
-		checkErr("Message Error", err)
+		if err != nil {
+			return 1, errors.Wrap(err, "while sending message")
+		}
 		fmt.Printf("Id: %s Resp: %s\n", id, resp)
 	}
-	return 0
+	return 0, nil
 }

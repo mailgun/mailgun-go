@@ -4,20 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mailgun/log"
 	"github.com/mailgun/mailgun-go"
 	"github.com/thrawn01/args"
 )
 
-func checkErr(msg string, err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s - %s\n", msg, err)
-		os.Exit(1)
-	}
-}
-
 func main() {
-	log.InitWithConfig(log.Config{Name: "console"})
 	desc := args.Dedent(`CLI for mailgun api
 
 	Examples:
@@ -45,7 +36,7 @@ func main() {
 	parser.AddCommand("tag", Tag)
 
 	// Parser and set global options
-	opts := parser.ParseArgsSimple(nil)
+	opts := parser.ParseOrExit(nil)
 	if opts.Bool("verbose") {
 		mailgun.Debug = true
 	}
@@ -62,8 +53,7 @@ func main() {
 	// Run the command chosen by our user
 	retCode, err := parser.RunCommand(mg)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, "-- %s", err)
 	}
 	os.Exit(retCode)
 }
