@@ -1,21 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"encoding/json"
+	"fmt"
 
-	"github.com/mailgun/log"
 	"github.com/mailgun/mailgun-go"
 	"github.com/thrawn01/args"
 )
 
-func Tag(parser *args.ArgParser, data interface{}) int {
+func Tag(parser *args.ArgParser, data interface{}) (int, error) {
 	mg := data.(mailgun.Mailgun)
-	var err error
 
-	log.InitWithConfig(log.Config{Name: "console"})
 	desc := args.Dedent(`Manage tags via the mailgun HTTP API
 
 	Examples:
@@ -38,19 +33,11 @@ func Tag(parser *args.ArgParser, data interface{}) int {
 	parser.AddCommand("get", GetTag)
 	parser.AddCommand("delete", DeleteTag)
 
-	// Parse the subcommands
-	parser.ParseArgsSimple(nil)
-
 	// Run the command chosen by our user
-	retCode, err := parser.RunCommand(mg)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		return 1
-	}
-	return retCode
+	return parser.ParseAndRun(nil, mg)
 }
 
-func ListTag(parser *args.ArgParser, data interface{}) int {
+func ListTag(parser *args.ArgParser, data interface{}) (int, error) {
 	mg := data.(mailgun.Mailgun)
 
 	desc := args.Dedent(`list tags via the mailgun HTTP API
@@ -71,7 +58,10 @@ func ListTag(parser *args.ArgParser, data interface{}) int {
 	parser.AddOption("--page").Alias("-pg").
 		Help("The page direction based off the tag parameter; valid choices are (first, last, next, prev)")
 
-	opts := parser.ParseArgsSimple(nil)
+	opts := parser.ParseSimple(nil)
+	if opts == nil {
+		return 1, nil
+	}
 
 	// Calculate our request limit
 	limit := opts.Int("limit")
@@ -91,18 +81,17 @@ func ListTag(parser *args.ArgParser, data interface{}) int {
 			fmt.Printf("%s\n", tag.Value)
 			count += 1
 			if limit != 0 && count > limit {
-				return 0
+				return 0, nil
 			}
 		}
 	}
 	if it.Err() != nil {
-		fmt.Fprint(os.Stderr, it.Err().Error())
-		return 1
+		return 1, it.Err()
 	}
-	return 0
+	return 0, nil
 }
 
-func GetTag(parser *args.ArgParser, data interface{}) int {
+func GetTag(parser *args.ArgParser, data interface{}) (int, error) {
 	mg := data.(mailgun.Mailgun)
 
 	desc := args.Dedent(`get metatdata about a tag via the mailgun HTTP API
@@ -113,23 +102,24 @@ func GetTag(parser *args.ArgParser, data interface{}) int {
 	parser.SetDesc(desc)
 	parser.AddArgument("tag").Required().Help("the tag to retrieve")
 
-	opts := parser.ParseArgsSimple(nil)
+	opts := parser.ParseSimple(nil)
+	if opts == nil {
+		return 1, nil
+	}
 
 	tag, err := mg.GetTag(opts.String("tag"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		return 1
+		return 1, err
 	}
 	output, err := json.Marshal(tag)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Json Error: %s\n", err)
-		return 1
+		return 1, fmt.Errorf("Json Error: %s\n", err)
 	}
 	fmt.Print(string(output))
-	return 0
+	return 0, nil
 }
 
-func DeleteTag(parser *args.ArgParser, data interface{}) int {
+func DeleteTag(parser *args.ArgParser, data interface{}) (int, error) {
 	mg := data.(mailgun.Mailgun)
 
 	desc := args.Dedent(`delete a tag via the mailgun HTTP API
@@ -140,12 +130,14 @@ func DeleteTag(parser *args.ArgParser, data interface{}) int {
 	parser.SetDesc(desc)
 	parser.AddArgument("tag").Required().Help("the tag to delete")
 
-	opts := parser.ParseArgsSimple(nil)
+	opts := parser.ParseSimple(nil)
+	if opts == nil {
+		return 1, nil
+	}
 
 	err := mg.DeleteTag(opts.String("tag"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		return 1
+		return 1, err
 	}
-	return 0
+	return 0, nil
 }
