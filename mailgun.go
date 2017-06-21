@@ -163,6 +163,7 @@ type Mailgun interface {
 	GetStoredMessageRaw(id string) (StoredMessageRaw, error)
 	GetStoredMessageForURL(url string) (StoredMessage, error)
 	GetStoredMessageRawForURL(url string) (StoredMessageRaw, error)
+	ResendMessage(id string, recipients []string) (map[string]interface{}, error)
 	DeleteStoredMessage(id string) error
 	GetCredentials(limit, skip int) (int, []Credential, error)
 	CreateCredential(login, password string) error
