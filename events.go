@@ -51,10 +51,10 @@ type Event struct {
 }
 
 type DeliveryStatus struct {
-	Message     *string `json:"message,omitempty"`
-	Code        *int    `json:"code,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Retry       *int    `json:"retry-seconds,omitempty"`
+	Message     *string     `json:"message,omitempty"`
+	Code        interface{} `json:"code,omitempty"`
+	Description *string     `json:"description,omitempty"`
+	Retry       *int        `json:"retry-seconds,omitempty"`
 }
 
 type EventFlags struct {

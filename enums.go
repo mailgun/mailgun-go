@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -86,7 +87,8 @@ func (i IP) MarshalText() ([]byte, error) {
 
 // UnmarshalText satisfies TextUnmarshaler
 func (i *IP) UnmarshalText(text []byte) error {
-	v := net.ParseIP(string(text))
+	s := strings.Trim(string(text), "\"")
+	v := net.ParseIP(s)
 	if v != nil {
 		*i = IP(v)
 	}
@@ -139,8 +141,8 @@ const (
 
 var severities = []string{
 	"unknown",
-	"permanent",
 	"temporary",
+	"permanent",
 	"internal",
 }
 
@@ -220,6 +222,8 @@ const (
 	ClientBrowser
 	ClientEmail
 	ClientLibrary
+	ClientRobot
+	ClientOther
 )
 
 var clientTypes = []string{
@@ -228,6 +232,8 @@ var clientTypes = []string{
 	"browser",
 	"email client",
 	"library",
+	"robot",
+	"other",
 }
 
 func (ct ClientType) String() string {
@@ -258,6 +264,7 @@ const (
 	DeviceMobileBrowser
 	DeviceBrowser
 	DeviceEmail
+	DeviceOther
 )
 
 var deviceTypes = []string{
@@ -265,6 +272,7 @@ var deviceTypes = []string{
 	"desktop",
 	"mobile",
 	"tablet",
+	"other",
 }
 
 func (ct DeviceType) String() string {
