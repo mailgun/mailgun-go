@@ -159,6 +159,32 @@ func TestGetStoredMessage(t *testing.T) {
 	})
 }
 
+func TestResendStoredMessage(t *testing.T) {
+	spendMoney(t, func() {
+		mg, err := NewMailgunFromEnv()
+		ensure.Nil(t, err)
+
+		id, err := findStoredMessageID(mg) // somehow...
+		if err != nil {
+			t.Log(err)
+			return
+		}
+
+		// Make sure our stored message exists
+		_, err = mg.GetStoredMessage(id)
+		ensure.Nil(t, err)
+
+		toUser := reqEnv(t, "MG_EMAIL_TO")
+		resp, err := mg.ResendMessage(id, []string{toUser})
+		ensure.Nil(t, err)
+
+		t.Logf("TestResendStoredMessage:MSG(%s),TO(%s),RESPONSE(%#v)", id, toUser, resp)
+
+		// We're done with it; now delete it.
+		ensure.Nil(t, mg.DeleteStoredMessage(id))
+	})
+}
+
 // Tries to locate the first stored event type, returning the associated stored message key.
 func findStoredMessageID(mg Mailgun) (string, error) {
 	ei := mg.NewEventIterator()

@@ -666,6 +666,23 @@ func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
 	return response, err
 }
 
+func (mg *MailgunImpl) ResendMessage(id string, recipients []string) (map[string]interface{}, error) {
+	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+	r := newHTTPRequest(url)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.ApiKey())
+	r.addHeader("Accept", "application/json")
+
+	payload := newUrlEncodedPayload()
+	for _, recipient := range recipients {
+		payload.addValue("to", recipient)
+	}
+
+	var response map[string]interface{}
+	err := postResponseFromJSON(r, payload, &response)
+	return response, err
+}
+
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
 // Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
 // thus delegates to the caller the required parsing.
