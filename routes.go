@@ -77,8 +77,6 @@ func (mg *MailgunImpl) CreateRoute(prototype Route) (_ignored Route, err error) 
 	if err = postResponseFromJSON(r, p, &envelope); err != nil {
 		return _ignored, err
 	}
-
-	err = postResponseFromJSON(r, p, &envelope)
 	return *envelope.Route, err
 }
 
