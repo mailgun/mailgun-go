@@ -15,6 +15,8 @@ func TestEmailValidation(t *testing.T) {
 	ensure.Nil(t, err)
 
 	ensure.True(t, ev.IsValid)
+	ensure.False(t, ev.IsDisposableAddress)
+	ensure.False(t, ev.IsRoleAddress)
 	ensure.True(t, ev.Parts.DisplayName == "")
 	ensure.DeepEqual(t, ev.Parts.LocalPart, "foo")
 	ensure.DeepEqual(t, ev.Parts.Domain, "mailgun.com")
