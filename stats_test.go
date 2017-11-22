@@ -24,7 +24,7 @@ func TestGetStatsTotal(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	statsTotal, err := mg.GetStatsTotal(nil, nil, "", "","accepted", "delivered")
+	statsTotal, err := mg.GetStatsTotal(nil, nil, "", "", "accepted", "delivered")
 	ensure.Nil(t, err)
 
 	if len(statsTotal.Stats) > 0 {
