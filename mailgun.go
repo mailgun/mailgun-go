@@ -111,6 +111,7 @@ const (
 	addressParseEndpoint    = "address/parse"
 	bouncesEndpoint         = "bounces"
 	statsEndpoint           = "stats"
+	statsTotalEndpoint      = "stats/total"
 	domainsEndpoint         = "domains"
 	tagsEndpoint            = "tags"
 	campaignsEndpoint       = "campaigns"
@@ -146,6 +147,7 @@ type Mailgun interface {
 	AddBounce(address, code, error string) error
 	DeleteBounce(address string) error
 	GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error)
+	GetStatsTotal(start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error)
 	GetTag(tag string) (TagItem, error)
 	DeleteTag(tag string) error
 	ListTags(*TagOptions) *TagIterator

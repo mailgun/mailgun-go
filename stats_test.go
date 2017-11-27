@@ -20,6 +20,22 @@ func TestGetStats(t *testing.T) {
 	}
 }
 
+func TestGetStatsTotal(t *testing.T) {
+	mg, err := NewMailgunFromEnv()
+	ensure.Nil(t, err)
+
+	statsTotal, err := mg.GetStatsTotal(nil, nil, "", "", "accepted", "delivered")
+	ensure.Nil(t, err)
+
+	if len(statsTotal.Stats) > 0 {
+		firstStatsTotal := statsTotal.Stats[0]
+		t.Logf("Time: %s\n", firstStatsTotal.Time)
+		t.Logf("Accepted Total: %d\n", firstStatsTotal.Accepted.Total)
+		t.Logf("Delivered Total: %d\n", firstStatsTotal.Delivered.Total)
+	}
+
+}
+
 func TestDeleteTag(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
