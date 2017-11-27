@@ -174,6 +174,8 @@ const (
 	ReasonGeneric
 	ReasonBounce
 	ReasonESPBlock
+	ReasonGreylisted
+	ReasonBlacklisted
 	ReasonSuppressBounce
 	ReasonSuppressComplaint
 	ReasonSuppressUnsubscribe
@@ -186,6 +188,8 @@ var eventReasons = []string{
 	"generic",
 	"bounce",
 	"espblock",
+	"greylisted",
+	"blacklisted",
 	"suppress-bounce",
 	"suppress-complaint",
 	"suppress-unsubscribe",
