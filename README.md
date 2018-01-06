@@ -27,7 +27,7 @@ package main
 import "gopkg.in/mailgun/mailgun-go.v1"
 
 mg := mailgun.NewMailgun(yourdomain, ApiKey, publicApiKey)
-message := mailgun.NewMessage(
+message := mg.NewMessage(
     "sender@example.com",
     "Fancy subject!",
     "Hello from Mailgun Go!",
