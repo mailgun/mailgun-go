@@ -174,7 +174,7 @@ var _ = Describe("PollEvents()", func() {
 			// Log the events we received
 			for _, event := range events {
 				messageID, _ := event.Message.ID()
-				log.Printf("Event: %s <%s> - %s", messageID, event.Event, event.Timestamp)
+				log.Printf("Event: %s <%s> - %v", messageID, event.Event, event.Timestamp)
 
 				// If we find our accepted email event
 				if id == ("<"+messageID+">") && event.Event == EventAccepted {
