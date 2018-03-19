@@ -243,6 +243,7 @@ func NewMailgunFromEnv() (Mailgun, error) {
 	}
 
 	mg := MailgunImpl{
+		apiBase:      ApiBase,
 		domain:       domain,
 		apiKey:       apiKey,
 		publicApiKey: os.Getenv("MG_PUBLIC_API_KEY"),
