@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/drhodes/golorem"
-	"github.com/mailgun/mailgun-go"
+	"github.com/forrest321/mailgun-go"
 	"github.com/pkg/errors"
 	"github.com/thrawn01/args"
 )
