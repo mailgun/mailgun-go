@@ -1,7 +1,7 @@
 Mailgun with Go
 ===============
 
-[![Build Status](https://img.shields.io/travis/mailgun/mailgun-go/master.svg)](https://travis-ci.org/mailgun/mailgun-go)
+[![Build Status](https://img.shields.io/travis/forrest321/mailgun-go/master.svg)](https://travis-ci.org/forrest321/mailgun-go)
 [![GoDoc](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1?status.svg)](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1)
 
 
