@@ -1,7 +1,7 @@
 // TODO(sfalvo):
 // Document how to run acceptance tests.
 
-// The mailgun package provides methods for interacting with the Mailgun API.
+// Package mailgun provides methods for interacting with the Mailgun API.
 // It automates the HTTP request/response cycle, encodings, and other details needed by the API.
 // This SDK lets you do everything the API lets you, in a more Go-friendly way.
 //
@@ -99,9 +99,15 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gobuffalo/envy"
 )
 
 var Debug = false
+
+// ENV is used to help switch settings based on where the
+// application is being run. Default is "development".
+var ENV = envy.Get("GO_ENV", "development")
 
 const (
 	ApiBase                 = "https://api.mailgun.net/v3"
