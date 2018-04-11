@@ -1,33 +1,38 @@
-Mailgun with Go
-===============
+# Mailgun with Go
 
-[![Build Status](https://img.shields.io/travis/mailgun/mailgun-go/master.svg)](https://travis-ci.org/mailgun/mailgun-go)
 [![GoDoc](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1?status.svg)](https://godoc.org/gopkg.in/mailgun/mailgun-go.v1)
-
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/api_reference.html).
 
-# Sending mail via the mailgun CLI
+**NOTE: Backward compatability has been broken with the v2.0 release. Pin your dependencies to the v1.1.1 tag if you are not ready for v2.0**
+
+## Sending mail via the mailgun CLI
+
 Export your API keys and domain
+
 ```bash
 $ export MG_API_KEY=your-api-key
 $ export MG_DOMAIN=your-domain
 $ export MG_PUBLIC_API_KEY=your-public-key
 $ export MG_URL="https://api.mailgun.net/v3"
 ```
+
 Send an email
+
 ```bash
 $ echo -n 'Hello World' | mailgun send -s "Test subject" address@example.com
 ```
 
-# Sending mail via the golang library
+## Sending mail via the golang library
+
 ```go
+
 package main
 
 import (
     "fmt"
-    "gopkg.in/mailgun/mailgun-go.v1"
     "log"
+    "github.com/mailgun/mailgun-go"
 )
 
 // Your available domain names can be found here:
@@ -40,12 +45,10 @@ var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
 // starts with "key-"
 var privateAPIKey string = "your-private-key"
 
-// starts with "pubkey-"
-var publicValidationKey string = "your-public-key"
 
 func main() {
     // Create an instance of the Mailgun Client
-    mg := mailgun.NewMailgun(yourDomain, privateAPIKey, publicValidationKey)
+    mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
 
     sender := "sender@example.com"
     subject := "Fancy subject!"
@@ -67,18 +70,46 @@ func sendMessage(mg mailgun.Mailgun, sender, subject, body, recipient string) {
 }
 ```
 
-# Installation
-Install the go library
+# Email Validations
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/mailgun/mailgun-go"
+    "log"
+)
+
+// If your plan does not include email validations but you have an account,
+// use your public api key (starts with "pubkey-"). If your plan does include
+// email validations, use your private api key (starts with "key-")
+var apiKey string = "your-key"
+
+func main() {
+    // Create an instance of the Validator
+    v := mailgun.NewEmailValidator(apiKey)
+
+    v.ValidateEmail("recipient@example.com", false)
+}
 ```
-go get gopkg.in/mailgun/mailgun-go.v1
+
+## Installation
+
+Install the go library
+
+```bash
+$ go get github.com/mailgun/mailgun-go
 ```
 
 Install the mailgun CLI
-```
-go install github.com/mailgun/mailgun-go/cmd/mailgun/./...
+
+```bash
+
+$ go install github.com/mailgun/mailgun-go/cmd/mailgun/./...
+
 ```
 
-# Testing
+## Testing
 
 *WARNING* - running the tests will cost you money!
 
@@ -91,7 +122,6 @@ To run the tests various environment variables must be set. These are:
 
 and finally
 
-* `MG_SPEND_MONEY` if this value is set the part of the test that use the API to actually send email
-will be run - be aware *this will count on your quota* and *this _will_ cost you money*.
+* `MG_SPEND_MONEY` if this value is set the part of the test that use the API to actually send email will be run - be aware *this will count on your quota* and *this _will_ cost you money*.
 
 The code is released under a 3-clause BSD license. See the LICENSE file for more information.

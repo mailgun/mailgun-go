@@ -44,8 +44,7 @@ func main() {
 	// Initialize our mailgun object
 	mg := mailgun.NewMailgun(
 		opts.String("domain"),
-		opts.String("api-key"),
-		opts.String("public-api-key"))
+		opts.String("api-key"))
 
 	// Set our api url
 	mg.SetAPIBase(opts.String("url"))

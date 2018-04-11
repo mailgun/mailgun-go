@@ -2,9 +2,7 @@ package mailgun
 
 import (
 	"log"
-
 	"fmt"
-
 	"time"
 
 	"github.com/facebookgo/ensure"

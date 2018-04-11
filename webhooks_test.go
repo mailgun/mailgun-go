@@ -27,7 +27,7 @@ func TestWebhookCRUD(t *testing.T) {
 
 	hookCount := countHooks()
 
-	domainURL := randomDomainURL(10)
+	domainURL := "http://api.mailgun.net"
 	ensure.Nil(t, mg.CreateWebhook("deliver", domainURL))
 	defer func() {
 		ensure.Nil(t, mg.DeleteWebhook("deliver"))
@@ -42,7 +42,7 @@ func TestWebhookCRUD(t *testing.T) {
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, theURL, domainURL)
 
-	updatedDomainURL := randomDomainURL(10)
+	updatedDomainURL := "http://api.mailgun.net/messages"
 	ensure.Nil(t, mg.UpdateWebhook("deliver", updatedDomainURL))
 
 	hooks, err := mg.GetWebhooks()
@@ -61,7 +61,7 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 	ensure.Nil(t, err)
 
 	for _, v := range signedTests {
-		fields := getSignatureFields(mg.ApiKey(), v)
+		fields := getSignatureFields(mg.APIKey(), v)
 		req := buildFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
@@ -78,7 +78,7 @@ func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
 	ensure.Nil(t, err)
 
 	for _, v := range signedTests {
-		fields := getSignatureFields(mg.ApiKey(), v)
+		fields := getSignatureFields(mg.APIKey(), v)
 		req := buildMultipartFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
