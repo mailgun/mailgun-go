@@ -32,6 +32,13 @@ func TestMailgun(t *testing.T) {
 	ensure.DeepEqual(t, client, m.Client())
 }
 
+func TestNewMailgunImpl(t *testing.T) {
+	mi := NewMailgunImpl(domain, apiKey, publicApiKey)
+	m := NewMailgun(domain, apiKey, publicApiKey)
+
+	ensure.DeepEqual(t, mi, m)
+}
+
 func TestBounceGetCode(t *testing.T) {
 	b1 := &Bounce{
 		CreatedAt: "blah",

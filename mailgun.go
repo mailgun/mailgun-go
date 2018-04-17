@@ -230,6 +230,11 @@ func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
 	return &m
 }
 
+// NewMailgunImpl creates a new client instance.
+func NewMailgunImpl(domain, apiKey, publicApiKey string) *MailgunImpl {
+	return NewMailgun(domain, apiKey, publicApiKey).(*MailgunImpl)
+}
+
 // Return a new Mailgun client using the environment variables
 // MG_API_KEY, MG_DOMAIN, MG_PUBLIC_API_KEY and MG_URL
 func NewMailgunFromEnv() (Mailgun, error) {
