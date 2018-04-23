@@ -24,19 +24,47 @@ $ echo -n 'Hello World' | mailgun send -s "Test subject" address@example.com
 ```go
 package main
 
-import "gopkg.in/mailgun/mailgun-go.v1"
+import (
+    "fmt"
+    "gopkg.in/mailgun/mailgun-go.v1"
+    "log"
+)
 
-mg := mailgun.NewMailgun(yourdomain, ApiKey, publicApiKey)
-message := mg.NewMessage(
-    "sender@example.com",
-    "Fancy subject!",
-    "Hello from Mailgun Go!",
-    "recipient@example.com")
-resp, id, err := mg.Send(message)
-if err != nil {
-    log.Fatal(err)
+// Your available domain names can be found here:
+// (https://app.mailgun.com/app/domains)
+var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+
+// The API Keys are found in your Account Menu, under "Settings":
+// (https://app.mailgun.com/app/account/security)
+
+// starts with "key-"
+var privateAPIKey string = "your-private-key"
+
+// starts with "pubkey-"
+var publicValidationKey string = "your-public-key"
+
+func main() {
+    // Create an instance of the Mailgun Client
+    mg := mailgun.NewMailgun(yourDomain, privateAPIKey, publicValidationKey)
+
+    sender := "sender@example.com"
+    subject := "Fancy subject!"
+    body := "Hello from Mailgun Go!"
+    recipient := "recipient@example.com"
+
+    sendMessage(mg, sender, subject, body, recipient)
 }
-fmt.Printf("ID: %s Resp: %s\n", id, resp)
+
+func sendMessage(mg mailgun.Mailgun, sender, subject, body, recipient string) {
+    message := mg.NewMessage(sender, subject, body, recipient)
+    resp, id, err := mg.Send(message)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("ID: %s Resp: %s\n", id, resp)
+}
 ```
 
 # Installation
