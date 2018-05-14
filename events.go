@@ -24,8 +24,8 @@ type Event struct {
 	Severity       *EventSeverity  `json:"severity,omitempty"`
 
 	// Message classification / grouping
-	Tags      []string   `json:"tags,omitempty"`
-	Campaigns []Campaign `json:"campaigns,omitempty"`
+	Tags []string `json:"tags,omitempty"`
+	//Campaigns []Campaign `json:"campaigns,omitempty"`
 
 	// Recipient information (for recipient-initiated events: opens, clicks etc)
 	ClientInfo  *ClientInfo  `json:"client-info,omitempty"`
@@ -439,7 +439,7 @@ func (ep *EventPoller) Poll(events *[]Event) bool {
 func (ei *EventIterator) fetch(url string) error {
 	r := newHTTPRequest(url)
 	r.setClient(ei.mg.Client())
-	r.setBasicAuth(basicAuthUser, ei.mg.ApiKey())
+	r.setBasicAuth(basicAuthUser, ei.mg.APIKey())
 
 	return getResponseFromJSON(r, &ei.eventResponse)
 }

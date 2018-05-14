@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mailgun/mailgun-go"
+	"github.com/forrest321/mailgun-go"
 	"github.com/thrawn01/args"
 )
 

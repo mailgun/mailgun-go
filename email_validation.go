@@ -48,7 +48,7 @@ func (m *MailgunImpl) ValidateEmail(email string) (EmailVerification, error) {
 	r := newHTTPRequest(generatePublicApiUrl(m, addressValidateEndpoint))
 	r.setClient(m.Client())
 	r.addParameter("address", email)
-	r.setBasicAuth(basicAuthUser, m.PublicApiKey())
+	r.setBasicAuth(basicAuthUser, m.PublicAPIKey())
 
 	var response EmailVerification
 	err := getResponseFromJSON(r, &response)
@@ -65,7 +65,7 @@ func (m *MailgunImpl) ParseAddresses(addresses ...string) ([]string, []string, e
 	r := newHTTPRequest(generatePublicApiUrl(m, addressParseEndpoint))
 	r.setClient(m.Client())
 	r.addParameter("addresses", strings.Join(addresses, ","))
-	r.setBasicAuth(basicAuthUser, m.PublicApiKey())
+	r.setBasicAuth(basicAuthUser, m.PublicAPIKey())
 
 	var response addressParseResult
 	err := getResponseFromJSON(r, &response)
