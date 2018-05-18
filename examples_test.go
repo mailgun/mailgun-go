@@ -8,8 +8,8 @@ import (
 )
 
 func ExampleMailgunImpl_ValidateEmail() {
-	mg := NewMailgun("example.com", "", "my_public_api_key")
-	ev, err := mg.ValidateEmail("joe@example.com")
+	v := NewEmailValidator("my_public_api_key")
+	ev, err := v.ValidateEmail("joe@example.com")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,8 +24,8 @@ func ExampleMailgunImpl_ValidateEmail() {
 }
 
 func ExampleMailgunImpl_ParseAddresses() {
-	mg := NewMailgun("example.com", "", "my_public_api_key")
-	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses("Alice <alice@example.com>", "bob@example.com", "example.com")
+	v := NewEmailValidator("my_public_api_key")
+	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses("Alice <alice@example.com>", "bob@example.com", "example.com")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func ExampleMailgunImpl_ParseAddresses() {
 }
 
 func ExampleMailgunImpl_UpdateList() {
-	mg := NewMailgun("example.com", "my_api_key", "")
+	mg := NewMailgun("example.com", "my_api_key")
 	_, err := mg.UpdateList("joe-stat@example.com", List{
 		Name:        "Joe Stat",
 		Description: "Joe's status report list",
@@ -55,7 +55,7 @@ func ExampleMailgunImpl_UpdateList() {
 }
 
 func ExampleMailgunImpl_Send_constructed() {
-	mg := NewMailgun("example.com", "my_api_key", "")
+	mg := NewMailgun("example.com", "my_api_key")
 	m := NewMessage(
 		"Excited User <me@example.com>",
 		"Hello World",
@@ -83,7 +83,7 @@ Date: Thu, 6 Mar 2014 00:37:52 +0000
 
 Testing some Mailgun MIME awesomeness!
 `
-	mg := NewMailgun("example.com", "my_api_key", "")
+	mg := NewMailgun("example.com", "my_api_key")
 	m := NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
 	_, id, err := mg.Send(m)
 	if err != nil {
@@ -93,7 +93,7 @@ Testing some Mailgun MIME awesomeness!
 }
 
 func ExampleMailgunImpl_GetRoutes() {
-	mg := NewMailgun("example.com", "my_api_key", "")
+	mg := NewMailgun("example.com", "my_api_key")
 	n, routes, err := mg.GetRoutes(DefaultLimit, DefaultSkip)
 	if err != nil {
 		log.Fatal(err)
@@ -107,7 +107,7 @@ func ExampleMailgunImpl_GetRoutes() {
 }
 
 func ExampleMailgunImpl_UpdateRoute() {
-	mg := NewMailgun("example.com", "my_api_key", "")
+	mg := NewMailgun("example.com", "my_api_key")
 	_, err := mg.UpdateRoute("route-id-here", Route{
 		Priority: 2,
 	})

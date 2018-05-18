@@ -12,7 +12,6 @@ Export your API keys and domain
 ```bash
 $ export MG_API_KEY=your-api-key
 $ export MG_DOMAIN=your-domain
-$ export MG_PUBLIC_API_KEY=your-public-key
 $ export MG_URL="https://api.mailgun.net/v3"
 ```
 Send an email
@@ -26,7 +25,7 @@ package main
 
 import (
     "fmt"
-    "gopkg.in/mailgun/mailgun-go.v1"
+    "gopkg.in/mailgun/mailgun-go.v2"
     "log"
 )
 
@@ -40,12 +39,10 @@ var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
 // starts with "key-"
 var privateAPIKey string = "your-private-key"
 
-// starts with "pubkey-"
-var publicValidationKey string = "your-public-key"
 
 func main() {
     // Create an instance of the Mailgun Client
-    mg := mailgun.NewMailgun(yourDomain, privateAPIKey, publicValidationKey)
+    mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
 
     sender := "sender@example.com"
     subject := "Fancy subject!"
@@ -64,6 +61,29 @@ func sendMessage(mg mailgun.Mailgun, sender, subject, body, recipient string) {
     }
 
     fmt.Printf("ID: %s Resp: %s\n", id, resp)
+}
+```
+
+# Email Validations
+```go
+package main
+
+import (
+    "fmt"
+    "gopkg.in/mailgun/mailgun-go.v2"
+    "log"
+)
+
+// If your plan does not include email validations but you have an account,
+// use your public api key (starts with "pubkey-"). If your plan does include
+// email validations, use your private api key (starts with "key-")
+var apiKey string = "your-key"
+
+func main() {
+    // Create an instance of the Validator
+    v := mailgun.NewEmailValidator(apiKey)
+
+    v.ValidateEmail("recipient@example.com")
 }
 ```
 

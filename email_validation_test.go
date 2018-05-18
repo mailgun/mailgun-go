@@ -8,10 +8,10 @@ import (
 
 func TestEmailValidation(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg, err := NewMailgunFromEnv()
+	validator, err := NewEmailValidatorFromEnv()
 	ensure.Nil(t, err)
 
-	ev, err := mg.ValidateEmail("foo@mailgun.com")
+	ev, err := validator.ValidateEmail("foo@mailgun.com")
 	ensure.Nil(t, err)
 
 	ensure.True(t, ev.IsValid)
@@ -24,10 +24,10 @@ func TestEmailValidation(t *testing.T) {
 
 func TestParseAddresses(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
-	mg, err := NewMailgunFromEnv()
+	validator, err := NewEmailValidatorFromEnv()
 	ensure.Nil(t, err)
 
-	addressesThatParsed, unparsableAddresses, err := mg.ParseAddresses(
+	addressesThatParsed, unparsableAddresses, err := validator.ParseAddresses(
 		"Alice <alice@example.com>",
 		"bob@example.com",
 		"example.com")

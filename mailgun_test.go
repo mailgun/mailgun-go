@@ -12,7 +12,6 @@ import (
 
 const domain = "valid-mailgun-domain"
 const apiKey = "valid-mailgun-api-key"
-const publicApiKey = "valid-mailgun-public-api-key"
 
 func TestMailgunGinkgo(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -20,11 +19,10 @@ func TestMailgunGinkgo(t *testing.T) {
 }
 
 func TestMailgun(t *testing.T) {
-	m := NewMailgun(domain, apiKey, publicApiKey)
+	m := NewMailgun(domain, apiKey)
 
 	ensure.DeepEqual(t, m.Domain(), domain)
 	ensure.DeepEqual(t, m.ApiKey(), apiKey)
-	ensure.DeepEqual(t, m.PublicApiKey(), publicApiKey)
 	ensure.DeepEqual(t, m.Client(), http.DefaultClient)
 
 	client := new(http.Client)
@@ -33,8 +31,8 @@ func TestMailgun(t *testing.T) {
 }
 
 func TestNewMailgunImpl(t *testing.T) {
-	mi := NewMailgunImpl(domain, apiKey, publicApiKey)
-	m := NewMailgun(domain, apiKey, publicApiKey)
+	mi := NewMailgunImpl(domain, apiKey)
+	m := NewMailgun(domain, apiKey)
 
 	ensure.DeepEqual(t, mi, m)
 }

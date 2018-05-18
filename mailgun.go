@@ -107,8 +107,6 @@ const (
 	ApiBase                 = "https://api.mailgun.net/v3"
 	messagesEndpoint        = "messages"
 	mimeMessagesEndpoint    = "messages.mime"
-	addressValidateEndpoint = "address/validate"
-	addressParseEndpoint    = "address/parse"
 	bouncesEndpoint         = "bounces"
 	statsEndpoint           = "stats"
 	statsTotalEndpoint      = "stats/total"
@@ -116,7 +114,6 @@ const (
 	tagsEndpoint            = "tags"
 	campaignsEndpoint       = "campaigns"
 	eventsEndpoint          = "events"
-	credentialsEndpoint     = "credentials"
 	unsubscribesEndpoint    = "unsubscribes"
 	routesEndpoint          = "routes"
 	webhooksEndpoint        = "webhooks"
@@ -136,12 +133,9 @@ type Mailgun interface {
 	ApiBase() string
 	Domain() string
 	ApiKey() string
-	PublicApiKey() string
 	Client() *http.Client
 	SetClient(client *http.Client)
 	Send(m *Message) (string, string, error)
-	ValidateEmail(email string) (EmailVerification, error)
-	ParseAddresses(addresses ...string) ([]string, []string, error)
 	GetBounces(limit, skip int) (int, []Bounce, error)
 	GetSingleBounce(address string) (Bounce, error)
 	AddBounce(address, code, error string) error
@@ -213,30 +207,28 @@ type MailgunImpl struct {
 	apiBase      string
 	domain       string
 	apiKey       string
-	publicApiKey string
 	client       *http.Client
 	baseURL      string
 }
 
 // NewMailGun creates a new client instance.
-func NewMailgun(domain, apiKey, publicApiKey string) Mailgun {
+func NewMailgun(domain, apiKey string) Mailgun {
 	m := MailgunImpl{
 		apiBase:      ApiBase,
 		domain:       domain,
 		apiKey:       apiKey,
-		publicApiKey: publicApiKey,
 		client:       http.DefaultClient,
 	}
 	return &m
 }
 
 // NewMailgunImpl creates a new client instance.
-func NewMailgunImpl(domain, apiKey, publicApiKey string) *MailgunImpl {
-	return NewMailgun(domain, apiKey, publicApiKey).(*MailgunImpl)
+func NewMailgunImpl(domain, apiKey string) *MailgunImpl {
+	return NewMailgun(domain, apiKey).(*MailgunImpl)
 }
 
 // Return a new Mailgun client using the environment variables
-// MG_API_KEY, MG_DOMAIN, MG_PUBLIC_API_KEY and MG_URL
+// MG_API_KEY, MG_DOMAIN, and MG_URL
 func NewMailgunFromEnv() (Mailgun, error) {
 	apiKey := os.Getenv("MG_API_KEY")
 	if apiKey == "" {
@@ -251,7 +243,6 @@ func NewMailgunFromEnv() (Mailgun, error) {
 		apiBase:      ApiBase,
 		domain:       domain,
 		apiKey:       apiKey,
-		publicApiKey: os.Getenv("MG_PUBLIC_API_KEY"),
 		client:       http.DefaultClient,
 	}
 	url := os.Getenv("MG_URL")
@@ -274,11 +265,6 @@ func (m *MailgunImpl) Domain() string {
 // ApiKey returns the API key configured for this client.
 func (m *MailgunImpl) ApiKey() string {
 	return m.apiKey
-}
-
-// PublicApiKey returns the public API key configured for this client.
-func (m *MailgunImpl) PublicApiKey() string {
-	return m.publicApiKey
 }
 
 // Client returns the HTTP client configured for this client.

@@ -316,7 +316,6 @@ func TestSendMGOffline(t *testing.T) {
 	const (
 		exampleDomain       = "testDomain"
 		exampleAPIKey       = "testAPIKey"
-		examplePublicAPIKey = "testPublicAPIKey"
 		toUser              = "test@test.com"
 		exampleMessage      = "Queue. Thank you"
 		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
@@ -336,7 +335,7 @@ func TestSendMGOffline(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey, examplePublicAPIKey)
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL)
 
 	m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
@@ -352,7 +351,6 @@ func TestSendMGSeparateDomain(t *testing.T) {
 		signingDomain = "signingDomain"
 
 		exampleAPIKey       = "testAPIKey"
-		examplePublicAPIKey = "testPublicAPIKey"
 		toUser              = "test@test.com"
 		exampleMessage      = "Queue. Thank you"
 		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
@@ -372,7 +370,7 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey, examplePublicAPIKey)
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL)
 
 	m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
