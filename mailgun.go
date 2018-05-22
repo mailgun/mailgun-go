@@ -212,24 +212,18 @@ type MailgunImpl struct {
 }
 
 // NewMailGun creates a new client instance.
-func NewMailgun(domain, apiKey string) Mailgun {
-	m := MailgunImpl{
+func NewMailgun(domain, apiKey string) *MailgunImpl {
+	return &MailgunImpl{
 		apiBase:      ApiBase,
 		domain:       domain,
 		apiKey:       apiKey,
 		client:       http.DefaultClient,
 	}
-	return &m
-}
-
-// NewMailgunImpl creates a new client instance.
-func NewMailgunImpl(domain, apiKey string) *MailgunImpl {
-	return NewMailgun(domain, apiKey).(*MailgunImpl)
 }
 
 // Return a new Mailgun client using the environment variables
 // MG_API_KEY, MG_DOMAIN, and MG_URL
-func NewMailgunFromEnv() (Mailgun, error) {
+func NewMailgunFromEnv() (*MailgunImpl, error) {
 	apiKey := os.Getenv("MG_API_KEY")
 	if apiKey == "" {
 		return nil, errors.New("required environment variable MG_API_KEY not defined")
@@ -239,17 +233,14 @@ func NewMailgunFromEnv() (Mailgun, error) {
 		return nil, errors.New("required environment variable MG_DOMAIN not defined")
 	}
 
-	mg := MailgunImpl{
-		apiBase:      ApiBase,
-		domain:       domain,
-		apiKey:       apiKey,
-		client:       http.DefaultClient,
-	}
+	mg := NewMailgun(domain, apiKey)
+
 	url := os.Getenv("MG_URL")
 	if url != "" {
 		mg.SetAPIBase(url)
 	}
-	return &mg, nil
+
+	return mg, nil
 }
 
 // ApiBase returns the API Base URL configured for this client.
