@@ -1,13 +1,13 @@
 package mailgun
 
 import (
-	"strings"
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
+
 	"github.com/pkg/errors"
 )
-
 
 // The EmailVerificationParts structure breaks out the basic elements of an email address.
 // LocalPart includes everything up to the '@' in an e-mail address.
@@ -52,10 +52,10 @@ type EmailValidator interface {
 }
 
 type EmailValidatorImpl struct {
-	client *http.Client
+	client      *http.Client
 	isPublicKey bool
-	apiBase string
-	apiKey string
+	apiBase     string
+	apiKey      string
 }
 
 // Creates a new validation instance.
@@ -65,15 +65,15 @@ func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 	isPublicKey := false
 
 	// Did the user pass in a public key?
-	if strings.HasPrefix(apiKey,"pubkey-") {
+	if strings.HasPrefix(apiKey, "pubkey-") {
 		isPublicKey = true
 	}
 
 	return &EmailValidatorImpl{
-		client:       http.DefaultClient,
-		isPublicKey:  isPublicKey,
-		apiBase:      ApiBase,
-		apiKey:       apiKey,
+		client:      http.DefaultClient,
+		isPublicKey: isPublicKey,
+		apiBase:     ApiBase,
+		apiKey:      apiKey,
 	}
 }
 

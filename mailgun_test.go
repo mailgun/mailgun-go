@@ -22,7 +22,7 @@ func TestMailgun(t *testing.T) {
 	m := NewMailgun(domain, apiKey)
 
 	ensure.DeepEqual(t, m.Domain(), domain)
-	ensure.DeepEqual(t, m.ApiKey(), apiKey)
+	ensure.DeepEqual(t, m.APIKey(), apiKey)
 	ensure.DeepEqual(t, m.Client(), http.DefaultClient)
 
 	client := new(http.Client)

@@ -61,7 +61,7 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 	ensure.Nil(t, err)
 
 	for _, v := range signedTests {
-		fields := getSignatureFields(mg.ApiKey(), v)
+		fields := getSignatureFields(mg.APIKey(), v)
 		req := buildFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
@@ -78,7 +78,7 @@ func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
 	ensure.Nil(t, err)
 
 	for _, v := range signedTests {
-		fields := getSignatureFields(mg.ApiKey(), v)
+		fields := getSignatureFields(mg.APIKey(), v)
 		req := buildMultipartFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
