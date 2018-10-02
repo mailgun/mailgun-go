@@ -1,14 +1,4 @@
 language: go
 
 go:
-  - 1.6.x
-  - 1.7.x
-  - 1.8.x
-
-sudo: true
-
-before_script:
-  - sudo apt-get install haveged && sudo service haveged start
-
-script:
-  - make
+  - 1.9.x

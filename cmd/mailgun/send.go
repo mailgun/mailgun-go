@@ -47,7 +47,7 @@ func Send(parser *args.ArgParser, data interface{}) (int, error) {
 
 	// Required for send
 	if err := opts.Required([]string{"domain", "api-key"}); err != nil {
-		return 1, fmt.Errorf("Missing Required option '%s'", err)
+		return 1, fmt.Errorf("missing Required option '%s'", err)
 	}
 
 	// Default to user@hostname if no from address provided
@@ -78,10 +78,10 @@ func Send(parser *args.ArgParser, data interface{}) (int, error) {
 		}
 	} else {
 		if len(content) == 0 {
-			return 1, fmt.Errorf("Must provide email body, or use --lorem")
+			return 1, fmt.Errorf("must provide email body, or use --lorem")
 		}
 		if len(subject) == 0 {
-			return 1, fmt.Errorf("Must provide subject, or use --lorem")
+			return 1, fmt.Errorf("must provide subject, or use --lorem")
 		}
 	}
 
