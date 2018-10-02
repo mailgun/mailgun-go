@@ -15,11 +15,13 @@ func TestEmailValidation(t *testing.T) {
 	ensure.Nil(t, err)
 
 	ensure.True(t, ev.IsValid)
+	ensure.True(t, ev.MailboxVerification)
 	ensure.False(t, ev.IsDisposableAddress)
 	ensure.False(t, ev.IsRoleAddress)
 	ensure.True(t, ev.Parts.DisplayName == "")
 	ensure.DeepEqual(t, ev.Parts.LocalPart, "foo")
 	ensure.DeepEqual(t, ev.Parts.Domain, "mailgun.com")
+	ensure.True(t, ev.Reason == "")
 }
 
 func TestParseAddresses(t *testing.T) {
