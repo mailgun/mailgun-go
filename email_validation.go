@@ -36,7 +36,7 @@ type EmailVerificationParts struct {
 // Reason contains error's description.
 type EmailVerification struct {
 	IsValid             bool                   `json:"is_valid"`
-	MailboxVerification bool                   `json:"mailbox_verification,string"`
+	MailboxVerification string                 `json:"mailbox_verification"`
 	Parts               EmailVerificationParts `json:"parts"`
 	Address             string                 `json:"address"`
 	DidYouMean          string                 `json:"did_you_mean"`
