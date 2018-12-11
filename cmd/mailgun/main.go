@@ -29,7 +29,7 @@ func main() {
 	parser.AddOption("--url").Env("URL").Default(mailgun.ApiBase).Help("url to the mailgun api")
 	parser.AddOption("--api-key").Env("API_KEY").Help("mailgun api key")
 	parser.AddOption("--public-api-key").Env("PUBLIC_API_KEY").Help("mailgun public api key")
-	parser.AddOption("--domain").Env("DOMAIN").Help("mailgun api key")
+	parser.AddOption("--domain").Env("DOMAIN").Help("mailgun domain name")
 
 	// Commands
 	parser.AddCommand("send", Send)
