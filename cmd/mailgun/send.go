@@ -36,7 +36,7 @@ func Send(parser *args.ArgParser, data interface{}) (int, error) {
 	parser.AddOption("--subject").Alias("-s").Help("subject of the message")
 	parser.AddOption("--tags").IsStringSlice().Alias("-t").Help("comma separated list of tags")
 	parser.AddOption("--from").Alias("-f").Env("FROM").Help("from address, defaults to <user>@<hostname>")
-	parser.AddOption("--lorem").Alias("-l").IsTrue().Help("generate a randome subject and message content")
+	parser.AddOption("--lorem").Alias("-l").IsTrue().Help("generate a random subject and message content")
 	parser.AddOption("--count").StoreInt(&count).Default("1").Alias("-c").Help("send the email x number of counts")
 	parser.AddArgument("addresses").IsStringSlice().Required().Help("a list of email addresses")
 
