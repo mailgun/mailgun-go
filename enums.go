@@ -80,7 +80,7 @@ func (tn *TimestampNano) UnmarshalJSON(data []byte) error {
 	var v float64
 	err := json.Unmarshal(data, &v)
 	if err == nil {
-		*tn = TimestampNano(time.Unix(0, int64(v*float64(time.Second))))
+		*tn = TimestampNano(time.Unix(int64(v), 0))
 	}
 	return err
 }
