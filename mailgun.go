@@ -123,6 +123,7 @@ const (
 	unsubscribesEndpoint = "unsubscribes"
 	routesEndpoint       = "routes"
 	ipsEndpoint          = "ips"
+	exportsEndpoint      = "exports"
 	webhooksEndpoint     = "webhooks"
 	listsEndpoint        = "lists"
 	basicAuthUser        = "api"
@@ -180,10 +181,10 @@ type Mailgun interface {
 	DeleteRoute(string) error
 	UpdateRoute(string, Route) (Route, error)
 	GetWebhooks() (map[string]string, error)
-	CreateWebhook(kind, url string) error
+	CreateWebhook(kind string, url []string) error
 	DeleteWebhook(kind string) error
 	GetWebhookByType(kind string) (string, error)
-	UpdateWebhook(kind, url string) error
+	UpdateWebhook(kind string, url []string) error
 	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
 	GetLists(limit, skip int, filter string) (int, []List, error)
 	CreateList(List) (List, error)
@@ -202,6 +203,15 @@ type Mailgun interface {
 	ListEvents(*EventsOptions) *EventIterator
 	PollEvents(*EventsOptions) *EventPoller
 	SetAPIBase(url string)
+	ListIPS(bool) ([]IPAddress, error)
+	GetIP(ip string) (IPAddress, error)
+	ListDomainIPS() ([]IPAddress, error)
+	AddDomainIP(ip string) error
+	DeleteDomainIP(ip string) error
+	CreateExport(url string) error
+	ListExports(url string) ([]Export, error)
+	GetExport(id string) (Export, error)
+	GetExportLink(id string) (string, error)
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.

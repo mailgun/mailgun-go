@@ -128,7 +128,7 @@ func (f *formDataPayload) addFile(key, file string) {
 }
 
 func (f *formDataPayload) addBuffer(key, file string, buff []byte) {
-	f.Buffers = append(f.Buffers, keyNameBuff{key: key, name: file, value:buff})
+	f.Buffers = append(f.Buffers, keyNameBuff{key: key, name: file, value: buff})
 }
 
 func (f *formDataPayload) addReadCloser(key, name string, rc io.ReadCloser) {
@@ -214,7 +214,7 @@ func (r *httpRequest) makeDeleteRequest() (*httpResponse, error) {
 	return r.makeRequest("DELETE", nil)
 }
 
-func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse, error) {
+func (r *httpRequest) NewRequest(method string, payload payload) (*http.Request, error) {
 	url, err := r.generateUrlWithParameters()
 	if err != nil {
 		return nil, err
@@ -228,7 +228,6 @@ func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse
 	} else {
 		body = nil
 	}
-
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
@@ -244,6 +243,14 @@ func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse
 
 	for header, value := range r.Headers {
 		req.Header.Add(header, value)
+	}
+	return req, nil
+}
+
+func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse, error) {
+	req, err := r.NewRequest(method, payload)
+	if err != nil {
+		return nil, err
 	}
 
 	if Debug {

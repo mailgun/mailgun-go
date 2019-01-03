@@ -32,13 +32,15 @@ func (mg *MailgunImpl) GetWebhooks() (map[string]string, error) {
 }
 
 // CreateWebhook installs a new webhook for your domain.
-func (mg *MailgunImpl) CreateWebhook(t, u string) error {
+func (mg *MailgunImpl) CreateWebhook(t string, urls []string) error {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("id", t)
-	p.addValue("url", u)
+	for _, url := range urls {
+		p.addValue("url", url)
+	}
 	_, err := makePostRequest(r, p)
 	return err
 }
@@ -67,12 +69,14 @@ func (mg *MailgunImpl) GetWebhookByType(t string) (string, error) {
 }
 
 // UpdateWebhook replaces one webhook setting for another.
-func (mg *MailgunImpl) UpdateWebhook(t, u string) error {
+func (mg *MailgunImpl) UpdateWebhook(t string, urls []string) error {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
-	p.addValue("url", u)
+	for _, url := range urls {
+		p.addValue("url", url)
+	}
 	_, err := makePutRequest(r, p)
 	return err
 }

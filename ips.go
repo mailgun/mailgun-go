@@ -2,7 +2,10 @@ package mailgun
 
 import "github.com/mailgun/mailgun-go/schema"
 
-func (mg *MailgunImpl) ListIPS(dedicated bool) ([]schema.IPAddress, error) {
+type IPAddress schema.IPAddress
+
+// Returns a list of IPs assigned to your account
+func (mg *MailgunImpl) ListIPS(dedicated bool) ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint))
 	r.setClient(mg.Client())
 	if dedicated {
@@ -14,23 +17,25 @@ func (mg *MailgunImpl) ListIPS(dedicated bool) ([]schema.IPAddress, error) {
 	if err := getResponseFromJSON(r, &resp); err != nil {
 		return nil, err
 	}
-	var result []schema.IPAddress
+	var result []IPAddress
 	for _, ip := range resp.Items {
-		result = append(result, schema.IPAddress{IP: ip})
+		result = append(result, IPAddress{IP: ip})
 	}
 	return result, nil
 }
 
-func (mg *MailgunImpl) GetIP(ip string) (schema.IPAddress, error) {
+// Returns information about the specified IP
+func (mg *MailgunImpl) GetIP(ip string) (IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint) + "/" + ip)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp schema.IPAddress
+	var resp IPAddress
 	err := getResponseFromJSON(r, &resp)
 	return resp, err
 }
 
-func (mg *MailgunImpl) ListDomainIPS() ([]schema.IPAddress, error) {
+// Returns a list of IPs currently assigned to the specified domain.
+func (mg *MailgunImpl) ListDomainIPS() ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -39,9 +44,9 @@ func (mg *MailgunImpl) ListDomainIPS() ([]schema.IPAddress, error) {
 	if err := getResponseFromJSON(r, &resp); err != nil {
 		return nil, err
 	}
-	var result []schema.IPAddress
+	var result []IPAddress
 	for _, ip := range resp.Items {
-		result = append(result, schema.IPAddress{IP: ip})
+		result = append(result, IPAddress{IP: ip})
 	}
 	return result, nil
 }

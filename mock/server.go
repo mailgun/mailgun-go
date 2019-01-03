@@ -22,6 +22,7 @@ func NewServer() MailgunServer {
 
 	r.Route("/v3", func(r chi.Router) {
 		addIPRoutes(r)
+		addExportRoutes(r)
 	})
 
 	// Start the server

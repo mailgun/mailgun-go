@@ -28,7 +28,7 @@ func TestWebhookCRUD(t *testing.T) {
 	hookCount := countHooks()
 
 	domainURL := "http://api.mailgun.net"
-	ensure.Nil(t, mg.CreateWebhook("deliver", domainURL))
+	ensure.Nil(t, mg.CreateWebhook("deliver", []string{domainURL}))
 	defer func() {
 		ensure.Nil(t, mg.DeleteWebhook("deliver"))
 		newCount := countHooks()
@@ -43,7 +43,7 @@ func TestWebhookCRUD(t *testing.T) {
 	ensure.DeepEqual(t, theURL, domainURL)
 
 	updatedDomainURL := "http://api.mailgun.net/messages"
-	ensure.Nil(t, mg.UpdateWebhook("deliver", updatedDomainURL))
+	ensure.Nil(t, mg.UpdateWebhook("deliver", []string{updatedDomainURL}))
 
 	hooks, err := mg.GetWebhooks()
 	ensure.Nil(t, err)
