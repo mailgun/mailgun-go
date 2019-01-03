@@ -122,6 +122,7 @@ const (
 	eventsEndpoint       = "events"
 	unsubscribesEndpoint = "unsubscribes"
 	routesEndpoint       = "routes"
+	ipsEndpoint          = "ips"
 	webhooksEndpoint     = "webhooks"
 	listsEndpoint        = "lists"
 	basicAuthUser        = "api"
@@ -246,33 +247,33 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 }
 
 // ApiBase returns the API Base URL configured for this client.
-func (m *MailgunImpl) APIBase() string {
-	return m.apiBase
+func (mg *MailgunImpl) APIBase() string {
+	return mg.apiBase
 }
 
 // Domain returns the domain configured for this client.
-func (m *MailgunImpl) Domain() string {
-	return m.domain
+func (mg *MailgunImpl) Domain() string {
+	return mg.domain
 }
 
 // ApiKey returns the API key configured for this client.
-func (m *MailgunImpl) APIKey() string {
-	return m.apiKey
+func (mg *MailgunImpl) APIKey() string {
+	return mg.apiKey
 }
 
 // Client returns the HTTP client configured for this client.
-func (m *MailgunImpl) Client() *http.Client {
-	return m.client
+func (mg *MailgunImpl) Client() *http.Client {
+	return mg.client
 }
 
 // SetClient updates the HTTP client for this client.
-func (m *MailgunImpl) SetClient(c *http.Client) {
-	m.client = c
+func (mg *MailgunImpl) SetClient(c *http.Client) {
+	mg.client = c
 }
 
 // SetAPIBase updates the API Base URL for this client.
-func (m *MailgunImpl) SetAPIBase(address string) {
-	m.apiBase = address
+func (mg *MailgunImpl) SetAPIBase(address string) {
+	mg.apiBase = address
 }
 
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.

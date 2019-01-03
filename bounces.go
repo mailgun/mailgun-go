@@ -53,8 +53,8 @@ func (b Bounce) GetCode() (int, error) {
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
-func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint))
+func (mg *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
+	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
 	if limit != -1 {
 		r.addParameter("limit", strconv.Itoa(limit))
 	}
@@ -62,8 +62,8 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 		r.addParameter("skip", strconv.Itoa(skip))
 	}
 
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response bounceEnvelope
 	err := getResponseFromJSON(r, &response)
@@ -75,10 +75,10 @@ func (m *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 }
 
 // GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
-func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+func (mg *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
+	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response Bounce
 	err := getResponseFromJSON(r, &response)
@@ -101,10 +101,10 @@ func (m *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
 //
 // Note that both code and error exist as strings, even though
 // code will report as a number.
-func (m *MailgunImpl) AddBounce(address, code, error string) error {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint))
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+func (mg *MailgunImpl) AddBounce(address, code, error string) error {
+	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("address", address)
@@ -119,10 +119,10 @@ func (m *MailgunImpl) AddBounce(address, code, error string) error {
 }
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
-func (m *MailgunImpl) DeleteBounce(address string) error {
-	r := newHTTPRequest(generateApiUrl(m, bouncesEndpoint) + "/" + address)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+func (mg *MailgunImpl) DeleteBounce(address string) error {
+	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
 }

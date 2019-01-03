@@ -49,8 +49,8 @@ type ReaderAttachment struct {
 }
 
 type BufferAttachment struct {
-	Filename   string
-	Buffer []byte
+	Filename string
+	Buffer   []byte
 }
 
 // StoredMessage structures contain the (parsed) message content for an email
@@ -466,7 +466,7 @@ func (m *Message) AddDomain(domain string) {
 // It returns the Mailgun server response, which consists of two components:
 // a human-readable status message, and a message ID.  The status and message ID are set only
 // if no error occurred.
-func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) {
+func (mg *MailgunImpl) Send(message *Message) (mes string, id string, err error) {
 	if !isValid(message) {
 		err = errors.New("Message not valid")
 		return
@@ -549,12 +549,12 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	}
 
 	if message.domain == "" {
-		message.domain = m.Domain()
+		message.domain = mg.Domain()
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(m, message.specific.endpoint(), message.domain))
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response sendMessageResponse
 	err = postResponseFromJSON(r, payload, &response)

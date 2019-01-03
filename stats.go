@@ -76,8 +76,8 @@ type StatsTotalResponse struct {
 // GetStats returns a basic set of statistics for different events.
 // Events start at the given start date, if one is provided.
 // If not, this function will consider all stated events dating to the creation of the sending domain.
-func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error) {
-	r := newHTTPRequest(generateApiUrl(m, statsEndpoint))
+func (mg *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error) {
+	r := newHTTPRequest(generateApiUrl(mg, statsEndpoint))
 
 	if limit != -1 {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -93,8 +93,8 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 	for _, e := range event {
 		r.addParameter("event", e)
 	}
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var res statsEnvelope
 	err := getResponseFromJSON(r, &res)
@@ -107,8 +107,8 @@ func (m *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event 
 
 // GetStatsTotal returns a basic set of statistics for different events.
 // https://documentation.mailgun.com/en/latest/api-stats.html#stats
-func (m *MailgunImpl) GetStatsTotal(start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error) {
-	r := newHTTPRequest(generateApiUrl(m, statsTotalEndpoint))
+func (mg *MailgunImpl) GetStatsTotal(start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error) {
+	r := newHTTPRequest(generateApiUrl(mg, statsTotalEndpoint))
 
 	if start != nil {
 		r.addParameter("start", start.Format(iso8601date))
@@ -128,8 +128,8 @@ func (m *MailgunImpl) GetStatsTotal(start *time.Time, end *time.Time, resolution
 	for _, e := range event {
 		r.addParameter("event", e)
 	}
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var res StatsTotalResponse
 	err := getResponseFromJSON(r, &res)

@@ -30,19 +30,19 @@ type TagOptions struct {
 }
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
-func (m *MailgunImpl) DeleteTag(tag string) error {
-	r := newHTTPRequest(generateApiUrl(m, tagsEndpoint) + "/" + tag)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+func (mg *MailgunImpl) DeleteTag(tag string) error {
+	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
 }
 
 // GetTag retrieves metadata about the tag from the api
-func (m *MailgunImpl) GetTag(tag string) (TagItem, error) {
-	r := newHTTPRequest(generateApiUrl(m, tagsEndpoint) + "/" + tag)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+func (mg *MailgunImpl) GetTag(tag string) (TagItem, error) {
+	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var tagItem TagItem
 	return tagItem, getResponseFromJSON(r, &tagItem)
 }
@@ -58,8 +58,8 @@ func (m *MailgunImpl) GetTag(tag string) (TagItem, error) {
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (m *MailgunImpl) ListTags(opts *TagOptions) *TagIterator {
-	req := newHTTPRequest(generateApiUrl(m, tagsEndpoint))
+func (mg *MailgunImpl) ListTags(opts *TagOptions) *TagIterator {
+	req := newHTTPRequest(generateApiUrl(mg, tagsEndpoint))
 	if opts != nil {
 		if opts.Limit != 0 {
 			req.addParameter("limit", strconv.Itoa(opts.Limit))
@@ -84,7 +84,7 @@ func (m *MailgunImpl) ListTags(opts *TagOptions) *TagIterator {
 			Previous: initialUrl,
 		},
 	}
-	return NewTagCursor(tagPage, m)
+	return NewTagCursor(tagPage, mg)
 }
 
 type TagIterator struct {
