@@ -30,6 +30,7 @@ type Domain struct {
 	SMTPPassword string `json:"smtp_password"`
 	Wildcard     bool   `json:"wildcard"`
 	SpamAction   string `json:"spam_action"`
+	State        string `json:"state"`
 }
 
 // DNSRecord structures describe intended records to properly configure your domain for use with Mailgun.
@@ -42,15 +43,25 @@ type DNSRecord struct {
 	Value      string
 }
 
-type domainsEnvelope struct {
+type SingleDomainResponse struct {
+	Domain              Domain            `json:"domain"`
+	ReceivingDNSRecords []DNSRecord       `json:"receiving_dns_records"`
+	SendingDNSRecords   []DNSRecord       `json:"sending_dns_records"`
+	Connection          *DomainConnection `json:"connection,omitempty"`
+}
+
+type DomainConnectionResponse struct {
+	Connection DomainConnection `json:"connection"`
+}
+
+type DomainList struct {
 	TotalCount int      `json:"total_count"`
 	Items      []Domain `json:"items"`
 }
 
-type singleDomainEnvelope struct {
-	Domain              Domain      `json:"domain"`
-	ReceivingDNSRecords []DNSRecord `json:"receiving_dns_records"`
-	SendingDNSRecords   []DNSRecord `json:"sending_dns_records"`
+type DomainConnection struct {
+	RequireTLS       bool `json:"require_tls"`
+	SkipVerification bool `json:"skip_verification"`
 }
 
 // GetCreatedAt returns the time the domain was created as a normal Go time.Time type.
@@ -76,12 +87,12 @@ func (mg *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var envelope domainsEnvelope
-	err := getResponseFromJSON(r, &envelope)
+	var list DomainList
+	err := getResponseFromJSON(r, &list)
 	if err != nil {
 		return -1, nil, err
 	}
-	return envelope.TotalCount, envelope.Items, nil
+	return list.TotalCount, list.Items, nil
 }
 
 // Retrieve detailed information about the named domain.
@@ -89,7 +100,7 @@ func (mg *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DN
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var envelope singleDomainEnvelope
+	var envelope SingleDomainResponse
 	err := getResponseFromJSON(r, &envelope)
 	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, err
 }
@@ -114,6 +125,27 @@ func (mg *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction
 	return err
 }
 
+func (mg *MailgunImpl) GetDomainConnection(domain string) (DomainConnection, error) {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	var resp DomainConnectionResponse
+	err := getResponseFromJSON(r, &resp)
+	return resp.Connection, err
+}
+
+func (mg *MailgunImpl) UpdateDomainConnection(domain string, settings DomainConnection) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("require_tls", boolToString(settings.RequireTLS))
+	payload.addValue("skip_verification", boolToString(settings.SkipVerification))
+	_, err := makePutRequest(r, payload)
+	return err
+}
+
 // DeleteDomain instructs Mailgun to dispose of the named domain name.
 func (mg *MailgunImpl) DeleteDomain(name string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + name)
@@ -121,4 +153,11 @@ func (mg *MailgunImpl) DeleteDomain(name string) error {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
+}
+
+func boolToString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
 }

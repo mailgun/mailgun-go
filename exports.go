@@ -4,11 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-
-	"github.com/mailgun/mailgun-go/schema"
 )
 
-type Export schema.Export
+type ExportList struct {
+	Items []Export `json:"items"`
+}
+
+type Export struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+	URL    string `json:"url"`
+}
 
 // Create an export based on the URL given
 func (mg *MailgunImpl) CreateExport(url string) error {
@@ -31,7 +37,7 @@ func (mg *MailgunImpl) ListExports(url string) ([]Export, error) {
 	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp schema.ExportList
+	var resp ExportList
 	if err := getResponseFromJSON(r, &resp); err != nil {
 		return nil, err
 	}

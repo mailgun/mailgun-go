@@ -6,14 +6,13 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go"
-	"github.com/mailgun/mailgun-go/mock"
 )
 
-var server mock.MailgunServer
+var server mailgun.MockServer
 
 // Setup and shutdown the mailgun mock server for the entire test suite
 func TestMain(m *testing.M) {
-	server = mock.NewServer()
+	server = mailgun.NewMockServer()
 	defer server.Stop()
 	os.Exit(m.Run())
 }

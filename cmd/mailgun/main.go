@@ -34,6 +34,7 @@ func main() {
 	// Commands
 	parser.AddCommand("send", Send)
 	parser.AddCommand("tag", Tag)
+	parser.AddCommand("events", ListEvents)
 
 	// Parser and set global options
 	opts := parser.ParseOrExit(nil)

@@ -1,8 +1,19 @@
 package mailgun
 
-import "github.com/mailgun/mailgun-go/schema"
+type IPAddressList struct {
+	TotalCount int      `json:"total_count"`
+	Items      []string `json:"items"`
+}
 
-type IPAddress schema.IPAddress
+type IPAddress struct {
+	IP        string `json:"ip"`
+	RDNS      string `json:"rdns"`
+	Dedicated bool   `json:"dedicated"`
+}
+
+type OK struct {
+	Message string `json:"message"`
+}
 
 // Returns a list of IPs assigned to your account
 func (mg *MailgunImpl) ListIPS(dedicated bool) ([]IPAddress, error) {
@@ -13,7 +24,7 @@ func (mg *MailgunImpl) ListIPS(dedicated bool) ([]IPAddress, error) {
 	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp schema.IPAddressList
+	var resp IPAddressList
 	if err := getResponseFromJSON(r, &resp); err != nil {
 		return nil, err
 	}
@@ -40,7 +51,7 @@ func (mg *MailgunImpl) ListDomainIPS() ([]IPAddress, error) {
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp schema.IPAddressList
+	var resp IPAddressList
 	if err := getResponseFromJSON(r, &resp); err != nil {
 		return nil, err
 	}

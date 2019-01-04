@@ -212,6 +212,8 @@ type Mailgun interface {
 	ListExports(url string) ([]Export, error)
 	GetExport(id string) (Export, error)
 	GetExportLink(id string) (string, error)
+	UpdateDomainConnection(domain string, settings DomainConnection) error
+	GetDomainConnection(domain string) (DomainConnection, error)
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.

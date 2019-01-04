@@ -1,4 +1,4 @@
-package mock
+package mailgun
 
 import (
 	"encoding/json"
@@ -8,21 +8,24 @@ import (
 	"github.com/go-chi/chi"
 )
 
-type MailgunServer struct {
+type MockServer struct {
 	srv *httptest.Server
 
-	domainIPS []string
+	domainIPS  []string
+	domainList []SingleDomainResponse
+	exportList []Export
 }
 
-func NewServer() MailgunServer {
-	ms := MailgunServer{}
+func NewMockServer() MockServer {
+	ms := MockServer{}
 
 	// Add all our handlers
 	r := chi.NewRouter()
 
 	r.Route("/v3", func(r chi.Router) {
-		addIPRoutes(r)
-		addExportRoutes(r)
+		ms.addIPRoutes(r)
+		ms.addExportRoutes(r)
+		ms.addDomainRoutes(r)
 	})
 
 	// Start the server
@@ -30,11 +33,11 @@ func NewServer() MailgunServer {
 	return ms
 }
 
-func (ms *MailgunServer) Stop() {
+func (ms *MockServer) Stop() {
 	ms.srv.Close()
 }
 
-func (ms *MailgunServer) URL() string {
+func (ms *MockServer) URL() string {
 	return ms.srv.URL + "/v3"
 }
 

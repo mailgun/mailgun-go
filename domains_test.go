@@ -1,18 +1,21 @@
-package mailgun
+package mailgun_test
 
 import (
 	"net/http"
 	"testing"
 
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go"
 )
 
 func TestGetDomains(t *testing.T) {
-	mg, err := NewMailgunFromEnv()
+	mg, err := mailgun.NewMailgunFromEnv()
+	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	n, domains, err := mg.GetDomains(DefaultLimit, DefaultSkip)
+	n, domains, err := mg.GetDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
+	ensure.DeepEqual(t, len(domains) != 0, true)
 
 	t.Logf("TestGetDomains: %d domains retrieved\n", n)
 	for _, d := range domains {
@@ -21,14 +24,17 @@ func TestGetDomains(t *testing.T) {
 }
 
 func TestGetSingleDomain(t *testing.T) {
-	mg, err := NewMailgunFromEnv()
+	mg, err := mailgun.NewMailgunFromEnv()
+	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	_, domains, err := mg.GetDomains(DefaultLimit, DefaultSkip)
+	_, domains, err := mg.GetDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
 
 	dr, rxDnsRecords, txDnsRecords, err := mg.GetSingleDomain(domains[0].Name)
 	ensure.Nil(t, err)
+	ensure.DeepEqual(t, len(rxDnsRecords) != 0, true)
+	ensure.DeepEqual(t, len(txDnsRecords) != 0, true)
 
 	t.Logf("TestGetSingleDomain: %#v\n", dr)
 	for _, rxd := range rxDnsRecords {
@@ -40,25 +46,46 @@ func TestGetSingleDomain(t *testing.T) {
 }
 
 func TestGetSingleDomainNotExist(t *testing.T) {
-	mg, err := NewMailgunFromEnv()
+	mg, err := mailgun.NewMailgunFromEnv()
+	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
-	_, _, _, err = mg.GetSingleDomain(randomString(32, "com.edu.org.") + ".com")
+	_, _, _, err = mg.GetSingleDomain("mailgun.test")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
-	ure, ok := err.(*UnexpectedResponseError)
+	ure, ok := err.(*mailgun.UnexpectedResponseError)
 	ensure.True(t, ok)
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
 func TestAddDeleteDomain(t *testing.T) {
-	mg, err := NewMailgunFromEnv()
+	mg, err := mailgun.NewMailgunFromEnv()
+	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
 	// First, we need to add the domain.
-	randomDomainName := randomString(16, "DOMAIN") + ".example.com"
-	randomPassword := randomString(16, "PASSWD")
-	ensure.Nil(t, mg.CreateDomain(randomDomainName, randomPassword, Tag, false))
+	ensure.Nil(t, mg.CreateDomain("mailgun.test", "supersecret", mailgun.Tag, false))
 	// Next, we delete it.
-	ensure.Nil(t, mg.DeleteDomain(randomDomainName))
+	ensure.Nil(t, mg.DeleteDomain("mailgun.test"))
+}
+
+func TestDomainConnection(t *testing.T) {
+	mg, err := mailgun.NewMailgunFromEnv()
+	mg.SetAPIBase(server.URL())
+	ensure.Nil(t, err)
+
+	info, err := mg.GetDomainConnection("samples.mailgun.org")
+	ensure.Nil(t, err)
+
+	ensure.DeepEqual(t, info.RequireTLS, true)
+	ensure.DeepEqual(t, info.SkipVerification, true)
+
+	info.RequireTLS = false
+	err = mg.UpdateDomainConnection("samples.mailgun.org", info)
+	ensure.Nil(t, err)
+
+	info, err = mg.GetDomainConnection("samples.mailgun.org")
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, info.RequireTLS, false)
+	ensure.DeepEqual(t, info.SkipVerification, true)
 }
