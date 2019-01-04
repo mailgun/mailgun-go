@@ -50,7 +50,7 @@ type Event struct {
 	Flags  *EventFlags `json:"flags,omitempty"`
 
 	// Mailing List
-	MailingList       MailingList       `json:"mailing-list,omitempty"`
+	MailingList       MailingListEvent  `json:"mailing-list,omitempty"`
 	Member            MailingListMember `json:"member,omitempty"`
 	MemberDescription string            `json:"member-description"`
 	Error             MailingListError  `json:"error"`
@@ -66,7 +66,7 @@ type MailingListError struct {
 	Message string
 }
 
-type MailingList struct {
+type MailingListEvent struct {
 	Address string `json:"address"`
 	ListID  string `json:"list-id"`
 	SID     string `json:"sid"`

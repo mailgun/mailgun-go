@@ -1,8 +1,6 @@
 package mailgun
 
 import (
-	"encoding/json"
-	"fmt"
 	"strconv"
 )
 
@@ -19,26 +17,6 @@ const (
 	Everyone = "everyone"
 )
 
-// Mailing list members have an attribute that determines if they've subscribed to the mailing list or not.
-// This attribute may be used to filter the results returned by GetSubscribers().
-// All, Subscribed, and Unsubscribed provides a convenient and readable syntax for specifying the scope of the search.
-var (
-	All          *bool = nil
-	Subscribed   *bool = &yes
-	Unsubscribed *bool = &no
-)
-
-// yes and no are variables which provide us the ability to take their addresses.
-// Subscribed and Unsubscribed are pointers to these booleans.
-//
-// We use a pointer to boolean as a kind of trinary data type:
-// if nil, the relevant data type remains unspecified.
-// Otherwise, its value is either true or false.
-var (
-	yes bool = true
-	no  bool = false
-)
-
 // A List structure provides information for a mailing list.
 //
 // AccessLevel may be one of ReadOnly, Members, or Everyone.
@@ -51,48 +29,142 @@ type List struct {
 	MembersCount int    `json:"members_count,omitempty"`
 }
 
-// A Member structure represents a member of the mailing list.
-// The Vars field can represent any JSON-encodable data.
-type Member struct {
-	Address    string                 `json:"address,omitempty"`
-	Name       string                 `json:"name,omitempty"`
-	Subscribed *bool                  `json:"subscribed,omitempty"`
-	Vars       map[string]interface{} `json:"vars,omitempty"`
+type ListsOptions struct {
+	Limit int
 }
 
-// GetLists returns the specified set of mailing lists administered by your account.
-func (mg *MailgunImpl) GetLists(limit, skip int, filter string) (int, []List, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint))
+type listsResponse struct {
+	Lists  []List `json:"items"`
+	Paging Paging `json:"paging"`
+}
+
+type ListsIterator struct {
+	listsResponse
+	mg  Mailgun
+	err error
+}
+
+// ListMailingLists returns the specified set of mailing lists administered by your account.
+func (mg *MailgunImpl) ListMailingLists(opts *ListsOptions) *ListsIterator {
+	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/pages")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newUrlEncodedPayload()
-	if limit != DefaultLimit {
-		p.addValue("limit", strconv.Itoa(limit))
+	if opts != nil {
+		if opts.Limit != 0 {
+			r.addParameter("limit", strconv.Itoa(opts.Limit))
+		}
 	}
-	if skip != DefaultSkip {
-		p.addValue("skip", strconv.Itoa(skip))
+	url, err := r.generateUrlWithParameters()
+	return &ListsIterator{
+		mg:            mg,
+		listsResponse: listsResponse{Paging: Paging{Next: url, First: url}},
+		err:           err,
 	}
-	if filter != "" {
-		p.addValue("address", filter)
-	}
-	var envelope struct {
-		Items      []List `json:"items"`
-		TotalCount int    `json:"total_count"`
-	}
-	response, err := makeRequest(r, "GET", p)
-	if err != nil {
-		return -1, nil, err
-	}
-	err = response.parseFromJSON(&envelope)
-	return envelope.TotalCount, envelope.Items, err
 }
 
-// CreateList creates a new mailing list under your Mailgun account.
+// If an error occurred during iteration `Err()` will return non nil
+func (li *ListsIterator) Err() error {
+	return li.err
+}
+
+// Retrieves the chronologically previous batch of events, if any exist.
+// You know you're at the end of the list when len(Events())==0.
+func (li *ListsIterator) GetPrevious() error {
+	return li.fetch(li.Paging.Previous)
+}
+
+// Retrieves the chronologically next batch of events, if any exist.
+// You know you're at the end of the list when len(Events())==0.
+func (li *ListsIterator) GetNext() error {
+	return li.fetch(li.Paging.Next)
+}
+
+// Retrieves the next page of events from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (li *ListsIterator) Next(items *[]List) bool {
+	if li.err != nil {
+		return false
+	}
+	li.err = li.fetch(li.Paging.Next)
+	if li.err != nil {
+		return false
+	}
+	*items = li.Lists
+	if len(li.Lists) == 0 {
+		return false
+	}
+	return true
+}
+
+// Retrieves the first page of events from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (li *ListsIterator) First(items *[]List) bool {
+	if li.err != nil {
+		return false
+	}
+	li.err = li.fetch(li.Paging.First)
+	if li.err != nil {
+		return false
+	}
+	*items = li.Lists
+	return true
+}
+
+// Retrieves the last page of events from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (li *ListsIterator) Last(items *[]List) bool {
+	if li.err != nil {
+		return false
+	}
+	li.err = li.fetch(li.Paging.Last)
+	if li.err != nil {
+		return false
+	}
+	*items = li.Lists
+	return true
+}
+
+// Retrieves the previous page of events from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (li *ListsIterator) Previous(items *[]List) bool {
+	if li.err != nil {
+		return false
+	}
+	if li.Paging.Previous == "" {
+		return false
+	}
+	li.err = li.fetch(li.Paging.Previous)
+	if li.err != nil {
+		return false
+	}
+	*items = li.Lists
+	if len(li.Lists) == 0 {
+		return false
+	}
+	return true
+}
+
+// GetFirstPage, GetPrevious, and GetNext all have a common body of code.
+// fetch completes the API fetch common to all three of these functions.
+func (li *ListsIterator) fetch(url string) error {
+	r := newHTTPRequest(url)
+	r.setClient(li.mg.Client())
+	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
+
+	return getResponseFromJSON(r, &li.listsResponse)
+}
+
+// CreateMailingList creates a new mailing list under your Mailgun account.
 // You need specify only the Address and Name members of the prototype;
 // Description, and AccessLevel are optional.
 // If unspecified, Description remains blank,
 // while AccessLevel defaults to Everyone.
-func (mg *MailgunImpl) CreateList(prototype List) (List, error) {
+func (mg *MailgunImpl) CreateMailingList(prototype List) (List, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -118,9 +190,9 @@ func (mg *MailgunImpl) CreateList(prototype List) (List, error) {
 	return l, err
 }
 
-// DeleteList removes all current members of the list, then removes the list itself.
+// DeleteMailingList removes all current members of the list, then removes the list itself.
 // Attempts to send e-mail to the list will fail subsequent to this call.
-func (mg *MailgunImpl) DeleteList(addr string) error {
+func (mg *MailgunImpl) DeleteMailingList(addr string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -128,9 +200,9 @@ func (mg *MailgunImpl) DeleteList(addr string) error {
 	return err
 }
 
-// GetListByAddress allows your application to recover the complete List structure
+// GetMailingList allows your application to recover the complete List structure
 // representing a mailing list, so long as you have its e-mail address.
-func (mg *MailgunImpl) GetListByAddress(addr string) (List, error) {
+func (mg *MailgunImpl) GetMailingList(addr string) (List, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -153,7 +225,7 @@ func (mg *MailgunImpl) GetListByAddress(addr string) (List, error) {
 // Be careful!  If changing the address of a mailing list,
 // e-mail sent to the old address will not succeed.
 // Make sure you account for the change accordingly.
-func (mg *MailgunImpl) UpdateList(addr string, prototype List) (List, error) {
+func (mg *MailgunImpl) UpdateMailingList(addr string, prototype List) (List, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -177,145 +249,4 @@ func (mg *MailgunImpl) UpdateList(addr string, prototype List) (List, error) {
 	}
 	err = response.parseFromJSON(&l)
 	return l, err
-}
-
-// GetMembers returns the list of members belonging to the indicated mailing list.
-// The s parameter can be set to one of three settings to help narrow the returned data set:
-// All indicates that you want both Members and unsubscribed members alike, while
-// Subscribed and Unsubscribed indicate you want only those eponymous subsets.
-func (mg *MailgunImpl) GetMembers(limit, skip int, s *bool, addr string) (int, []Member, error) {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr))
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newUrlEncodedPayload()
-	if limit != DefaultLimit {
-		p.addValue("limit", strconv.Itoa(limit))
-	}
-	if skip != DefaultSkip {
-		p.addValue("skip", strconv.Itoa(skip))
-	}
-	if s != nil {
-		p.addValue("subscribed", yesNo(*s))
-	}
-	var envelope struct {
-		TotalCount int      `json:"total_count"`
-		Items      []Member `json:"items"`
-	}
-	response, err := makeRequest(r, "GET", p)
-	if err != nil {
-		return -1, nil, err
-	}
-	err = response.parseFromJSON(&envelope)
-	return envelope.TotalCount, envelope.Items, err
-}
-
-// GetMemberByAddress returns a complete Member structure for a member of a mailing list,
-// given only their subscription e-mail address.
-func (mg *MailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	response, err := makeGetRequest(r)
-	if err != nil {
-		return Member{}, err
-	}
-	var envelope struct {
-		Member Member `json:"member"`
-	}
-	err = response.parseFromJSON(&envelope)
-	return envelope.Member, err
-}
-
-// CreateMember registers a new member of the indicated mailing list.
-// If merge is set to true, then the registration may update an existing Member's settings.
-// Otherwise, an error will occur if you attempt to add a member with a duplicate e-mail address.
-func (mg *MailgunImpl) CreateMember(merge bool, addr string, prototype Member) error {
-	vs, err := json.Marshal(prototype.Vars)
-	if err != nil {
-		return err
-	}
-
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr))
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
-	p.addValue("upsert", yesNo(merge))
-	p.addValue("address", prototype.Address)
-	p.addValue("name", prototype.Name)
-	p.addValue("vars", string(vs))
-	if prototype.Subscribed != nil {
-		p.addValue("subscribed", yesNo(*prototype.Subscribed))
-	}
-	_, err = makePostRequest(r, p)
-	return err
-}
-
-// UpdateMember lets you change certain details about the indicated mailing list member.
-// Address, Name, Vars, and Subscribed fields may be changed.
-func (mg *MailgunImpl) UpdateMember(s, l string, prototype Member) (Member, error) {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
-	if prototype.Address != "" {
-		p.addValue("address", prototype.Address)
-	}
-	if prototype.Name != "" {
-		p.addValue("name", prototype.Name)
-	}
-	if prototype.Vars != nil {
-		vs, err := json.Marshal(prototype.Vars)
-		if err != nil {
-			return Member{}, err
-		}
-		p.addValue("vars", string(vs))
-	}
-	if prototype.Subscribed != nil {
-		p.addValue("subscribed", yesNo(*prototype.Subscribed))
-	}
-	response, err := makePutRequest(r, p)
-	if err != nil {
-		return Member{}, err
-	}
-	var envelope struct {
-		Member Member `json:"member"`
-	}
-	err = response.parseFromJSON(&envelope)
-	return envelope.Member, err
-}
-
-// DeleteMember removes the member from the list.
-func (mg *MailgunImpl) DeleteMember(member, addr string) error {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + "/" + member)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
-	return err
-}
-
-// CreateMemberList registers multiple Members and non-Member members to a single mailing list
-// in a single round-trip.
-// u indicates if the existing members should be updated or duplicates should be updated.
-// Use All to elect not to provide a default.
-// The newMembers list can take one of two JSON-encodable forms: an slice of strings, or
-// a slice of Member structures.
-// If a simple slice of strings is passed, each string refers to the member's e-mail address.
-// Otherwise, each Member needs to have at least the Address field filled out.
-// Other fields are optional, but may be set according to your needs.
-func (mg *MailgunImpl) CreateMemberList(u *bool, addr string, newMembers []interface{}) error {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
-	if u != nil {
-		p.addValue("upsert", yesNo(*u))
-	}
-	bs, err := json.Marshal(newMembers)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(bs))
-	p.addValue("members", string(bs))
-	_, err = makePostRequest(r, p)
-	return err
 }

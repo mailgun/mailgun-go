@@ -25,7 +25,7 @@ func setup(t *testing.T) (Mailgun, string) {
 }
 
 func teardown(t *testing.T, mg Mailgun, address string) {
-	ensure.Nil(t, mg.DeleteList(address))
+	ensure.Nil(t, mg.DeleteMailingList(address))
 }
 
 func TestMailingListMembers(t *testing.T) {

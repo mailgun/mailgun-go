@@ -24,6 +24,10 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 			RequireTLS:       true,
 			SkipVerification: true,
 		},
+		TagLimits: &TagLimits{
+			Limit: 50000,
+			Count: 5000,
+		},
 		Tracking: &DomainTracking{
 			Click: TrackingStatus{Active: true},
 			Open:  TrackingStatus{Active: true},
@@ -82,6 +86,7 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 	r.Put("/domains/{domain}/connection", ms.updateConnection)
 	r.Get("/domains/{domain}/tracking", ms.getTracking)
 	//r.Put("/domains/{domain}/tracking/{type}", ms.updateTracking)
+	r.Get("/domains/{domain}/limits/tag", ms.getTagLimits)
 }
 
 func (ms *MockServer) listDomains(w http.ResponseWriter, _ *http.Request) {
@@ -179,6 +184,22 @@ func (ms *MockServer) getTracking(w http.ResponseWriter, r *http.Request) {
 				Tracking: *d.Tracking,
 			}
 			toJSON(w, resp)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
+}
+
+func (ms *MockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
+	for _, d := range ms.domainList {
+		if d.Domain.Name == chi.URLParam(r, "domain") {
+			if d.TagLimits == nil {
+				w.WriteHeader(http.StatusNotFound)
+				toJSON(w, okResp{Message: "no limits defined for domain"})
+				return
+			}
+			toJSON(w, d.TagLimits)
 			return
 		}
 	}

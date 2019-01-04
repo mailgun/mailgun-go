@@ -49,6 +49,7 @@ type domainResponse struct {
 	SendingDNSRecords   []DNSRecord       `json:"sending_dns_records"`
 	Connection          *DomainConnection `json:"connection,omitempty"`
 	Tracking            *DomainTracking   `json:"tracking,omitempty"`
+	TagLimits           *TagLimits        `json:"limits,omitempty"`
 }
 
 type domainConnectionResponse struct {
@@ -142,6 +143,7 @@ func (mg *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction
 	return err
 }
 
+// Returns delivery connection settings for the defined domain
 func (mg *MailgunImpl) GetDomainConnection(domain string) (DomainConnection, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.Client())
@@ -151,6 +153,7 @@ func (mg *MailgunImpl) GetDomainConnection(domain string) (DomainConnection, err
 	return resp.Connection, err
 }
 
+// Updates the specified delivery connection settings for the defined domain
 func (mg *MailgunImpl) UpdateDomainConnection(domain string, settings DomainConnection) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.Client())
@@ -163,7 +166,7 @@ func (mg *MailgunImpl) UpdateDomainConnection(domain string, settings DomainConn
 	return err
 }
 
-// DeleteDomain instructs Mailgun to dispose of the named domain name.
+// DeleteDomain instructs Mailgun to dispose of the named domain name
 func (mg *MailgunImpl) DeleteDomain(name string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + name)
 	r.setClient(mg.Client())
@@ -172,6 +175,7 @@ func (mg *MailgunImpl) DeleteDomain(name string) error {
 	return err
 }
 
+// Returns tracking settings for a domain
 func (mg *MailgunImpl) GetDomainTracking(domain string) (DomainTracking, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking")
 	r.setClient(mg.Client())

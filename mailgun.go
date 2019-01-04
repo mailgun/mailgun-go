@@ -186,12 +186,12 @@ type Mailgun interface {
 	GetWebhookByType(kind string) (string, error)
 	UpdateWebhook(kind string, url []string) error
 	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
-	GetLists(limit, skip int, filter string) (int, []List, error)
-	CreateList(List) (List, error)
-	DeleteList(string) error
-	GetListByAddress(string) (List, error)
-	UpdateList(string, List) (List, error)
-	GetMembers(limit, skip int, subfilter *bool, address string) (int, []Member, error)
+	ListMailingLists(opts *ListsOptions) *ListsIterator
+	CreateMailingList(List) (List, error)
+	DeleteMailingList(string) error
+	GetMailingList(string) (List, error)
+	UpdateMailingList(string, List) (List, error)
+	ListMembers(address string, opts *ListMembersOptions) *MemberListIterator
 	GetMemberByAddress(MemberAddr, listAddr string) (Member, error)
 	CreateMember(merge bool, addr string, prototype Member) error
 	CreateMemberList(subscribed *bool, addr string, newMembers []interface{}) error
@@ -212,9 +212,10 @@ type Mailgun interface {
 	ListExports(url string) ([]Export, error)
 	GetExport(id string) (Export, error)
 	GetExportLink(id string) (string, error)
-	UpdateDomainConnection(domain string, settings DomainConnection) error
+	UpdateDomainConnection(domain string, dc DomainConnection) error
 	GetDomainConnection(domain string) (DomainConnection, error)
 	GetDomainTracking(domain string) (DomainTracking, error)
+	GetTagLimits(domain string) (TagLimits, error)
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
