@@ -13,7 +13,7 @@ func TestGetComplaints(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	n, complaints, err := mg.GetComplaints(-1, -1)
+	n, complaints, err := mg.ListComplaints(-1, -1)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(complaints), n)
 }
@@ -23,7 +23,7 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	_, err = mg.GetSingleComplaint(randomString(64, "") + "@example.com")
+	_, err = mg.GetComplaint(randomString(64, "") + "@example.com")
 	ensure.NotNil(t, err)
 
 	ure, ok := err.(*UnexpectedResponseError)
@@ -37,7 +37,7 @@ func TestCreateDeleteComplaint(t *testing.T) {
 
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
-		_, complaints, err := mg.GetComplaints(DefaultLimit, DefaultSkip)
+		_, complaints, err := mg.ListComplaints(DefaultLimit, DefaultSkip)
 		ensure.Nil(t, err)
 
 		for _, complaint := range complaints {

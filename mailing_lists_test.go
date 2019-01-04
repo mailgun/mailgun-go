@@ -1,20 +1,46 @@
-package mailgun
+package mailgun_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
+
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go"
 )
 
-func setup(t *testing.T) (Mailgun, string) {
+func TestPaging(t *testing.T) {
+	mg, err := mailgun.NewMailgunFromEnv()
+	mg.SetAPIBase(server.URL())
+	ensure.Nil(t, err)
+
+	it := mg.ListMailingLists(&mailgun.ListOptions{Limit: 10})
+	var page []mailgun.MailingList
+	var first []mailgun.MailingList
+
+	/*for it.Next(&page) {
+		spew.Dump(page)
+	}*/
+	//var count int
+	it.Next(&first)
+	it.First(&page)
+	spew.Dump(page)
+	//ensure.DeepEqual(t, page, first)
+	/*if count > 2 {
+		break
+	}
+	count++*/
+	//}
+	//ensure.Nil(t, it.Err())
+}
+
+/*func setup(t *testing.T) (Mailgun, string) {
 	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
 	address := fmt.Sprintf("%s@%s", strings.ToLower(randomString(6, "list")), domain)
-	_, err = mg.CreateList(List{
+	_, err = mg.CreateMailingList(MailingList{
 		Address:     address,
 		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
@@ -33,9 +59,14 @@ func TestMailingListMembers(t *testing.T) {
 	defer teardown(t, mg, address)
 
 	var countPeople = func() int {
-		n, _, err := mg.GetMembers(DefaultLimit, DefaultSkip, All, address)
-		ensure.Nil(t, err)
-		return n
+		var count int
+		it := mg.ListMembers(address, nil)
+		var page []Member
+		for it.Next(&page) {
+			count += len(page)
+		}
+		ensure.Nil(t, it.Err())
+		return count
 	}
 
 	startCount := countPeople()
@@ -99,7 +130,7 @@ func TestMailingLists(t *testing.T) {
 	ensure.Nil(t, err)
 
 	listAddr := fmt.Sprintf("%s@%s", strings.ToLower(randomString(7, "list")), domain)
-	protoList := List{
+	protoList := MailingList{
 		Address:     listAddr,
 		Name:        "List1",
 		Description: "A list created by an acceptance test.",
@@ -107,38 +138,43 @@ func TestMailingLists(t *testing.T) {
 	}
 
 	var countLists = func() int {
-		total, _, err := mg.GetLists(DefaultLimit, DefaultSkip, "")
-		ensure.Nil(t, err)
-		return total
+		var count int
+		it := mg.ListMailingLists(nil)
+		var page []MailingList
+		for it.Next(&page) {
+			count += len(page)
+		}
+		ensure.Nil(t, it.Err())
+		return count
 	}
 
-	_, err = mg.CreateList(protoList)
+	_, err = mg.CreateMailingList(protoList)
 	ensure.Nil(t, err)
 	defer func() {
-		ensure.Nil(t, mg.DeleteList(listAddr))
+		ensure.Nil(t, mg.DeleteMailingList(listAddr))
 
-		_, err := mg.GetListByAddress(listAddr)
+		_, err := mg.GetMailingList(listAddr)
 		ensure.NotNil(t, err)
 	}()
 
 	actualCount := countLists()
 	ensure.False(t, actualCount < 1)
 
-	theList, err := mg.GetListByAddress(listAddr)
+	theList, err := mg.GetMailingList(listAddr)
 	ensure.Nil(t, err)
 
 	protoList.CreatedAt = theList.CreatedAt // ignore this field when comparing.
 	ensure.DeepEqual(t, theList, protoList)
 
-	_, err = mg.UpdateList(listAddr, List{
+	_, err = mg.UpdateMailingList(listAddr, MailingList{
 		Description: "A list whose description changed",
 	})
 	ensure.Nil(t, err)
 
-	theList, err = mg.GetListByAddress(listAddr)
+	theList, err = mg.GetMailingList(listAddr)
 	ensure.Nil(t, err)
 
 	newList := protoList
 	newList.Description = "A list whose description changed"
 	ensure.DeepEqual(t, theList, newList)
-}
+}*/

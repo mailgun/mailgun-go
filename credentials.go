@@ -15,8 +15,8 @@ type Credential struct {
 // ErrEmptyParam results occur when a required parameter is missing.
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
-// GetCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error) {
+// ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
+func (mg *MailgunImpl) ListCredentials(limit, skip int) (int, []Credential, error) {
 	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
 	r.setClient(mg.Client())
 	if limit != DefaultLimit {

@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/mailgun/mailgun-go/events"
+
 	"github.com/facebookgo/ensure"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -94,7 +96,7 @@ var _ = Describe("ListEvents()", func() {
 	})*/
 })
 
-var _ = Describe("EventIterator()", func() {
+/*var _ = Describe("EventIterator()", func() {
 	log := log.New(GinkgoWriter, "EventIterator() - ", 0)
 	var t GinkgoTInterface
 	var mg Mailgun
@@ -129,7 +131,7 @@ var _ = Describe("EventIterator()", func() {
 			})
 		})
 	})
-})
+})*/
 
 var _ = Describe("PollEvents()", func() {
 	log := log.New(GinkgoWriter, "PollEvents() - ", 0)
@@ -167,17 +169,17 @@ var _ = Describe("PollEvents()", func() {
 			log.Printf("New Email: %s Id: %s\n", msg, id)
 
 			// Wait for our email event to arrive
-			var events []Event
-			it.Poll(&events)
+			var page []Event
+			it.Poll(&page)
 
 			var found bool
 			// Log the events we received
-			for _, event := range events {
+			for _, event := range page {
 				messageID, _ := event.Message.ID()
 				log.Printf("Event: %s <%s> - %v", messageID, event.Event, event.Timestamp)
 
 				// If we find our accepted email event
-				if id == ("<"+messageID+">") && event.Event == EventAccepted {
+				if id == ("<"+messageID+">") && event.Event == events.EventAccepted {
 					found = true
 				}
 			}

@@ -20,7 +20,7 @@ const (
 // A List structure provides information for a mailing list.
 //
 // AccessLevel may be one of ReadOnly, Members, or Everyone.
-type List struct {
+type MailingList struct {
 	Address      string `json:"address,omitempty"`
 	Name         string `json:"name,omitempty"`
 	Description  string `json:"description,omitempty"`
@@ -29,13 +29,9 @@ type List struct {
 	MembersCount int    `json:"members_count,omitempty"`
 }
 
-type ListsOptions struct {
-	Limit int
-}
-
 type listsResponse struct {
-	Lists  []List `json:"items"`
-	Paging Paging `json:"paging"`
+	Lists  []MailingList `json:"items"`
+	Paging Paging        `json:"paging"`
 }
 
 type ListsIterator struct {
@@ -45,7 +41,7 @@ type ListsIterator struct {
 }
 
 // ListMailingLists returns the specified set of mailing lists administered by your account.
-func (mg *MailgunImpl) ListMailingLists(opts *ListsOptions) *ListsIterator {
+func (mg *MailgunImpl) ListMailingLists(opts *ListOptions) *ListsIterator {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/pages")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -82,7 +78,7 @@ func (li *ListsIterator) GetNext() error {
 // Retrieves the next page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (li *ListsIterator) Next(items *[]List) bool {
+func (li *ListsIterator) Next(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
@@ -100,7 +96,7 @@ func (li *ListsIterator) Next(items *[]List) bool {
 // Retrieves the first page of events from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (li *ListsIterator) First(items *[]List) bool {
+func (li *ListsIterator) First(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
@@ -116,7 +112,7 @@ func (li *ListsIterator) First(items *[]List) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (li *ListsIterator) Last(items *[]List) bool {
+func (li *ListsIterator) Last(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
@@ -131,7 +127,7 @@ func (li *ListsIterator) Last(items *[]List) bool {
 // Retrieves the previous page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (li *ListsIterator) Previous(items *[]List) bool {
+func (li *ListsIterator) Previous(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
@@ -164,7 +160,7 @@ func (li *ListsIterator) fetch(url string) error {
 // Description, and AccessLevel are optional.
 // If unspecified, Description remains blank,
 // while AccessLevel defaults to Everyone.
-func (mg *MailgunImpl) CreateMailingList(prototype List) (List, error) {
+func (mg *MailgunImpl) CreateMailingList(prototype MailingList) (MailingList, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -183,9 +179,9 @@ func (mg *MailgunImpl) CreateMailingList(prototype List) (List, error) {
 	}
 	response, err := makePostRequest(r, p)
 	if err != nil {
-		return List{}, err
+		return MailingList{}, err
 	}
-	var l List
+	var l MailingList
 	err = response.parseFromJSON(&l)
 	return l, err
 }
@@ -202,20 +198,20 @@ func (mg *MailgunImpl) DeleteMailingList(addr string) error {
 
 // GetMailingList allows your application to recover the complete List structure
 // representing a mailing list, so long as you have its e-mail address.
-func (mg *MailgunImpl) GetMailingList(addr string) (List, error) {
+func (mg *MailgunImpl) GetMailingList(addr string) (MailingList, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	response, err := makeGetRequest(r)
 	if err != nil {
-		return List{}, err
+		return MailingList{}, err
 	}
 
 	var envelope struct {
-		List `json:"list"`
+		MailingList `json:"list"`
 	}
 	err = response.parseFromJSON(&envelope)
-	return envelope.List, err
+	return envelope.MailingList, err
 }
 
 // UpdateList allows you to change various attributes of a list.
@@ -225,7 +221,7 @@ func (mg *MailgunImpl) GetMailingList(addr string) (List, error) {
 // Be careful!  If changing the address of a mailing list,
 // e-mail sent to the old address will not succeed.
 // Make sure you account for the change accordingly.
-func (mg *MailgunImpl) UpdateMailingList(addr string, prototype List) (List, error) {
+func (mg *MailgunImpl) UpdateMailingList(addr string, prototype MailingList) (MailingList, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -242,7 +238,7 @@ func (mg *MailgunImpl) UpdateMailingList(addr string, prototype List) (List, err
 	if prototype.AccessLevel != "" {
 		p.addValue("access_level", prototype.AccessLevel)
 	}
-	var l List
+	var l MailingList
 	response, err := makePutRequest(r, p)
 	if err != nil {
 		return l, err

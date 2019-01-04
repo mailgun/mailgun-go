@@ -18,7 +18,7 @@ func TestGetUnsubscribes(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	n, us, err := mg.GetUnsubscribes(DefaultLimit, DefaultSkip)
+	n, us, err := mg.ListUnsubscribes(DefaultLimit, DefaultSkip)
 	ensure.Nil(t, err)
 
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
@@ -38,7 +38,7 @@ func TestGetUnsubscriptionByAddress(t *testing.T) {
 	// Create unsubscription record
 	ensure.Nil(t, mg.Unsubscribe(email, "*"))
 
-	n, us, err := mg.GetUnsubscribesByAddress(email)
+	n, us, err := mg.GetUnsubscribes(email)
 	ensure.Nil(t, err)
 
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
@@ -60,7 +60,7 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 	// Create unsubscription record
 	ensure.Nil(t, mg.Unsubscribe(email, "*"))
 
-	n, us, err := mg.GetUnsubscribesByAddress(email)
+	n, us, err := mg.GetUnsubscribes(email)
 	ensure.Nil(t, err)
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
 

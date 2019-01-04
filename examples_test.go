@@ -45,7 +45,7 @@ func ExampleMailgunImpl_ParseAddresses() {
 
 func ExampleMailgunImpl_UpdateList() {
 	mg := NewMailgun("example.com", "my_api_key")
-	_, err := mg.UpdateList("joe-stat@example.com", List{
+	_, err := mg.UpdateMailingList("joe-stat@example.com", MailingList{
 		Name:        "Joe Stat",
 		Description: "Joe's status report list",
 	})
@@ -94,7 +94,7 @@ Testing some Mailgun MIME awesomeness!
 
 func ExampleMailgunImpl_GetRoutes() {
 	mg := NewMailgun("example.com", "my_api_key")
-	n, routes, err := mg.GetRoutes(DefaultLimit, DefaultSkip)
+	n, routes, err := mg.ListRoutes(DefaultLimit, DefaultSkip)
 	if err != nil {
 		log.Fatal(err)
 	}

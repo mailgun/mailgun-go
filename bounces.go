@@ -49,11 +49,11 @@ func (b Bounce) GetCode() (int, error) {
 	}
 }
 
-// GetBounces returns a complete set of bounces logged against the sender's domain, if any.
+// ListBounces returns a complete set of bounces logged against the sender's domain, if any.
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
-func (mg *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
+func (mg *MailgunImpl) ListBounces(limit, skip int) (int, []Bounce, error) {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
 	if limit != -1 {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -74,8 +74,8 @@ func (mg *MailgunImpl) GetBounces(limit, skip int) (int, []Bounce, error) {
 	return len(response.Items), response.Items, nil
 }
 
-// GetSingleBounce retrieves a single bounce record, if any exist, for the given recipient address.
-func (mg *MailgunImpl) GetSingleBounce(address string) (Bounce, error) {
+// GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
+func (mg *MailgunImpl) GetBounce(address string) (Bounce, error) {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

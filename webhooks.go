@@ -9,9 +9,9 @@ import (
 	"net/http"
 )
 
-// GetWebhooks returns the complete set of webhooks configured for your domain.
+// ListWebhooks returns the complete set of webhooks configured for your domain.
 // Note that a zero-length mapping is not an error.
-func (mg *MailgunImpl) GetWebhooks() (map[string]string, error) {
+func (mg *MailgunImpl) ListWebhooks() (map[string]string, error) {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -54,8 +54,8 @@ func (mg *MailgunImpl) DeleteWebhook(t string) error {
 	return err
 }
 
-// GetWebhookByType retrieves the currently assigned webhook URL associated with the provided type of webhook.
-func (mg *MailgunImpl) GetWebhookByType(t string) (string, error) {
+// GetWebhook retrieves the currently assigned webhook URL associated with the provided type of webhook.
+func (mg *MailgunImpl) GetWebhook(t string) (string, error) {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + t)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

@@ -17,7 +17,7 @@ func TestGetDomains(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	n, domains, err := mg.GetDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
+	n, domains, err := mg.ListDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(domains) != 0, true)
 
@@ -32,10 +32,10 @@ func TestGetSingleDomain(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	_, domains, err := mg.GetDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
+	_, domains, err := mg.ListDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
 
-	dr, rxDnsRecords, txDnsRecords, err := mg.GetSingleDomain(domains[0].Name)
+	dr, rxDnsRecords, txDnsRecords, err := mg.GetDomain(domains[0].Name)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(rxDnsRecords) != 0, true)
 	ensure.DeepEqual(t, len(txDnsRecords) != 0, true)
@@ -53,7 +53,7 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	mg, err := mailgun.NewMailgunFromEnv()
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
-	_, _, _, err = mg.GetSingleDomain("mailgun.test")
+	_, _, _, err = mg.GetDomain("mailgun.test")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}

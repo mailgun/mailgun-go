@@ -12,7 +12,7 @@ func TestGetCredentials(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	n, cs, err := mg.GetCredentials(DefaultLimit, DefaultSkip)
+	n, cs, err := mg.ListCredentials(DefaultLimit, DefaultSkip)
 	ensure.Nil(t, err)
 
 	t.Logf("Login\tCreated At\t\n")

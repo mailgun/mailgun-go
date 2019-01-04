@@ -2,15 +2,23 @@ package mailgun
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
 )
 
+type domainContainer struct {
+	Domain              Domain            `json:"domain"`
+	ReceivingDNSRecords []DNSRecord       `json:"receiving_dns_records"`
+	SendingDNSRecords   []DNSRecord       `json:"sending_dns_records"`
+	Connection          *DomainConnection `json:"connection,omitempty"`
+	Tracking            *DomainTracking   `json:"tracking,omitempty"`
+	TagLimits           *TagLimits        `json:"limits,omitempty"`
+}
+
 func (ms *MockServer) addDomainRoutes(r chi.Router) {
 
-	ms.domainList = append(ms.domainList, domainResponse{
+	ms.domainList = append(ms.domainList, domainContainer{
 		Domain: Domain{
 			CreatedAt:    "Wed, 10 Jul 2013 19:26:52 GMT",
 			Name:         "samples.mailgun.org",
@@ -95,7 +103,7 @@ func (ms *MockServer) listDomains(w http.ResponseWriter, _ *http.Request) {
 		list = append(list, domain.Domain)
 	}
 
-	toJSON(w, DomainList{
+	toJSON(w, domainListResponse{
 		TotalCount: len(list),
 		Items:      list,
 	})
@@ -115,7 +123,7 @@ func (ms *MockServer) getDomain(w http.ResponseWriter, r *http.Request) {
 
 func (ms *MockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
-	ms.domainList = append(ms.domainList, domainResponse{
+	ms.domainList = append(ms.domainList, domainContainer{
 		Domain: Domain{
 			CreatedAt:    formatMailgunTime(&now),
 			Name:         r.FormValue("name"),
@@ -205,12 +213,4 @@ func (ms *MockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNotFound)
 	toJSON(w, okResp{Message: "domain not found"})
-}
-
-func stringToBool(b string) bool {
-	result, err := strconv.ParseBool(b)
-	if err != nil {
-		panic(err)
-	}
-	return result
 }

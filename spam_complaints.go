@@ -23,10 +23,10 @@ type complaintsEnvelope struct {
 	Paging Paging      `json:"paging"`
 }
 
-// GetComplaints returns a set of spam complaints registered against your domain.
+// ListComplaints returns a set of spam complaints registered against your domain.
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
-func (mg *MailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
+func (mg *MailgunImpl) ListComplaints(limit, skip int) (int, []Complaint, error) {
 	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -46,9 +46,9 @@ func (mg *MailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) 
 	return len(envelope.Items), envelope.Items, nil
 }
 
-// GetSingleComplaint returns a single complaint record filed by a recipient at the email address provided.
+// GetComplaint returns a single complaint record filed by a recipient at the email address provided.
 // If no complaint exists, the Complaint instance returned will be empty.
-func (mg *MailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
+func (mg *MailgunImpl) GetComplaint(address string) (Complaint, error) {
 	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint) + "/" + address)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

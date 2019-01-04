@@ -29,11 +29,11 @@ type Route struct {
 	ID        string `json:"id,omitempty"`
 }
 
-// GetRoutes returns the complete set of routes configured for your domain.
+// ListRoutes returns the complete set of routes configured for your domain.
 // You use routes to configure how to handle returned messages, or
 // messages sent to a specfic address on your domain.
 // See the Mailgun documentation for more information.
-func (mg *MailgunImpl) GetRoutes(limit, skip int) (int, []Route, error) {
+func (mg *MailgunImpl) ListRoutes(limit, skip int) (int, []Route, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint))
 	if limit != DefaultLimit {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -91,8 +91,8 @@ func (mg *MailgunImpl) DeleteRoute(id string) error {
 	return err
 }
 
-// GetRouteByID retrieves the complete route definition associated with the unique route ID.
-func (mg *MailgunImpl) GetRouteByID(id string) (Route, error) {
+// GetRoute retrieves the complete route definition associated with the unique route ID.
+func (mg *MailgunImpl) GetRoute(id string) (Route, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint) + "/" + id)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

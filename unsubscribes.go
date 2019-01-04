@@ -11,9 +11,9 @@ type Unsubscription struct {
 	Address   string   `json:"address"`
 }
 
-// GetUnsubscribes retrieves a list of unsubscriptions issued by recipients of mail from your domain.
+// ListUnsubscribes retrieves a list of unsubscriptions issued by recipients of mail from your domain.
 // Zero is a valid list length.
-func (mg *MailgunImpl) GetUnsubscribes(limit, skip int) (int, []Unsubscription, error) {
+func (mg *MailgunImpl) ListUnsubscribes(limit, skip int) (int, []Unsubscription, error) {
 	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
 	if limit != DefaultLimit {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -31,9 +31,9 @@ func (mg *MailgunImpl) GetUnsubscribes(limit, skip int) (int, []Unsubscription, 
 	return envelope.TotalCount, envelope.Items, err
 }
 
-// GetUnsubscribesByAddress retrieves a list of unsubscriptions by recipient address.
+// GetUnsubscribes retrieves a list of unsubscriptions by recipient address.
 // Zero is a valid list length.
-func (mg *MailgunImpl) GetUnsubscribesByAddress(a string) (int, []Unsubscription, error) {
+func (mg *MailgunImpl) GetUnsubscribes(a string) (int, []Unsubscription, error) {
 	r := newHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, a))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -58,7 +58,7 @@ func (mg *MailgunImpl) Unsubscribe(a, t string) error {
 }
 
 // RemoveUnsubscribe removes the e-mail address given from the domain's unsubscription table.
-// If passing in an ID (discoverable from, e.g., GetUnsubscribes()), the e-mail address associated
+// If passing in an ID (discoverable from, e.g., ListUnsubscribes()), the e-mail address associated
 // with the given ID will be removed.
 func (mg *MailgunImpl) RemoveUnsubscribe(a string) error {
 	r := newHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, a))
@@ -69,7 +69,7 @@ func (mg *MailgunImpl) RemoveUnsubscribe(a string) error {
 }
 
 // RemoveUnsubscribe removes the e-mail address given from the domain's unsubscription table with a matching tag.
-// If passing in an ID (discoverable from, e.g., GetUnsubscribes()), the e-mail address associated
+// If passing in an ID (discoverable from, e.g., ListUnsubscribes()), the e-mail address associated
 // with the given ID will be removed.
 func (mg *MailgunImpl) RemoveUnsubscribeWithTag(a, t string) error {
 	r := newHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, a))

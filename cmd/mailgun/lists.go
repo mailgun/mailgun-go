@@ -44,11 +44,11 @@ func ListMailingList(parser *args.ArgParser, data interface{}) (int, error) {
 	}
 
 	// Create the tag iterator
-	it := mg.ListMailingLists(&mailgun.ListsOptions{
+	it := mg.ListMailingLists(&mailgun.ListOptions{
 		Limit: opts.Int("limit"),
 	})
 
-	var page []mailgun.List
+	var page []mailgun.MailingList
 	for it.Next(&page) {
 		for _, list := range page {
 			spew.Printf("%+v\n", list)
@@ -79,7 +79,7 @@ func ListMailingListMembers(parser *args.ArgParser, data interface{}) (int, erro
 	}
 
 	// Create the tag iterator
-	it := mg.ListMembers(opts.String("address"), &mailgun.ListMembersOptions{
+	it := mg.ListMembers(opts.String("address"), &mailgun.ListOptions{
 		Limit: opts.Int("limit"),
 	})
 

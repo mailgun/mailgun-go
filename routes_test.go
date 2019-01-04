@@ -11,7 +11,7 @@ func TestRouteCRUD(t *testing.T) {
 	ensure.Nil(t, err)
 
 	var countRoutes = func() int {
-		count, _, err := mg.GetRoutes(DefaultLimit, DefaultSkip)
+		count, _, err := mg.ListRoutes(DefaultLimit, DefaultSkip)
 		ensure.Nil(t, err)
 		return count
 	}
@@ -32,14 +32,14 @@ func TestRouteCRUD(t *testing.T) {
 
 	defer func() {
 		ensure.Nil(t, mg.DeleteRoute(newRoute.ID))
-		_, err = mg.GetRouteByID(newRoute.ID)
+		_, err = mg.GetRoute(newRoute.ID)
 		ensure.NotNil(t, err)
 	}()
 
 	newCount := countRoutes()
 	ensure.False(t, newCount <= routeCount)
 
-	theRoute, err := mg.GetRouteByID(newRoute.ID)
+	theRoute, err := mg.GetRoute(newRoute.ID)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, newRoute, theRoute)
 

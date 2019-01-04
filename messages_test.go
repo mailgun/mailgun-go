@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mailgun/mailgun-go/events"
+
 	"github.com/facebookgo/ensure"
 )
 
@@ -161,21 +163,18 @@ func TestGetStoredMessage(t *testing.T) {
 
 // Tries to locate the first stored event type, returning the associated stored message key.
 func findStoredMessageID(mg Mailgun) (string, error) {
-	ei := mg.NewEventIterator()
-	err := ei.GetFirstPage(GetEventsOptions{})
-	for {
-		if err != nil {
-			return "", err
-		}
-		if len(ei.Events) == 0 {
-			break
-		}
-		for _, event := range ei.Events {
-			if event.Event == EventStored {
+	it := mg.ListEvents(nil)
+
+	var page []Event
+	for it.Next(&page) {
+		for _, event := range page {
+			if event.Event == events.EventStored {
 				return event.Storage.Key, nil
 			}
 		}
-		err = ei.GetNext()
+	}
+	if it.Err() != nil {
+		return "", it.Err()
 	}
 	return "", fmt.Errorf("No stored messages found.  Try changing MG_EMAIL_TO to an address that stores messages and try again.")
 }
@@ -314,11 +313,11 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 
 func TestSendMGOffline(t *testing.T) {
 	const (
-		exampleDomain       = "testDomain"
-		exampleAPIKey       = "testAPIKey"
-		toUser              = "test@test.com"
-		exampleMessage      = "Queue. Thank you"
-		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
+		exampleDomain  = "testDomain"
+		exampleAPIKey  = "testAPIKey"
+		toUser         = "test@test.com"
+		exampleMessage = "Queue. Thank you"
+		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
@@ -350,10 +349,10 @@ func TestSendMGSeparateDomain(t *testing.T) {
 		exampleDomain = "testDomain"
 		signingDomain = "signingDomain"
 
-		exampleAPIKey       = "testAPIKey"
-		toUser              = "test@test.com"
-		exampleMessage      = "Queue. Thank you"
-		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
+		exampleAPIKey  = "testAPIKey"
+		toUser         = "test@test.com"
+		exampleMessage = "Queue. Thank you"
+		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)

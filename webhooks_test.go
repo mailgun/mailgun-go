@@ -20,7 +20,7 @@ func TestWebhookCRUD(t *testing.T) {
 	ensure.Nil(t, err)
 
 	var countHooks = func() int {
-		hooks, err := mg.GetWebhooks()
+		hooks, err := mg.ListWebhooks()
 		ensure.Nil(t, err)
 		return len(hooks)
 	}
@@ -38,14 +38,14 @@ func TestWebhookCRUD(t *testing.T) {
 	newCount := countHooks()
 	ensure.False(t, newCount <= hookCount)
 
-	theURL, err := mg.GetWebhookByType("deliver")
+	theURL, err := mg.GetWebhook("deliver")
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, theURL, domainURL)
 
 	updatedDomainURL := "http://api.mailgun.net/messages"
 	ensure.Nil(t, mg.UpdateWebhook("deliver", []string{updatedDomainURL}))
 
-	hooks, err := mg.GetWebhooks()
+	hooks, err := mg.ListWebhooks()
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, hooks["deliver"], updatedDomainURL)

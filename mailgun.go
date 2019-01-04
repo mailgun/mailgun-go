@@ -143,78 +143,93 @@ type Mailgun interface {
 	APIKey() string
 	Client() *http.Client
 	SetClient(client *http.Client)
+	SetAPIBase(url string)
+
 	Send(m *Message) (string, string, error)
-	GetBounces(limit, skip int) (int, []Bounce, error)
-	GetSingleBounce(address string) (Bounce, error)
+	NewMessage(from, subject, text string, to ...string) *Message
+	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
+
+	ListBounces(limit, skip int) (int, []Bounce, error)
+	GetBounce(address string) (Bounce, error)
 	AddBounce(address, code, error string) error
 	DeleteBounce(address string) error
+
 	GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error)
 	GetStatsTotal(start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error)
 	GetTag(tag string) (TagItem, error)
 	DeleteTag(tag string) error
 	ListTags(*TagOptions) *TagIterator
-	GetDomains(limit, skip int) (int, []Domain, error)
-	GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
+
+	ListDomains(limit, skip int) (int, []Domain, error)
+	GetDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
 	CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error
 	DeleteDomain(name string) error
-	GetComplaints(limit, skip int) (int, []Complaint, error)
-	GetSingleComplaint(address string) (Complaint, error)
+	UpdateDomainConnection(domain string, dc DomainConnection) error
+	GetDomainConnection(domain string) (DomainConnection, error)
+	GetDomainTracking(domain string) (DomainTracking, error)
+
 	GetStoredMessage(id string) (StoredMessage, error)
 	GetStoredMessageRaw(id string) (StoredMessageRaw, error)
 	GetStoredMessageForURL(url string) (StoredMessage, error)
 	GetStoredMessageRawForURL(url string) (StoredMessageRaw, error)
 	DeleteStoredMessage(id string) error
-	GetCredentials(limit, skip int) (int, []Credential, error)
+
+	ListCredentials(limit, skip int) (int, []Credential, error)
 	CreateCredential(login, password string) error
 	ChangeCredentialPassword(id, password string) error
 	DeleteCredential(id string) error
-	GetUnsubscribes(limit, skip int) (int, []Unsubscription, error)
-	GetUnsubscribesByAddress(string) (int, []Unsubscription, error)
+
+	ListUnsubscribes(limit, skip int) (int, []Unsubscription, error)
+	GetUnsubscribes(string) (int, []Unsubscription, error)
 	Unsubscribe(address, tag string) error
 	RemoveUnsubscribe(string) error
 	RemoveUnsubscribeWithTag(a, t string) error
+
+	ListComplaints(limit, skip int) (int, []Complaint, error)
+	GetComplaint(address string) (Complaint, error)
 	CreateComplaint(string) error
 	DeleteComplaint(string) error
-	GetRoutes(limit, skip int) (int, []Route, error)
-	GetRouteByID(string) (Route, error)
+
+	ListRoutes(limit, skip int) (int, []Route, error)
+	GetRoute(string) (Route, error)
 	CreateRoute(Route) (Route, error)
 	DeleteRoute(string) error
 	UpdateRoute(string, Route) (Route, error)
-	GetWebhooks() (map[string]string, error)
+
+	ListWebhooks() (map[string]string, error)
 	CreateWebhook(kind string, url []string) error
 	DeleteWebhook(kind string) error
-	GetWebhookByType(kind string) (string, error)
+	GetWebhook(kind string) (string, error)
 	UpdateWebhook(kind string, url []string) error
 	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
-	ListMailingLists(opts *ListsOptions) *ListsIterator
-	CreateMailingList(List) (List, error)
+
+	ListMailingLists(opts *ListOptions) *ListsIterator
+	CreateMailingList(MailingList) (MailingList, error)
 	DeleteMailingList(string) error
-	GetMailingList(string) (List, error)
-	UpdateMailingList(string, List) (List, error)
-	ListMembers(address string, opts *ListMembersOptions) *MemberListIterator
+	GetMailingList(string) (MailingList, error)
+	UpdateMailingList(string, MailingList) (MailingList, error)
+
+	ListMembers(address string, opts *ListOptions) *MemberListIterator
 	GetMemberByAddress(MemberAddr, listAddr string) (Member, error)
 	CreateMember(merge bool, addr string, prototype Member) error
 	CreateMemberList(subscribed *bool, addr string, newMembers []interface{}) error
 	UpdateMember(Member, list string, prototype Member) (Member, error)
 	DeleteMember(Member, list string) error
-	NewMessage(from, subject, text string, to ...string) *Message
-	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
-	NewEventIterator() *EventIterator
+
 	ListEvents(*EventsOptions) *EventIterator
 	PollEvents(*EventsOptions) *EventPoller
-	SetAPIBase(url string)
+
 	ListIPS(bool) ([]IPAddress, error)
 	GetIP(ip string) (IPAddress, error)
 	ListDomainIPS() ([]IPAddress, error)
 	AddDomainIP(ip string) error
 	DeleteDomainIP(ip string) error
-	CreateExport(url string) error
+
 	ListExports(url string) ([]Export, error)
 	GetExport(id string) (Export, error)
 	GetExportLink(id string) (string, error)
-	UpdateDomainConnection(domain string, dc DomainConnection) error
-	GetDomainConnection(domain string) (DomainConnection, error)
-	GetDomainTracking(domain string) (DomainTracking, error)
+	CreateExport(url string) error
+
 	GetTagLimits(domain string) (TagLimits, error)
 }
 

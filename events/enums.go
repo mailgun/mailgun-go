@@ -1,4 +1,4 @@
-package mailgun
+package events
 
 import (
 	"encoding/json"

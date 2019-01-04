@@ -13,7 +13,7 @@ func TestGetBounces(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	n, bounces, err := mg.GetBounces(-1, -1)
+	n, bounces, err := mg.ListBounces(-1, -1)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, n, len(bounces))
 }
@@ -24,7 +24,7 @@ func TestGetSingleBounce(t *testing.T) {
 	ensure.Nil(t, err)
 
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")), domain)
-	_, err = mg.GetSingleBounce(exampleEmail)
+	_, err = mg.GetBounce(exampleEmail)
 	ensure.NotNil(t, err)
 
 	ure, ok := err.(*UnexpectedResponseError)
@@ -43,7 +43,7 @@ func TestAddDelBounces(t *testing.T) {
 	// First, basic sanity check.
 	// Fail early if we have bounces for a fictitious e-mail address.
 
-	n, _, err := mg.GetBounces(-1, -1)
+	n, _, err := mg.ListBounces(-1, -1)
 	ensure.Nil(t, err)
 	// Add the bounce for our address.
 
@@ -52,7 +52,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	// We should now have one bounce listed when we query the API.
 
-	n, bounces, err := mg.GetBounces(-1, -1)
+	n, bounces, err := mg.ListBounces(-1, -1)
 	ensure.Nil(t, err)
 	if n == 0 {
 		t.Fatal("Expected at least one bounce for this domain.")
@@ -70,7 +70,7 @@ func TestAddDelBounces(t *testing.T) {
 		t.Fatalf("Expected bounce for address %s in list of bounces", exampleEmail)
 	}
 
-	bounce, err := mg.GetSingleBounce(exampleEmail)
+	bounce, err := mg.GetBounce(exampleEmail)
 	ensure.Nil(t, err)
 	if bounce.CreatedAt == "" {
 		t.Fatalf("Expected at least one bounce for %s", exampleEmail)
@@ -83,7 +83,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Make sure we're back to the way we were.
 
-	n, bounces, err = mg.GetBounces(-1, -1)
+	n, bounces, err = mg.ListBounces(-1, -1)
 	ensure.Nil(t, err)
 
 	found = 0
@@ -98,6 +98,6 @@ func TestAddDelBounces(t *testing.T) {
 		t.Fatalf("Expected no bounce for address %s in list of bounces", exampleEmail)
 	}
 
-	_, err = mg.GetSingleBounce(exampleEmail)
+	_, err = mg.GetBounce(exampleEmail)
 	ensure.NotNil(t, err)
 }

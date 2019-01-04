@@ -44,19 +44,16 @@ type DNSRecord struct {
 }
 
 type domainResponse struct {
-	Domain              Domain            `json:"domain"`
-	ReceivingDNSRecords []DNSRecord       `json:"receiving_dns_records"`
-	SendingDNSRecords   []DNSRecord       `json:"sending_dns_records"`
-	Connection          *DomainConnection `json:"connection,omitempty"`
-	Tracking            *DomainTracking   `json:"tracking,omitempty"`
-	TagLimits           *TagLimits        `json:"limits,omitempty"`
+	Domain              Domain      `json:"domain"`
+	ReceivingDNSRecords []DNSRecord `json:"receiving_dns_records"`
+	SendingDNSRecords   []DNSRecord `json:"sending_dns_records"`
 }
 
 type domainConnectionResponse struct {
 	Connection DomainConnection `json:"connection"`
 }
 
-type DomainList struct {
+type domainListResponse struct {
 	TotalCount int      `json:"total_count"`
 	Items      []Domain `json:"items"`
 }
@@ -88,13 +85,13 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 	return
 }
 
-// GetDomains retrieves a set of domains from Mailgun.
+// ListDomains retrieves a set of domains from Mailgun.
 //
 // Assuming no error, both the number of items retrieved and a slice of Domain instances.
 // The number of items returned may be less than the specified limit, if it's specified.
 // Note that zero items and a zero-length slice do not necessarily imply an error occurred.
 // Except for the error itself, all results are undefined in the event of an error.
-func (mg *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
+func (mg *MailgunImpl) ListDomains(limit, skip int) (int, []Domain, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	if limit != DefaultLimit {
@@ -105,7 +102,7 @@ func (mg *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var list DomainList
+	var list domainListResponse
 	err := getResponseFromJSON(r, &list)
 	if err != nil {
 		return -1, nil, err
@@ -114,7 +111,7 @@ func (mg *MailgunImpl) GetDomains(limit, skip int) (int, []Domain, error) {
 }
 
 // Retrieve detailed information about the named domain.
-func (mg *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
+func (mg *MailgunImpl) GetDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

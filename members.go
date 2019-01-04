@@ -46,11 +46,11 @@ type MemberListIterator struct {
 	err error
 }
 
-type ListMembersOptions struct {
+type ListOptions struct {
 	Limit int
 }
 
-func (mg *MailgunImpl) ListMembers(address string, opts *ListMembersOptions) *MemberListIterator {
+func (mg *MailgunImpl) ListMembers(address string, opts *ListOptions) *MemberListIterator {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, address) + "/pages")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
