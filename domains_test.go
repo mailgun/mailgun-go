@@ -8,6 +8,10 @@ import (
 	"github.com/mailgun/mailgun-go"
 )
 
+const (
+	sampleDomain = "samples.mailgun.org"
+)
+
 func TestGetDomains(t *testing.T) {
 	mg, err := mailgun.NewMailgunFromEnv()
 	mg.SetAPIBase(server.URL())
@@ -74,18 +78,33 @@ func TestDomainConnection(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	info, err := mg.GetDomainConnection("samples.mailgun.org")
+	info, err := mg.GetDomainConnection(sampleDomain)
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, info.RequireTLS, true)
 	ensure.DeepEqual(t, info.SkipVerification, true)
 
 	info.RequireTLS = false
-	err = mg.UpdateDomainConnection("samples.mailgun.org", info)
+	err = mg.UpdateDomainConnection(sampleDomain, info)
 	ensure.Nil(t, err)
 
-	info, err = mg.GetDomainConnection("samples.mailgun.org")
+	info, err = mg.GetDomainConnection(sampleDomain)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, info.RequireTLS, false)
 	ensure.DeepEqual(t, info.SkipVerification, true)
+}
+
+func TestDomainTracking(t *testing.T) {
+	mg, err := mailgun.NewMailgunFromEnv()
+	mg.SetAPIBase(server.URL())
+	ensure.Nil(t, err)
+
+	info, err := mg.GetDomainTracking(sampleDomain)
+	ensure.Nil(t, err)
+
+	ensure.DeepEqual(t, info.Unsubscribe.Active, false)
+	ensure.DeepEqual(t, len(info.Unsubscribe.HTMLFooter) != 0, true)
+	ensure.DeepEqual(t, len(info.Unsubscribe.TextFooter) != 0, true)
+	ensure.DeepEqual(t, info.Click.Active, true)
+	ensure.DeepEqual(t, info.Open.Active, true)
 }

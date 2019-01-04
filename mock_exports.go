@@ -22,7 +22,7 @@ func (ms *MockServer) postExports(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ms.exportList = append(ms.exportList, e)
-	toJSON(w, OK{Message: "success"})
+	toJSON(w, okResp{Message: "success"})
 }
 
 func (ms *MockServer) listExports(w http.ResponseWriter, _ *http.Request) {
@@ -39,7 +39,7 @@ func (ms *MockServer) getExport(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
-	toJSON(w, OK{Message: "export not found"})
+	toJSON(w, okResp{Message: "export not found"})
 }
 
 func (ms *MockServer) getExportLink(w http.ResponseWriter, r *http.Request) {

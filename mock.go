@@ -12,7 +12,7 @@ type MockServer struct {
 	srv *httptest.Server
 
 	domainIPS  []string
-	domainList []SingleDomainResponse
+	domainList []domainResponse
 	exportList []Export
 }
 

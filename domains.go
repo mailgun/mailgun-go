@@ -43,14 +43,15 @@ type DNSRecord struct {
 	Value      string
 }
 
-type SingleDomainResponse struct {
+type domainResponse struct {
 	Domain              Domain            `json:"domain"`
 	ReceivingDNSRecords []DNSRecord       `json:"receiving_dns_records"`
 	SendingDNSRecords   []DNSRecord       `json:"sending_dns_records"`
 	Connection          *DomainConnection `json:"connection,omitempty"`
+	Tracking            *DomainTracking   `json:"tracking,omitempty"`
 }
 
-type DomainConnectionResponse struct {
+type domainConnectionResponse struct {
 	Connection DomainConnection `json:"connection"`
 }
 
@@ -62,6 +63,22 @@ type DomainList struct {
 type DomainConnection struct {
 	RequireTLS       bool `json:"require_tls"`
 	SkipVerification bool `json:"skip_verification"`
+}
+
+type DomainTracking struct {
+	Click       TrackingStatus `json:"click"`
+	Open        TrackingStatus `json:"open"`
+	Unsubscribe TrackingStatus `json:"unsubscribe"`
+}
+
+type TrackingStatus struct {
+	Active     bool   `json:"active"`
+	HTMLFooter string `json:"html_footer"`
+	TextFooter string `json:"text_footer"`
+}
+
+type domainTrackingResponse struct {
+	Tracking DomainTracking `json:"tracking"`
 }
 
 // GetCreatedAt returns the time the domain was created as a normal Go time.Time type.
@@ -100,7 +117,7 @@ func (mg *MailgunImpl) GetSingleDomain(domain string) (Domain, []DNSRecord, []DN
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var envelope SingleDomainResponse
+	var envelope domainResponse
 	err := getResponseFromJSON(r, &envelope)
 	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, err
 }
@@ -129,7 +146,7 @@ func (mg *MailgunImpl) GetDomainConnection(domain string) (DomainConnection, err
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp DomainConnectionResponse
+	var resp domainConnectionResponse
 	err := getResponseFromJSON(r, &resp)
 	return resp.Connection, err
 }
@@ -153,6 +170,15 @@ func (mg *MailgunImpl) DeleteDomain(name string) error {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(r)
 	return err
+}
+
+func (mg *MailgunImpl) GetDomainTracking(domain string) (DomainTracking, error) {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	var resp domainTrackingResponse
+	err := getResponseFromJSON(r, &resp)
+	return resp.Tracking, err
 }
 
 func boolToString(b bool) string {

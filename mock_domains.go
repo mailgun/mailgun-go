@@ -10,7 +10,7 @@ import (
 
 func (ms *MockServer) addDomainRoutes(r chi.Router) {
 
-	ms.domainList = append(ms.domainList, SingleDomainResponse{
+	ms.domainList = append(ms.domainList, domainResponse{
 		Domain: Domain{
 			CreatedAt:    "Wed, 10 Jul 2013 19:26:52 GMT",
 			Name:         "samples.mailgun.org",
@@ -23,6 +23,15 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 		Connection: &DomainConnection{
 			RequireTLS:       true,
 			SkipVerification: true,
+		},
+		Tracking: &DomainTracking{
+			Click: TrackingStatus{Active: true},
+			Open:  TrackingStatus{Active: true},
+			Unsubscribe: TrackingStatus{
+				Active:     false,
+				HTMLFooter: "\n<br>\n<p><a href=\"%unsubscribe_url%\">unsubscribe</a></p>\n",
+				TextFooter: "\n\nTo unsubscribe click: <%unsubscribe_url%>\n\n",
+			},
 		},
 		ReceivingDNSRecords: []DNSRecord{
 			{
@@ -71,6 +80,8 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 	//r.Delete("/domains/{domain}/credentials/{login}", ms.deleteCredentials)
 	r.Get("/domains/{domain}/connection", ms.getConnection)
 	r.Put("/domains/{domain}/connection", ms.updateConnection)
+	r.Get("/domains/{domain}/tracking", ms.getTracking)
+	//r.Put("/domains/{domain}/tracking/{type}", ms.updateTracking)
 }
 
 func (ms *MockServer) listDomains(w http.ResponseWriter, _ *http.Request) {
@@ -94,12 +105,12 @@ func (ms *MockServer) getDomain(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
-	toJSON(w, OK{Message: "domain not found"})
+	toJSON(w, okResp{Message: "domain not found"})
 }
 
 func (ms *MockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
-	ms.domainList = append(ms.domainList, SingleDomainResponse{
+	ms.domainList = append(ms.domainList, domainResponse{
 		Domain: Domain{
 			CreatedAt:    formatMailgunTime(&now),
 			Name:         r.FormValue("name"),
@@ -110,7 +121,7 @@ func (ms *MockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 			State:        "active",
 		},
 	})
-	toJSON(w, OK{Message: "Domain has been created"})
+	toJSON(w, okResp{Message: "Domain has been created"})
 }
 
 func (ms *MockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
@@ -123,19 +134,19 @@ func (ms *MockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(result) != len(ms.domainList) {
-		toJSON(w, OK{Message: "success"})
+		toJSON(w, okResp{Message: "success"})
 		ms.domainList = result
 		return
 	}
 
 	w.WriteHeader(http.StatusNotFound)
-	toJSON(w, OK{Message: "domain not found"})
+	toJSON(w, okResp{Message: "domain not found"})
 }
 
 func (ms *MockServer) getConnection(w http.ResponseWriter, r *http.Request) {
 	for _, d := range ms.domainList {
 		if d.Domain.Name == chi.URLParam(r, "domain") {
-			resp := DomainConnectionResponse{
+			resp := domainConnectionResponse{
 				Connection: *d.Connection,
 			}
 			toJSON(w, resp)
@@ -143,7 +154,7 @@ func (ms *MockServer) getConnection(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
-	toJSON(w, OK{Message: "domain not found"})
+	toJSON(w, okResp{Message: "domain not found"})
 }
 
 func (ms *MockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
@@ -153,12 +164,26 @@ func (ms *MockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
 				RequireTLS:       stringToBool(r.FormValue("require_tls")),
 				SkipVerification: stringToBool(r.FormValue("skip_verification")),
 			}
-			toJSON(w, OK{Message: "Domain connection settings have been updated, may take 10 minutes to fully propagate"})
+			toJSON(w, okResp{Message: "Domain connection settings have been updated, may take 10 minutes to fully propagate"})
 			return
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
-	toJSON(w, OK{Message: "domain not found"})
+	toJSON(w, okResp{Message: "domain not found"})
+}
+
+func (ms *MockServer) getTracking(w http.ResponseWriter, r *http.Request) {
+	for _, d := range ms.domainList {
+		if d.Domain.Name == chi.URLParam(r, "domain") {
+			resp := domainTrackingResponse{
+				Tracking: *d.Tracking,
+			}
+			toJSON(w, resp)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
 }
 
 func stringToBool(b string) bool {

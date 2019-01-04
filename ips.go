@@ -1,6 +1,6 @@
 package mailgun
 
-type IPAddressList struct {
+type ipAddressListResponse struct {
 	TotalCount int      `json:"total_count"`
 	Items      []string `json:"items"`
 }
@@ -11,7 +11,7 @@ type IPAddress struct {
 	Dedicated bool   `json:"dedicated"`
 }
 
-type OK struct {
+type okResp struct {
 	Message string `json:"message"`
 }
 
@@ -24,7 +24,7 @@ func (mg *MailgunImpl) ListIPS(dedicated bool) ([]IPAddress, error) {
 	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp IPAddressList
+	var resp ipAddressListResponse
 	if err := getResponseFromJSON(r, &resp); err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (mg *MailgunImpl) ListDomainIPS() ([]IPAddress, error) {
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp IPAddressList
+	var resp ipAddressListResponse
 	if err := getResponseFromJSON(r, &resp); err != nil {
 		return nil, err
 	}
