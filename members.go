@@ -2,7 +2,6 @@ package mailgun
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 )
 
@@ -35,13 +34,17 @@ type Member struct {
 	Vars       map[string]interface{} `json:"vars,omitempty"`
 }
 
-type memberListsResponse struct {
+type memberListResponse struct {
 	Lists  []Member `json:"items"`
 	Paging Paging   `json:"paging"`
 }
 
+type memberResponse struct {
+	Member Member `json:"list"`
+}
+
 type MemberListIterator struct {
-	memberListsResponse
+	memberListResponse
 	mg  Mailgun
 	err error
 }
@@ -61,9 +64,9 @@ func (mg *MailgunImpl) ListMembers(address string, opts *ListOptions) *MemberLis
 	}
 	url, err := r.generateUrlWithParameters()
 	return &MemberListIterator{
-		mg:                  mg,
-		memberListsResponse: memberListsResponse{Paging: Paging{Next: url, First: url}},
-		err:                 err,
+		mg:                 mg,
+		memberListResponse: memberListResponse{Paging: Paging{Next: url, First: url}},
+		err:                err,
 	}
 }
 
@@ -161,12 +164,12 @@ func (li *MemberListIterator) fetch(url string) error {
 	r.setClient(li.mg.Client())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 
-	return getResponseFromJSON(r, &li.memberListsResponse)
+	return getResponseFromJSON(r, &li.memberListResponse)
 }
 
-// GetMemberByAddress returns a complete Member structure for a member of a mailing list,
+// GetMember returns a complete Member structure for a member of a mailing list,
 // given only their subscription e-mail address.
-func (mg *MailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
+func (mg *MailgunImpl) GetMember(s, l string) (Member, error) {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -174,11 +177,9 @@ func (mg *MailgunImpl) GetMemberByAddress(s, l string) (Member, error) {
 	if err != nil {
 		return Member{}, err
 	}
-	var envelope struct {
-		Member Member `json:"member"`
-	}
-	err = response.parseFromJSON(&envelope)
-	return envelope.Member, err
+	var resp memberResponse
+	err = response.parseFromJSON(&resp)
+	return resp.Member, err
 }
 
 // CreateMember registers a new member of the indicated mailing list.
@@ -269,7 +270,6 @@ func (mg *MailgunImpl) CreateMemberList(u *bool, addr string, newMembers []inter
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(bs))
 	p.addValue("members", string(bs))
 	_, err = makePostRequest(r, p)
 	return err

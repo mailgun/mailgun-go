@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	sampleDomain = "samples.mailgun.org"
+	testDomain = "mailgun.test"
 )
 
 func TestGetDomains(t *testing.T) {
@@ -53,7 +53,7 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	mg, err := mailgun.NewMailgunFromEnv()
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
-	_, _, _, err = mg.GetDomain("mailgun.test")
+	_, _, _, err = mg.GetDomain("unknown.domain")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
@@ -68,9 +68,9 @@ func TestAddDeleteDomain(t *testing.T) {
 	ensure.Nil(t, err)
 
 	// First, we need to add the domain.
-	ensure.Nil(t, mg.CreateDomain("mailgun.test", "supersecret", mailgun.Tag, false))
+	ensure.Nil(t, mg.CreateDomain("mx.mailgun.test", "supersecret", mailgun.Tag, false))
 	// Next, we delete it.
-	ensure.Nil(t, mg.DeleteDomain("mailgun.test"))
+	ensure.Nil(t, mg.DeleteDomain("mx.mailgun.test"))
 }
 
 func TestDomainConnection(t *testing.T) {
@@ -78,17 +78,17 @@ func TestDomainConnection(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	info, err := mg.GetDomainConnection(sampleDomain)
+	info, err := mg.GetDomainConnection(testDomain)
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, info.RequireTLS, true)
 	ensure.DeepEqual(t, info.SkipVerification, true)
 
 	info.RequireTLS = false
-	err = mg.UpdateDomainConnection(sampleDomain, info)
+	err = mg.UpdateDomainConnection(testDomain, info)
 	ensure.Nil(t, err)
 
-	info, err = mg.GetDomainConnection(sampleDomain)
+	info, err = mg.GetDomainConnection(testDomain)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, info.RequireTLS, false)
 	ensure.DeepEqual(t, info.SkipVerification, true)
@@ -99,7 +99,7 @@ func TestDomainTracking(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	info, err := mg.GetDomainTracking(sampleDomain)
+	info, err := mg.GetDomainTracking(testDomain)
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, info.Unsubscribe.Active, false)

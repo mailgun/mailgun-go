@@ -30,8 +30,12 @@ type MailingList struct {
 }
 
 type listsResponse struct {
-	Lists  []MailingList `json:"items"`
+	Items  []MailingList `json:"items"`
 	Paging Paging        `json:"paging"`
+}
+
+type mailingListResponse struct {
+	MailingList MailingList `json:"member"`
 }
 
 type ListsIterator struct {
@@ -86,8 +90,8 @@ func (li *ListsIterator) Next(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
-	*items = li.Lists
-	if len(li.Lists) == 0 {
+	*items = li.Items
+	if len(li.Items) == 0 {
 		return false
 	}
 	return true
@@ -104,7 +108,7 @@ func (li *ListsIterator) First(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
-	*items = li.Lists
+	*items = li.Items
 	return true
 }
 
@@ -120,7 +124,7 @@ func (li *ListsIterator) Last(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
-	*items = li.Lists
+	*items = li.Items
 	return true
 }
 
@@ -138,8 +142,8 @@ func (li *ListsIterator) Previous(items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
-	*items = li.Lists
-	if len(li.Lists) == 0 {
+	*items = li.Items
+	if len(li.Items) == 0 {
 		return false
 	}
 	return true
@@ -207,11 +211,9 @@ func (mg *MailgunImpl) GetMailingList(addr string) (MailingList, error) {
 		return MailingList{}, err
 	}
 
-	var envelope struct {
-		MailingList `json:"list"`
-	}
-	err = response.parseFromJSON(&envelope)
-	return envelope.MailingList, err
+	var resp mailingListResponse
+	err = response.parseFromJSON(&resp)
+	return resp.MailingList, err
 }
 
 // UpdateList allows you to change various attributes of a list.

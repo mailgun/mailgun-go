@@ -21,8 +21,8 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 	ms.domainList = append(ms.domainList, domainContainer{
 		Domain: Domain{
 			CreatedAt:    "Wed, 10 Jul 2013 19:26:52 GMT",
-			Name:         "samples.mailgun.org",
-			SMTPLogin:    "postmaster@samples.mailgun.org",
+			Name:         "mailgun.test",
+			SMTPLogin:    "postmaster@mailgun.test",
 			SMTPPassword: "4rtqo4p6rrx9",
 			Wildcard:     true,
 			SpamAction:   "disabled",

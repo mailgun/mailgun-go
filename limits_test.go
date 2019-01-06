@@ -12,7 +12,7 @@ func TestLimits(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ensure.Nil(t, err)
 
-	limits, err := mg.GetTagLimits(sampleDomain)
+	limits, err := mg.GetTagLimits(testDomain)
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, limits.Limit, 50000)

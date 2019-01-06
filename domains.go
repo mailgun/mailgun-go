@@ -115,9 +115,9 @@ func (mg *MailgunImpl) GetDomain(domain string) (Domain, []DNSRecord, []DNSRecor
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var envelope domainResponse
-	err := getResponseFromJSON(r, &envelope)
-	return envelope.Domain, envelope.ReceivingDNSRecords, envelope.SendingDNSRecords, err
+	var resp domainResponse
+	err := getResponseFromJSON(r, &resp)
+	return resp.Domain, resp.ReceivingDNSRecords, resp.SendingDNSRecords, err
 }
 
 // CreateDomain instructs Mailgun to create a new domain for your account.

@@ -210,7 +210,7 @@ type Mailgun interface {
 	UpdateMailingList(string, MailingList) (MailingList, error)
 
 	ListMembers(address string, opts *ListOptions) *MemberListIterator
-	GetMemberByAddress(MemberAddr, listAddr string) (Member, error)
+	GetMember(MemberAddr, listAddr string) (Member, error)
 	CreateMember(merge bool, addr string, prototype Member) error
 	CreateMemberList(subscribed *bool, addr string, newMembers []interface{}) error
 	UpdateMember(Member, list string, prototype Member) (Member, error)

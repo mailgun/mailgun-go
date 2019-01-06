@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/mail"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi"
 )
@@ -51,24 +54,57 @@ func toJSON(w http.ResponseWriter, obj interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func stringToBool(b string) bool {
-	result, err := strconv.ParseBool(b)
+func stringToBool(v string) bool {
+	lower := strings.ToLower(v)
+	if lower == "yes" || lower == "no" {
+		return lower == "yes"
+	}
+
+	if v == "" {
+		return false
+	}
+
+	result, err := strconv.ParseBool(v)
 	if err != nil {
 		panic(err)
 	}
 	return result
 }
 
-func stringToInt(b string) int {
-	if b == "" {
+func stringToInt(v string) int {
+	if v == "" {
 		return 0
 	}
 
-	result, err := strconv.ParseInt(b, 10, 64)
+	result, err := strconv.ParseInt(v, 10, 64)
 	if err != nil {
 		panic(err)
 	}
 	return int(result)
+}
+
+func stringToMap(v string) map[string]interface{} {
+	if v == "" {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+	err := json.Unmarshal([]byte(v), &result)
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+func parseAddress(v string) string {
+	if v == "" {
+		return ""
+	}
+	e, err := mail.ParseAddress(v)
+	if err != nil {
+		panic(err)
+	}
+	return e.Address
 }
 
 // Given the page direction, pivot value and limit, calculate the offsets for the slice
@@ -112,4 +148,9 @@ func pageOffsets(pivotIdx []string, pivotDir, pivotVal string, limit int) (int, 
 		return 0, len(pivotIdx)
 	}
 	return 0, limit
+}
+
+func getPageURL(r *http.Request, params url.Values) string {
+	params.Add("limit", r.FormValue("limit"))
+	return "http://" + r.Host + r.URL.EscapedPath() + "?" + params.Encode()
 }
