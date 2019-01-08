@@ -12,6 +12,7 @@ type IPAddress struct {
 }
 
 type okResp struct {
+	ID      string `json:"id,omitempty"`
 	Message string `json:"message"`
 }
 

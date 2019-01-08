@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/facebookgo/ensure"
@@ -34,24 +33,6 @@ func randomDomainURL(n int) string {
 		bytes[i] = alpha[b%byte(len(alpha))]
 	}
 	return "http://" + string(bytes) + ".com"
-}
-
-// randomString generates a string of given length, but random content.
-// All content will be within the ASCII graphic character set.
-// (Implementation from Even Shaw's contribution on
-// http://stackoverflow.com/questions/12771930/what-is-the-fastest-way-to-generate-a-long-random-string-in-go).
-func randomString(n int, prefix string) string {
-	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	var bytes = make([]byte, n)
-	rand.Read(bytes)
-	for i, b := range bytes {
-		bytes[i] = alphanum[b%byte(len(alphanum))]
-	}
-	return prefix + string(bytes)
-}
-
-func randomEmail(prefix, domain string) string {
-	return strings.ToLower(fmt.Sprintf("%s@%s", randomString(20, prefix), domain))
 }
 
 func spendMoney(t *testing.T, tFunc func()) {

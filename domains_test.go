@@ -10,12 +10,12 @@ import (
 
 const (
 	testDomain = "mailgun.test"
+	testKey    = "api-fake-key"
 )
 
 func TestGetDomains(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	n, domains, err := mg.ListDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
@@ -28,9 +28,8 @@ func TestGetDomains(t *testing.T) {
 }
 
 func TestGetSingleDomain(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	_, domains, err := mg.ListDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
@@ -50,10 +49,10 @@ func TestGetSingleDomain(t *testing.T) {
 }
 
 func TestGetSingleDomainNotExist(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
-	_, _, _, err = mg.GetDomain("unknown.domain")
+
+	_, _, _, err := mg.GetDomain("unknown.domain")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
@@ -63,9 +62,8 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 }
 
 func TestAddDeleteDomain(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	// First, we need to add the domain.
 	ensure.Nil(t, mg.CreateDomain("mx.mailgun.test", "supersecret", mailgun.Tag, false))
@@ -74,9 +72,8 @@ func TestAddDeleteDomain(t *testing.T) {
 }
 
 func TestDomainConnection(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	info, err := mg.GetDomainConnection(testDomain)
 	ensure.Nil(t, err)
@@ -95,9 +92,8 @@ func TestDomainConnection(t *testing.T) {
 }
 
 func TestDomainTracking(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	info, err := mg.GetDomainTracking(testDomain)
 	ensure.Nil(t, err)

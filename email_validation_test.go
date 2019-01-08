@@ -1,19 +1,18 @@
-package mailgun
+package mailgun_test
 
 import (
+	"encoding/json"
 	"testing"
 
-	"encoding/json"
-
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go"
 )
 
 func TestEmailValidation(t *testing.T) {
-	reqEnv(t, "MG_PUBLIC_API_KEY")
-	validator, err := NewEmailValidatorFromEnv()
-	ensure.Nil(t, err)
+	v := mailgun.NewEmailValidator(testKey)
+	v.SetAPIBase(server.URL())
 
-	ev, err := validator.ValidateEmail("foo@mailgun.com", false)
+	ev, err := v.ValidateEmail("foo@mailgun.com", false)
 	ensure.Nil(t, err)
 
 	ensure.True(t, ev.IsValid)
@@ -27,11 +26,10 @@ func TestEmailValidation(t *testing.T) {
 }
 
 func TestParseAddresses(t *testing.T) {
-	reqEnv(t, "MG_PUBLIC_API_KEY")
-	validator, err := NewEmailValidatorFromEnv()
-	ensure.Nil(t, err)
+	v := mailgun.NewEmailValidator(testKey)
+	v.SetAPIBase(server.URL())
 
-	addressesThatParsed, unparsableAddresses, err := validator.ParseAddresses(
+	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses(
 		"Alice <alice@example.com>",
 		"bob@example.com",
 		"example.com")
@@ -62,7 +60,7 @@ func TestUnmarshallResponse(t *testing.T) {
 		},
 		"reason": null
 	}`)
-	var ev EmailVerification
+	var ev mailgun.EmailVerification
 	err := json.Unmarshal(payload, &ev)
 	ensure.Nil(t, err)
 

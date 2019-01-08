@@ -1,7 +1,9 @@
 package mailgun
 
 import (
+	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/mail"
@@ -19,6 +21,7 @@ type MockServer struct {
 	domainList  []domainContainer
 	exportList  []Export
 	mailingList []mailingListContainer
+	events      []Event
 }
 
 func NewMockServer() MockServer {
@@ -32,6 +35,9 @@ func NewMockServer() MockServer {
 		ms.addExportRoutes(r)
 		ms.addDomainRoutes(r)
 		ms.addMailingListRoutes(r)
+		ms.addEventRoutes(r)
+		ms.addMessagesRoutes(r)
+		ms.addValidationRoutes(r)
 	})
 
 	// Start the server
@@ -134,11 +140,15 @@ func pageOffsets(pivotIdx []string, pivotDir, pivotVal string, limit int) (int, 
 	case "prev":
 		for i, item := range pivotIdx {
 			if item == pivotVal {
-				offset := i + limit
-				if offset > len(pivotIdx) {
-					offset = len(pivotIdx)
+				if i == 0 {
+					return 0, 0
 				}
-				return i, offset
+
+				offset := i - limit
+				if offset < 0 {
+					offset = 0
+				}
+				return offset, i
 			}
 		}
 		return 0, 0
@@ -151,6 +161,26 @@ func pageOffsets(pivotIdx []string, pivotDir, pivotVal string, limit int) (int, 
 }
 
 func getPageURL(r *http.Request, params url.Values) string {
-	params.Add("limit", r.FormValue("limit"))
+	if r.FormValue("limit") != "" {
+		params.Add("limit", r.FormValue("limit"))
+	}
 	return "http://" + r.Host + r.URL.EscapedPath() + "?" + params.Encode()
+}
+
+// randomString generates a string of given length, but random content.
+// All content will be within the ASCII graphic character set.
+// (Implementation from Even Shaw's contribution on
+// http://stackoverflow.com/questions/12771930/what-is-the-fastest-way-to-generate-a-long-random-string-in-go).
+func randomString(n int, prefix string) string {
+	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	var bytes = make([]byte, n)
+	rand.Read(bytes)
+	for i, b := range bytes {
+		bytes[i] = alphanum[b%byte(len(alphanum))]
+	}
+	return prefix + string(bytes)
+}
+
+func randomEmail(prefix, domain string) string {
+	return strings.ToLower(fmt.Sprintf("%s@%s", randomString(20, prefix), domain))
 }

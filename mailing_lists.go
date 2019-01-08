@@ -67,18 +67,6 @@ func (li *ListsIterator) Err() error {
 	return li.err
 }
 
-// Retrieves the chronologically previous batch of events, if any exist.
-// You know you're at the end of the list when len(Events())==0.
-func (li *ListsIterator) GetPrevious() error {
-	return li.fetch(li.Paging.Previous)
-}
-
-// Retrieves the chronologically next batch of events, if any exist.
-// You know you're at the end of the list when len(Events())==0.
-func (li *ListsIterator) GetNext() error {
-	return li.fetch(li.Paging.Next)
-}
-
 // Retrieves the next page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
@@ -149,8 +137,6 @@ func (li *ListsIterator) Previous(items *[]MailingList) bool {
 	return true
 }
 
-// GetFirstPage, GetPrevious, and GetNext all have a common body of code.
-// fetch completes the API fetch common to all three of these functions.
 func (li *ListsIterator) fetch(url string) error {
 	r := newHTTPRequest(url)
 	r.setClient(li.mg.Client())

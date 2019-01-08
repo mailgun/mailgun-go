@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9,9 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mailgun/mailgun-go/events"
-
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go/events"
 )
 
 const (
@@ -166,10 +166,10 @@ func findStoredMessageID(mg Mailgun) (string, error) {
 	it := mg.ListEvents(nil)
 
 	var page []Event
-	for it.Next(&page) {
+	for it.Next(context.Background(), &page) {
 		for _, event := range page {
-			if event.Event == events.EventStored {
-				return event.Storage.Key, nil
+			if event.GetName() == events.EventStored {
+				return event.(*events.Stored).Storage.Key, nil
 			}
 		}
 	}

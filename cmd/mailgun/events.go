@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/davecgh/go-spew/spew"
+	"context"
+	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/mailgun/mailgun-go"
 	"github.com/thrawn01/args"
 )
@@ -35,11 +37,13 @@ func ListEvents(parser *args.ArgParser, data interface{}) (int, error) {
 	})
 
 	var page []mailgun.Event
-	for it.Next(&page) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	for it.Next(ctx, &page) {
 		for _, event := range page {
 			spew.Printf("%+v\n", event)
 		}
 	}
+	cancel()
 	if it.Err() != nil {
 		return 1, it.Err()
 	}

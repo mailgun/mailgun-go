@@ -8,12 +8,11 @@ import (
 )
 
 func TestMailingListMembers(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	address := randomEmail("list", testDomain)
-	_, err = mg.CreateMailingList(mailgun.MailingList{
+	_, err := mg.CreateMailingList(mailgun.MailingList{
 		Address:     address,
 		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
@@ -23,12 +22,6 @@ func TestMailingListMembers(t *testing.T) {
 	defer func() {
 		ensure.Nil(t, mg.DeleteMailingList(address))
 	}()
-
-	var page []mailgun.MailingList
-	it := mg.ListMailingLists(nil)
-	for it.Next(&page) {
-		ensure.DeepEqual(t, len(page) != 0, true)
-	}
 
 	var countMembers = func() int {
 		var page []mailgun.Member
@@ -98,9 +91,8 @@ func TestMailingListMembers(t *testing.T) {
 }
 
 func TestMailingLists(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	address := randomEmail("list", testDomain)
 	protoList := mailgun.MailingList{
@@ -121,7 +113,7 @@ func TestMailingLists(t *testing.T) {
 		return count
 	}
 
-	_, err = mg.CreateMailingList(protoList)
+	_, err := mg.CreateMailingList(protoList)
 	ensure.Nil(t, err)
 	defer func() {
 		ensure.Nil(t, mg.DeleteMailingList(address))
