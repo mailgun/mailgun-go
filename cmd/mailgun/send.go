@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -102,7 +103,8 @@ func Send(parser *args.ArgParser, data interface{}) (int, error) {
 			msg.AddTag(tag)
 		}
 
-		resp, id, err := mg.Send(msg)
+		ctx := context.Background()
+		resp, id, err := mg.Send(ctx, msg)
 		if err != nil {
 			return 1, errors.Wrap(err, "while sending message")
 		}

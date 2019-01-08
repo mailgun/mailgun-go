@@ -1,6 +1,7 @@
 package mailgun_test
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -11,8 +12,9 @@ import (
 func TestEmailValidation(t *testing.T) {
 	v := mailgun.NewEmailValidator(testKey)
 	v.SetAPIBase(server.URL())
+	ctx := context.Background()
 
-	ev, err := v.ValidateEmail("foo@mailgun.com", false)
+	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
 	ensure.Nil(t, err)
 
 	ensure.True(t, ev.IsValid)
@@ -28,8 +30,9 @@ func TestEmailValidation(t *testing.T) {
 func TestParseAddresses(t *testing.T) {
 	v := mailgun.NewEmailValidator(testKey)
 	v.SetAPIBase(server.URL())
+	ctx := context.Background()
 
-	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses(
+	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses(ctx,
 		"Alice <alice@example.com>",
 		"bob@example.com",
 		"example.com")

@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -12,7 +13,8 @@ func TestGetCredentials(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	n, cs, err := mg.ListCredentials(DefaultLimit, DefaultSkip)
+	ctx := context.Background()
+	n, cs, err := mg.ListCredentials(ctx, DefaultLimit, DefaultSkip)
 	ensure.Nil(t, err)
 
 	t.Logf("Login\tCreated At\t\n")
@@ -31,7 +33,8 @@ func TestCreateDeleteCredentials(t *testing.T) {
 	randomID := strings.ToLower(randomString(16, "usr"))
 	randomLogin := fmt.Sprintf("%s@%s", randomID, domain)
 
-	ensure.Nil(t, mg.CreateCredential(randomLogin, randomPassword))
-	ensure.Nil(t, mg.ChangeCredentialPassword(randomID, randomString(16, "pw2")))
-	ensure.Nil(t, mg.DeleteCredential(randomID))
+	ctx := context.Background()
+	ensure.Nil(t, mg.CreateCredential(ctx, randomLogin, randomPassword))
+	ensure.Nil(t, mg.ChangeCredentialPassword(ctx, randomID, randomString(16, "pw2")))
+	ensure.Nil(t, mg.DeleteCredential(ctx, randomID))
 }

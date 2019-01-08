@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -135,7 +136,7 @@ func (m *EmailValidatorImpl) getAddressURL(endpoint string) string {
 
 // ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.
 // It may also be used to break an email address into its sub-components.  (See example.)
-func (m *EmailValidatorImpl) ValidateEmail(email string, mailBoxVerify bool) (EmailVerification, error) {
+func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
 	r := newHTTPRequest(m.getAddressURL("validate"))
 	r.setClient(m.Client())
 	r.addParameter("address", email)
@@ -145,7 +146,7 @@ func (m *EmailValidatorImpl) ValidateEmail(email string, mailBoxVerify bool) (Em
 	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var response EmailVerification
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	if err != nil {
 		return EmailVerification{}, err
 	}
@@ -155,14 +156,14 @@ func (m *EmailValidatorImpl) ValidateEmail(email string, mailBoxVerify bool) (Em
 
 // ParseAddresses takes a list of addresses and sorts them into valid and invalid address categories.
 // NOTE: Use of this function requires a proper public API key.  The private API key will not work.
-func (m *EmailValidatorImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
+func (m *EmailValidatorImpl) ParseAddresses(ctx context.Context, addresses ...string) ([]string, []string, error) {
 	r := newHTTPRequest(m.getAddressURL("parse"))
 	r.setClient(m.Client())
 	r.addParameter("addresses", strings.Join(addresses, ","))
 	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var response addressParseResult
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	if err != nil {
 		return nil, nil, err
 	}

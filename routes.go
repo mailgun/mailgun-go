@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
@@ -33,7 +34,7 @@ type Route struct {
 // You use routes to configure how to handle returned messages, or
 // messages sent to a specfic address on your domain.
 // See the Mailgun documentation for more information.
-func (mg *MailgunImpl) ListRoutes(limit, skip int) (int, []Route, error) {
+func (mg *MailgunImpl) ListRoutes(ctx context.Context, limit, skip int) (int, []Route, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint))
 	if limit != DefaultLimit {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -47,7 +48,7 @@ func (mg *MailgunImpl) ListRoutes(limit, skip int) (int, []Route, error) {
 		TotalCount int     `json:"total_count"`
 		Items      []Route `json:"items"`
 	}
-	err := getResponseFromJSON(r, &envelope)
+	err := getResponseFromJSON(ctx, r, &envelope)
 	if err != nil {
 		fmt.Printf("err here\n")
 		return -1, nil, err
@@ -59,7 +60,7 @@ func (mg *MailgunImpl) ListRoutes(limit, skip int) (int, []Route, error) {
 // The route structure you provide serves as a template, and
 // only a subset of the fields influence the operation.
 // See the Route structure definition for more details.
-func (mg *MailgunImpl) CreateRoute(prototype Route) (_ignored Route, err error) {
+func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignored Route, err error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -74,7 +75,7 @@ func (mg *MailgunImpl) CreateRoute(prototype Route) (_ignored Route, err error) 
 		Message string `json:"message"`
 		*Route  `json:"route"`
 	}
-	if err = postResponseFromJSON(r, p, &envelope); err != nil {
+	if err = postResponseFromJSON(ctx, r, p, &envelope); err != nil {
 		return _ignored, err
 	}
 	return *envelope.Route, err
@@ -83,16 +84,16 @@ func (mg *MailgunImpl) CreateRoute(prototype Route) (_ignored Route, err error) 
 // DeleteRoute removes the specified route from your domain's configuration.
 // To avoid ambiguity, Mailgun identifies the route by unique ID.
 // See the Route structure definition and the Mailgun API documentation for more details.
-func (mg *MailgunImpl) DeleteRoute(id string) error {
+func (mg *MailgunImpl) DeleteRoute(ctx context.Context, id string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint) + "/" + id)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // GetRoute retrieves the complete route definition associated with the unique route ID.
-func (mg *MailgunImpl) GetRoute(id string) (Route, error) {
+func (mg *MailgunImpl) GetRoute(ctx context.Context, id string) (Route, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint) + "/" + id)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -100,7 +101,7 @@ func (mg *MailgunImpl) GetRoute(id string) (Route, error) {
 		Message string `json:"message"`
 		*Route  `json:"route"`
 	}
-	err := getResponseFromJSON(r, &envelope)
+	err := getResponseFromJSON(ctx, r, &envelope)
 	if err != nil {
 		return Route{}, err
 	}
@@ -111,7 +112,7 @@ func (mg *MailgunImpl) GetRoute(id string) (Route, error) {
 // UpdateRoute provides an "in-place" update of the specified route.
 // Only those route fields which are non-zero or non-empty are updated.
 // All other fields remain as-is.
-func (mg *MailgunImpl) UpdateRoute(id string, route Route) (Route, error) {
+func (mg *MailgunImpl) UpdateRoute(ctx context.Context, id string, route Route) (Route, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint) + "/" + id)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -133,6 +134,6 @@ func (mg *MailgunImpl) UpdateRoute(id string, route Route) (Route, error) {
 	// For some reason, this API function just returns a bare Route on success.
 	// Unsure why this is the case; it seems like it ought to be a bug.
 	var envelope Route
-	err := putResponseFromJSON(r, p, &envelope)
+	err := putResponseFromJSON(ctx, r, p, &envelope)
 	return envelope, err
 }

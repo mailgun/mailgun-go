@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"net/url"
 	"strconv"
 	"time"
@@ -30,21 +31,21 @@ type TagOptions struct {
 }
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
-func (mg *MailgunImpl) DeleteTag(tag string) error {
+func (mg *MailgunImpl) DeleteTag(ctx context.Context, tag string) error {
 	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // GetTag retrieves metadata about the tag from the api
-func (mg *MailgunImpl) GetTag(tag string) (TagItem, error) {
+func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (TagItem, error) {
 	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var tagItem TagItem
-	return tagItem, getResponseFromJSON(r, &tagItem)
+	return tagItem, getResponseFromJSON(ctx, r, &tagItem)
 }
 
 // ListTags returns a cursor used to iterate through a list of tags
@@ -99,12 +100,12 @@ func NewTagCursor(tagPage TagsPage, mailgun Mailgun) *TagIterator {
 }
 
 // Returns the next page in the list of tags
-func (t *TagIterator) Next(tagPage *TagsPage) bool {
+func (t *TagIterator) Next(ctx context.Context, tagPage *TagsPage) bool {
 	if !canFetchPage(t.curr.Paging.Next) {
 		return false
 	}
 
-	if err := t.cursorRequest(tagPage, t.curr.Paging.Next); err != nil {
+	if err := t.cursorRequest(ctx, tagPage, t.curr.Paging.Next); err != nil {
 		t.err = err
 		return false
 	}
@@ -113,12 +114,12 @@ func (t *TagIterator) Next(tagPage *TagsPage) bool {
 }
 
 // Returns the previous page in the list of tags
-func (t *TagIterator) Previous(tagPage *TagsPage) bool {
+func (t *TagIterator) Previous(ctx context.Context, tagPage *TagsPage) bool {
 	if !canFetchPage(t.curr.Paging.Previous) {
 		return false
 	}
 
-	if err := t.cursorRequest(tagPage, t.curr.Paging.Previous); err != nil {
+	if err := t.cursorRequest(ctx, tagPage, t.curr.Paging.Previous); err != nil {
 		t.err = err
 		return false
 	}
@@ -127,8 +128,8 @@ func (t *TagIterator) Previous(tagPage *TagsPage) bool {
 }
 
 // Returns the first page in the list of tags
-func (t *TagIterator) First(tagPage *TagsPage) bool {
-	if err := t.cursorRequest(tagPage, t.curr.Paging.First); err != nil {
+func (t *TagIterator) First(ctx context.Context, tagPage *TagsPage) bool {
+	if err := t.cursorRequest(ctx, tagPage, t.curr.Paging.First); err != nil {
 		t.err = err
 		return false
 	}
@@ -137,8 +138,8 @@ func (t *TagIterator) First(tagPage *TagsPage) bool {
 }
 
 // Returns the last page in the list of tags
-func (t *TagIterator) Last(tagPage *TagsPage) bool {
-	if err := t.cursorRequest(tagPage, t.curr.Paging.Last); err != nil {
+func (t *TagIterator) Last(ctx context.Context, tagPage *TagsPage) bool {
+	if err := t.cursorRequest(ctx, tagPage, t.curr.Paging.Last); err != nil {
 		t.err = err
 		return false
 	}
@@ -151,11 +152,11 @@ func (t *TagIterator) Err() error {
 	return t.err
 }
 
-func (t *TagIterator) cursorRequest(tagPage *TagsPage, url string) error {
+func (t *TagIterator) cursorRequest(ctx context.Context, tagPage *TagsPage, url string) error {
 	req := newHTTPRequest(url)
 	req.setClient(t.mg.Client())
 	req.setBasicAuth(basicAuthUser, t.mg.APIKey())
-	return getResponseFromJSON(req, tagPage)
+	return getResponseFromJSON(ctx, req, tagPage)
 }
 
 func canFetchPage(slug string) bool {

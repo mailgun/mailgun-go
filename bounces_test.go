@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -13,7 +14,8 @@ func TestGetBounces(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	n, bounces, err := mg.ListBounces(-1, -1)
+	ctx := context.Background()
+	n, bounces, err := mg.ListBounces(ctx, -1, -1)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, n, len(bounces))
 }
@@ -23,8 +25,9 @@ func TestGetSingleBounce(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
+	ctx := context.Background()
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")), domain)
-	_, err = mg.GetBounce(exampleEmail)
+	_, err = mg.GetBounce(ctx, exampleEmail)
 	ensure.NotNil(t, err)
 
 	ure, ok := err.(*UnexpectedResponseError)
@@ -43,16 +46,17 @@ func TestAddDelBounces(t *testing.T) {
 	// First, basic sanity check.
 	// Fail early if we have bounces for a fictitious e-mail address.
 
-	n, _, err := mg.ListBounces(-1, -1)
+	ctx := context.Background()
+	n, _, err := mg.ListBounces(ctx, -1, -1)
 	ensure.Nil(t, err)
 	// Add the bounce for our address.
 
-	err = mg.AddBounce(exampleEmail, "550", "TestAddDelBounces-generated error")
+	err = mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
 	ensure.Nil(t, err)
 
 	// We should now have one bounce listed when we query the API.
 
-	n, bounces, err := mg.ListBounces(-1, -1)
+	n, bounces, err := mg.ListBounces(ctx, -1, -1)
 	ensure.Nil(t, err)
 	if n == 0 {
 		t.Fatal("Expected at least one bounce for this domain.")
@@ -70,7 +74,7 @@ func TestAddDelBounces(t *testing.T) {
 		t.Fatalf("Expected bounce for address %s in list of bounces", exampleEmail)
 	}
 
-	bounce, err := mg.GetBounce(exampleEmail)
+	bounce, err := mg.GetBounce(ctx, exampleEmail)
 	ensure.Nil(t, err)
 	if bounce.CreatedAt == "" {
 		t.Fatalf("Expected at least one bounce for %s", exampleEmail)
@@ -78,12 +82,12 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Delete it.  This should put us back the way we were.
 
-	err = mg.DeleteBounce(exampleEmail)
+	err = mg.DeleteBounce(ctx, exampleEmail)
 	ensure.Nil(t, err)
 
 	// Make sure we're back to the way we were.
 
-	n, bounces, err = mg.ListBounces(-1, -1)
+	n, bounces, err = mg.ListBounces(ctx, -1, -1)
 	ensure.Nil(t, err)
 
 	found = 0
@@ -98,6 +102,6 @@ func TestAddDelBounces(t *testing.T) {
 		t.Fatalf("Expected no bounce for address %s in list of bounces", exampleEmail)
 	}
 
-	_, err = mg.GetBounce(exampleEmail)
+	_, err = mg.GetBounce(ctx, exampleEmail)
 	ensure.NotNil(t, err)
 }

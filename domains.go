@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"strconv"
 	"time"
 )
@@ -91,7 +92,7 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 // The number of items returned may be less than the specified limit, if it's specified.
 // Note that zero items and a zero-length slice do not necessarily imply an error occurred.
 // Except for the error itself, all results are undefined in the event of an error.
-func (mg *MailgunImpl) ListDomains(limit, skip int) (int, []Domain, error) {
+func (mg *MailgunImpl) ListDomains(ctx context.Context, limit, skip int) (int, []Domain, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	if limit != DefaultLimit {
@@ -103,7 +104,7 @@ func (mg *MailgunImpl) ListDomains(limit, skip int) (int, []Domain, error) {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var list domainListResponse
-	err := getResponseFromJSON(r, &list)
+	err := getResponseFromJSON(ctx, r, &list)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -111,12 +112,12 @@ func (mg *MailgunImpl) ListDomains(limit, skip int) (int, []Domain, error) {
 }
 
 // Retrieve detailed information about the named domain.
-func (mg *MailgunImpl) GetDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error) {
+func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp domainResponse
-	err := getResponseFromJSON(r, &resp)
+	err := getResponseFromJSON(ctx, r, &resp)
 	return resp.Domain, resp.ReceivingDNSRecords, resp.SendingDNSRecords, err
 }
 
@@ -126,7 +127,7 @@ func (mg *MailgunImpl) GetDomain(domain string) (Domain, []DNSRecord, []DNSRecor
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error {
+func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, smtpPassword string, spamAction string, wildcard bool) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -136,22 +137,22 @@ func (mg *MailgunImpl) CreateDomain(name string, smtpPassword string, spamAction
 	payload.addValue("smtp_password", smtpPassword)
 	payload.addValue("spam_action", spamAction)
 	payload.addValue("wildcard", strconv.FormatBool(wildcard))
-	_, err := makePostRequest(r, payload)
+	_, err := makePostRequest(ctx, r, payload)
 	return err
 }
 
 // Returns delivery connection settings for the defined domain
-func (mg *MailgunImpl) GetDomainConnection(domain string) (DomainConnection, error) {
+func (mg *MailgunImpl) GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp domainConnectionResponse
-	err := getResponseFromJSON(r, &resp)
+	err := getResponseFromJSON(ctx, r, &resp)
 	return resp.Connection, err
 }
 
 // Updates the specified delivery connection settings for the defined domain
-func (mg *MailgunImpl) UpdateDomainConnection(domain string, settings DomainConnection) error {
+func (mg *MailgunImpl) UpdateDomainConnection(ctx context.Context, domain string, settings DomainConnection) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -159,26 +160,26 @@ func (mg *MailgunImpl) UpdateDomainConnection(domain string, settings DomainConn
 	payload := newUrlEncodedPayload()
 	payload.addValue("require_tls", boolToString(settings.RequireTLS))
 	payload.addValue("skip_verification", boolToString(settings.SkipVerification))
-	_, err := makePutRequest(r, payload)
+	_, err := makePutRequest(ctx, r, payload)
 	return err
 }
 
 // DeleteDomain instructs Mailgun to dispose of the named domain name
-func (mg *MailgunImpl) DeleteDomain(name string) error {
+func (mg *MailgunImpl) DeleteDomain(ctx context.Context, name string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + name)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // Returns tracking settings for a domain
-func (mg *MailgunImpl) GetDomainTracking(domain string) (DomainTracking, error) {
+func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp domainTrackingResponse
-	err := getResponseFromJSON(r, &resp)
+	err := getResponseFromJSON(ctx, r, &resp)
 	return resp.Tracking, err
 }
 

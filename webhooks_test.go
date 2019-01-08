@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -18,9 +19,10 @@ import (
 func TestWebhookCRUD(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
 	var countHooks = func() int {
-		hooks, err := mg.ListWebhooks()
+		hooks, err := mg.ListWebhooks(ctx)
 		ensure.Nil(t, err)
 		return len(hooks)
 	}
@@ -28,9 +30,9 @@ func TestWebhookCRUD(t *testing.T) {
 	hookCount := countHooks()
 
 	domainURL := "http://api.mailgun.net"
-	ensure.Nil(t, mg.CreateWebhook("deliver", []string{domainURL}))
+	ensure.Nil(t, mg.CreateWebhook(ctx, "deliver", []string{domainURL}))
 	defer func() {
-		ensure.Nil(t, mg.DeleteWebhook("deliver"))
+		ensure.Nil(t, mg.DeleteWebhook(ctx, "deliver"))
 		newCount := countHooks()
 		ensure.DeepEqual(t, newCount, hookCount)
 	}()
@@ -38,14 +40,14 @@ func TestWebhookCRUD(t *testing.T) {
 	newCount := countHooks()
 	ensure.False(t, newCount <= hookCount)
 
-	theURL, err := mg.GetWebhook("deliver")
+	theURL, err := mg.GetWebhook(ctx, "deliver")
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, theURL, domainURL)
 
 	updatedDomainURL := "http://api.mailgun.net/messages"
-	ensure.Nil(t, mg.UpdateWebhook("deliver", []string{updatedDomainURL}))
+	ensure.Nil(t, mg.UpdateWebhook(ctx, "deliver", []string{updatedDomainURL}))
 
-	hooks, err := mg.ListWebhooks()
+	hooks, err := mg.ListWebhooks(ctx)
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, hooks["deliver"], updatedDomainURL)

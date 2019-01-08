@@ -1,15 +1,22 @@
-package mailgun
+package mailgun_test
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/mailgun/mailgun-go"
 )
 
 func ExampleMailgunImpl_ValidateEmail() {
-	v := NewEmailValidator("my_public_api_key")
-	ev, err := v.ValidateEmail("joe@example.com", false)
+	v := mailgun.NewEmailValidator("my_public_api_key")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	ev, err := v.ValidateEmail(ctx, "joe@example.com", false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,8 +31,12 @@ func ExampleMailgunImpl_ValidateEmail() {
 }
 
 func ExampleMailgunImpl_ParseAddresses() {
-	v := NewEmailValidator("my_public_api_key")
-	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses("Alice <alice@example.com>", "bob@example.com", "example.com")
+	v := mailgun.NewEmailValidator("my_public_api_key")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses(ctx, "Alice <alice@example.com>", "bob@example.com", "example.com")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,8 +55,12 @@ func ExampleMailgunImpl_ParseAddresses() {
 }
 
 func ExampleMailgunImpl_UpdateList() {
-	mg := NewMailgun("example.com", "my_api_key")
-	_, err := mg.UpdateMailingList("joe-stat@example.com", MailingList{
+	mg := mailgun.NewMailgun("example.com", "my_api_key")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	_, err := mg.UpdateMailingList(ctx, "joe-stat@example.com", mailgun.MailingList{
 		Name:        "Joe Stat",
 		Description: "Joe's status report list",
 	})
@@ -55,8 +70,12 @@ func ExampleMailgunImpl_UpdateList() {
 }
 
 func ExampleMailgunImpl_Send_constructed() {
-	mg := NewMailgun("example.com", "my_api_key")
-	m := NewMessage(
+	mg := mailgun.NewMailgun("example.com", "my_api_key")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	m := mg.NewMessage(
 		"Excited User <me@example.com>",
 		"Hello World",
 		"Testing some Mailgun Awesomeness!",
@@ -66,7 +85,7 @@ func ExampleMailgunImpl_Send_constructed() {
 	m.SetTracking(true)
 	m.SetDeliveryTime(time.Now().Add(24 * time.Hour))
 	m.SetHtml("<html><body><h1>Testing some Mailgun Awesomeness!!</h1></body></html>")
-	_, id, err := mg.Send(m)
+	_, id, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,9 +102,13 @@ Date: Thu, 6 Mar 2014 00:37:52 +0000
 
 Testing some Mailgun MIME awesomeness!
 `
-	mg := NewMailgun("example.com", "my_api_key")
-	m := NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
-	_, id, err := mg.Send(m)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	mg := mailgun.NewMailgun("example.com", "my_api_key")
+	m := mg.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
+	_, id, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,8 +116,11 @@ Testing some Mailgun MIME awesomeness!
 }
 
 func ExampleMailgunImpl_GetRoutes() {
-	mg := NewMailgun("example.com", "my_api_key")
-	n, routes, err := mg.ListRoutes(DefaultLimit, DefaultSkip)
+	mg := mailgun.NewMailgun("example.com", "my_api_key")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	n, routes, err := mg.ListRoutes(ctx, mailgun.DefaultLimit, mailgun.DefaultSkip)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,8 +133,10 @@ func ExampleMailgunImpl_GetRoutes() {
 }
 
 func ExampleMailgunImpl_UpdateRoute() {
-	mg := NewMailgun("example.com", "my_api_key")
-	_, err := mg.UpdateRoute("route-id-here", Route{
+	mg := mailgun.NewMailgun("example.com", "my_api_key")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	_, err := mg.UpdateRoute(ctx, "route-id-here", mailgun.Route{
 		Priority: 2,
 	})
 	if err != nil {

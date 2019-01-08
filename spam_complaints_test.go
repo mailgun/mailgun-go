@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
@@ -12,8 +13,9 @@ func TestGetComplaints(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
-	n, complaints, err := mg.ListComplaints(-1, -1)
+	n, complaints, err := mg.ListComplaints(ctx, -1, -1)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(complaints), n)
 }
@@ -22,8 +24,9 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	reqEnv(t, "MG_PUBLIC_API_KEY")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
-	_, err = mg.GetComplaint(randomString(64, "") + "@example.com")
+	_, err = mg.GetComplaint(ctx, randomString(64, "")+"@example.com")
 	ensure.NotNil(t, err)
 
 	ure, ok := err.(*UnexpectedResponseError)
@@ -34,10 +37,11 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 func TestCreateDeleteComplaint(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
-		_, complaints, err := mg.ListComplaints(DefaultLimit, DefaultSkip)
+		_, complaints, err := mg.ListComplaints(ctx, DefaultLimit, DefaultSkip)
 		ensure.Nil(t, err)
 
 		for _, complaint := range complaints {
@@ -52,8 +56,8 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	randomMail := strings.ToLower(randomString(64, "")) + "@example.com"
 	ensure.False(t, hasComplaint(randomMail))
 
-	ensure.Nil(t, mg.CreateComplaint(randomMail))
+	ensure.Nil(t, mg.CreateComplaint(ctx, randomMail))
 	ensure.True(t, hasComplaint(randomMail))
-	ensure.Nil(t, mg.DeleteComplaint(randomMail))
+	ensure.Nil(t, mg.DeleteComplaint(ctx, randomMail))
 	ensure.False(t, hasComplaint(randomMail))
 }

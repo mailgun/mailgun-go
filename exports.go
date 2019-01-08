@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -17,19 +18,19 @@ type Export struct {
 }
 
 // Create an export based on the URL given
-func (mg *MailgunImpl) CreateExport(url string) error {
+func (mg *MailgunImpl) CreateExport(ctx context.Context, url string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("url", url)
-	_, err := makePostRequest(r, payload)
+	_, err := makePostRequest(ctx, r, payload)
 	return err
 }
 
 // List all exports created within the past 24 hours
-func (mg *MailgunImpl) ListExports(url string) ([]Export, error) {
+func (mg *MailgunImpl) ListExports(ctx context.Context, url string) ([]Export, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint))
 	r.setClient(mg.Client())
 	if url != "" {
@@ -38,7 +39,7 @@ func (mg *MailgunImpl) ListExports(url string) ([]Export, error) {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var resp ExportList
-	if err := getResponseFromJSON(r, &resp); err != nil {
+	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
 		return nil, err
 	}
 
@@ -50,18 +51,18 @@ func (mg *MailgunImpl) ListExports(url string) ([]Export, error) {
 }
 
 // Get an export by id
-func (mg *MailgunImpl) GetExport(id string) (Export, error) {
+func (mg *MailgunImpl) GetExport(ctx context.Context, id string) (Export, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint) + "/" + id)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp Export
-	err := getResponseFromJSON(r, &resp)
+	err := getResponseFromJSON(ctx, r, &resp)
 	return resp, err
 }
 
 // Download an export by ID. This will respond with a '302 Moved'
 // with the Location header of temporary S3 URL if it is available.
-func (mg *MailgunImpl) GetExportLink(id string) (string, error) {
+func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint) + "/" + id + "/download_url")
 	c := mg.Client()
 
@@ -75,7 +76,7 @@ func (mg *MailgunImpl) GetExportLink(id string) (string, error) {
 
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 
-	req, err := r.NewRequest("GET", nil)
+	req, err := r.NewRequest(ctx, "GET", nil)
 	if err != nil {
 		return "", err
 	}

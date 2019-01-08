@@ -1,8 +1,9 @@
 package mailgun
 
 import (
-	"log"
+	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/facebookgo/ensure"
@@ -25,8 +26,10 @@ var _ = Describe("/v3/{domain}/tags", func() {
 		msg.AddTag("bart")
 		msg.AddTag("disco-steve")
 		msg.AddTag("newsletter")
+
+		ctx := context.Background()
 		// Create an email with some tags attached
-		_, _, err := mg.Send(msg)
+		_, _, err := mg.Send(ctx, msg)
 		if err != nil {
 			Fail(fmt.Sprintf("Mesage send: '%s'", err.Error()))
 		}
@@ -45,9 +48,10 @@ var _ = Describe("/v3/{domain}/tags", func() {
 	Describe("ListTags()", func() {
 		Context("When a limit parameter of -1 is supplied", func() {
 			It("Should return a list of available tags", func() {
+				ctx := context.Background()
 				it := mg.ListTags(nil)
 				var page TagsPage
-				for it.Next(&page) {
+				for it.Next(ctx, &page) {
 					Expect(len(page.Items)).NotTo(Equal(0))
 					log.Printf("Tags: %+v\n", page)
 				}
@@ -56,10 +60,11 @@ var _ = Describe("/v3/{domain}/tags", func() {
 		})
 		Context("When limit parameter is supplied", func() {
 			It("Should return a limited list of available tags", func() {
+				ctx := context.Background()
 				cursor := mg.ListTags(&TagOptions{Limit: 1})
 
 				var tags TagsPage
-				for cursor.Next(&tags) {
+				for cursor.Next(ctx, &tags) {
 					ensure.DeepEqual(t, len(tags.Items), 1)
 					log.Printf("Tags: %+v\n", tags.Items)
 				}
@@ -71,7 +76,8 @@ var _ = Describe("/v3/{domain}/tags", func() {
 	Describe("DeleteTag()", func() {
 		Context("When deleting an existing tag", func() {
 			It("Should not error", func() {
-				err = mg.DeleteTag("newsletter")
+				ctx := context.Background()
+				err = mg.DeleteTag(ctx, "newsletter")
 				ensure.Nil(t, err)
 			})
 		})
@@ -80,14 +86,16 @@ var _ = Describe("/v3/{domain}/tags", func() {
 	Describe("GetTag()", func() {
 		Context("When requesting an existing tag", func() {
 			It("Should not error", func() {
-				tag, err := mg.GetTag("homer")
+				ctx := context.Background()
+				tag, err := mg.GetTag(ctx, "homer")
 				ensure.Nil(t, err)
 				ensure.DeepEqual(t, tag.Value, "homer")
 			})
 		})
 		Context("When requesting an non-existant tag", func() {
 			It("Should return error", func() {
-				_, err := mg.GetTag("i-dont-exist")
+				ctx := context.Background()
+				_, err := mg.GetTag(ctx, "i-dont-exist")
 				ensure.NotNil(t, err)
 				ensure.DeepEqual(t, GetStatusFromErr(err), 404)
 			})
@@ -96,9 +104,10 @@ var _ = Describe("/v3/{domain}/tags", func() {
 })
 
 func waitForTag(mg Mailgun, tag string) error {
+	ctx := context.Background()
 	var attempts int
 	for attempts <= 5 {
-		_, err := mg.GetTag(tag)
+		_, err := mg.GetTag(ctx, tag)
 		if err != nil {
 			if GetStatusFromErr(err) == 404 {
 				time.Sleep(time.Second * 2)

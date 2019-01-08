@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"strconv"
 )
 
@@ -26,7 +27,7 @@ type complaintsEnvelope struct {
 // ListComplaints returns a set of spam complaints registered against your domain.
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
-func (mg *MailgunImpl) ListComplaints(limit, skip int) (int, []Complaint, error) {
+func (mg *MailgunImpl) ListComplaints(ctx context.Context, limit, skip int) (int, []Complaint, error) {
 	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -39,7 +40,7 @@ func (mg *MailgunImpl) ListComplaints(limit, skip int) (int, []Complaint, error)
 	}
 
 	var envelope complaintsEnvelope
-	err := getResponseFromJSON(r, &envelope)
+	err := getResponseFromJSON(ctx, r, &envelope)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -48,34 +49,34 @@ func (mg *MailgunImpl) ListComplaints(limit, skip int) (int, []Complaint, error)
 
 // GetComplaint returns a single complaint record filed by a recipient at the email address provided.
 // If no complaint exists, the Complaint instance returned will be empty.
-func (mg *MailgunImpl) GetComplaint(address string) (Complaint, error) {
+func (mg *MailgunImpl) GetComplaint(ctx context.Context, address string) (Complaint, error) {
 	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint) + "/" + address)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var c Complaint
-	err := getResponseFromJSON(r, &c)
+	err := getResponseFromJSON(ctx, r, &c)
 	return c, err
 }
 
 // CreateComplaint registers the specified address as a recipient who has complained of receiving spam
 // from your domain.
-func (mg *MailgunImpl) CreateComplaint(address string) error {
+func (mg *MailgunImpl) CreateComplaint(ctx context.Context, address string) error {
 	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("address", address)
-	_, err := makePostRequest(r, p)
+	_, err := makePostRequest(ctx, r, p)
 	return err
 }
 
 // DeleteComplaint removes a previously registered e-mail address from the list of people who complained
 // of receiving spam from your domain.
-func (mg *MailgunImpl) DeleteComplaint(address string) error {
+func (mg *MailgunImpl) DeleteComplaint(ctx context.Context, address string) error {
 	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint) + "/" + address)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }

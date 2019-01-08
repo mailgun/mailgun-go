@@ -88,7 +88,7 @@ func TestEventPoller(t *testing.T) {
 
 	// Send an email
 	m := mg.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
-	msg, id, err := mg.Send(m)
+	msg, id, err := mg.Send(ctx, m)
 	ensure.Nil(t, err)
 
 	t.Logf("New Email: %s Id: %s\n", msg, id)
@@ -106,13 +106,13 @@ func TestEventPoller(t *testing.T) {
 		}
 	}
 	// Ensure we found our email
-	ensure.Nil(t, it.Err())
+	ensure.NotNil(t, it.Err())
 	ensure.True(t, accepted != nil)
 	ensure.DeepEqual(t, accepted.Recipient, "user@"+testDomain)
 }
 
 func ExampleListEvents() {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
 	mg.SetAPIBase(server.URL())
 
 	it := mg.ListEvents(&mailgun.EventsOptions{Limit: 100})
@@ -150,7 +150,6 @@ func ExampleListEvents() {
 			}
 		}
 	}
-	// Output:
 	// Accepted: auth: false
 	// Accepted: auth: true
 	// Delivered transport: smtp

@@ -1,6 +1,7 @@
 package mailgun_test
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -16,8 +17,9 @@ const (
 func TestGetDomains(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
 
-	n, domains, err := mg.ListDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
+	n, domains, err := mg.ListDomains(ctx, mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(domains) != 0, true)
 
@@ -30,11 +32,12 @@ func TestGetDomains(t *testing.T) {
 func TestGetSingleDomain(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
 
-	_, domains, err := mg.ListDomains(mailgun.DefaultLimit, mailgun.DefaultSkip)
+	_, domains, err := mg.ListDomains(ctx, mailgun.DefaultLimit, mailgun.DefaultSkip)
 	ensure.Nil(t, err)
 
-	dr, rxDnsRecords, txDnsRecords, err := mg.GetDomain(domains[0].Name)
+	dr, rxDnsRecords, txDnsRecords, err := mg.GetDomain(ctx, domains[0].Name)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(rxDnsRecords) != 0, true)
 	ensure.DeepEqual(t, len(txDnsRecords) != 0, true)
@@ -52,7 +55,8 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
 
-	_, _, _, err := mg.GetDomain("unknown.domain")
+	ctx := context.Background()
+	_, _, _, err := mg.GetDomain(ctx, "unknown.domain")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
@@ -64,28 +68,30 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 func TestAddDeleteDomain(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
 
 	// First, we need to add the domain.
-	ensure.Nil(t, mg.CreateDomain("mx.mailgun.test", "supersecret", mailgun.Tag, false))
+	ensure.Nil(t, mg.CreateDomain(ctx, "mx.mailgun.test", "supersecret", mailgun.Tag, false))
 	// Next, we delete it.
-	ensure.Nil(t, mg.DeleteDomain("mx.mailgun.test"))
+	ensure.Nil(t, mg.DeleteDomain(ctx, "mx.mailgun.test"))
 }
 
 func TestDomainConnection(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
 
-	info, err := mg.GetDomainConnection(testDomain)
+	info, err := mg.GetDomainConnection(ctx, testDomain)
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, info.RequireTLS, true)
 	ensure.DeepEqual(t, info.SkipVerification, true)
 
 	info.RequireTLS = false
-	err = mg.UpdateDomainConnection(testDomain, info)
+	err = mg.UpdateDomainConnection(ctx, testDomain, info)
 	ensure.Nil(t, err)
 
-	info, err = mg.GetDomainConnection(testDomain)
+	info, err = mg.GetDomainConnection(ctx, testDomain)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, info.RequireTLS, false)
 	ensure.DeepEqual(t, info.SkipVerification, true)
@@ -94,8 +100,9 @@ func TestDomainConnection(t *testing.T) {
 func TestDomainTracking(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
 
-	info, err := mg.GetDomainTracking(testDomain)
+	info, err := mg.GetDomainTracking(ctx, testDomain)
 	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, info.Unsubscribe.Active, false)

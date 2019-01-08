@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 )
@@ -78,11 +79,11 @@ func (li *MemberListIterator) Err() error {
 // Retrieves the next page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (li *MemberListIterator) Next(items *[]Member) bool {
+func (li *MemberListIterator) Next(ctx context.Context, items *[]Member) bool {
 	if li.err != nil {
 		return false
 	}
-	li.err = li.fetch(li.Paging.Next)
+	li.err = li.fetch(ctx, li.Paging.Next)
 	if li.err != nil {
 		return false
 	}
@@ -96,11 +97,11 @@ func (li *MemberListIterator) Next(items *[]Member) bool {
 // Retrieves the first page of events from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (li *MemberListIterator) First(items *[]Member) bool {
+func (li *MemberListIterator) First(ctx context.Context, items *[]Member) bool {
 	if li.err != nil {
 		return false
 	}
-	li.err = li.fetch(li.Paging.First)
+	li.err = li.fetch(ctx, li.Paging.First)
 	if li.err != nil {
 		return false
 	}
@@ -112,11 +113,11 @@ func (li *MemberListIterator) First(items *[]Member) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (li *MemberListIterator) Last(items *[]Member) bool {
+func (li *MemberListIterator) Last(ctx context.Context, items *[]Member) bool {
 	if li.err != nil {
 		return false
 	}
-	li.err = li.fetch(li.Paging.Last)
+	li.err = li.fetch(ctx, li.Paging.Last)
 	if li.err != nil {
 		return false
 	}
@@ -127,14 +128,14 @@ func (li *MemberListIterator) Last(items *[]Member) bool {
 // Retrieves the previous page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (li *MemberListIterator) Previous(items *[]Member) bool {
+func (li *MemberListIterator) Previous(ctx context.Context, items *[]Member) bool {
 	if li.err != nil {
 		return false
 	}
 	if li.Paging.Previous == "" {
 		return false
 	}
-	li.err = li.fetch(li.Paging.Previous)
+	li.err = li.fetch(ctx, li.Paging.Previous)
 	if li.err != nil {
 		return false
 	}
@@ -145,21 +146,21 @@ func (li *MemberListIterator) Previous(items *[]Member) bool {
 	return true
 }
 
-func (li *MemberListIterator) fetch(url string) error {
+func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
 	r := newHTTPRequest(url)
 	r.setClient(li.mg.Client())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 
-	return getResponseFromJSON(r, &li.memberListResponse)
+	return getResponseFromJSON(ctx, r, &li.memberListResponse)
 }
 
 // GetMember returns a complete Member structure for a member of a mailing list,
 // given only their subscription e-mail address.
-func (mg *MailgunImpl) GetMember(s, l string) (Member, error) {
+func (mg *MailgunImpl) GetMember(ctx context.Context, s, l string) (Member, error) {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	response, err := makeGetRequest(r)
+	response, err := makeGetRequest(ctx, r)
 	if err != nil {
 		return Member{}, err
 	}
@@ -171,7 +172,7 @@ func (mg *MailgunImpl) GetMember(s, l string) (Member, error) {
 // CreateMember registers a new member of the indicated mailing list.
 // If merge is set to true, then the registration may update an existing Member's settings.
 // Otherwise, an error will occur if you attempt to add a member with a duplicate e-mail address.
-func (mg *MailgunImpl) CreateMember(merge bool, addr string, prototype Member) error {
+func (mg *MailgunImpl) CreateMember(ctx context.Context, merge bool, addr string, prototype Member) error {
 	vs, err := json.Marshal(prototype.Vars)
 	if err != nil {
 		return err
@@ -188,13 +189,13 @@ func (mg *MailgunImpl) CreateMember(merge bool, addr string, prototype Member) e
 	if prototype.Subscribed != nil {
 		p.addValue("subscribed", yesNo(*prototype.Subscribed))
 	}
-	_, err = makePostRequest(r, p)
+	_, err = makePostRequest(ctx, r, p)
 	return err
 }
 
 // UpdateMember lets you change certain details about the indicated mailing list member.
 // Address, Name, Vars, and Subscribed fields may be changed.
-func (mg *MailgunImpl) UpdateMember(s, l string, prototype Member) (Member, error) {
+func (mg *MailgunImpl) UpdateMember(ctx context.Context, s, l string, prototype Member) (Member, error) {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -215,7 +216,7 @@ func (mg *MailgunImpl) UpdateMember(s, l string, prototype Member) (Member, erro
 	if prototype.Subscribed != nil {
 		p.addValue("subscribed", yesNo(*prototype.Subscribed))
 	}
-	response, err := makePutRequest(r, p)
+	response, err := makePutRequest(ctx, r, p)
 	if err != nil {
 		return Member{}, err
 	}
@@ -227,11 +228,11 @@ func (mg *MailgunImpl) UpdateMember(s, l string, prototype Member) (Member, erro
 }
 
 // DeleteMember removes the member from the list.
-func (mg *MailgunImpl) DeleteMember(member, addr string) error {
+func (mg *MailgunImpl) DeleteMember(ctx context.Context, member, addr string) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + "/" + member)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
@@ -244,7 +245,7 @@ func (mg *MailgunImpl) DeleteMember(member, addr string) error {
 // If a simple slice of strings is passed, each string refers to the member's e-mail address.
 // Otherwise, each Member needs to have at least the Address field filled out.
 // Other fields are optional, but may be set according to your needs.
-func (mg *MailgunImpl) CreateMemberList(u *bool, addr string, newMembers []interface{}) error {
+func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []interface{}) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -257,6 +258,6 @@ func (mg *MailgunImpl) CreateMemberList(u *bool, addr string, newMembers []inter
 		return err
 	}
 	p.addValue("members", string(bs))
-	_, err = makePostRequest(r, p)
+	_, err = makePostRequest(ctx, r, p)
 	return err
 }

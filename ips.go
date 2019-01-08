@@ -1,5 +1,7 @@
 package mailgun
 
+import "context"
+
 type ipAddressListResponse struct {
 	TotalCount int      `json:"total_count"`
 	Items      []string `json:"items"`
@@ -17,7 +19,7 @@ type okResp struct {
 }
 
 // Returns a list of IPs assigned to your account
-func (mg *MailgunImpl) ListIPS(dedicated bool) ([]IPAddress, error) {
+func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint))
 	r.setClient(mg.Client())
 	if dedicated {
@@ -26,7 +28,7 @@ func (mg *MailgunImpl) ListIPS(dedicated bool) ([]IPAddress, error) {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var resp ipAddressListResponse
-	if err := getResponseFromJSON(r, &resp); err != nil {
+	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
 		return nil, err
 	}
 	var result []IPAddress
@@ -37,23 +39,23 @@ func (mg *MailgunImpl) ListIPS(dedicated bool) ([]IPAddress, error) {
 }
 
 // Returns information about the specified IP
-func (mg *MailgunImpl) GetIP(ip string) (IPAddress, error) {
+func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint) + "/" + ip)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp IPAddress
-	err := getResponseFromJSON(r, &resp)
+	err := getResponseFromJSON(ctx, r, &resp)
 	return resp, err
 }
 
 // Returns a list of IPs currently assigned to the specified domain.
-func (mg *MailgunImpl) ListDomainIPS() ([]IPAddress, error) {
+func (mg *MailgunImpl) ListDomainIPS(ctx context.Context) ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var resp ipAddressListResponse
-	if err := getResponseFromJSON(r, &resp); err != nil {
+	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
 		return nil, err
 	}
 	var result []IPAddress
@@ -64,22 +66,22 @@ func (mg *MailgunImpl) ListDomainIPS() ([]IPAddress, error) {
 }
 
 // Assign a dedicated IP to the domain specified.
-func (mg *MailgunImpl) AddDomainIP(ip string) error {
+func (mg *MailgunImpl) AddDomainIP(ctx context.Context, ip string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("ip", ip)
-	_, err := makePostRequest(r, payload)
+	_, err := makePostRequest(ctx, r, payload)
 	return err
 }
 
 // Unassign an IP from the domain specified.
-func (mg *MailgunImpl) DeleteDomainIP(ip string) error {
+func (mg *MailgunImpl) DeleteDomainIP(ctx context.Context, ip string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips/" + ip)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }

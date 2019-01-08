@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/mailgun/mailgun-go"
@@ -48,8 +50,9 @@ func ListMailingList(parser *args.ArgParser, data interface{}) (int, error) {
 		Limit: opts.Int("limit"),
 	})
 
+	ctx := context.Background()
 	var page []mailgun.MailingList
-	for it.Next(&page) {
+	for it.Next(ctx, &page) {
 		for _, list := range page {
 			spew.Printf("%+v\n", list)
 		}
@@ -83,8 +86,9 @@ func ListMailingListMembers(parser *args.ArgParser, data interface{}) (int, erro
 		Limit: opts.Int("limit"),
 	})
 
+	ctx := context.Background()
 	var page []mailgun.Member
-	for it.Next(&page) {
+	for it.Next(ctx, &page) {
 		for _, list := range page {
 			spew.Printf("%+v\n", list)
 		}

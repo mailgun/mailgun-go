@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"strconv"
 	"time"
 )
@@ -53,7 +54,7 @@ func (b Bounce) GetCode() (int, error) {
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
-func (mg *MailgunImpl) ListBounces(limit, skip int) (int, []Bounce, error) {
+func (mg *MailgunImpl) ListBounces(ctx context.Context, limit, skip int) (int, []Bounce, error) {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
 	if limit != -1 {
 		r.addParameter("limit", strconv.Itoa(limit))
@@ -66,7 +67,7 @@ func (mg *MailgunImpl) ListBounces(limit, skip int) (int, []Bounce, error) {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response bounceEnvelope
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	if err != nil {
 		return -1, nil, err
 	}
@@ -75,13 +76,13 @@ func (mg *MailgunImpl) ListBounces(limit, skip int) (int, []Bounce, error) {
 }
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
-func (mg *MailgunImpl) GetBounce(address string) (Bounce, error) {
+func (mg *MailgunImpl) GetBounce(ctx context.Context, address string) (Bounce, error) {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response Bounce
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }
 
@@ -101,7 +102,7 @@ func (mg *MailgunImpl) GetBounce(address string) (Bounce, error) {
 //
 // Note that both code and error exist as strings, even though
 // code will report as a number.
-func (mg *MailgunImpl) AddBounce(address, code, error string) error {
+func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, error string) error {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -114,15 +115,15 @@ func (mg *MailgunImpl) AddBounce(address, code, error string) error {
 	if error != "" {
 		payload.addValue("error", error)
 	}
-	_, err := makePostRequest(r, payload)
+	_, err := makePostRequest(ctx, r, payload)
 	return err
 }
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
-func (mg *MailgunImpl) DeleteBounce(address string) error {
+func (mg *MailgunImpl) DeleteBounce(ctx context.Context, address string) error {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }

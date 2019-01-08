@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"strconv"
 	"time"
 )
@@ -76,7 +77,7 @@ type StatsTotalResponse struct {
 // GetStats returns a basic set of statistics for different events.
 // Events start at the given start date, if one is provided.
 // If not, this function will consider all stated events dating to the creation of the sending domain.
-func (mg *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error) {
+func (mg *MailgunImpl) GetStats(ctx context.Context, limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error) {
 	r := newHTTPRequest(generateApiUrl(mg, statsEndpoint))
 
 	if limit != -1 {
@@ -97,7 +98,7 @@ func (mg *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var res statsEnvelope
-	err := getResponseFromJSON(r, &res)
+	err := getResponseFromJSON(ctx, r, &res)
 	if err != nil {
 		return -1, nil, err
 	} else {
@@ -107,7 +108,7 @@ func (mg *MailgunImpl) GetStats(limit int, skip int, startDate *time.Time, event
 
 // GetStatsTotal returns a basic set of statistics for different events.
 // https://documentation.mailgun.com/en/latest/api-stats.html#stats
-func (mg *MailgunImpl) GetStatsTotal(start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error) {
+func (mg *MailgunImpl) GetStatsTotal(ctx context.Context, start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, statsTotalEndpoint))
 
 	if start != nil {
@@ -132,7 +133,7 @@ func (mg *MailgunImpl) GetStatsTotal(start *time.Time, end *time.Time, resolutio
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var res StatsTotalResponse
-	err := getResponseFromJSON(r, &res)
+	err := getResponseFromJSON(ctx, r, &res)
 	if err != nil {
 		return nil, err
 	} else {

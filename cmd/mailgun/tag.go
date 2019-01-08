@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -74,9 +75,10 @@ func ListTag(parser *args.ArgParser, data interface{}) (int, error) {
 		Tag:    opts.String("tag"),
 	})
 
+	var ctx = context.Background()
 	var count int
 	var page mailgun.TagsPage
-	for it.Next(&page) {
+	for it.Next(ctx, &page) {
 		for _, tag := range page.Items {
 			fmt.Printf("%s\n", tag.Value)
 			count += 1
@@ -107,7 +109,7 @@ func GetTag(parser *args.ArgParser, data interface{}) (int, error) {
 		return 1, nil
 	}
 
-	tag, err := mg.GetTag(opts.String("tag"))
+	tag, err := mg.GetTag(context.Background(), opts.String("tag"))
 	if err != nil {
 		return 1, err
 	}
@@ -135,7 +137,7 @@ func DeleteTag(parser *args.ArgParser, data interface{}) (int, error) {
 		return 1, nil
 	}
 
-	err := mg.DeleteTag(opts.String("tag"))
+	err := mg.DeleteTag(context.Background(), opts.String("tag"))
 	if err != nil {
 		return 1, err
 	}

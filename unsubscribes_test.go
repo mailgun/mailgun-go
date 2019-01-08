@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"testing"
 
 	"github.com/facebookgo/ensure"
@@ -10,15 +11,18 @@ func TestCreateUnsubscriber(t *testing.T) {
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
+
 	// Create unsubscription record
-	ensure.Nil(t, mg.Unsubscribe(email, "*"))
+	ensure.Nil(t, mg.Unsubscribe(ctx, email, "*"))
 }
 
 func TestGetUnsubscribes(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
-	n, us, err := mg.ListUnsubscribes(DefaultLimit, DefaultSkip)
+	n, us, err := mg.ListUnsubscribes(ctx, DefaultLimit, DefaultSkip)
 	ensure.Nil(t, err)
 
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
@@ -34,11 +38,12 @@ func TestGetUnsubscriptionByAddress(t *testing.T) {
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
 	// Create unsubscription record
-	ensure.Nil(t, mg.Unsubscribe(email, "*"))
+	ensure.Nil(t, mg.Unsubscribe(ctx, email, "*"))
 
-	n, us, err := mg.GetUnsubscribes(email)
+	n, us, err := mg.GetUnsubscribes(ctx, email)
 	ensure.Nil(t, err)
 
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
@@ -49,7 +54,7 @@ func TestGetUnsubscriptionByAddress(t *testing.T) {
 		}
 	}
 	// Destroy the unsubscription record
-	ensure.Nil(t, mg.RemoveUnsubscribe(email))
+	ensure.Nil(t, mg.RemoveUnsubscribe(ctx, email))
 }
 
 func TestCreateDestroyUnsubscription(t *testing.T) {
@@ -57,13 +62,15 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	// Create unsubscription record
-	ensure.Nil(t, mg.Unsubscribe(email, "*"))
+	ctx := context.Background()
 
-	n, us, err := mg.GetUnsubscribes(email)
+	// Create unsubscription record
+	ensure.Nil(t, mg.Unsubscribe(ctx, email, "*"))
+
+	n, us, err := mg.GetUnsubscribes(ctx, email)
 	ensure.Nil(t, err)
 	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
 
 	// Destroy the unsubscription record
-	ensure.Nil(t, mg.RemoveUnsubscribe(email))
+	ensure.Nil(t, mg.RemoveUnsubscribe(ctx, email))
 }

@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"testing"
 
 	"github.com/facebookgo/ensure"
@@ -9,8 +10,9 @@ import (
 func TestGetStats(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
-	totalCount, stats, err := mg.GetStats(-1, -1, nil, "sent", "opened")
+	totalCount, stats, err := mg.GetStats(ctx, -1, -1, nil, "sent", "opened")
 	ensure.Nil(t, err)
 
 	t.Logf("Total Count: %d\n", totalCount)
@@ -23,8 +25,9 @@ func TestGetStats(t *testing.T) {
 func TestGetStatsTotal(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
-	statsTotal, err := mg.GetStatsTotal(nil, nil, "", "", "accepted", "delivered")
+	statsTotal, err := mg.GetStatsTotal(ctx, nil, nil, "", "", "accepted", "delivered")
 	ensure.Nil(t, err)
 
 	if len(statsTotal.Stats) > 0 {
@@ -38,6 +41,8 @@ func TestGetStatsTotal(t *testing.T) {
 
 func TestDeleteTag(t *testing.T) {
 	mg, err := NewMailgunFromEnv()
+	ctx := context.Background()
+
 	ensure.Nil(t, err)
-	ensure.Nil(t, mg.DeleteTag("newsletter"))
+	ensure.Nil(t, mg.DeleteTag(ctx, "newsletter"))
 }

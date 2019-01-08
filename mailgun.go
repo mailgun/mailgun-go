@@ -93,6 +93,7 @@
 package mailgun
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -145,92 +146,92 @@ type Mailgun interface {
 	SetClient(client *http.Client)
 	SetAPIBase(url string)
 
-	Send(m *Message) (string, string, error)
+	Send(ctx context.Context, m *Message) (string, string, error)
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
-	ListBounces(limit, skip int) (int, []Bounce, error)
-	GetBounce(address string) (Bounce, error)
-	AddBounce(address, code, error string) error
-	DeleteBounce(address string) error
+	ListBounces(ctx context.Context, limit, skip int) (int, []Bounce, error)
+	GetBounce(ctx context.Context, address string) (Bounce, error)
+	AddBounce(ctx context.Context, address, code, error string) error
+	DeleteBounce(ctx context.Context, address string) error
 
-	GetStats(limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error)
-	GetStatsTotal(start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error)
-	GetTag(tag string) (TagItem, error)
-	DeleteTag(tag string) error
+	GetStats(ctx context.Context, limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error)
+	GetStatsTotal(ctx context.Context, start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error)
+	GetTag(ctx context.Context, tag string) (TagItem, error)
+	DeleteTag(ctx context.Context, tag string) error
 	ListTags(*TagOptions) *TagIterator
 
-	ListDomains(limit, skip int) (int, []Domain, error)
-	GetDomain(domain string) (Domain, []DNSRecord, []DNSRecord, error)
-	CreateDomain(name string, smtpPassword string, spamAction string, wildcard bool) error
-	DeleteDomain(name string) error
-	UpdateDomainConnection(domain string, dc DomainConnection) error
-	GetDomainConnection(domain string) (DomainConnection, error)
-	GetDomainTracking(domain string) (DomainTracking, error)
+	ListDomains(ctx context.Context, limit, skip int) (int, []Domain, error)
+	GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error)
+	CreateDomain(ctx context.Context, name string, smtpPassword string, spamAction string, wildcard bool) error
+	DeleteDomain(ctx context.Context, name string) error
+	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
+	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
+	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)
 
-	GetStoredMessage(id string) (StoredMessage, error)
-	GetStoredMessageRaw(id string) (StoredMessageRaw, error)
-	GetStoredMessageForURL(url string) (StoredMessage, error)
-	GetStoredMessageRawForURL(url string) (StoredMessageRaw, error)
-	DeleteStoredMessage(id string) error
+	GetStoredMessage(ctx context.Context, id string) (StoredMessage, error)
+	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
+	GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error)
+	GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error)
+	DeleteStoredMessage(ctx context.Context, id string) error
 
-	ListCredentials(limit, skip int) (int, []Credential, error)
-	CreateCredential(login, password string) error
-	ChangeCredentialPassword(id, password string) error
-	DeleteCredential(id string) error
+	ListCredentials(ctx context.Context, limit, skip int) (int, []Credential, error)
+	CreateCredential(ctx context.Context, login, password string) error
+	ChangeCredentialPassword(ctx context.Context, id, password string) error
+	DeleteCredential(ctx context.Context, id string) error
 
-	ListUnsubscribes(limit, skip int) (int, []Unsubscription, error)
-	GetUnsubscribes(string) (int, []Unsubscription, error)
-	Unsubscribe(address, tag string) error
-	RemoveUnsubscribe(string) error
-	RemoveUnsubscribeWithTag(a, t string) error
+	ListUnsubscribes(ctx context.Context, limit, skip int) (int, []Unsubscription, error)
+	GetUnsubscribes(ctx context.Context, address string) (int, []Unsubscription, error)
+	Unsubscribe(ctx context.Context, address, tag string) error
+	RemoveUnsubscribe(ctx context.Context, address string) error
+	RemoveUnsubscribeWithTag(ctx context.Context, a, t string) error
 
-	ListComplaints(limit, skip int) (int, []Complaint, error)
-	GetComplaint(address string) (Complaint, error)
-	CreateComplaint(string) error
-	DeleteComplaint(string) error
+	ListComplaints(ctx context.Context, limit, skip int) (int, []Complaint, error)
+	GetComplaint(ctx context.Context, address string) (Complaint, error)
+	CreateComplaint(ctx context.Context, address string) error
+	DeleteComplaint(ctx context.Context, address string) error
 
-	ListRoutes(limit, skip int) (int, []Route, error)
-	GetRoute(string) (Route, error)
-	CreateRoute(Route) (Route, error)
-	DeleteRoute(string) error
-	UpdateRoute(string, Route) (Route, error)
+	ListRoutes(ctx context.Context, limit, skip int) (int, []Route, error)
+	GetRoute(ctx context.Context, address string) (Route, error)
+	CreateRoute(ctx context.Context, address Route) (Route, error)
+	DeleteRoute(ctx context.Context, address string) error
+	UpdateRoute(ctx context.Context, address string, r Route) (Route, error)
 
-	ListWebhooks() (map[string]string, error)
-	CreateWebhook(kind string, url []string) error
-	DeleteWebhook(kind string) error
-	GetWebhook(kind string) (string, error)
-	UpdateWebhook(kind string, url []string) error
+	ListWebhooks(ctx context.Context) (map[string]string, error)
+	CreateWebhook(ctx context.Context, kind string, url []string) error
+	DeleteWebhook(ctx context.Context, kind string) error
+	GetWebhook(ctx context.Context, kind string) (string, error)
+	UpdateWebhook(ctx context.Context, kind string, url []string) error
 	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
 
 	ListMailingLists(opts *ListOptions) *ListsIterator
-	CreateMailingList(MailingList) (MailingList, error)
-	DeleteMailingList(string) error
-	GetMailingList(string) (MailingList, error)
-	UpdateMailingList(string, MailingList) (MailingList, error)
+	CreateMailingList(ctx context.Context, address MailingList) (MailingList, error)
+	DeleteMailingList(ctx context.Context, address string) error
+	GetMailingList(ctx context.Context, address string) (MailingList, error)
+	UpdateMailingList(ctx context.Context, address string, ml MailingList) (MailingList, error)
 
 	ListMembers(address string, opts *ListOptions) *MemberListIterator
-	GetMember(MemberAddr, listAddr string) (Member, error)
-	CreateMember(merge bool, addr string, prototype Member) error
-	CreateMemberList(subscribed *bool, addr string, newMembers []interface{}) error
-	UpdateMember(Member, list string, prototype Member) (Member, error)
-	DeleteMember(Member, list string) error
+	GetMember(ctx context.Context, MemberAddr, listAddr string) (Member, error)
+	CreateMember(ctx context.Context, merge bool, addr string, prototype Member) error
+	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []interface{}) error
+	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
+	DeleteMember(ctx context.Context, Member, list string) error
 
 	ListEvents(*EventsOptions) *EventIterator
 	PollEvents(*EventsOptions) *EventPoller
 
-	ListIPS(bool) ([]IPAddress, error)
-	GetIP(ip string) (IPAddress, error)
-	ListDomainIPS() ([]IPAddress, error)
-	AddDomainIP(ip string) error
-	DeleteDomainIP(ip string) error
+	ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error)
+	GetIP(ctx context.Context, ip string) (IPAddress, error)
+	ListDomainIPS(ctx context.Context) ([]IPAddress, error)
+	AddDomainIP(ctx context.Context, ip string) error
+	DeleteDomainIP(ctx context.Context, ip string) error
 
-	ListExports(url string) ([]Export, error)
-	GetExport(id string) (Export, error)
-	GetExportLink(id string) (string, error)
-	CreateExport(url string) error
+	ListExports(ctx context.Context, url string) ([]Export, error)
+	GetExport(ctx context.Context, id string) (Export, error)
+	GetExportLink(ctx context.Context, id string) (string, error)
+	CreateExport(ctx context.Context, url string) error
 
-	GetTagLimits(domain string) (TagLimits, error)
+	GetTagLimits(ctx context.Context, domain string) (TagLimits, error)
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.

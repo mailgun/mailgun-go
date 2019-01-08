@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -57,9 +58,9 @@ var expected = []int{200, 202, 204}
 
 // makeRequest shim performs a generic request, checking for a positive outcome.
 // See simplehttp.MakeRequest for more details.
-func makeRequest(r *httpRequest, kind string, p payload) (*httpResponse, error) {
+func makeRequest(ctx context.Context, r *httpRequest, method string, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	rsp, err := r.makeRequest(kind, p)
+	rsp, err := r.makeRequest(ctx, method, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
 		return rsp, newError(r.URL, expected, rsp)
 	}
@@ -68,9 +69,9 @@ func makeRequest(r *httpRequest, kind string, p payload) (*httpResponse, error) 
 
 // getResponseFromJSON shim performs a GET request, checking for a positive outcome.
 // See simplehttp.GetResponseFromJSON for more details.
-func getResponseFromJSON(r *httpRequest, v interface{}) error {
+func getResponseFromJSON(ctx context.Context, r *httpRequest, v interface{}) error {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	response, err := r.makeGetRequest()
+	response, err := r.makeGetRequest(ctx)
 	if err != nil {
 		return err
 	}
@@ -82,9 +83,9 @@ func getResponseFromJSON(r *httpRequest, v interface{}) error {
 
 // postResponseFromJSON shim performs a POST request, checking for a positive outcome.
 // See simplehttp.PostResponseFromJSON for more details.
-func postResponseFromJSON(r *httpRequest, p payload, v interface{}) error {
+func postResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v interface{}) error {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	response, err := r.makePostRequest(p)
+	response, err := r.makePostRequest(ctx, p)
 	if err != nil {
 		return err
 	}
@@ -96,9 +97,9 @@ func postResponseFromJSON(r *httpRequest, p payload, v interface{}) error {
 
 // putResponseFromJSON shim performs a PUT request, checking for a positive outcome.
 // See simplehttp.PutResponseFromJSON for more details.
-func putResponseFromJSON(r *httpRequest, p payload, v interface{}) error {
+func putResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v interface{}) error {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	response, err := r.makePutRequest(p)
+	response, err := r.makePutRequest(ctx, p)
 	if err != nil {
 		return err
 	}
@@ -110,9 +111,9 @@ func putResponseFromJSON(r *httpRequest, p payload, v interface{}) error {
 
 // makeGetRequest shim performs a GET request, checking for a positive outcome.
 // See simplehttp.MakeGetRequest for more details.
-func makeGetRequest(r *httpRequest) (*httpResponse, error) {
+func makeGetRequest(ctx context.Context, r *httpRequest) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	rsp, err := r.makeGetRequest()
+	rsp, err := r.makeGetRequest(ctx)
 	if (err == nil) && notGood(rsp.Code, expected) {
 		return rsp, newError(r.URL, expected, rsp)
 	}
@@ -121,9 +122,9 @@ func makeGetRequest(r *httpRequest) (*httpResponse, error) {
 
 // makePostRequest shim performs a POST request, checking for a positive outcome.
 // See simplehttp.MakePostRequest for more details.
-func makePostRequest(r *httpRequest, p payload) (*httpResponse, error) {
+func makePostRequest(ctx context.Context, r *httpRequest, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	rsp, err := r.makePostRequest(p)
+	rsp, err := r.makePostRequest(ctx, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
 		return rsp, newError(r.URL, expected, rsp)
 	}
@@ -132,9 +133,9 @@ func makePostRequest(r *httpRequest, p payload) (*httpResponse, error) {
 
 // makePutRequest shim performs a PUT request, checking for a positive outcome.
 // See simplehttp.MakePutRequest for more details.
-func makePutRequest(r *httpRequest, p payload) (*httpResponse, error) {
+func makePutRequest(ctx context.Context, r *httpRequest, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	rsp, err := r.makePutRequest(p)
+	rsp, err := r.makePutRequest(ctx, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
 		return rsp, newError(r.URL, expected, rsp)
 	}
@@ -143,9 +144,9 @@ func makePutRequest(r *httpRequest, p payload) (*httpResponse, error) {
 
 // makeDeleteRequest shim performs a DELETE request, checking for a positive outcome.
 // See simplehttp.MakeDeleteRequest for more details.
-func makeDeleteRequest(r *httpRequest) (*httpResponse, error) {
+func makeDeleteRequest(ctx context.Context, r *httpRequest) (*httpResponse, error) {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
-	rsp, err := r.makeDeleteRequest()
+	rsp, err := r.makeDeleteRequest(ctx)
 	if (err == nil) && notGood(rsp.Code, expected) {
 		return rsp, newError(r.URL, expected, rsp)
 	}
