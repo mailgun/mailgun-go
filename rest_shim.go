@@ -8,7 +8,7 @@ import (
 // The MailgunGoUserAgent identifies the client to the server, for logging purposes.
 // In the event of problems requiring a human administrator's assistance,
 // this user agent allows them to identify the client from human-generated activity.
-const MailgunGoUserAgent = "mailgun-go/1.0.0"
+const MailgunGoUserAgent = "mailgun-go/" + Version
 
 // This error will be returned whenever a Mailgun API returns an error response.
 // Your application can check the Actual field to see the actual HTTP response code returned.

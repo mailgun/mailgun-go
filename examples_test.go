@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mailgun/mailgun-go"
+	"github.com/mailgun/mailgun-go/v3"
 )
 
 func ExampleMailgunImpl_ValidateEmail() {

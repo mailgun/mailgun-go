@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/facebookgo/ensure"
-	"github.com/mailgun/mailgun-go"
+	"github.com/mailgun/mailgun-go/v3"
 )
 
 const (
