@@ -3,6 +3,7 @@ package mailgun
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -17,10 +18,12 @@ const (
 // Tag instruments the received message with headers providing a measure of its spamness.
 // Delete instructs Mailgun to just block or delete the message all-together.
 const (
-	SpamActionTag      = "tag"
-	SpamActionDisabled = "disabled"
-	SpamActionDelete   = "delete"
+	SpamActionTag      = SpamAction("tag")
+	SpamActionDisabled = SpamAction("disabled")
+	SpamActionDelete   = SpamAction("delete")
 )
+
+type SpamAction string
 
 // A Domain structure holds information about a domain used when sending mail.
 type Domain struct {
@@ -30,8 +33,8 @@ type Domain struct {
 	SMTPPassword string `json:"smtp_password"`
 	Wildcard     bool   `json:"wildcard"`
 	// The SpamAction field must be one of Tag, Disabled, or Delete.
-	SpamAction   string `json:"spam_action"`
-	State        string `json:"state"`
+	SpamAction string `json:"spam_action"`
+	State      string `json:"state"`
 }
 
 // DNSRecord structures describe intended records to properly configure your domain for use with Mailgun.
@@ -123,22 +126,46 @@ func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (Domain, []
 	return resp.Domain, resp.ReceivingDNSRecords, resp.SendingDNSRecords, err
 }
 
+type CreateDomainOptions struct {
+	SpamAction         SpamAction
+	Wildcard           bool
+	ForceDKIMAuthority bool
+	DKIMKeySize        int
+	IPS                []string
+}
+
 // CreateDomain instructs Mailgun to create a new domain for your account.
 // The name parameter identifies the domain.
 // The smtpPassword parameter provides an access credential for the domain.
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, smtpPassword string, spamAction string, wildcard bool) error {
+func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password string, opts *CreateDomainOptions) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("name", name)
-	payload.addValue("smtp_password", smtpPassword)
-	payload.addValue("spam_action", spamAction)
-	payload.addValue("wildcard", strconv.FormatBool(wildcard))
+	payload.addValue("smtp_password", password)
+
+	if opts != nil {
+		if opts.SpamAction != "" {
+			payload.addValue("spam_action", string(opts.SpamAction))
+		}
+		if opts.Wildcard {
+			payload.addValue("wildcard", boolToString(opts.Wildcard))
+		}
+		if opts.ForceDKIMAuthority {
+			payload.addValue("force_dkim_authority", boolToString(opts.ForceDKIMAuthority))
+		}
+		if opts.DKIMKeySize != 0 {
+			payload.addValue("dkim_key_size", strconv.Itoa(opts.DKIMKeySize))
+		}
+		if len(opts.IPS) != 0 {
+			payload.addValue("ips", strings.Join(opts.IPS, ","))
+		}
+	}
 	_, err := makePostRequest(ctx, r, payload)
 	return err
 }

@@ -79,7 +79,9 @@ func (li *ListsIterator) Next(ctx context.Context, items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
-	*items = li.Items
+	cpy := make([]MailingList, len(li.Items))
+	copy(cpy, li.Items)
+	*items = cpy
 	if len(li.Items) == 0 {
 		return false
 	}
@@ -97,7 +99,9 @@ func (li *ListsIterator) First(ctx context.Context, items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
-	*items = li.Items
+	cpy := make([]MailingList, len(li.Items))
+	copy(cpy, li.Items)
+	*items = cpy
 	return true
 }
 
@@ -113,7 +117,9 @@ func (li *ListsIterator) Last(ctx context.Context, items *[]MailingList) bool {
 	if li.err != nil {
 		return false
 	}
-	*items = li.Items
+	cpy := make([]MailingList, len(li.Items))
+	copy(cpy, li.Items)
+	*items = cpy
 	return true
 }
 
@@ -131,7 +137,9 @@ func (li *ListsIterator) Previous(ctx context.Context, items *[]MailingList) boo
 	if li.err != nil {
 		return false
 	}
-	*items = li.Items
+	cpy := make([]MailingList, len(li.Items))
+	copy(cpy, li.Items)
+	*items = cpy
 	if len(li.Items) == 0 {
 		return false
 	}

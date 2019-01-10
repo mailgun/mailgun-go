@@ -19,33 +19,126 @@ type Complaint struct {
 	Address   string `json:"address"`
 }
 
-type complaintsEnvelope struct {
-	Items  []Complaint `json:"items"`
+type complaintsResponse struct {
 	Paging Paging      `json:"paging"`
+	Items  []Complaint `json:"items"`
 }
 
 // ListComplaints returns a set of spam complaints registered against your domain.
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
-func (mg *MailgunImpl) ListComplaints(ctx context.Context, opts *ListOptions) ([]Complaint, error) {
-	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
+func (mg *MailgunImpl) ListComplaints(opts *ListOptions) *ComplaintsIterator {
+	r := newHTTPRequest(generatePublicApiUrl(mg, mg.domain+"/"+complaintsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-
-	if opts != nil && opts.Limit != 0 {
-		r.addParameter("limit", strconv.Itoa(opts.Limit))
+	if opts != nil {
+		if opts.Limit != 0 {
+			r.addParameter("limit", strconv.Itoa(opts.Limit))
+		}
 	}
-
-	if opts != nil && opts.Skip != 0 {
-		r.addParameter("skip", strconv.Itoa(opts.Skip))
+	url, err := r.generateUrlWithParameters()
+	return &ComplaintsIterator{
+		mg:                 mg,
+		complaintsResponse: complaintsResponse{Paging: Paging{Next: url, First: url}},
+		err:                err,
 	}
+}
 
-	var envelope complaintsEnvelope
-	err := getResponseFromJSON(ctx, r, &envelope)
-	if err != nil {
-		return nil, err
+type ComplaintsIterator struct {
+	complaintsResponse
+	mg  Mailgun
+	err error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ci *ComplaintsIterator) Err() error {
+	return ci.err
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ci *ComplaintsIterator) Next(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
 	}
-	return envelope.Items, nil
+	ci.err = ci.fetch(ctx, ci.Paging.Next)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ci *ComplaintsIterator) First(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.First)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ci *ComplaintsIterator) Last(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Last)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ci *ComplaintsIterator) Previous(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
+	}
+	if ci.Paging.Previous == "" {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Previous)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {
+	r := newHTTPRequest(url)
+	r.setClient(ci.mg.Client())
+	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
+
+	return getResponseFromJSON(ctx, r, &ci.complaintsResponse)
 }
 
 // GetComplaint returns a single complaint record filed by a recipient at the email address provided.

@@ -180,6 +180,8 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 
 func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
 	r := newHTTPRequest(ri.url)
+	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
+	r.setClient(ri.mg.Client())
 
 	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
@@ -187,9 +189,6 @@ func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
 	if limit != 0 {
 		r.addParameter("limit", strconv.Itoa(limit))
 	}
-
-	r.setClient(ri.mg.Client())
-	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
 
 	return getResponseFromJSON(ctx, r, &ri.routesListResponse)
 }

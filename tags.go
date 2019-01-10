@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type TagItem struct {
+type Tag struct {
 	Value       string     `json:"tag"`
 	Description string     `json:"description"`
 	FirstSeen   *time.Time `json:"first-seen,omitempty"`
@@ -15,8 +15,8 @@ type TagItem struct {
 }
 
 type tagsResponse struct {
-	Items  []TagItem `json:"items"`
-	Paging Paging    `json:"paging"`
+	Items  []Tag  `json:"items"`
+	Paging Paging `json:"paging"`
 }
 
 type ListTagOptions struct {
@@ -40,11 +40,11 @@ func (mg *MailgunImpl) DeleteTag(ctx context.Context, tag string) error {
 }
 
 // GetTag retrieves metadata about the tag from the api
-func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (TagItem, error) {
+func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
 	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var tagItem TagItem
+	var tagItem Tag
 	return tagItem, getResponseFromJSON(ctx, r, &tagItem)
 }
 
@@ -79,19 +79,19 @@ func (mg *MailgunImpl) ListTags(opts *ListTagOptions) *TagIterator {
 	url, err := req.generateUrlWithParameters()
 	return &TagIterator{
 		tagsResponse: tagsResponse{Paging: Paging{Next: url, First: url}},
-		err:           err,
-		mg: mg,
+		err:          err,
+		mg:           mg,
 	}
 }
 
 type TagIterator struct {
 	tagsResponse
-	mg   Mailgun
-	err  error
+	mg  Mailgun
+	err error
 }
 
 // Returns the next page in the list of tags
-func (ti *TagIterator) Next(ctx context.Context, items *[]TagItem) bool {
+func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -112,7 +112,7 @@ func (ti *TagIterator) Next(ctx context.Context, items *[]TagItem) bool {
 }
 
 // Returns the previous page in the list of tags
-func (ti *TagIterator) Previous(ctx context.Context, items *[]TagItem) bool {
+func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -137,7 +137,7 @@ func (ti *TagIterator) Previous(ctx context.Context, items *[]TagItem) bool {
 }
 
 // Returns the first page in the list of tags
-func (ti *TagIterator) First(ctx context.Context, items *[]TagItem) bool {
+func (ti *TagIterator) First(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -150,7 +150,7 @@ func (ti *TagIterator) First(ctx context.Context, items *[]TagItem) bool {
 }
 
 // Returns the last page in the list of tags
-func (ti *TagIterator) Last(ctx context.Context, items *[]TagItem) bool {
+func (ti *TagIterator) Last(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
 	}

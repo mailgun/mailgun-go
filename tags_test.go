@@ -36,13 +36,13 @@ func TestTags(t *testing.T) {
 	ensure.Nil(t, err)
 
 	// Wait for the tag to show up
-	ensure.Nil(t,waitForTag(mg, "newsletter"))
+	ensure.Nil(t, waitForTag(mg, "newsletter"))
 
 	// Should return a list of available tags
-	it := mg.ListTags( nil)
-	var page []mailgun.TagItem
+	it := mg.ListTags(nil)
+	var page []mailgun.Tag
 	for it.Next(ctx, &page) {
-		ensure.True(t, len(page)!= 0)
+		ensure.True(t, len(page) != 0)
 		log.Printf("Tags: %+v\n", page)
 	}
 	ensure.Nil(t, it.Err())
@@ -50,7 +50,7 @@ func TestTags(t *testing.T) {
 	// Should return a limited list of available tags
 	cursor := mg.ListTags(&mailgun.ListTagOptions{Limit: 1})
 
-	var tags []mailgun.TagItem
+	var tags []mailgun.Tag
 	for cursor.Next(ctx, &tags) {
 		ensure.DeepEqual(t, len(tags), 1)
 		log.Printf("Tags: %+v\n", tags)

@@ -18,7 +18,11 @@ func TestGetComplaints(t *testing.T) {
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
-	_, err = mg.ListComplaints(ctx, nil)
+	it := mg.ListComplaints(nil)
+	var page []Complaint
+	for it.Next(ctx, &page) {
+		//spew.Dump(page)
+	}
 	ensure.Nil(t, err)
 }
 
@@ -40,6 +44,7 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {
+	Debug = true
 	if reason := SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
@@ -50,13 +55,16 @@ func TestCreateDeleteComplaint(t *testing.T) {
 
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
-		complaints, err := mg.ListComplaints(ctx, nil)
+		it := mg.ListComplaints(nil)
 		ensure.Nil(t, err)
 
-		for _, complaint := range complaints {
-			t.Logf("Complaint Address: %s\n", complaint.Address)
-			if complaint.Address == email {
-				return true
+		var page []Complaint
+		for it.Next(ctx, &page) {
+			for _, complaint := range page {
+				t.Logf("Complaint Address: %s\n", complaint.Address)
+				if complaint.Address == email {
+					return true
+				}
 			}
 		}
 		return false

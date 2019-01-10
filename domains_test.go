@@ -71,7 +71,8 @@ func TestAddDeleteDomain(t *testing.T) {
 	ctx := context.Background()
 
 	// First, we need to add the domain.
-	ensure.Nil(t, mg.CreateDomain(ctx, "mx.mailgun.test", "supersecret", mailgun.SpamActionTag, false))
+	ensure.Nil(t, mg.CreateDomain(ctx, "mx.mailgun.test", "supersecret",
+		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag}))
 	// Next, we delete it.
 	ensure.Nil(t, mg.DeleteDomain(ctx, "mx.mailgun.test"))
 }

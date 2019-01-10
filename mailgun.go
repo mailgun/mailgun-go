@@ -154,13 +154,13 @@ type Mailgun interface {
 	DeleteBounce(ctx context.Context, address string) error
 
 	ListStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error)
-	GetTag(ctx context.Context, tag string) (TagItem, error)
+	GetTag(ctx context.Context, tag string) (Tag, error)
 	DeleteTag(ctx context.Context, tag string) error
 	ListTags(*ListTagOptions) *TagIterator
 
 	ListDomains(ctx context.Context, opts *ListOptions) (int, []Domain, error)
 	GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error)
-	CreateDomain(ctx context.Context, name string, smtpPassword string, spamAction string, wildcard bool) error
+	CreateDomain(ctx context.Context, name string, pass string, opts *CreateDomainOptions) error
 	DeleteDomain(ctx context.Context, name string) error
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
@@ -183,7 +183,7 @@ type Mailgun interface {
 	DeleteUnsubscribe(ctx context.Context, address string) error
 	DeleteUnsubscribeWithTag(ctx context.Context, a, t string) error
 
-	ListComplaints(ctx context.Context, opts *ListOptions) ([]Complaint, error)
+	ListComplaints(opts *ListOptions) *ComplaintsIterator
 	GetComplaint(ctx context.Context, address string) (Complaint, error)
 	CreateComplaint(ctx context.Context, address string) error
 	DeleteComplaint(ctx context.Context, address string) error
