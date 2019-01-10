@@ -120,15 +120,15 @@ func ExampleMailgunImpl_GetRoutes() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	n, routes, err := mg.ListRoutes(ctx, mailgun.DefaultLimit, mailgun.DefaultSkip)
-	if err != nil {
-		log.Fatal(err)
+	it := mg.ListRoutes(nil)
+	var page []mailgun.Route
+	for it.Next(ctx, &page) {
+		for _, r := range page {
+			log.Printf("Route pri=%d expr=%s desc=%s", r.Priority, r.Expression, r.Description)
+		}
 	}
-	if n > len(routes) {
-		log.Printf("More routes exist than has been returned.")
-	}
-	for _, r := range routes {
-		log.Printf("Route pri=%d expr=%s desc=%s", r.Priority, r.Expression, r.Description)
+	if it.Err() != nil {
+		log.Fatal(it.Err())
 	}
 }
 

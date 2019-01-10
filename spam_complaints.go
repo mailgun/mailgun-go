@@ -27,24 +27,25 @@ type complaintsEnvelope struct {
 // ListComplaints returns a set of spam complaints registered against your domain.
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
-func (mg *MailgunImpl) ListComplaints(ctx context.Context, limit, skip int) (int, []Complaint, error) {
+func (mg *MailgunImpl) ListComplaints(ctx context.Context, opts *ListOptions) ([]Complaint, error) {
 	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	if limit != -1 {
-		r.addParameter("limit", strconv.Itoa(limit))
+	if opts != nil && opts.Limit != 0 {
+		r.addParameter("limit", strconv.Itoa(opts.Limit))
 	}
-	if skip != -1 {
-		r.addParameter("skip", strconv.Itoa(skip))
+
+	if opts != nil && opts.Skip != 0 {
+		r.addParameter("skip", strconv.Itoa(opts.Skip))
 	}
 
 	var envelope complaintsEnvelope
 	err := getResponseFromJSON(ctx, r, &envelope)
 	if err != nil {
-		return -1, nil, err
+		return nil, err
 	}
-	return len(envelope.Items), envelope.Items, nil
+	return envelope.Items, nil
 }
 
 // GetComplaint returns a single complaint record filed by a recipient at the email address provided.

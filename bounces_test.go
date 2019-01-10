@@ -11,16 +11,23 @@ import (
 )
 
 func TestGetBounces(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
 	ctx := context.Background()
-	n, bounces, err := mg.ListBounces(ctx, -1, -1)
+	_, err = mg.ListBounces(ctx, nil)
 	ensure.Nil(t, err)
-	ensure.DeepEqual(t, n, len(bounces))
 }
 
 func TestGetSingleBounce(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
@@ -36,6 +43,10 @@ func TestGetSingleBounce(t *testing.T) {
 }
 
 func TestAddDelBounces(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
@@ -47,7 +58,7 @@ func TestAddDelBounces(t *testing.T) {
 	// Fail early if we have bounces for a fictitious e-mail address.
 
 	ctx := context.Background()
-	n, _, err := mg.ListBounces(ctx, -1, -1)
+	_, err = mg.ListBounces(ctx, nil)
 	ensure.Nil(t, err)
 	// Add the bounce for our address.
 
@@ -56,9 +67,9 @@ func TestAddDelBounces(t *testing.T) {
 
 	// We should now have one bounce listed when we query the API.
 
-	n, bounces, err := mg.ListBounces(ctx, -1, -1)
+	bounces, err := mg.ListBounces(ctx,nil)
 	ensure.Nil(t, err)
-	if n == 0 {
+	if len(bounces) == 0 {
 		t.Fatal("Expected at least one bounce for this domain.")
 	}
 
@@ -87,7 +98,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Make sure we're back to the way we were.
 
-	n, bounces, err = mg.ListBounces(ctx, -1, -1)
+	bounces, err = mg.ListBounces(ctx, nil)
 	ensure.Nil(t, err)
 
 	found = 0

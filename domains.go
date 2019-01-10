@@ -17,19 +17,19 @@ const (
 // Tag instruments the received message with headers providing a measure of its spamness.
 // Delete instructs Mailgun to just block or delete the message all-together.
 const (
-	Tag      = "tag"
-	Disabled = "disabled"
-	Delete   = "delete"
+	SpamActionTag      = "tag"
+	SpamActionDisabled = "disabled"
+	SpamActionDelete   = "delete"
 )
 
 // A Domain structure holds information about a domain used when sending mail.
-// The SpamAction field must be one of Tag, Disabled, or Delete.
 type Domain struct {
 	CreatedAt    string `json:"created_at"`
 	SMTPLogin    string `json:"smtp_login"`
 	Name         string `json:"name"`
 	SMTPPassword string `json:"smtp_password"`
 	Wildcard     bool   `json:"wildcard"`
+	// The SpamAction field must be one of Tag, Disabled, or Delete.
 	SpamAction   string `json:"spam_action"`
 	State        string `json:"state"`
 }
@@ -92,16 +92,18 @@ func (d Domain) GetCreatedAt() (t time.Time, err error) {
 // The number of items returned may be less than the specified limit, if it's specified.
 // Note that zero items and a zero-length slice do not necessarily imply an error occurred.
 // Except for the error itself, all results are undefined in the event of an error.
-func (mg *MailgunImpl) ListDomains(ctx context.Context, limit, skip int) (int, []Domain, error) {
+func (mg *MailgunImpl) ListDomains(ctx context.Context, opts *ListOptions) (int, []Domain, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
-	if limit != DefaultLimit {
-		r.addParameter("limit", strconv.Itoa(limit))
-	}
-	if skip != DefaultSkip {
-		r.addParameter("skip", strconv.Itoa(skip))
-	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	if opts != nil && opts.Limit != 0 {
+		r.addParameter("limit", strconv.Itoa(opts.Limit))
+	}
+
+	if opts != nil && opts.Skip != 0 {
+		r.addParameter("skip", strconv.Itoa(opts.Skip))
+	}
 
 	var list domainListResponse
 	err := getResponseFromJSON(ctx, r, &list)

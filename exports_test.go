@@ -9,9 +9,8 @@ import (
 )
 
 func TestExports(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	ctx := context.Background()
 	list, err := mg.ListExports(ctx, "")
@@ -37,9 +36,8 @@ func TestExports(t *testing.T) {
 }
 
 func TestExportsLink(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	ctx := context.Background()
 	url, err := mg.GetExportLink(ctx, "12")

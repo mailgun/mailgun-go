@@ -14,12 +14,21 @@ import (
 	"testing"
 
 	"github.com/facebookgo/ensure"
-	"github.com/onsi/ginkgo"
 )
+
+// Return the variable missing which caused the test to be skipped
+func SkipNetworkTest() string {
+	for _, env := range []string{"MG_DOMAIN", "MG_API_KEY", "MG_EMAIL_TO", "MG_PUBLIC_API_KEY"} {
+		if os.Getenv(env) == "" {
+			return fmt.Sprintf("'%s' missing from environment skipping...", env)
+		}
+	}
+	return ""
+}
 
 // Many tests require configuration settings unique to the user, passed in via
 // environment variables.  If these variables aren't set, we need to fail the test early.
-func reqEnv(t ginkgo.GinkgoTInterface, variableName string) string {
+func reqEnv(t *testing.T, variableName string) string {
 	value := os.Getenv(variableName)
 	ensure.True(t, value != "")
 	return value

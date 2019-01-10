@@ -19,7 +19,7 @@ func TestGetDomains(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	n, domains, err := mg.ListDomains(ctx, mailgun.DefaultLimit, mailgun.DefaultSkip)
+	n, domains, err := mg.ListDomains(ctx, nil)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(domains) != 0, true)
 
@@ -34,7 +34,7 @@ func TestGetSingleDomain(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	_, domains, err := mg.ListDomains(ctx, mailgun.DefaultLimit, mailgun.DefaultSkip)
+	_, domains, err := mg.ListDomains(ctx, nil)
 	ensure.Nil(t, err)
 
 	dr, rxDnsRecords, txDnsRecords, err := mg.GetDomain(ctx, domains[0].Name)
@@ -71,7 +71,7 @@ func TestAddDeleteDomain(t *testing.T) {
 	ctx := context.Background()
 
 	// First, we need to add the domain.
-	ensure.Nil(t, mg.CreateDomain(ctx, "mx.mailgun.test", "supersecret", mailgun.Tag, false))
+	ensure.Nil(t, mg.CreateDomain(ctx, "mx.mailgun.test", "supersecret", mailgun.SpamActionTag, false))
 	// Next, we delete it.
 	ensure.Nil(t, mg.DeleteDomain(ctx, "mx.mailgun.test"))
 }

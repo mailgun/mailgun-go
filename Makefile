@@ -8,8 +8,4 @@ gen:
 	easyjson --all events/objects.go
 
 all:
-# Only run these tests if secure credentials exist
-ifeq ($(TRAVIS_SECURE_ENV_VARS),true)
-	go get -t .
-	go test .
-endif
+	export GO111MODULE=on; go test . -v

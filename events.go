@@ -9,8 +9,8 @@ import (
 	"github.com/mailru/easyjson"
 )
 
-// EventsOptions{} modifies the behavior of ListEvents()
-type EventsOptions struct {
+// ListEventOptions{} modifies the behavior of ListEvents()
+type ListEventOptions struct {
 	// Limits the results to a specific start and end time
 	Begin, End *time.Time
 	// ForceAscending and ForceDescending are used to force Mailgun to use a given
@@ -44,7 +44,7 @@ type EventIterator struct {
 }
 
 // Create an new iterator to fetch a page of events from the events api
-//	it := mg.ListEvents(&EventsOptions{Limit: 100})
+//	it := mg.ListEvents(&ListEventOptions{Limit: 100})
 //	var events []Event
 //	for it.Next(&events) {
 //	    	for _, event := range events {
@@ -60,7 +60,7 @@ type EventIterator struct {
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (mg *MailgunImpl) ListEvents(opts *EventsOptions) *EventIterator {
+func (mg *MailgunImpl) ListEvents(opts *ListEventOptions) *EventIterator {
 	req := newHTTPRequest(generateApiUrl(mg, eventsEndpoint))
 	if opts != nil {
 		if opts.Limit > 0 {
@@ -188,7 +188,7 @@ func (ei *EventIterator) fetch(ctx context.Context, url string) error {
 // EventPoller maintains the state necessary for polling events
 type EventPoller struct {
 	it            *EventIterator
-	opts          EventsOptions
+	opts          ListEventOptions
 	thresholdTime time.Time
 	beginTime     time.Time
 	sleepUntil    time.Time
@@ -197,7 +197,7 @@ type EventPoller struct {
 }
 
 // Poll the events api and return new events as they occur
-// 	it = mg.PollEvents(&EventsOptions{
+// 	it = mg.PollEvents(&ListEventOptions{
 //			// Only events with a timestamp after this date/time will be returned
 //			Begin:        time.Now().Add(time.Second * -3),
 //			// How often we poll the api for new events
@@ -213,7 +213,7 @@ type EventPoller struct {
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (mg *MailgunImpl) PollEvents(opts *EventsOptions) *EventPoller {
+func (mg *MailgunImpl) PollEvents(opts *ListEventOptions) *EventPoller {
 	now := time.Now()
 	// ForceAscending must be set
 	opts.ForceAscending = true

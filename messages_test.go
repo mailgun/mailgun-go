@@ -33,6 +33,10 @@ Testing some Mailgun MIME awesomeness!
 )
 
 func TestGetStoredMessage(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
@@ -83,6 +87,10 @@ func findStoredMessageID(mg Mailgun) (string, error) {
 }
 
 func TestSendMGPlain(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -97,6 +105,10 @@ func TestSendMGPlain(t *testing.T) {
 }
 
 func TestSendMGPlainWithTracking(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -112,6 +124,10 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 }
 
 func TestSendMGPlainAt(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -127,6 +143,10 @@ func TestSendMGPlainAt(t *testing.T) {
 }
 
 func TestSendMGHtml(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -142,6 +162,10 @@ func TestSendMGHtml(t *testing.T) {
 }
 
 func TestSendMGTracking(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -157,6 +181,10 @@ func TestSendMGTracking(t *testing.T) {
 }
 
 func TestSendMGTag(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -174,6 +202,10 @@ func TestSendMGTag(t *testing.T) {
 }
 
 func TestSendMGMIME(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -188,6 +220,10 @@ func TestSendMGMIME(t *testing.T) {
 }
 
 func TestSendMGBatchFailRecipients(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
@@ -205,6 +241,10 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 }
 
 func TestSendMGBatchRecipientVariables(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		toUser := reqEnv(t, "MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()

@@ -10,21 +10,28 @@ import (
 )
 
 func TestGetCredentials(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
 	ctx := context.Background()
-	n, cs, err := mg.ListCredentials(ctx, DefaultLimit, DefaultSkip)
+	cs, err := mg.ListCredentials(ctx, nil)
 	ensure.Nil(t, err)
 
 	t.Logf("Login\tCreated At\t\n")
 	for _, c := range cs {
 		t.Logf("%s\t%s\t\n", c.Login, c.CreatedAt)
 	}
-	t.Logf("%d credentials listed out of %d\n", len(cs), n)
 }
 
 func TestCreateDeleteCredentials(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	domain := reqEnv(t, "MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)

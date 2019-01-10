@@ -115,11 +115,9 @@ const (
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
-	statsEndpoint        = "stats"
 	statsTotalEndpoint   = "stats/total"
 	domainsEndpoint      = "domains"
 	tagsEndpoint         = "tags"
-	campaignsEndpoint    = "campaigns"
 	eventsEndpoint       = "events"
 	unsubscribesEndpoint = "unsubscribes"
 	routesEndpoint       = "routes"
@@ -150,18 +148,17 @@ type Mailgun interface {
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
-	ListBounces(ctx context.Context, limit, skip int) (int, []Bounce, error)
+	ListBounces(ctx context.Context, opts *ListOptions) ([]Bounce, error)
 	GetBounce(ctx context.Context, address string) (Bounce, error)
 	AddBounce(ctx context.Context, address, code, error string) error
 	DeleteBounce(ctx context.Context, address string) error
 
-	GetStats(ctx context.Context, limit int, skip int, startDate *time.Time, event ...string) (int, []Stat, error)
-	GetStatsTotal(ctx context.Context, start *time.Time, end *time.Time, resolution string, duration string, event ...string) (*StatsTotalResponse, error)
+	ListStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error)
 	GetTag(ctx context.Context, tag string) (TagItem, error)
 	DeleteTag(ctx context.Context, tag string) error
-	ListTags(*TagOptions) *TagIterator
+	ListTags(*ListTagOptions) *TagIterator
 
-	ListDomains(ctx context.Context, limit, skip int) (int, []Domain, error)
+	ListDomains(ctx context.Context, opts *ListOptions) (int, []Domain, error)
 	GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error)
 	CreateDomain(ctx context.Context, name string, smtpPassword string, spamAction string, wildcard bool) error
 	DeleteDomain(ctx context.Context, name string) error
@@ -175,23 +172,23 @@ type Mailgun interface {
 	GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error)
 	DeleteStoredMessage(ctx context.Context, id string) error
 
-	ListCredentials(ctx context.Context, limit, skip int) (int, []Credential, error)
+	ListCredentials(ctx context.Context, opts *ListOptions) ([]Credential, error)
 	CreateCredential(ctx context.Context, login, password string) error
 	ChangeCredentialPassword(ctx context.Context, id, password string) error
 	DeleteCredential(ctx context.Context, id string) error
 
-	ListUnsubscribes(ctx context.Context, limit, skip int) (int, []Unsubscription, error)
-	GetUnsubscribes(ctx context.Context, address string) (int, []Unsubscription, error)
-	Unsubscribe(ctx context.Context, address, tag string) error
-	RemoveUnsubscribe(ctx context.Context, address string) error
-	RemoveUnsubscribeWithTag(ctx context.Context, a, t string) error
+	ListUnsubscribes(ctx context.Context, opts *ListOptions) ([]Unsubscription, error)
+	GetUnsubscribe(ctx context.Context, address string) (Unsubscription, error)
+	CreateUnsubscribe(ctx context.Context, address, tag string) error
+	DeleteUnsubscribe(ctx context.Context, address string) error
+	DeleteUnsubscribeWithTag(ctx context.Context, a, t string) error
 
-	ListComplaints(ctx context.Context, limit, skip int) (int, []Complaint, error)
+	ListComplaints(ctx context.Context, opts *ListOptions) ([]Complaint, error)
 	GetComplaint(ctx context.Context, address string) (Complaint, error)
 	CreateComplaint(ctx context.Context, address string) error
 	DeleteComplaint(ctx context.Context, address string) error
 
-	ListRoutes(ctx context.Context, limit, skip int) (int, []Route, error)
+	ListRoutes(opts *ListOptions) *RoutesIterator
 	GetRoute(ctx context.Context, address string) (Route, error)
 	CreateRoute(ctx context.Context, address Route) (Route, error)
 	DeleteRoute(ctx context.Context, address string) error
@@ -217,8 +214,8 @@ type Mailgun interface {
 	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
 	DeleteMember(ctx context.Context, Member, list string) error
 
-	ListEvents(*EventsOptions) *EventIterator
-	PollEvents(*EventsOptions) *EventPoller
+	ListEvents(*ListEventOptions) *EventIterator
+	PollEvents(*ListEventOptions) *EventPoller
 
 	ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error)
 	GetIP(ctx context.Context, ip string) (IPAddress, error)

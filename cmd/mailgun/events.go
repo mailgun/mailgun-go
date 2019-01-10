@@ -32,7 +32,7 @@ func ListEvents(parser *args.ArgParser, data interface{}) (int, error) {
 	limit := opts.Int("limit")
 
 	// Create the event iterator
-	it := mg.ListEvents(&mailgun.EventsOptions{
+	it := mg.ListEvents(&mailgun.ListEventOptions{
 		Limit: limit,
 	})
 

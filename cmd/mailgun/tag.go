@@ -68,7 +68,7 @@ func ListTag(parser *args.ArgParser, data interface{}) (int, error) {
 	limit := opts.Int("limit")
 
 	// Create the tag iterator
-	it := mg.ListTags(&mailgun.TagOptions{
+	it := mg.ListTags(&mailgun.ListTagOptions{
 		Limit:  limit,
 		Prefix: opts.String("prefix"),
 		Page:   opts.String("page"),
@@ -77,9 +77,9 @@ func ListTag(parser *args.ArgParser, data interface{}) (int, error) {
 
 	var ctx = context.Background()
 	var count int
-	var page mailgun.TagsPage
+	var page []mailgun.TagItem
 	for it.Next(ctx, &page) {
-		for _, tag := range page.Items {
+		for _, tag := range page {
 			fmt.Printf("%s\n", tag.Value)
 			count += 1
 			if limit != 0 && count > limit {

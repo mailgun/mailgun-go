@@ -2,58 +2,196 @@ package mailgun
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 )
 
 // A Route structure contains information on a configured or to-be-configured route.
-// The Priority field indicates how soon the route works relative to other configured routes.
-// Routes of equal priority are consulted in chronological order.
-// The Description field provides a human-readable description for the route.
-// Mailgun ignores this field except to provide the description when viewing the Mailgun web control panel.
-// The Expression field lets you specify a pattern to match incoming messages against.
-// The Actions field contains strings specifying what to do
-// with any message which matches the provided expression.
-// The CreatedAt field provides a time-stamp for when the route came into existence.
-// Finally, the ID field provides a unique identifier for this route.
-//
 // When creating a new route, the SDK only uses a subset of the fields of this structure.
 // In particular, CreatedAt and ID are meaningless in this context, and will be ignored.
 // Only Priority, Description, Expression, and Actions need be provided.
 type Route struct {
-	Priority    int      `json:"priority,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Expression  string   `json:"expression,omitempty"`
-	Actions     []string `json:"actions,omitempty"`
+	// The Priority field indicates how soon the route works relative to other configured routes.
+	// Routes of equal priority are consulted in chronological order.
+	Priority int `json:"priority,omitempty"`
+	// The Description field provides a human-readable description for the route.
+	// Mailgun ignores this field except to provide the description when viewing the Mailgun web control panel.
+	Description string `json:"description,omitempty"`
+	// The Expression field lets you specify a pattern to match incoming messages against.
+	Expression string `json:"expression,omitempty"`
+	// The Actions field contains strings specifying what to do
+	// with any message which matches the provided expression.
+	Actions []string `json:"actions,omitempty"`
 
+	// The CreatedAt field provides a time-stamp for when the route came into existence.
 	CreatedAt string `json:"created_at,omitempty"`
-	ID        string `json:"id,omitempty"`
+	// ID field provides a unique identifier for this route.
+	ID string `json:"id,omitempty"`
 }
 
-// ListRoutes returns the complete set of routes configured for your domain.
-// You use routes to configure how to handle returned messages, or
-// messages sent to a specfic address on your domain.
-// See the Mailgun documentation for more information.
-func (mg *MailgunImpl) ListRoutes(ctx context.Context, limit, skip int) (int, []Route, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint))
-	if limit != DefaultLimit {
-		r.addParameter("limit", strconv.Itoa(limit))
+type routesListResponse struct {
+	TotalCount int     `json:"total_count"`
+	Items      []Route `json:"items"`
+}
+
+type createRouteResp struct {
+	Message string `json:"message"`
+	Route   `json:"route"`
+}
+
+// ListRoutes allows you to iterate through a list of routes returned by the API
+func (mg *MailgunImpl) ListRoutes(opts *ListOptions) *RoutesIterator {
+
+	var limit int
+	if opts != nil {
+		limit = opts.Limit
 	}
-	if skip != DefaultSkip {
+	return &RoutesIterator{
+		mg:                 mg,
+		url:                generatePublicApiUrl(mg, routesEndpoint),
+		routesListResponse: routesListResponse{TotalCount: -1},
+		limit:              limit,
+	}
+}
+
+type RoutesIterator struct {
+	routesListResponse
+
+	limit  int
+	mg     Mailgun
+	offset int
+	url    string
+	err    error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ri *RoutesIterator) Err() error {
+	return ri.err
+}
+
+// Return the total number of items as returned by the mailgun API
+// Returns -1 if Next() or First() have not been called
+func (ri *RoutesIterator) Count() int {
+	return ri.TotalCount
+}
+
+// Returns the current offset of the iterator
+func (ri *RoutesIterator) Offset() int {
+	return ri.offset
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+
+	cpy := make([]Route, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
+	}
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ri *RoutesIterator) First(ctx context.Context, items *[]Route) bool {
+	if ri.err != nil {
+		return false
+	}
+	ri.err = ri.fetch(ctx, 0, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Route, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ri *RoutesIterator) Last(ctx context.Context, items *[]Route) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.TotalCount - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Route, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.offset - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Route, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
+	r := newHTTPRequest(ri.url)
+
+	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
 	}
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var envelope struct {
-		TotalCount int     `json:"total_count"`
-		Items      []Route `json:"items"`
+	if limit != 0 {
+		r.addParameter("limit", strconv.Itoa(limit))
 	}
-	err := getResponseFromJSON(ctx, r, &envelope)
-	if err != nil {
-		fmt.Printf("err here\n")
-		return -1, nil, err
-	}
-	return envelope.TotalCount, envelope.Items, nil
+
+	r.setClient(ri.mg.Client())
+	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
+
+	return getResponseFromJSON(ctx, r, &ri.routesListResponse)
 }
 
 // CreateRoute installs a new route for your domain.
@@ -71,14 +209,11 @@ func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignor
 	for _, action := range prototype.Actions {
 		p.addValue("action", action)
 	}
-	var envelope struct {
-		Message string `json:"message"`
-		*Route  `json:"route"`
-	}
-	if err = postResponseFromJSON(ctx, r, p, &envelope); err != nil {
+	var resp createRouteResp
+	if err = postResponseFromJSON(ctx, r, p, &resp); err != nil {
 		return _ignored, err
 	}
-	return *envelope.Route, err
+	return resp.Route, err
 }
 
 // DeleteRoute removes the specified route from your domain's configuration.

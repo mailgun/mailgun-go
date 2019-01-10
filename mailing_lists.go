@@ -68,7 +68,7 @@ func (li *ListsIterator) Err() error {
 	return li.err
 }
 
-// Retrieves the next page of events from the api. Returns false when there
+// Retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (li *ListsIterator) Next(ctx context.Context, items *[]MailingList) bool {
@@ -86,7 +86,7 @@ func (li *ListsIterator) Next(ctx context.Context, items *[]MailingList) bool {
 	return true
 }
 
-// Retrieves the first page of events from the api. Returns false if there
+// Retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (li *ListsIterator) First(ctx context.Context, items *[]MailingList) bool {
@@ -101,7 +101,7 @@ func (li *ListsIterator) First(ctx context.Context, items *[]MailingList) bool {
 	return true
 }
 
-// Retrieves the last page of events from the api.
+// Retrieves the last page of items from the api.
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
@@ -117,7 +117,7 @@ func (li *ListsIterator) Last(ctx context.Context, items *[]MailingList) bool {
 	return true
 }
 
-// Retrieves the previous page of events from the api. Returns false when there
+// Retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (li *ListsIterator) Previous(ctx context.Context, items *[]MailingList) bool {

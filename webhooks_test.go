@@ -17,6 +17,10 @@ import (
 )
 
 func TestWebhookCRUD(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
@@ -59,6 +63,10 @@ var signedTests = []bool{
 }
 
 func TestVerifyWebhookRequest_Form(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
@@ -76,6 +84,10 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 }
 
 func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 

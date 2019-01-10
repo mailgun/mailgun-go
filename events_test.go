@@ -15,7 +15,7 @@ func TestEventIteratorGetNext(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
 
-	it := mg.ListEvents(&mailgun.EventsOptions{Limit: 5})
+	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 5})
 
 	var firstPage, secondPage, previousPage []mailgun.Event
 	var ctx = context.Background()
@@ -67,7 +67,7 @@ func TestEventPoller(t *testing.T) {
 	begin := time.Now().Add(time.Second * -3)
 
 	// Very short poll interval
-	it := mg.PollEvents(&mailgun.EventsOptions{
+	it := mg.PollEvents(&mailgun.ListEventOptions{
 		// Only events with a timestamp after this date/time will be returned
 		Begin: &begin,
 		// How often we poll the api for new events
@@ -115,7 +115,7 @@ func ExampleListEvents() {
 	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
 	mg.SetAPIBase(server.URL())
 
-	it := mg.ListEvents(&mailgun.EventsOptions{Limit: 100})
+	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
 
 	var page []mailgun.Event
 

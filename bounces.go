@@ -54,13 +54,15 @@ func (b Bounce) GetCode() (int, error) {
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
-func (mg *MailgunImpl) ListBounces(ctx context.Context, limit, skip int) (int, []Bounce, error) {
+func (mg *MailgunImpl) ListBounces(ctx context.Context, opts *ListOptions) ([]Bounce, error) {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
-	if limit != -1 {
-		r.addParameter("limit", strconv.Itoa(limit))
+
+	if opts != nil && opts.Limit != 0 {
+		r.addParameter("limit", strconv.Itoa(opts.Limit))
 	}
-	if skip != -1 {
-		r.addParameter("skip", strconv.Itoa(skip))
+
+	if opts != nil && opts.Skip != 0 {
+		r.addParameter("skip", strconv.Itoa(opts.Skip))
 	}
 
 	r.setClient(mg.Client())
@@ -69,10 +71,10 @@ func (mg *MailgunImpl) ListBounces(ctx context.Context, limit, skip int) (int, [
 	var response bounceEnvelope
 	err := getResponseFromJSON(ctx, r, &response)
 	if err != nil {
-		return -1, nil, err
+		return nil, err
 	}
 
-	return len(response.Items), response.Items, nil
+	return response.Items, nil
 }
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.

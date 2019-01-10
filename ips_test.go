@@ -19,9 +19,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestListIPS(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	ctx := context.Background()
 	list, err := mg.ListIPS(ctx, false)
@@ -37,12 +36,11 @@ func TestListIPS(t *testing.T) {
 }
 
 func TestDomainIPS(t *testing.T) {
-	mg, err := mailgun.NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	ensure.Nil(t, err)
 
 	ctx := context.Background()
-	err = mg.AddDomainIP(ctx, "192.172.1.1")
+	err := mg.AddDomainIP(ctx, "192.172.1.1")
 	ensure.Nil(t, err)
 
 	list, err := mg.ListDomainIPS(ctx)

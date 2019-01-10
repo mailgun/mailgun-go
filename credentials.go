@@ -17,15 +17,17 @@ type Credential struct {
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
 // ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) ListCredentials(ctx context.Context, limit, skip int) (int, []Credential, error) {
+func (mg *MailgunImpl) ListCredentials(ctx context.Context, opts *ListOptions) ([]Credential, error) {
 	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
 	r.setClient(mg.Client())
-	if limit != DefaultLimit {
-		r.addParameter("limit", strconv.Itoa(limit))
+	if opts != nil && opts.Limit != 0 {
+		r.addParameter("limit", strconv.Itoa(opts.Limit))
 	}
-	if skip != DefaultSkip {
-		r.addParameter("skip", strconv.Itoa(skip))
+
+	if opts != nil && opts.Skip != 0 {
+		r.addParameter("skip", strconv.Itoa(opts.Skip))
 	}
+
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var envelope struct {
 		TotalCount int          `json:"total_count"`
@@ -33,9 +35,9 @@ func (mg *MailgunImpl) ListCredentials(ctx context.Context, limit, skip int) (in
 	}
 	err := getResponseFromJSON(ctx, r, &envelope)
 	if err != nil {
-		return -1, nil, err
+		return nil, err
 	}
-	return envelope.TotalCount, envelope.Items, nil
+	return envelope.Items, nil
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.

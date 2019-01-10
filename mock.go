@@ -21,6 +21,7 @@ type MockServer struct {
 	domainList  []domainContainer
 	exportList  []Export
 	mailingList []mailingListContainer
+	routeList   []Route
 	events      []Event
 }
 
@@ -38,6 +39,7 @@ func NewMockServer() MockServer {
 		ms.addEventRoutes(r)
 		ms.addMessagesRoutes(r)
 		ms.addValidationRoutes(r)
+		ms.addRoutes(r)
 	})
 
 	// Start the server

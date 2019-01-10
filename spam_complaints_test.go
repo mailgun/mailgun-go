@@ -10,18 +10,23 @@ import (
 )
 
 func TestGetComplaints(t *testing.T) {
-	reqEnv(t, "MG_PUBLIC_API_KEY")
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
-	n, complaints, err := mg.ListComplaints(ctx, -1, -1)
+	_, err = mg.ListComplaints(ctx, nil)
 	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(complaints), n)
 }
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
-	reqEnv(t, "MG_PUBLIC_API_KEY")
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
@@ -35,13 +40,17 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
-		_, complaints, err := mg.ListComplaints(ctx, DefaultLimit, DefaultSkip)
+		complaints, err := mg.ListComplaints(ctx, nil)
 		ensure.Nil(t, err)
 
 		for _, complaint := range complaints {

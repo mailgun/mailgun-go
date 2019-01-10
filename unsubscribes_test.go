@@ -8,24 +8,32 @@ import (
 )
 
 func TestCreateUnsubscriber(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
 	// Create unsubscription record
-	ensure.Nil(t, mg.Unsubscribe(ctx, email, "*"))
+	ensure.Nil(t, mg.CreateUnsubscribe(ctx, email, "*"))
 }
 
 func TestGetUnsubscribes(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
-	n, us, err := mg.ListUnsubscribes(ctx, DefaultLimit, DefaultSkip)
+	us, err := mg.ListUnsubscribes(ctx, nil)
 	ensure.Nil(t, err)
 
-	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
+	t.Logf("Received %d unsubscribe records.\n", len(us))
 	if len(us) > 0 {
 		t.Log("ID\tAddress\tCreated At\tTags\t")
 		for _, u := range us {
@@ -34,30 +42,40 @@ func TestGetUnsubscribes(t *testing.T) {
 	}
 }
 
-func TestGetUnsubscriptionByAddress(t *testing.T) {
+func TestGetUnsubscribe(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
 	// Create unsubscription record
-	ensure.Nil(t, mg.Unsubscribe(ctx, email, "*"))
+	ensure.Nil(t, mg.CreateUnsubscribe(ctx, email, "*"))
 
-	n, us, err := mg.GetUnsubscribes(ctx, email)
+	u, err := mg.GetUnsubscribe(ctx, email)
 	ensure.Nil(t, err)
+	t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
 
-	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
+	/*t.Logf("Received %d unsubscribe records.\n", len(us))
 	if len(us) > 0 {
 		t.Log("ID\tAddress\tCreated At\tTags\t")
 		for _, u := range us {
 			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
 		}
 	}
+	*/
 	// Destroy the unsubscription record
-	ensure.Nil(t, mg.RemoveUnsubscribe(ctx, email))
+	ensure.Nil(t, mg.DeleteUnsubscribe(ctx, email))
 }
 
 func TestCreateDestroyUnsubscription(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
@@ -65,12 +83,12 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 	ctx := context.Background()
 
 	// Create unsubscription record
-	ensure.Nil(t, mg.Unsubscribe(ctx, email, "*"))
+	ensure.Nil(t, mg.CreateUnsubscribe(ctx, email, "*"))
 
-	n, us, err := mg.GetUnsubscribes(ctx, email)
+	_, err = mg.GetUnsubscribe(ctx, email)
 	ensure.Nil(t, err)
-	t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)
+	/*t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)*/
 
 	// Destroy the unsubscription record
-	ensure.Nil(t, mg.RemoveUnsubscribe(ctx, email))
+	ensure.Nil(t, mg.DeleteUnsubscribe(ctx, email))
 }
