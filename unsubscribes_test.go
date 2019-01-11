@@ -30,16 +30,18 @@ func TestGetUnsubscribes(t *testing.T) {
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
-	us, err := mg.ListUnsubscribes(ctx, nil)
-	ensure.Nil(t, err)
-
-	t.Logf("Received %d unsubscribe records.\n", len(us))
-	if len(us) > 0 {
-		t.Log("ID\tAddress\tCreated At\tTags\t")
-		for _, u := range us {
-			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
+	it := mg.ListUnsubscribes(nil)
+	var page []Unsubscribe
+	for it.Next(ctx, &page) {
+		t.Logf("Received %d unsubscribe records.\n", len(page))
+		if len(page) > 0 {
+			t.Log("ID\tAddress\tCreated At\tTags\t")
+			for _, u := range page {
+				t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
+			}
 		}
 	}
+	ensure.Nil(t, it.Err())
 }
 
 func TestGetUnsubscribe(t *testing.T) {

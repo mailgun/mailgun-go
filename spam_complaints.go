@@ -28,7 +28,7 @@ type complaintsResponse struct {
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
 func (mg *MailgunImpl) ListComplaints(opts *ListOptions) *ComplaintsIterator {
-	r := newHTTPRequest(generatePublicApiUrl(mg, mg.domain+"/"+complaintsEndpoint))
+	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {

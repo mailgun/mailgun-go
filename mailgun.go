@@ -177,8 +177,8 @@ type Mailgun interface {
 	ChangeCredentialPassword(ctx context.Context, id, password string) error
 	DeleteCredential(ctx context.Context, id string) error
 
-	ListUnsubscribes(ctx context.Context, opts *ListOptions) ([]Unsubscription, error)
-	GetUnsubscribe(ctx context.Context, address string) (Unsubscription, error)
+	ListUnsubscribes(opts *ListOptions) *UnsubscribesIterator
+	GetUnsubscribe(ctx context.Context, address string) (Unsubscribe, error)
 	CreateUnsubscribe(ctx context.Context, address, tag string) error
 	DeleteUnsubscribe(ctx context.Context, address string) error
 	DeleteUnsubscribeWithTag(ctx context.Context, a, t string) error

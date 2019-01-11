@@ -5,16 +5,21 @@ import (
 	"strconv"
 )
 
-type Unsubscription struct {
+type Unsubscribe struct {
 	CreatedAt string   `json:"created_at"`
 	Tags      []string `json:"tags"`
 	ID        string   `json:"id"`
 	Address   string   `json:"address"`
 }
 
-// Fetches the list of unsubscribes.
-func (mg *MailgunImpl) ListUnsubscribes(ctx context.Context, opts *ListOptions) ([]Unsubscription, error) {
-	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
+type unsubscribesResponse struct {
+	Paging Paging        `json:"paging"`
+	Items  []Unsubscribe `json:"items"`
+}
+
+// Fetches the list of unsubscribes
+func (mg *MailgunImpl) ListUnsubscribes(opts *ListOptions) *UnsubscribesIterator {
+	/*r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.setClient(mg.Client())
 
@@ -28,20 +33,131 @@ func (mg *MailgunImpl) ListUnsubscribes(ctx context.Context, opts *ListOptions) 
 
 	var envelope struct {
 		TotalCount int              `json:"total_count"`
-		Items      []Unsubscription `json:"items"`
+		Items      []Unsubscribe `json:"items"`
 	}
 	err := getResponseFromJSON(ctx, r, &envelope)
-	return envelope.Items, err
+	return envelope.Items, err*/
+	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	if opts != nil {
+		if opts.Limit != 0 {
+			r.addParameter("limit", strconv.Itoa(opts.Limit))
+		}
+	}
+	url, err := r.generateUrlWithParameters()
+	return &UnsubscribesIterator{
+		mg:                   mg,
+		unsubscribesResponse: unsubscribesResponse{Paging: Paging{Next: url, First: url}},
+		err:                  err,
+	}
+}
+
+type UnsubscribesIterator struct {
+	unsubscribesResponse
+	mg  Mailgun
+	err error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ci *UnsubscribesIterator) Err() error {
+	return ci.err
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ci *UnsubscribesIterator) Next(ctx context.Context, items *[]Unsubscribe) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Next)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Unsubscribe, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ci *UnsubscribesIterator) First(ctx context.Context, items *[]Unsubscribe) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.First)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Unsubscribe, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ci *UnsubscribesIterator) Last(ctx context.Context, items *[]Unsubscribe) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Last)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Unsubscribe, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ci *UnsubscribesIterator) Previous(ctx context.Context, items *[]Unsubscribe) bool {
+	if ci.err != nil {
+		return false
+	}
+	if ci.Paging.Previous == "" {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Previous)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Unsubscribe, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ci *UnsubscribesIterator) fetch(ctx context.Context, url string) error {
+	r := newHTTPRequest(url)
+	r.setClient(ci.mg.Client())
+	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
+
+	return getResponseFromJSON(ctx, r, &ci.unsubscribesResponse)
 }
 
 // Retreives a single unsubscribe record. Can be used to check if a given address is present in the list of unsubscribed users.
-func (mg *MailgunImpl) GetUnsubscribe(ctx context.Context, address string) (Unsubscription, error) {
+func (mg *MailgunImpl) GetUnsubscribe(ctx context.Context, address string) (Unsubscribe, error) {
 	// TODO: Test this method!
 	r := newHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, address))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var envelope struct {
-		Unsubscribe Unsubscription `json:"unsubscribe"`
+		Unsubscribe Unsubscribe `json:"unsubscribe"`
 	}
 	err := getResponseFromJSON(ctx, r, &envelope)
 	return envelope.Unsubscribe, err
