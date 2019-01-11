@@ -63,23 +63,22 @@ type statsTotalResponse struct {
 type Resolution string
 
 const (
-	ResolutionHour = Resolution("hour")
-	ResolutionDay = Resolution("day")
+	ResolutionHour  = Resolution("hour")
+	ResolutionDay   = Resolution("day")
 	ResolutionMonth = Resolution("month")
 )
 
 type ListStatOptions struct {
 	Resolution Resolution
-	Duration string
-	Start time.Time
-	End time.Time
-	Limit int
-	Skip int
+	Duration   string
+	Start      time.Time
+	End        time.Time
+	Limit      int
+	Skip       int
 }
 
 // Returns total stats for a given domain for the specified time period
-func (mg *MailgunImpl) ListStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error) {
-	// TODO: Test this
+func (mg *MailgunImpl) GetStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error) {
 	r := newHTTPRequest(generateApiUrl(mg, statsTotalEndpoint))
 
 	if opts != nil {

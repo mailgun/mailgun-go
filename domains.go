@@ -4,7 +4,6 @@ import (
 	"context"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // DefaultLimit and DefaultSkip instruct the SDK to rely on Mailgun's reasonable defaults for Paging settings.
@@ -27,11 +26,11 @@ type SpamAction string
 
 // A Domain structure holds information about a domain used when sending mail.
 type Domain struct {
-	CreatedAt    string `json:"created_at"`
-	SMTPLogin    string `json:"smtp_login"`
-	Name         string `json:"name"`
-	SMTPPassword string `json:"smtp_password"`
-	Wildcard     bool   `json:"wildcard"`
+	CreatedAt    RFC2822Time `json:"created_at"`
+	SMTPLogin    string      `json:"smtp_login"`
+	Name         string      `json:"name"`
+	SMTPPassword string      `json:"smtp_password"`
+	Wildcard     bool        `json:"wildcard"`
 	// The SpamAction field must be one of Tag, Disabled, or Delete.
 	SpamAction string `json:"spam_action"`
 	State      string `json:"state"`
@@ -81,12 +80,6 @@ type TrackingStatus struct {
 
 type domainTrackingResponse struct {
 	Tracking DomainTracking `json:"tracking"`
-}
-
-// GetCreatedAt returns the time the domain was created as a normal Go time.Time type.
-func (d Domain) GetCreatedAt() (t time.Time, err error) {
-	t, err = parseMailgunTime(d.CreatedAt)
-	return
 }
 
 // ListDomains retrieves a set of domains from Mailgun.

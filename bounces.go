@@ -3,7 +3,6 @@ package mailgun
 import (
 	"context"
 	"strconv"
-	"time"
 )
 
 // Bounce aggregates data relating to undeliverable messages to a specific intended recipient,
@@ -12,8 +11,8 @@ import (
 // while Error provides a human readable reason why.
 // CreatedAt provides the time at which Mailgun detected the bounce.
 type Bounce struct {
-	CreatedAt string      `json:"created_at"`
-	Code      interface{} `json:"code"`
+	CreatedAt RFC2822Time `json:"created_at"`
+	Code      string      `json:"code"`
 	Address   string      `json:"address"`
 	Error     string      `json:"error"`
 }
@@ -25,56 +24,127 @@ type Paging struct {
 	Last     string `json:"last,omitempty"`
 }
 
-type bounceEnvelope struct {
+type bouncesListResponse struct {
 	Items  []Bounce `json:"items"`
 	Paging Paging   `json:"paging"`
-}
-
-// GetCreatedAt parses the textual, RFC-822 timestamp into a standard Go-compatible
-// Time structure.
-func (i Bounce) GetCreatedAt() (t time.Time, err error) {
-	return parseMailgunTime(i.CreatedAt)
-}
-
-// GetCode will return the bounce code for the message, regardless if it was
-// returned as a string or as an integer.  This method overcomes a protocol
-// bug in the Mailgun API.
-func (b Bounce) GetCode() (int, error) {
-	switch c := b.Code.(type) {
-	case int:
-		return c, nil
-	case string:
-		return strconv.Atoi(c)
-	default:
-		return -1, strconv.ErrSyntax
-	}
 }
 
 // ListBounces returns a complete set of bounces logged against the sender's domain, if any.
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
-func (mg *MailgunImpl) ListBounces(ctx context.Context, opts *ListOptions) ([]Bounce, error) {
+func (mg *MailgunImpl) ListBounces(opts *ListOptions) *BouncesIterator {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
-
-	if opts != nil && opts.Limit != 0 {
-		r.addParameter("limit", strconv.Itoa(opts.Limit))
-	}
-
-	if opts != nil && opts.Skip != 0 {
-		r.addParameter("skip", strconv.Itoa(opts.Skip))
-	}
-
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-
-	var response bounceEnvelope
-	err := getResponseFromJSON(ctx, r, &response)
-	if err != nil {
-		return nil, err
+	if opts != nil {
+		if opts.Limit != 0 {
+			r.addParameter("limit", strconv.Itoa(opts.Limit))
+		}
 	}
+	url, err := r.generateUrlWithParameters()
+	return &BouncesIterator{
+		mg:                  mg,
+		bouncesListResponse: bouncesListResponse{Paging: Paging{Next: url, First: url}},
+		err:                 err,
+	}
+}
 
-	return response.Items, nil
+type BouncesIterator struct {
+	bouncesListResponse
+	mg  Mailgun
+	err error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ci *BouncesIterator) Err() error {
+	return ci.err
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Next)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Bounce, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.First)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Bounce, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Last)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Bounce, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
+	if ci.err != nil {
+		return false
+	}
+	if ci.Paging.Previous == "" {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Previous)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Bounce, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
+	r := newHTTPRequest(url)
+	r.setClient(ci.mg.Client())
+	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
+
+	return getResponseFromJSON(ctx, r, &ci.bouncesListResponse)
 }
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.

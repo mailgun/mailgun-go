@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/facebookgo/ensure"
@@ -12,7 +13,7 @@ func TestCreateUnsubscriber(t *testing.T) {
 		t.Skip(reason)
 	}
 
-	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
+	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
@@ -21,7 +22,7 @@ func TestCreateUnsubscriber(t *testing.T) {
 	ensure.Nil(t, mg.CreateUnsubscribe(ctx, email, "*"))
 }
 
-func TestGetUnsubscribes(t *testing.T) {
+func TestListUnsubscribes(t *testing.T) {
 	if reason := SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
@@ -49,7 +50,7 @@ func TestGetUnsubscribe(t *testing.T) {
 		t.Skip(reason)
 	}
 
-	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
+	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 	ctx := context.Background()
@@ -61,14 +62,6 @@ func TestGetUnsubscribe(t *testing.T) {
 	ensure.Nil(t, err)
 	t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
 
-	/*t.Logf("Received %d unsubscribe records.\n", len(us))
-	if len(us) > 0 {
-		t.Log("ID\tAddress\tCreated At\tTags\t")
-		for _, u := range us {
-			t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
-		}
-	}
-	*/
 	// Destroy the unsubscription record
 	ensure.Nil(t, mg.DeleteUnsubscribe(ctx, email))
 }
@@ -78,7 +71,7 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 		t.Skip(reason)
 	}
 
-	email := randomEmail("unsubcribe", reqEnv(t, "MG_DOMAIN"))
+	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 

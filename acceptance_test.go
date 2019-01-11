@@ -2,7 +2,6 @@ package mailgun
 
 import (
 	"bytes"
-	"crypto/rand"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,8 +11,6 @@ import (
 	"net/url"
 	"os"
 	"testing"
-
-	"github.com/facebookgo/ensure"
 )
 
 // Return the variable missing which caused the test to be skipped
@@ -24,24 +21,6 @@ func SkipNetworkTest() string {
 		}
 	}
 	return ""
-}
-
-// Many tests require configuration settings unique to the user, passed in via
-// environment variables.  If these variables aren't set, we need to fail the test early.
-func reqEnv(t *testing.T, variableName string) string {
-	value := os.Getenv(variableName)
-	ensure.True(t, value != "")
-	return value
-}
-
-func randomDomainURL(n int) string {
-	const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	var bytes = make([]byte, n)
-	rand.Read(bytes)
-	for i, b := range bytes {
-		bytes[i] = alpha[b%byte(len(alpha))]
-	}
-	return "http://" + string(bytes) + ".com"
 }
 
 func spendMoney(t *testing.T, tFunc func()) {

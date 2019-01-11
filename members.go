@@ -52,7 +52,7 @@ type MemberListIterator struct {
 
 type ListOptions struct {
 	Limit int
-	Skip int
+	Skip  int
 }
 
 func (mg *MailgunImpl) ListMembers(address string, opts *ListOptions) *MemberListIterator {

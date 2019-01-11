@@ -81,9 +81,8 @@ func (ms *MockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	now := time.Now()
 	ms.routeList = append(ms.routeList, Route{
-		CreatedAt:   formatMailgunTime(&now),
+		CreatedAt:   RFC2822Time(time.Now().UTC()),
 		ID:          randomString(10, "ID-"),
 		Priority:    stringToInt(r.FormValue("priority")),
 		Description: r.FormValue("description"),

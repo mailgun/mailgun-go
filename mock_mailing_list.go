@@ -32,7 +32,7 @@ func (ms *MockServer) addMailingListRoutes(r chi.Router) {
 		MailingList: MailingList{
 			AccessLevel:  "everyone",
 			Address:      "foo@mailgun.test",
-			CreatedAt:    "Tue, 06 Mar 2012 05:44:45 GMT",
+			CreatedAt:    RFC2822Time(time.Now().UTC()),
 			Description:  "Mailgun developers list",
 			MembersCount: 1,
 			Name:         "",
@@ -143,10 +143,9 @@ func (ms *MockServer) updateMailingList(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ms *MockServer) createMailingList(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
 	ms.mailingList = append(ms.mailingList, mailingListContainer{
 		MailingList: MailingList{
-			CreatedAt:   formatMailgunTime(&now),
+			CreatedAt:   RFC2822Time(time.Now().UTC()),
 			Name:        r.FormValue("name"),
 			Address:     r.FormValue("address"),
 			Description: r.FormValue("description"),

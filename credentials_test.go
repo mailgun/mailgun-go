@@ -3,6 +3,7 @@ package mailgun
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -35,7 +36,7 @@ func TestCreateDeleteCredentials(t *testing.T) {
 		t.Skip(reason)
 	}
 
-	domain := reqEnv(t, "MG_DOMAIN")
+	domain := os.Getenv("MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 

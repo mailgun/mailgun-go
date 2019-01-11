@@ -20,7 +20,7 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 
 	ms.domainList = append(ms.domainList, domainContainer{
 		Domain: Domain{
-			CreatedAt:    "Wed, 10 Jul 2013 19:26:52 GMT",
+			CreatedAt:    RFC2822Time(time.Now().UTC()),
 			Name:         "mailgun.test",
 			SMTPLogin:    "postmaster@mailgun.test",
 			SMTPPassword: "4rtqo4p6rrx9",
@@ -122,10 +122,9 @@ func (ms *MockServer) getDomain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *MockServer) createDomain(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
 	ms.domainList = append(ms.domainList, domainContainer{
 		Domain: Domain{
-			CreatedAt:    formatMailgunTime(&now),
+			CreatedAt:    RFC2822Time(time.Now()),
 			Name:         r.FormValue("name"),
 			SMTPLogin:    r.FormValue("smtp_login"),
 			SMTPPassword: r.FormValue("smtp_password"),

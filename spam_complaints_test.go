@@ -44,7 +44,6 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {
-	Debug = true
 	if reason := SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}

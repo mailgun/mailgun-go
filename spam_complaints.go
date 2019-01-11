@@ -14,9 +14,9 @@ const (
 // Count provides a running counter of how many times
 // the recipient thought your messages were not solicited.
 type Complaint struct {
-	Count     int    `json:"count"`
-	CreatedAt string `json:"created_at"`
-	Address   string `json:"address"`
+	Count     int         `json:"count"`
+	CreatedAt RFC2822Time `json:"created_at"`
+	Address   string      `json:"address"`
 }
 
 type complaintsResponse struct {

@@ -6,10 +6,10 @@ import (
 )
 
 type Unsubscribe struct {
-	CreatedAt string   `json:"created_at"`
-	Tags      []string `json:"tags"`
-	ID        string   `json:"id"`
-	Address   string   `json:"address"`
+	CreatedAt RFC2822Time `json:"created_at"`
+	Tags      []string    `json:"tags"`
+	ID        string      `json:"id"`
+	Address   string      `json:"address"`
 }
 
 type unsubscribesResponse struct {
@@ -19,24 +19,6 @@ type unsubscribesResponse struct {
 
 // Fetches the list of unsubscribes
 func (mg *MailgunImpl) ListUnsubscribes(opts *ListOptions) *UnsubscribesIterator {
-	/*r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	r.setClient(mg.Client())
-
-	if opts != nil && opts.Limit != 0 {
-		r.addParameter("limit", strconv.Itoa(opts.Limit))
-	}
-
-	if opts != nil && opts.Skip != 0 {
-		r.addParameter("skip", strconv.Itoa(opts.Skip))
-	}
-
-	var envelope struct {
-		TotalCount int              `json:"total_count"`
-		Items      []Unsubscribe `json:"items"`
-	}
-	err := getResponseFromJSON(ctx, r, &envelope)
-	return envelope.Items, err*/
 	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

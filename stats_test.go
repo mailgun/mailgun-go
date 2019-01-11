@@ -16,7 +16,7 @@ func TestListStats(t *testing.T) {
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
-	stats, err := mg.ListStats(ctx, []string{"accepted", "delivered"}, nil)
+	stats, err := mg.GetStats(ctx, []string{"accepted", "delivered"}, nil)
 	ensure.Nil(t, err)
 
 	if len(stats) > 0 {

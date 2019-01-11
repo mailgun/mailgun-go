@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -92,7 +93,7 @@ func TestSendMGPlain(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -110,7 +111,7 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -129,7 +130,7 @@ func TestSendMGPlainAt(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -148,7 +149,7 @@ func TestSendMGHtml(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -167,7 +168,7 @@ func TestSendMGTracking(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -186,7 +187,7 @@ func TestSendMGTag(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -207,7 +208,7 @@ func TestSendMGMIME(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -225,7 +226,7 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -246,7 +247,7 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 	}
 
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 

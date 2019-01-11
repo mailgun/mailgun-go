@@ -8,9 +8,9 @@ import (
 
 // A Credential structure describes a principle allowed to send or receive mail at the domain.
 type Credential struct {
-	CreatedAt string `json:"created_at"`
-	Login     string `json:"login"`
-	Password  string `json:"password"`
+	CreatedAt RFC2822Time `json:"created_at"`
+	Login     string      `json:"login"`
+	Password  string      `json:"password"`
 }
 
 type credentialsListResponse struct {

@@ -148,12 +148,12 @@ type Mailgun interface {
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
-	ListBounces(ctx context.Context, opts *ListOptions) ([]Bounce, error)
+	ListBounces(opts *ListOptions) *BouncesIterator
 	GetBounce(ctx context.Context, address string) (Bounce, error)
 	AddBounce(ctx context.Context, address, code, error string) error
 	DeleteBounce(ctx context.Context, address string) error
 
-	ListStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error)
+	GetStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error)
 	GetTag(ctx context.Context, tag string) (Tag, error)
 	DeleteTag(ctx context.Context, tag string) error
 	ListTags(*ListTagOptions) *TagIterator
