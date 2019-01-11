@@ -13,31 +13,166 @@ type Credential struct {
 	Password  string `json:"password"`
 }
 
+type credentialsListResponse struct {
+	TotalCount int          `json:"total_count"`
+	Items      []Credential `json:"items"`
+}
+
 // ErrEmptyParam results occur when a required parameter is missing.
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
 // ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) ListCredentials(ctx context.Context, opts *ListOptions) ([]Credential, error) {
-	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
-	r.setClient(mg.Client())
-	if opts != nil && opts.Limit != 0 {
-		r.addParameter("limit", strconv.Itoa(opts.Limit))
+func (mg *MailgunImpl) ListCredentials(opts *ListOptions) *CredentialsIterator {
+	var limit int
+	if opts != nil {
+		limit = opts.Limit
+	}
+	return &CredentialsIterator{
+		mg:                      mg,
+		url:                     generateCredentialsUrl(mg, ""),
+		credentialsListResponse: credentialsListResponse{TotalCount: -1},
+		limit:                   limit,
+	}
+}
+
+type CredentialsIterator struct {
+	credentialsListResponse
+
+	limit  int
+	mg     Mailgun
+	offset int
+	url    string
+	err    error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ri *CredentialsIterator) Err() error {
+	return ri.err
+}
+
+// Return the total number of items as returned by the mailgun API
+// Returns -1 if Next() or First() have not been called
+func (ri *CredentialsIterator) Count() int {
+	return ri.TotalCount
+}
+
+// Returns the current offset of the iterator
+func (ri *CredentialsIterator) Offset() int {
+	return ri.offset
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
 	}
 
-	if opts != nil && opts.Skip != 0 {
-		r.addParameter("skip", strconv.Itoa(opts.Skip))
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
 	}
 
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var envelope struct {
-		TotalCount int          `json:"total_count"`
-		Items      []Credential `json:"items"`
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
 	}
-	err := getResponseFromJSON(ctx, r, &envelope)
-	if err != nil {
-		return nil, err
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
 	}
-	return envelope.Items, nil
+	ri.err = ri.fetch(ctx, 0, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.TotalCount - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.offset - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error {
+	r := newHTTPRequest(ri.url)
+	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
+	r.setClient(ri.mg.Client())
+
+	if skip != 0 {
+		r.addParameter("skip", strconv.Itoa(skip))
+	}
+	if limit != 0 {
+		r.addParameter("limit", strconv.Itoa(limit))
+	}
+
+	return getResponseFromJSON(ctx, r, &ri.credentialsListResponse)
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.

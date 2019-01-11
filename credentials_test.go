@@ -18,13 +18,16 @@ func TestGetCredentials(t *testing.T) {
 	ensure.Nil(t, err)
 
 	ctx := context.Background()
-	cs, err := mg.ListCredentials(ctx, nil)
-	ensure.Nil(t, err)
+	it := mg.ListCredentials(nil)
 
-	t.Logf("Login\tCreated At\t\n")
-	for _, c := range cs {
-		t.Logf("%s\t%s\t\n", c.Login, c.CreatedAt)
+	var page []Credential
+	for it.Next(ctx, &page) {
+		t.Logf("Login\tCreated At\t\n")
+		for _, c := range page {
+			t.Logf("%s\t%s\t\n", c.Login, c.CreatedAt)
+		}
 	}
+	ensure.Nil(t, it.Err())
 }
 
 func TestCreateDeleteCredentials(t *testing.T) {

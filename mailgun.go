@@ -172,7 +172,7 @@ type Mailgun interface {
 	GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error)
 	DeleteStoredMessage(ctx context.Context, id string) error
 
-	ListCredentials(ctx context.Context, opts *ListOptions) ([]Credential, error)
+	ListCredentials(opts *ListOptions) *CredentialsIterator
 	CreateCredential(ctx context.Context, login, password string) error
 	ChangeCredentialPassword(ctx context.Context, id, password string) error
 	DeleteCredential(ctx context.Context, id string) error

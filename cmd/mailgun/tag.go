@@ -77,7 +77,7 @@ func ListTag(parser *args.ArgParser, data interface{}) (int, error) {
 
 	var ctx = context.Background()
 	var count int
-	var page []mailgun.TagItem
+	var page []mailgun.Tag
 	for it.Next(ctx, &page) {
 		for _, tag := range page {
 			fmt.Printf("%s\n", tag.Value)

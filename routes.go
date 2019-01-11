@@ -40,7 +40,6 @@ type createRouteResp struct {
 
 // ListRoutes allows you to iterate through a list of routes returned by the API
 func (mg *MailgunImpl) ListRoutes(opts *ListOptions) *RoutesIterator {
-
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
