@@ -24,10 +24,6 @@ type ListTagOptions struct {
 	Limit int
 	// Return only the tags starting with the given prefix
 	Prefix string
-	// The page direction based off the 'tag' parameter; valid choices are (first, last, next, prev)
-	Page string
-	// The tag that marks piviot point for the 'page' parameter
-	Tag string
 }
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
@@ -67,12 +63,6 @@ func (mg *MailgunImpl) ListTags(opts *ListTagOptions) *TagIterator {
 		}
 		if opts.Prefix != "" {
 			req.addParameter("prefix", opts.Prefix)
-		}
-		if opts.Page != "" {
-			req.addParameter("page", opts.Page)
-		}
-		if opts.Tag != "" {
-			req.addParameter("tag", opts.Tag)
 		}
 	}
 

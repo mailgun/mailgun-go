@@ -33,22 +33,22 @@ func TestRouteCRUD(t *testing.T) {
 		},
 	})
 	ensure.Nil(t, err)
-	ensure.True(t, newRoute.ID != "")
+	ensure.True(t, newRoute.Id != "")
 
 	defer func() {
-		ensure.Nil(t, mg.DeleteRoute(ctx, newRoute.ID))
-		_, err = mg.GetRoute(ctx, newRoute.ID)
+		ensure.Nil(t, mg.DeleteRoute(ctx, newRoute.Id))
+		_, err = mg.GetRoute(ctx, newRoute.Id)
 		ensure.NotNil(t, err)
 	}()
 
 	newCount := countRoutes()
 	ensure.False(t, newCount <= routeCount)
 
-	theRoute, err := mg.GetRoute(ctx, newRoute.ID)
+	theRoute, err := mg.GetRoute(ctx, newRoute.Id)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, newRoute, theRoute)
 
-	changedRoute, err := mg.UpdateRoute(ctx, newRoute.ID, mailgun.Route{
+	changedRoute, err := mg.UpdateRoute(ctx, newRoute.Id, mailgun.Route{
 		Priority: 2,
 	})
 	ensure.Nil(t, err)
@@ -90,7 +90,7 @@ func TestRoutesIterator(t *testing.T) {
 
 	ensure.True(t, it.Previous(ctx, &previousPage))
 	ensure.True(t, len(previousPage) != 0)
-	ensure.DeepEqual(t, previousPage[0].ID, firstPage[0].ID)
+	ensure.DeepEqual(t, previousPage[0].Id, firstPage[0].Id)
 
 	// First()
 	ensure.True(t, it.First(ctx, &firstPage))

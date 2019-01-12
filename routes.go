@@ -25,7 +25,7 @@ type Route struct {
 	// The CreatedAt field provides a time-stamp for when the route came into existence.
 	CreatedAt RFC2822Time `json:"created_at,omitempty"`
 	// ID field provides a unique identifier for this route.
-	ID string `json:"id,omitempty"`
+	Id string `json:"id,omitempty"`
 }
 
 type routesListResponse struct {

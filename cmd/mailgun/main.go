@@ -36,6 +36,7 @@ func main() {
 	parser.AddCommand("tag", Tag)
 	parser.AddCommand("events", ListEvents)
 	parser.AddCommand("mailing-lists", MailingLists)
+	parser.AddCommand("templates", Templates)
 
 	// Parser and set global options
 	opts := parser.ParseOrExit(nil)

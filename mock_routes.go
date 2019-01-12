@@ -20,7 +20,7 @@ func (ms *MockServer) addRoutes(r chi.Router) {
 
 	for i := 0; i < 10; i++ {
 		ms.routeList = append(ms.routeList, Route{
-			ID:          randomString(10, "ID-"),
+			Id:          randomString(10, "ID-"),
 			Priority:    0,
 			Description: fmt.Sprintf("Sample Route %d", i),
 			Actions: []string{
@@ -65,7 +65,7 @@ func (ms *MockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
 
 func (ms *MockServer) getRoute(w http.ResponseWriter, r *http.Request) {
 	for _, item := range ms.routeList {
-		if item.ID == chi.URLParam(r, "id") {
+		if item.Id == chi.URLParam(r, "id") {
 			toJSON(w, routeResponse{Route: item})
 			return
 		}
@@ -83,7 +83,7 @@ func (ms *MockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 
 	ms.routeList = append(ms.routeList, Route{
 		CreatedAt:   RFC2822Time(time.Now().UTC()),
-		ID:          randomString(10, "ID-"),
+		Id:          randomString(10, "ID-"),
 		Priority:    stringToInt(r.FormValue("priority")),
 		Description: r.FormValue("description"),
 		Expression:  r.FormValue("expression"),
@@ -97,7 +97,7 @@ func (ms *MockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 
 func (ms *MockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 	for i, item := range ms.routeList {
-		if item.ID == chi.URLParam(r, "id") {
+		if item.Id == chi.URLParam(r, "id") {
 
 			if r.FormValue("action") != "" {
 				ms.routeList[i].Actions = r.Form["action"]
@@ -122,7 +122,7 @@ func (ms *MockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) deleteRoute(w http.ResponseWriter, r *http.Request) {
 	result := ms.routeList[:0]
 	for _, item := range ms.routeList {
-		if item.ID == chi.URLParam(r, "id") {
+		if item.Id == chi.URLParam(r, "id") {
 			continue
 		}
 		result = append(result, item)

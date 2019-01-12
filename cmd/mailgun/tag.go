@@ -55,9 +55,6 @@ func ListTag(parser *args.ArgParser, data interface{}) (int, error) {
 	parser.SetDesc(desc)
 	parser.AddOption("--prefix").Alias("-p").Help("list only tags with the given prefix")
 	parser.AddOption("--limit").Alias("-l").IsInt().Help("Limit the result set")
-	parser.AddOption("--tag").Alias("-t").Help("The tag that marks piviot point for the --page parameter")
-	parser.AddOption("--page").Alias("-pg").
-		Help("The page direction based off the tag parameter; valid choices are (first, last, next, prev)")
 
 	opts := parser.ParseSimple(nil)
 	if opts == nil {
@@ -71,8 +68,6 @@ func ListTag(parser *args.ArgParser, data interface{}) (int, error) {
 	it := mg.ListTags(&mailgun.ListTagOptions{
 		Limit:  limit,
 		Prefix: opts.String("prefix"),
-		Page:   opts.String("page"),
-		Tag:    opts.String("tag"),
 	})
 
 	var ctx = context.Background()

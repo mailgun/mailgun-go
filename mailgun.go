@@ -126,6 +126,7 @@ const (
 	webhooksEndpoint     = "webhooks"
 	listsEndpoint        = "lists"
 	basicAuthUser        = "api"
+	templatesEndpoint    = "templates"
 )
 
 // Mailgun defines the supported subset of the Mailgun API.
@@ -229,6 +230,18 @@ type Mailgun interface {
 	CreateExport(ctx context.Context, url string) error
 
 	GetTagLimits(ctx context.Context, domain string) (TagLimits, error)
+
+	CreateTemplate(ctx context.Context, template *Template) error
+	GetTemplate(ctx context.Context, id string) (Template, error)
+	UpdateTemplate(ctx context.Context, template *Template) error
+	DeleteTemplate(ctx context.Context, id string) error
+	ListTemplates(opts *ListOptions) *TemplatesIterator
+
+	AddTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error
+	GetTemplateVersion(ctx context.Context, templateId, versionId string) (TemplateVersion, error)
+	UpdateTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error
+	DeleteTemplateVersion(ctx context.Context, templateId, versionId string) error
+	ListTemplateVersions(templateId string, opts *ListOptions) *TemplateVersionsIterator
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
