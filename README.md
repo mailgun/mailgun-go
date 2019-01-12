@@ -75,6 +75,98 @@ func main() {
 }
 ```
 
+## Get Events
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+
+    "github.com/mailgun/mailgun-go/v3"
+    "github.com/mailgun/mailgun-go/v3/events"
+)
+
+func main() {
+    mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+
+	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
+
+	var page []mailgun.Event
+
+	// The entire operation should not take longer than 30 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	// For each page of 100 events
+	for it.Next(ctx, &page) {
+		for _, e := range page {
+			// You can access some fields via the interface
+			fmt.Printf("Event: '%s' TimeStamp: '%s'\n", e.GetName(), e.GetTimestamp())
+
+			// and you can act upon each event by type
+			switch event := e.(type) {
+			case *events.Accepted:
+				fmt.Printf("Accepted: auth: %t\n", event.Flags.IsAuthenticated)
+			case *events.Delivered:
+				fmt.Printf("Delivered transport: %s\n", event.Envelope.Transport)
+			case *events.Failed:
+				fmt.Printf("Failed reason: %s\n", event.Reason)
+			case *events.Clicked:
+				fmt.Printf("Clicked GeoLocation: %s\n", event.GeoLocation.Country)
+			case *events.Opened:
+				fmt.Printf("Opened GeoLocation: %s\n", event.GeoLocation.Country)
+			case *events.Rejected:
+				fmt.Printf("Rejected reason: %s\n", event.Reject.Reason)
+			case *events.Stored:
+				fmt.Printf("Stored URL: %s\n", event.Storage.URL)
+			case *events.Unsubscribed:
+				fmt.Printf("Unsubscribed client OS: %s\n", event.ClientInfo.ClientOS)
+			}
+		}
+	}
+}
+```
+
+## Event Polling
+The mailgun library has built-in support for polling the events api
+```go
+package main
+
+import (
+    "context"
+    "time"
+
+    "github.com/mailgun/mailgun-go/v3"
+)
+
+func main() {
+    mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+
+	begin := time.Now().Add(time.Second * -3)
+
+	// Very short poll interval
+	it := mg.PollEvents(&mailgun.ListEventOptions{
+		// Only events with a timestamp after this date/time will be returned
+		Begin: &begin,
+		// How often we poll the api for new events
+		PollInterval: time.Second * 30,
+	})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+    // Poll until our email event arrives
+    var page []mailgun.Event
+    for it.Poll(ctx, &page) {
+        for _, e := range page {
+            // Do something with event
+        }
+    }
+}
+```
+
 # Email Validations
 ```go
 package main
