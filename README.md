@@ -9,24 +9,7 @@ Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https:
 go modules (See [Releasing Modules](https://github.com/golang/go/wiki/Modules#releasing-modules-v2-or-higher)).
  Pin your dependencies to the v1.1.1 or v2.0 tag if you are not ready for v3.0**
 
-## Sending mail via the mailgun CLI
-
-Export your API keys and domain
-
-```bash
-$ export MG_API_KEY=your-api-key
-$ export MG_DOMAIN=your-domain
-$ export MG_PUBLIC_API_KEY=your-public-key
-$ export MG_URL="https://api.mailgun.net/v3"
-```
-
-Send the email
-
-```bash
-$ echo -n 'Hello World' | mailgun send -s "Test subject" address@example.com
-```
-
-## Sending mail via the golang library
+## Usage
 ```go
 package main
 
