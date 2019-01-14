@@ -26,7 +26,7 @@ func main() {
 
 	parser := args.NewParser(args.EnvPrefix("MG_"), args.Desc(desc, args.IsFormated))
 	parser.AddOption("--verbose").Alias("-v").IsTrue().Help("be verbose")
-	parser.AddOption("--url").Env("URL").Default(mailgun.ApiBase).Help("url to the mailgun api")
+	parser.AddOption("--url").Env("URL").Default(mailgun.APIBase).Help("url to the mailgun api")
 	parser.AddOption("--api-key").Env("API_KEY").Help("mailgun api key")
 	parser.AddOption("--public-api-key").Env("PUBLIC_API_KEY").Help("mailgun public api key")
 	parser.AddOption("--domain").Env("DOMAIN").Help("mailgun domain name")

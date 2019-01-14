@@ -14,7 +14,6 @@ func TestTemplateCRUD(t *testing.T) {
 	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
-	mailgun.Debug = true
 
 	mg, err := mailgun.NewMailgunFromEnv()
 	ensure.Nil(t, err)

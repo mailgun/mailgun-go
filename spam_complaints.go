@@ -10,8 +10,6 @@ const (
 )
 
 // Complaint structures track how many times one of your emails have been marked as spam.
-// CreatedAt indicates when the first report arrives from a given recipient, identified by Address.
-// Count provides a running counter of how many times
 // the recipient thought your messages were not solicited.
 type Complaint struct {
 	Count     int         `json:"count"`

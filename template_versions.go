@@ -23,6 +23,7 @@ type templateVersionListResp struct {
 	Paging Paging `json:"paging"`
 }
 
+// Add a template version to a template
 func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions")
 	r.setClient(mg.Client())
@@ -49,6 +50,7 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateId string
 	return nil
 }
 
+// Get a specific version of a template
 func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateId, versionId string) (TemplateVersion, error) {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions/" + versionId)
 	r.setClient(mg.Client())
@@ -62,6 +64,7 @@ func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateId, versi
 	return resp.Item.Version, nil
 }
 
+// Update the comment and mark a version of a template active
 func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions/" + version.Id)
 	r.setClient(mg.Client())
@@ -84,6 +87,7 @@ func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateId str
 	return nil
 }
 
+// Delete a specific version of a template
 func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, templateId, versionId string) error {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions/" + versionId)
 	r.setClient(mg.Client())
@@ -98,6 +102,7 @@ type TemplateVersionsIterator struct {
 	err error
 }
 
+// List all the versions of a specific template
 func (mg *MailgunImpl) ListTemplateVersions(templateId string, opts *ListOptions) *TemplateVersionsIterator {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions")
 	r.setClient(mg.Client())

@@ -29,6 +29,7 @@ type Route struct {
 }
 
 type routesListResponse struct {
+	// is -1 if Next() or First() have not been called
 	TotalCount int     `json:"total_count"`
 	Items      []Route `json:"items"`
 }
@@ -65,12 +66,6 @@ type RoutesIterator struct {
 // If an error occurred during iteration `Err()` will return non nil
 func (ri *RoutesIterator) Err() error {
 	return ri.err
-}
-
-// Return the total number of items as returned by the mailgun API
-// Returns -1 if Next() or First() have not been called
-func (ri *RoutesIterator) Count() int {
-	return ri.TotalCount
 }
 
 // Returns the current offset of the iterator

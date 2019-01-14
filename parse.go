@@ -9,6 +9,7 @@ import (
 	"github.com/mailru/easyjson"
 )
 
+// All events returned by the EventIterator conform to this interface
 type Event interface {
 	easyjson.Unmarshaler
 	easyjson.Marshaler
@@ -20,6 +21,7 @@ type Event interface {
 	SetID(id string)
 }
 
+// A list of all JSON event types returned by the /events API
 var EventNames = map[string]func() Event{
 	"accepted":                 new_(events.Accepted{}),
 	"clicked":                  new_(events.Clicked{}),
@@ -33,11 +35,6 @@ var EventNames = map[string]func() Event{
 	"list_member_uploaded":     new_(events.ListMemberUploaded{}),
 	"list_member_upload_error": new_(events.ListMemberUploadError{}),
 	"list_uploaded":            new_(events.ListUploaded{}),
-}
-
-// Returns a new event users can populate
-func NewEvent(e interface{}) Event {
-	return new_(e)()
 }
 
 // new_ is a universal event "constructor".

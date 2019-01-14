@@ -132,7 +132,7 @@ func (ms *MockServer) updateMailingList(w http.ResponseWriter, r *http.Request) 
 				ms.mailingList[i].MailingList.Description = r.FormValue("description")
 			}
 			if r.FormValue("access_level") != "" {
-				ms.mailingList[i].MailingList.AccessLevel = r.FormValue("access_level")
+				ms.mailingList[i].MailingList.AccessLevel = AccessLevel(r.FormValue("access_level"))
 			}
 			toJSON(w, okResp{Message: "Mailing list member has been updated"})
 			return
@@ -149,7 +149,7 @@ func (ms *MockServer) createMailingList(w http.ResponseWriter, r *http.Request) 
 			Name:        r.FormValue("name"),
 			Address:     r.FormValue("address"),
 			Description: r.FormValue("description"),
-			AccessLevel: r.FormValue("access_level"),
+			AccessLevel: AccessLevel(r.FormValue("access_level")),
 		},
 	})
 	toJSON(w, okResp{Message: "Mailing list has been created"})

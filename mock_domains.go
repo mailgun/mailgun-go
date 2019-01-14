@@ -25,7 +25,7 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 			SMTPLogin:    "postmaster@mailgun.test",
 			SMTPPassword: "4rtqo4p6rrx9",
 			Wildcard:     true,
-			SpamAction:   "disabled",
+			SpamAction:   SpamActionDisabled,
 			State:        "active",
 		},
 		Connection: &DomainConnection{
@@ -97,15 +97,39 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 	r.Get("/domains/{domain}/limits/tag", ms.getTagLimits)
 }
 
-func (ms *MockServer) listDomains(w http.ResponseWriter, _ *http.Request) {
+func (ms *MockServer) listDomains(w http.ResponseWriter, r *http.Request) {
 	var list []Domain
 	for _, domain := range ms.domainList {
 		list = append(list, domain.Domain)
 	}
 
-	toJSON(w, domainListResponse{
+	skip := stringToInt(r.FormValue("skip"))
+	limit := stringToInt(r.FormValue("limit"))
+	if limit == 0 {
+		limit = 100
+	}
+
+	if skip > len(list) {
+		skip = len(list)
+	}
+
+	end := limit + skip
+	if end > len(list) {
+		end = len(list)
+	}
+
+	// If we are at the end of the list
+	if skip == end {
+		toJSON(w, domainsListResponse{
+			TotalCount: len(list),
+			Items:      []Domain{},
+		})
+		return
+	}
+
+	toJSON(w, domainsListResponse{
 		TotalCount: len(list),
-		Items:      list,
+		Items:      list[skip:end],
 	})
 }
 
@@ -129,7 +153,7 @@ func (ms *MockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 			SMTPLogin:    r.FormValue("smtp_login"),
 			SMTPPassword: r.FormValue("smtp_password"),
 			Wildcard:     stringToBool(r.FormValue("wildcard")),
-			SpamAction:   r.FormValue("spam_action"),
+			SpamAction:   SpamAction(r.FormValue("spam_action")),
 			State:        "active",
 		},
 	})

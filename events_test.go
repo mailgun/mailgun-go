@@ -111,7 +111,7 @@ func TestEventPoller(t *testing.T) {
 	ensure.DeepEqual(t, accepted.Recipient, "user@"+testDomain)
 }
 
-func ExampleListEvents() {
+func ExampleMailgunImpl_ListEvents() {
 	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
 	mg.SetAPIBase(server.URL())
 

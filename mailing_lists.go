@@ -6,17 +6,21 @@ import (
 )
 
 // A mailing list may have one of three membership modes.
-// ReadOnly specifies that nobody, including Members,
-// may send messages to the mailing list.
-// Messages distributed on such lists come from list administrator accounts only.
-// Members specifies that only those who subscribe to the mailing list may send messages.
-// Everyone specifies that anyone and everyone may both read and submit messages
-// to the mailing list, including non-subscribers.
 const (
-	ReadOnly = "readonly"
-	Members  = "members"
-	Everyone = "everyone"
+	// ReadOnly specifies that nobody, including Members, may send messages to
+	// the mailing list.  Messages distributed on such lists come from list
+	// administrator accounts only.
+	AccessLevelReadOnly = "readonly"
+	// Members specifies that only those who subscribe to the mailing list may
+	// send messages.
+	AccessLevelMembers = "members"
+	// Everyone specifies that anyone and everyone may both read and submit
+	// messages to the mailing list, including non-subscribers.
+	AccessLevelEveryone = "everyone"
 )
+
+// Specify the access of a mailing list member
+type AccessLevel string
 
 // A List structure provides information for a mailing list.
 //
@@ -25,7 +29,7 @@ type MailingList struct {
 	Address      string      `json:"address,omitempty"`
 	Name         string      `json:"name,omitempty"`
 	Description  string      `json:"description,omitempty"`
-	AccessLevel  string      `json:"access_level,omitempty"`
+	AccessLevel  AccessLevel `json:"access_level,omitempty"`
 	CreatedAt    RFC2822Time `json:"created_at,omitempty"`
 	MembersCount int         `json:"members_count,omitempty"`
 }
@@ -174,7 +178,7 @@ func (mg *MailgunImpl) CreateMailingList(ctx context.Context, prototype MailingL
 		p.addValue("description", prototype.Description)
 	}
 	if prototype.AccessLevel != "" {
-		p.addValue("access_level", prototype.AccessLevel)
+		p.addValue("access_level", string(prototype.AccessLevel))
 	}
 	response, err := makePostRequest(ctx, r, p)
 	if err != nil {
@@ -233,7 +237,7 @@ func (mg *MailgunImpl) UpdateMailingList(ctx context.Context, addr string, proto
 		p.addValue("description", prototype.Description)
 	}
 	if prototype.AccessLevel != "" {
-		p.addValue("access_level", prototype.AccessLevel)
+		p.addValue("access_level", string(prototype.AccessLevel))
 	}
 	var l MailingList
 	response, err := makePutRequest(ctx, r, p)

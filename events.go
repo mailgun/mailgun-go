@@ -28,14 +28,6 @@ type ListEventOptions struct {
 	PollInterval time.Duration
 }
 
-// Depreciated See `ListEvents()`
-type GetEventsOptions struct {
-	Begin, End                               *time.Time
-	ForceAscending, ForceDescending, Compact bool
-	Limit                                    int
-	Filter                                   map[string]string
-}
-
 // EventIterator maintains the state necessary for paging though small parcels of a larger set of events.
 type EventIterator struct {
 	events.Response
@@ -44,22 +36,6 @@ type EventIterator struct {
 }
 
 // Create an new iterator to fetch a page of events from the events api
-//	it := mg.ListEvents(&ListEventOptions{Limit: 100})
-//	var events []Event
-//	for it.Next(&events) {
-//	    	for _, event := range events {
-//		        // Do things with events
-//				switch event := e.(type) {
-//				case *events.Accepted:
-//					log.Printf("Accepted Event: %s - %v", event.Message.Headers.MessageID, event.GetTimestamp())
-//				case *events.Delivered:
-//					log.Printf("Delivered Event: %s - %v", event.Message.Headers.MessageID, event.GetTimestamp())
-//				}
-//		}
-//	}
-//	if it.Err() != nil {
-//		log.Fatal(it.Err())
-//	}
 func (mg *MailgunImpl) ListEvents(opts *ListEventOptions) *EventIterator {
 	req := newHTTPRequest(generateApiUrl(mg, eventsEndpoint))
 	if opts != nil {
@@ -197,22 +173,25 @@ type EventPoller struct {
 }
 
 // Poll the events api and return new events as they occur
-// 	it = mg.PollEvents(&ListEventOptions{
-//			// Only events with a timestamp after this date/time will be returned
-//			Begin:        time.Now().Add(time.Second * -3),
-//			// How often we poll the api for new events
-//			PollInterval: time.Second * 4})
-//	var events []Event
-//	// Blocks until new events appear or context is cancelled
+//  it = mg.PollEvents(&ListEventOptions{
+//    // Only events with a timestamp after this date/time will be returned
+//    Begin:        time.Now().Add(time.Second * -3),
+//    // How often we poll the api for new events
+//    PollInterval: time.Second * 4
+//  })
+//
+//  var events []Event
 //  ctx, cancel := context.WithCancel(context.Background())
-//	for it.Poll(ctx, &events) {
-//		for _, event := range(events) {
-//			fmt.Printf("Event %+v\n", event)
-//		}
-//	}
-//	if it.Err() != nil {
-//		log.Fatal(it.Err())
-//	}
+//
+//  // Blocks until new events appear or context is cancelled
+//  for it.Poll(ctx, &events) {
+//    for _, event := range(events) {
+//      fmt.Printf("Event %+v\n", event)
+//    }
+//  }
+//  if it.Err() != nil {
+//    log.Fatal(it.Err())
+//  }
 func (mg *MailgunImpl) PollEvents(opts *ListEventOptions) *EventPoller {
 	now := time.Now()
 	// ForceAscending must be set

@@ -14,19 +14,21 @@ const (
 	testKey    = "api-fake-key"
 )
 
-func TestGetDomains(t *testing.T) {
+func TestListDomains(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	n, domains, err := mg.ListDomains(ctx, nil)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(domains) != 0, true)
-
-	t.Logf("TestGetDomains: %d domains retrieved\n", n)
-	for _, d := range domains {
-		t.Logf("TestGetDomains: %#v\n", d)
+	it := mg.ListDomains(ctx, nil)
+	var page []mailgun.Domain
+	for it.Next(ctx, &page) {
+		for _, d := range page {
+			t.Logf("TestListDomains: %#v\n", d)
+		}
 	}
+	t.Logf("TestListDomains: %d domains retrieved\n", it.TotalCount)
+	ensure.Nil(t, it.Err())
+	ensure.True(t, it.TotalCount != 0)
 }
 
 func TestGetSingleDomain(t *testing.T) {
@@ -34,10 +36,12 @@ func TestGetSingleDomain(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	_, domains, err := mg.ListDomains(ctx, nil)
-	ensure.Nil(t, err)
+	it := mg.ListDomains(ctx, nil)
+	var page []mailgun.Domain
+	ensure.True(t, it.Next(ctx, &page))
+	ensure.Nil(t, it.Err())
 
-	dr, rxDnsRecords, txDnsRecords, err := mg.GetDomain(ctx, domains[0].Name)
+	dr, rxDnsRecords, txDnsRecords, err := mg.GetDomain(ctx, page[0].Name)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, len(rxDnsRecords) != 0, true)
 	ensure.DeepEqual(t, len(txDnsRecords) != 0, true)

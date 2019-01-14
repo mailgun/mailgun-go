@@ -427,6 +427,7 @@ func (m *Message) AddDomain(domain string) {
 	m.domain = domain
 }
 
+// Returned by `Send()` when the `mailgun.Message` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.

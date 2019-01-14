@@ -14,6 +14,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
+// A mailgun api mock suitable for testing
 type MockServer struct {
 	srv *httptest.Server
 
@@ -25,6 +26,7 @@ type MockServer struct {
 	events      []Event
 }
 
+// Create a new instance of the mailgun API mock server
 func NewMockServer() MockServer {
 	ms := MockServer{}
 
@@ -47,10 +49,12 @@ func NewMockServer() MockServer {
 	return ms
 }
 
+// Stop the server
 func (ms *MockServer) Stop() {
 	ms.srv.Close()
 }
 
+// Return the URL used to connect to the mock server
 func (ms *MockServer) URL() string {
 	return ms.srv.URL + "/v3"
 }

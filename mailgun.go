@@ -1,69 +1,52 @@
-// TODO(sfalvo):
-// Document how to run acceptance tests.
-
-// Package mailgun provides methods for interacting with the Mailgun API.
-// It automates the HTTP request/response cycle, encodings, and other details needed by the API.
-// This SDK lets you do everything the API lets you, in a more Go-friendly way.
+// Package mailgun provides methods for interacting with the Mailgun API.  It
+// automates the HTTP request/response cycle, encodings, and other details
+// needed by the API.  This SDK lets you do everything the API lets you, in a
+// more Go-friendly way.
 //
 // For further information please see the Mailgun documentation at
 // http://documentation.mailgun.com/
 //
 //  Original Author: Michael Banzon
 //  Contributions:   Samuel A. Falvo II <sam.falvo %at% rackspace.com>
-//  Version:         0.99.0
+//                   Derrick J. Wippler <thrawn01 %at% gmail.com>
 //
 // Examples
 //
-// This document includes a number of examples which illustrates some aspects of the GUI which might be misleading or confusing.
-// All examples included are derived from an acceptance test.
-// Note that every SDK function has a corresponding acceptance test, so
-// if you don't find an example for a function you'd like to know more about,
-// please check the acceptance sub-package for a corresponding test.
-// Of course, contributions to the documentation are always welcome as well.
-// Feel free to submit a pull request or open a Github issue if you cannot find an example to suit your needs.
+// All functions and method have a corresponding test, so if you don't find an
+// example for a function you'd like to know more about, please check for a
+// corresponding test. Of course, contributions to the documentation are always
+// welcome as well. Feel free to submit a pull request or open a Github issue
+// if you cannot find an example to suit your needs.
 //
-// Limit and Skip Settings
+// List iterators
 //
-// Many SDK functions consume a pair of parameters called limit and skip.
-// These help control how much data Mailgun sends over the wire.
-// Limit, as you'd expect, gives a count of the number of records you want to receive.
-// Note that, at present, Mailgun imposes its own cap of 100, for all API endpoints.
-// Skip indicates where in the data set you want to start receiving from.
-// Mailgun defaults to the very beginning of the dataset if not specified explicitly.
+// Most methods that begin with `List` return an iterator which simplfies
+// paging through large result sets returned by the mailgun API. Most `List`
+// methods allow you to specify a `Limit` parameter which as you'd expect,
+// limits the number of items returned per page.  Note that, at present,
+// Mailgun imposes its own cap of 100 items per page, for all API endpoints.
 //
-// If you don't particularly care how much data you receive, you may specify DefaultLimit.
-// If you similarly don't care about where the data starts, you may specify DefaultSkip.
+// For example, the following iterates over all pages of events 100 items at a time
 //
-// Functions that Return Totals
+//  mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+//  it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
 //
-// Functions which accept a limit and skip setting, in general,
-// will also return a total count of the items returned.
-// Note that this total count is not the total in the bundle returned by the call.
-// You can determine that easily enough with Go's len() function.
-// The total that you receive actually refers to the complete set of data on the server.
-// This total may well exceed the size returned from the API.
+//  // The entire operation should not take longer than 30 seconds
+//  ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+//  defer cancel()
 //
-// If this happens, you may find yourself needing to iterate over the dataset of interest.
-// For example:
+//  // For each page of 100 events
+//  var page []mailgun.Event
+//  for it.Next(ctx, &page) {
+//    for _, e := range page {
+//      // Do something with 'e'
+//    }
+//  }
 //
-//		// Get total amount of stuff we have to work with.
-// 		mg := NewMailgun("example.com", "my_api_key", "")
-// 		n, _, err := mg.GetStats(1, 0, nil, "sent", "opened")
-// 		if err != nil {
-// 			t.Fatal(err)
-// 		}
-//		// Loop over it all.
-//		for sk := 0; sk < n; sk += limit {
-//			_, stats, err := mg.GetStats(limit, sk, nil, "sent", "opened")
-//		 	if err != nil {
-//		 		t.Fatal(err)
-//		 	}
-//			doSomethingWith(stats)
-//		}
 //
 // License
 //
-// Copyright (c) 2013-2014, Michael Banzon.
+// Copyright (c) 2013-2019, Michael Banzon.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -100,18 +83,14 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/gobuffalo/envy"
 )
 
+// Set true to write the HTTP requests in curl for to stdout
 var Debug = false
 
-// ENV is used to help switch settings based on where the
-// application is being run. Default is "development".
-var ENV = envy.Get("GO_ENV", "development")
-
 const (
-	ApiBase              = "https://api.mailgun.net/v3"
+	// Base Url the library uses to contact mailgun. Use SetAPIBase() to override
+	APIBase              = "https://api.mailgun.net/v3"
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
@@ -154,12 +133,12 @@ type Mailgun interface {
 	AddBounce(ctx context.Context, address, code, error string) error
 	DeleteBounce(ctx context.Context, address string) error
 
-	GetStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error)
+	GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error)
 	GetTag(ctx context.Context, tag string) (Tag, error)
 	DeleteTag(ctx context.Context, tag string) error
 	ListTags(*ListTagOptions) *TagIterator
 
-	ListDomains(ctx context.Context, opts *ListOptions) (int, []Domain, error)
+	ListDomains(ctx context.Context, opts *ListOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error)
 	CreateDomain(ctx context.Context, name string, pass string, opts *CreateDomainOptions) error
 	DeleteDomain(ctx context.Context, name string) error
@@ -257,7 +236,7 @@ type MailgunImpl struct {
 // NewMailGun creates a new client instance.
 func NewMailgun(domain, apiKey string) *MailgunImpl {
 	return &MailgunImpl{
-		apiBase: ApiBase,
+		apiBase: APIBase,
 		domain:  domain,
 		apiKey:  apiKey,
 		client:  http.DefaultClient,
@@ -286,7 +265,7 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 	return mg, nil
 }
 
-// ApiBase returns the API Base URL configured for this client.
+// APIBase returns the API Base URL configured for this client.
 func (mg *MailgunImpl) APIBase() string {
 	return mg.apiBase
 }

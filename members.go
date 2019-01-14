@@ -50,9 +50,9 @@ type MemberListIterator struct {
 	err error
 }
 
+// Used by List methods to specify what list parameters to send to the mailgun API
 type ListOptions struct {
 	Limit int
-	Skip  int
 }
 
 func (mg *MailgunImpl) ListMembers(address string, opts *ListOptions) *MemberListIterator {

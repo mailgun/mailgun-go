@@ -18,7 +18,7 @@ func TestMailingListMembers(t *testing.T) {
 		Address:     address,
 		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
-		AccessLevel: mailgun.Members,
+		AccessLevel: mailgun.AccessLevelMembers,
 	})
 	ensure.Nil(t, err)
 	defer func() {
@@ -102,7 +102,7 @@ func TestMailingLists(t *testing.T) {
 		Address:     address,
 		Name:        "List1",
 		Description: "A list created by an acceptance test.",
-		AccessLevel: mailgun.Members,
+		AccessLevel: mailgun.AccessLevelMembers,
 	}
 
 	var countLists = func() int {

@@ -7,22 +7,26 @@ import (
 
 const iso8601date = "2006-01-02"
 
+// Stats on accepted messages
 type Accepted struct {
 	Incoming int `json:"incoming"`
 	Outgoing int `json:"outgoing"`
 	Total    int `json:"total"`
 }
 
+// Stats on delivered messages
 type Delivered struct {
 	Smtp  int `json:"smtp"`
 	Http  int `json:"http"`
 	Total int `json:"total"`
 }
 
+// Stats on temporary failures
 type Temporary struct {
 	Espblock int `json:"espblock"`
 }
 
+// Stats on permanent failures
 type Permanent struct {
 	SuppressBounce      int `json:"suppress-bounce"`
 	SuppressUnsubscribe int `json:"suppress-unsubscribe"`
@@ -32,15 +36,18 @@ type Permanent struct {
 	Total               int `json:"total"`
 }
 
+// Stats on failed messages
 type Failed struct {
 	Temporary Temporary `json:"temporary"`
 	Permanent Permanent `json:"permanent"`
 }
 
+// Total stats for messages
 type Total struct {
 	Total int `json:"total"`
 }
 
+// Stats as returned by `GetStats()`
 type Stats struct {
 	Time         string    `json:"time"`
 	Accepted     Accepted  `json:"accepted"`
@@ -60,15 +67,18 @@ type statsTotalResponse struct {
 	Stats      []Stats `json:"stats"`
 }
 
+// Used by GetStats() to specify the resolution stats are for
 type Resolution string
 
+// Indicate which resolution a stat response for request is for
 const (
 	ResolutionHour  = Resolution("hour")
 	ResolutionDay   = Resolution("day")
 	ResolutionMonth = Resolution("month")
 )
 
-type ListStatOptions struct {
+// Options for GetStats()
+type GetStatOptions struct {
 	Resolution Resolution
 	Duration   string
 	Start      time.Time
@@ -78,7 +88,7 @@ type ListStatOptions struct {
 }
 
 // Returns total stats for a given domain for the specified time period
-func (mg *MailgunImpl) GetStats(ctx context.Context, events []string, opts *ListStatOptions) ([]Stats, error) {
+func (mg *MailgunImpl) GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error) {
 	r := newHTTPRequest(generateApiUrl(mg, statsTotalEndpoint))
 
 	if opts != nil {

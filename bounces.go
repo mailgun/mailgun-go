@@ -7,14 +7,15 @@ import (
 
 // Bounce aggregates data relating to undeliverable messages to a specific intended recipient,
 // identified by Address.
-// Code provides the SMTP error code causing the bounce,
-// while Error provides a human readable reason why.
-// CreatedAt provides the time at which Mailgun detected the bounce.
 type Bounce struct {
+	// The time at which Mailgun detected the bounce.
 	CreatedAt RFC2822Time `json:"created_at"`
-	Code      string      `json:"code"`
-	Address   string      `json:"address"`
-	Error     string      `json:"error"`
+	// Code provides the SMTP error code that caused the bounce
+	Code string `json:"code"`
+	// Address the bounce is for
+	Address string `json:"address"`
+	// human readable reason why
+	Error string `json:"error"`
 }
 
 type Paging struct {

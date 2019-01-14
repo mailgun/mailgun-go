@@ -6,20 +6,14 @@ import (
 	"strings"
 )
 
-// DefaultLimit and DefaultSkip instruct the SDK to rely on Mailgun's reasonable defaults for Paging settings.
+// Use these to specify a spam action when creating a new domain.
 const (
-	DefaultLimit = -1
-	DefaultSkip  = -1
-)
-
-// Disabled, Tag, and Delete indicate spam actions.
-// Disabled prevents Mailgun from taking any action on what it perceives to be spam.
-// Tag instruments the received message with headers providing a measure of its spamness.
-// Delete instructs Mailgun to just block or delete the message all-together.
-const (
-	SpamActionTag      = SpamAction("tag")
+	// Tag the received message with headers providing a measure of its spamness.
+	SpamActionTag = SpamAction("tag")
+	// Prevents Mailgun from taking any action on what it perceives to be spam.
 	SpamActionDisabled = SpamAction("disabled")
-	SpamActionDelete   = SpamAction("delete")
+	// instructs Mailgun to just block or delete the message all-together.
+	SpamActionDelete = SpamAction("delete")
 )
 
 type SpamAction string
@@ -31,9 +25,8 @@ type Domain struct {
 	Name         string      `json:"name"`
 	SMTPPassword string      `json:"smtp_password"`
 	Wildcard     bool        `json:"wildcard"`
-	// The SpamAction field must be one of Tag, Disabled, or Delete.
-	SpamAction string `json:"spam_action"`
-	State      string `json:"state"`
+	SpamAction   SpamAction  `json:"spam_action"`
+	State        string      `json:"state"`
 }
 
 // DNSRecord structures describe intended records to properly configure your domain for use with Mailgun.
@@ -56,22 +49,26 @@ type domainConnectionResponse struct {
 	Connection DomainConnection `json:"connection"`
 }
 
-type domainListResponse struct {
+type domainsListResponse struct {
+	// is -1 if Next() or First() have not been called
 	TotalCount int      `json:"total_count"`
 	Items      []Domain `json:"items"`
 }
 
+// Specify the domain connection options
 type DomainConnection struct {
 	RequireTLS       bool `json:"require_tls"`
 	SkipVerification bool `json:"skip_verification"`
 }
 
+// Specify the domain tracking options
 type DomainTracking struct {
 	Click       TrackingStatus `json:"click"`
 	Open        TrackingStatus `json:"open"`
 	Unsubscribe TrackingStatus `json:"unsubscribe"`
 }
 
+// The tracking status of a domain
 type TrackingStatus struct {
 	Active     bool   `json:"active"`
 	HTMLFooter string `json:"html_footer"`
@@ -83,30 +80,151 @@ type domainTrackingResponse struct {
 }
 
 // ListDomains retrieves a set of domains from Mailgun.
-//
-// Assuming no error, both the number of items retrieved and a slice of Domain instances.
-// The number of items returned may be less than the specified limit, if it's specified.
-// Note that zero items and a zero-length slice do not necessarily imply an error occurred.
-// Except for the error itself, all results are undefined in the event of an error.
-func (mg *MailgunImpl) ListDomains(ctx context.Context, opts *ListOptions) (int, []Domain, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
+func (mg *MailgunImpl) ListDomains(ctx context.Context, opts *ListOptions) *DomainsIterator {
+	var limit int
+	if opts != nil {
+		limit = opts.Limit
+	}
+	return &DomainsIterator{
+		mg:                  mg,
+		url:                 generatePublicApiUrl(mg, domainsEndpoint),
+		domainsListResponse: domainsListResponse{TotalCount: -1},
+		limit:               limit,
+	}
+}
 
-	if opts != nil && opts.Limit != 0 {
-		r.addParameter("limit", strconv.Itoa(opts.Limit))
+type DomainsIterator struct {
+	domainsListResponse
+
+	limit  int
+	mg     Mailgun
+	offset int
+	url    string
+	err    error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ri *DomainsIterator) Err() error {
+	return ri.err
+}
+
+// Returns the current offset of the iterator
+func (ri *DomainsIterator) Offset() int {
+	return ri.offset
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ri *DomainsIterator) Next(ctx context.Context, items *[]Domain) bool {
+	if ri.err != nil {
+		return false
 	}
 
-	if opts != nil && opts.Skip != 0 {
-		r.addParameter("skip", strconv.Itoa(opts.Skip))
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
 	}
 
-	var list domainListResponse
-	err := getResponseFromJSON(ctx, r, &list)
-	if err != nil {
-		return -1, nil, err
+	cpy := make([]Domain, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
 	}
-	return list.TotalCount, list.Items, nil
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ri *DomainsIterator) First(ctx context.Context, items *[]Domain) bool {
+	if ri.err != nil {
+		return false
+	}
+	ri.err = ri.fetch(ctx, 0, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Domain, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ri *DomainsIterator) Last(ctx context.Context, items *[]Domain) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.TotalCount - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Domain, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.offset - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Domain, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
+	r := newHTTPRequest(ri.url)
+	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
+	r.setClient(ri.mg.Client())
+
+	if skip != 0 {
+		r.addParameter("skip", strconv.Itoa(skip))
+	}
+	if limit != 0 {
+		r.addParameter("limit", strconv.Itoa(limit))
+	}
+
+	return getResponseFromJSON(ctx, r, &ri.domainsListResponse)
 }
 
 // Retrieve detailed information about the named domain.
@@ -119,6 +237,7 @@ func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (Domain, []
 	return resp.Domain, resp.ReceivingDNSRecords, resp.SendingDNSRecords, err
 }
 
+// Optional parameters when creating a domain
 type CreateDomainOptions struct {
 	SpamAction         SpamAction
 	Wildcard           bool

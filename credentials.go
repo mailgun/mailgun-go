@@ -14,11 +14,12 @@ type Credential struct {
 }
 
 type credentialsListResponse struct {
+	// is -1 if Next() or First() have not been called
 	TotalCount int          `json:"total_count"`
 	Items      []Credential `json:"items"`
 }
 
-// ErrEmptyParam results occur when a required parameter is missing.
+// Returned when a required parameter is missing.
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
 // ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
@@ -48,12 +49,6 @@ type CredentialsIterator struct {
 // If an error occurred during iteration `Err()` will return non nil
 func (ri *CredentialsIterator) Err() error {
 	return ri.err
-}
-
-// Return the total number of items as returned by the mailgun API
-// Returns -1 if Next() or First() have not been called
-func (ri *CredentialsIterator) Count() int {
-	return ri.TotalCount
 }
 
 // Returns the current offset of the iterator

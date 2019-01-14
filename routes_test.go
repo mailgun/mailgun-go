@@ -18,7 +18,7 @@ func TestRouteCRUD(t *testing.T) {
 		var page []mailgun.Route
 		it.Next(ctx, &page)
 		ensure.Nil(t, it.Err())
-		return it.Count()
+		return it.TotalCount
 	}
 
 	routeCount := countRoutes()
@@ -82,7 +82,7 @@ func TestRoutesIterator(t *testing.T) {
 
 	// Pages should be different
 	ensure.NotDeepEqual(t, firstPage, secondPage)
-	ensure.True(t, firstIterator.Count() != 0)
+	ensure.True(t, firstIterator.TotalCount != 0)
 
 	// Previous()
 	ensure.True(t, it.First(ctx, &firstPage))

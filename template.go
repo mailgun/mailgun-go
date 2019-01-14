@@ -8,6 +8,7 @@ import (
 
 type TemplateEngine string
 
+// Used by CreateTemplate() and AddTemplateVersion() to specify the template engine
 const (
 	TemplateEngineMustache   = TemplateEngine("mustache")
 	TemplateEngineHandlebars = TemplateEngine("handlebars")
@@ -33,15 +34,7 @@ type templateListResp struct {
 	Paging Paging     `json:"paging"`
 }
 
-/*type TemplateOptions struct {
-	Name        string
-	Description string
-	Template    string
-	Engine      TemplateEngine
-	Comment     string
-	Active      bool
-}*/
-
+// Create a new template which can be used to attach template versions to
 func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) error {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint))
 	r.setClient(mg.Client())
@@ -74,6 +67,7 @@ func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) e
 	return nil
 }
 
+// Get a template given the template id
 func (mg *MailgunImpl) GetTemplate(ctx context.Context, id string) (Template, error) {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + id)
 	r.setClient(mg.Client())
@@ -88,6 +82,7 @@ func (mg *MailgunImpl) GetTemplate(ctx context.Context, id string) (Template, er
 	return resp.Item, nil
 }
 
+// Update the name and description of a template
 func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, template *Template) error {
 	if template.Id == "" {
 		return errors.New("UpdateTemplate() Template.Id cannot be empty")
@@ -114,6 +109,7 @@ func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, template *Template) e
 	return nil
 }
 
+// Delete a template given a template id
 func (mg *MailgunImpl) DeleteTemplate(ctx context.Context, id string) error {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + id)
 	r.setClient(mg.Client())
@@ -128,6 +124,7 @@ type TemplatesIterator struct {
 	err error
 }
 
+// List all available templates
 func (mg *MailgunImpl) ListTemplates(opts *ListOptions) *TemplatesIterator {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint))
 	r.setClient(mg.Client())
