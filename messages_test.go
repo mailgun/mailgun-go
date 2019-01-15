@@ -274,13 +274,10 @@ func TestSendMGOffline(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
 		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", exampleDomain))
-		values, err := parseContentType(req)
-		ensure.Nil(t, err)
-		ensure.True(t, len(values) != 0)
-		ensure.DeepEqual(t, values.Get("from"), fromUser)
-		ensure.DeepEqual(t, values.Get("subject"), exampleSubject)
-		ensure.DeepEqual(t, values.Get("text"), exampleText)
-		ensure.DeepEqual(t, values.Get("to"), toUser)
+		ensure.DeepEqual(t, req.FormValue("from"), fromUser)
+		ensure.DeepEqual(t, req.FormValue("subject"), exampleSubject)
+		ensure.DeepEqual(t, req.FormValue("text"), exampleText)
+		ensure.DeepEqual(t, req.FormValue("to"), toUser)
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -310,13 +307,10 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
 		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", signingDomain))
-		values, err := parseContentType(req)
-		ensure.Nil(t, err)
-		ensure.True(t, len(values) != 0)
-		ensure.DeepEqual(t, values.Get("from"), fromUser)
-		ensure.DeepEqual(t, values.Get("subject"), exampleSubject)
-		ensure.DeepEqual(t, values.Get("text"), exampleText)
-		ensure.DeepEqual(t, values.Get("to"), toUser)
+		ensure.DeepEqual(t, req.FormValue("from"), fromUser)
+		ensure.DeepEqual(t, req.FormValue("subject"), exampleSubject)
+		ensure.DeepEqual(t, req.FormValue("text"), exampleText)
+		ensure.DeepEqual(t, req.FormValue("to"), toUser)
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -333,4 +327,111 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
+}
+
+func TestSendMGMessageVariables(t *testing.T) {
+	const (
+		exampleDomain       = "testDomain"
+		exampleAPIKey       = "testAPIKey"
+		toUser              = "test@test.com"
+		exampleMessage      = "Queue. Thank you"
+		exampleID           = "<20111114174239.25659.5820@samples.mailgun.org>"
+		exampleStrVarKey    = "test-str-key"
+		exampleStrVarVal    = "test-str-val"
+		exampleBoolVarKey   = "test-bool-key"
+		exampleBoolVarVal   = "false"
+		exampleMapVarKey    = "test-map-key"
+		exampleMapVarStrVal    = `{"test":"123"}`
+	)
+	var (
+		exampleMapVarVal = map[string]string{"test": "123"}
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", exampleDomain))
+
+		ensure.DeepEqual(t, req.FormValue("from"), fromUser)
+		ensure.DeepEqual(t, req.FormValue("subject"), exampleSubject)
+		ensure.DeepEqual(t, req.FormValue("text"), exampleText)
+		ensure.DeepEqual(t, req.FormValue("to"), toUser)
+		ensure.DeepEqual(t, req.FormValue("v:"+exampleMapVarKey), exampleMapVarStrVal)
+		ensure.DeepEqual(t, req.FormValue("v:"+exampleBoolVarKey), exampleBoolVarVal)
+		ensure.DeepEqual(t, req.FormValue("v:"+exampleStrVarKey), exampleStrVarVal)
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m.AddVariable(exampleStrVarKey, exampleStrVarVal)
+	m.AddVariable(exampleBoolVarKey, false)
+	m.AddVariable(exampleMapVarKey, exampleMapVarVal)
+
+	msg, id, err := mg.Send(context.Background(), m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
+}
+
+
+func TestSendEOFError(t *testing.T) {
+	const (
+		exampleDomain       = "testDomain"
+		exampleAPIKey       = "testAPIKey"
+		toUser              = "test@test.com"
+	)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		//ensure.True(t, false)
+		panic("")
+		return
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	_, _, err := mg.Send(context.Background(), m)
+	ensure.NotNil(t, err)
+	ensure.StringContains(t, err.Error(), "remote server prematurely closed connection: Post ")
+	ensure.StringContains(t, err.Error(), "/messages: EOF")
+}
+func TestHasRecipient(t *testing.T) {
+	const (
+		exampleDomain       = "testDomain"
+		exampleAPIKey       = "testAPIKey"
+		recipient              = "test@test.com"
+	)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", exampleDomain))
+		fmt.Fprint(w, `{"message":"Queued, Thank you", "id":"<20111114174239.25659.5820@samples.mailgun.org>"}`)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	// No recipient
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
+	_, _, err := mg.Send(context.Background(), m)
+	ensure.NotNil(t, err)
+	ensure.DeepEqual(t, err.Error(), "message not valid")
+
+	// Provided Bcc
+	m = mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m.AddBCC(recipient)
+	_, _, err = mg.Send(context.Background(), m)
+	ensure.Nil(t, err)
+
+	// Provided cc
+	m = mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m.AddCC(recipient)
+	_, _, err = mg.Send(context.Background(), m)
+	ensure.Nil(t, err)
 }

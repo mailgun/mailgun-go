@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strconv"
 	"time"
 )
 
@@ -411,14 +412,22 @@ func (m *Message) AddHeader(header, value string) {
 // which Mailgun can use to, in essence, complete form-mail.
 // Refer to the Mailgun documentation for more information.
 func (m *Message) AddVariable(variable string, value interface{}) error {
+	if m.variables == nil {
+		m.variables = make(map[string]string)
+	}
+
 	j, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
-	if m.variables == nil {
-		m.variables = make(map[string]string)
+
+	encoded := string(j)
+	v, err := strconv.Unquote(encoded)
+	if err != nil {
+		v = encoded
 	}
-	m.variables[variable] = string(j)
+
+	m.variables[variable] = v
 	return nil
 }
 
@@ -435,6 +444,16 @@ var ErrInvalidMessage = errors.New("message not valid")
 // a human-readable status message, and a message ID.  The status and message ID are set only
 // if no error occurred.
 func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, id string, err error) {
+	if mg.domain == "" {
+		err = errors.New("you must provide a valid domain before calling Send()")
+		return
+	}
+
+	if mg.apiKey == "" {
+		err = errors.New("you must provide a valid api-key before calling Send()")
+		return
+	}
+
 	if !isValid(message) {
 		err = ErrInvalidMessage
 		return
@@ -581,7 +600,7 @@ func isValid(m *Message) bool {
 		return false
 	}
 
-	if !validateStringList(m.to, true) {
+	if m.RecipientCount() == 0 {
 		return false
 	}
 
