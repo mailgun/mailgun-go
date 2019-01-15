@@ -14,6 +14,9 @@ import (
 // This figure includes To:, Cc:, Bcc:, etc. recipients.
 const MaxNumberOfRecipients = 1000
 
+// MaxNumberOfTags represents the maximum number of tags that can be added for a message
+const MaxNumberOfTags = 3
+
 // Message structures contain both the message text and the envelop for an e-mail message.
 type Message struct {
 	to                []string
@@ -327,10 +330,15 @@ func (pm *plainMessage) setHtml(h string) {
 
 func (mm *mimeMessage) setHtml(_ string) {}
 
-// AddTag attaches a tag to the message.  Tags are useful for metrics gathering and event tracking purposes.
+// AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
-func (m *Message) AddTag(tag string) {
-	m.tags = append(m.tags, tag)
+func (m *Message) AddTag(tag ...string) error {
+	if len(m.tags) >= MaxNumberOfTags {
+		return fmt.Errorf("Cannot add any new tags. Message tag limit (%b) reached.", MaxNumberOfTags)
+	}
+
+	m.tags = append(m.tags, tag...)
+	return nil
 }
 
 // This feature is deprecated for new software.
