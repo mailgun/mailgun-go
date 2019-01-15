@@ -1,10 +1,12 @@
 package mailgun
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 )
 
@@ -139,24 +141,6 @@ type features interface {
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
 //
-// DEPRECATED.
-// The package will panic if you use AddRecipient(), AddBcc(), AddCc(), et. al.
-// on a message already equipped with MaxNumberOfRecipients recipients.
-// Use Mailgun.NewMessage() instead.
-// It works similarly to this function, but supports larger lists of recipients.
-func NewMessage(from string, subject string, text string, to ...string) *Message {
-	return &Message{
-		specific: &plainMessage{
-			from:    from,
-			subject: subject,
-			text:    text,
-		},
-		to: to,
-	}
-}
-
-// NewMessage returns a new e-mail message with the simplest envelop needed to send.
-//
 // Unlike the global function,
 // this method supports arbitrary-sized recipient lists by
 // automatically sending mail in batches of up to MaxNumberOfRecipients.
@@ -179,24 +163,6 @@ func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Mes
 		},
 		to: to,
 		mg: mg,
-	}
-}
-
-// NewMIMEMessage creates a new MIME message.  These messages are largely canned;
-// you do not need to invoke setters to set message-related headers.
-// However, you do still need to call setters for Mailgun-specific settings.
-//
-// DEPRECATED.
-// The package will panic if you use AddRecipient(), AddBcc(), AddCc(), et. al.
-// on a message already equipped with MaxNumberOfRecipients recipients.
-// Use Mailgun.NewMIMEMessage() instead.
-// It works similarly to this function, but supports larger lists of recipients.
-func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
-	return &Message{
-		specific: &mimeMessage{
-			body: body,
-		},
-		to: to,
 	}
 }
 
@@ -319,8 +285,8 @@ func (mm *mimeMessage) recipientCount() int {
 	return 10
 }
 
-func (m *Message) send() (string, string, error) {
-	return m.mg.Send(m)
+func (m *Message) send(ctx context.Context) (string, string, error) {
+	return m.mg.Send(ctx, m)
 }
 
 func (m *Message) SetReplyTo(recipient string) {
@@ -436,14 +402,22 @@ func (m *Message) AddHeader(header, value string) {
 // which Mailgun can use to, in essence, complete form-mail.
 // Refer to the Mailgun documentation for more information.
 func (m *Message) AddVariable(variable string, value interface{}) error {
+	if m.variables == nil {
+		m.variables = make(map[string]string)
+	}
+
 	j, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
-	if m.variables == nil {
-		m.variables = make(map[string]string)
+
+	encoded := string(j)
+	v, err := strconv.Unquote(encoded)
+	if err != nil {
+		v = encoded
 	}
-	m.variables[variable] = string(j)
+
+	m.variables[variable] = v
 	return nil
 }
 
@@ -452,13 +426,26 @@ func (m *Message) AddDomain(domain string) {
 	m.domain = domain
 }
 
+// Returned by `Send()` when the `mailgun.Message` struct is incomplete
+var ErrInvalidMessage = errors.New("message not valid")
+
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
 // a human-readable status message, and a message ID.  The status and message ID are set only
 // if no error occurred.
-func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) {
+func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, id string, err error) {
+	if mg.domain == "" {
+		err = errors.New("you must provide a valid domain before calling Send()")
+		return
+	}
+
+	if mg.apiKey == "" {
+		err = errors.New("you must provide a valid api-key before calling Send()")
+		return
+	}
+
 	if !isValid(message) {
-		err = errors.New("Message not valid")
+		err = ErrInvalidMessage
 		return
 	}
 	payload := newFormDataPayload()
@@ -539,15 +526,15 @@ func (m *MailgunImpl) Send(message *Message) (mes string, id string, err error) 
 	}
 
 	if message.domain == "" {
-		message.domain = m.Domain()
+		message.domain = mg.Domain()
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(m, message.specific.endpoint(), message.domain))
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response sendMessageResponse
-	err = postResponseFromJSON(r, payload, &response)
+	err = postResponseFromJSON(ctx, r, payload, &response)
 	if err == nil {
 		mes = response.Message
 		id = response.Id
@@ -603,7 +590,7 @@ func isValid(m *Message) bool {
 		return false
 	}
 
-	if !validateStringList(m.to, true) {
+	if m.RecipientCount() == 0 {
 		return false
 	}
 
@@ -666,21 +653,21 @@ func validateStringList(list []string, requireOne bool) bool {
 
 // GetStoredMessage retrieves information about a received e-mail message.
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *MailgunImpl) GetStoredMessage(id string) (StoredMessage, error) {
+func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, id string) (StoredMessage, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response StoredMessage
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }
 
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
 // Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
 // thus delegates to the caller the required parsing.
-func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) {
+func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error) {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
@@ -688,33 +675,33 @@ func (mg *MailgunImpl) GetStoredMessageRaw(id string) (StoredMessageRaw, error) 
 	r.addHeader("Accept", "message/rfc2822")
 
 	var response StoredMessageRaw
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }
 
 // GetStoredMessageForURL retrieves information about a received e-mail message.
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *MailgunImpl) GetStoredMessageForURL(url string) (StoredMessage, error) {
+func (mg *MailgunImpl) GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response StoredMessage
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }
 
 // GetStoredMessageRawForURL retrieves the raw MIME body of a received e-mail message.
 // Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
 // thus delegates to the caller the required parsing.
-func (mg *MailgunImpl) GetStoredMessageRawForURL(url string) (StoredMessageRaw, error) {
+func (mg *MailgunImpl) GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addHeader("Accept", "message/rfc2822")
 
 	var response StoredMessageRaw
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 
 }
@@ -722,11 +709,11 @@ func (mg *MailgunImpl) GetStoredMessageRawForURL(url string) (StoredMessageRaw, 
 // DeleteStoredMessage removes a previously stored message.
 // Note that Mailgun institutes a policy of automatically deleting messages after a set time.
 // Consult the current Mailgun API documentation for more details.
-func (mg *MailgunImpl) DeleteStoredMessage(id string) error {
+func (mg *MailgunImpl) DeleteStoredMessage(ctx context.Context, id string) error {
 	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }

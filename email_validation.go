@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -22,27 +23,26 @@ type EmailVerificationParts struct {
 // EmailVerification records basic facts about a validated e-mail address.
 // See the ValidateEmail method and example for more details.
 //
-// IsValid indicates whether an email address conforms to IETF RFC standards.
-// MailboxVerification indicates whether an email address is deliverable.
-// Parts records the different subfields of an email address.
-// Address echoes the address provided.
-// DidYouMean provides a simple recommendation in case the address is invalid or
-// Mailgun thinks you might have a typo.
-// DidYouMean may be empty (""), in which case Mailgun has no recommendation to give.
-// The existence of DidYouMean does NOT imply the email provided has anything wrong with it.
-// IsDisposableAddress indicates whether Mailgun thinks the address is from a known
-// disposable mailbox provider.
-// IsRoleAddress indicates whether Mailgun thinks the address is an email distribution list.
-// Reason contains error's description.
 type EmailVerification struct {
-	IsValid             bool                   `json:"is_valid"`
-	MailboxVerification string                 `json:"mailbox_verification"`
-	Parts               EmailVerificationParts `json:"parts"`
-	Address             string                 `json:"address"`
-	DidYouMean          string                 `json:"did_you_mean"`
-	IsDisposableAddress bool                   `json:"is_disposable_address"`
-	IsRoleAddress       bool                   `json:"is_role_address"`
-	Reason              string                 `json:"reason"`
+	// Indicates whether an email address conforms to IETF RFC standards.
+	IsValid bool `json:"is_valid"`
+	// Indicates whether an email address is deliverable.
+	MailboxVerification string `json:"mailbox_verification"`
+	// Parts records the different subfields of the parsed email address
+	Parts EmailVerificationParts `json:"parts"`
+	// Echoes the address provided.
+	Address string `json:"address"`
+	// Provides a simple recommendation in case the address is invalid or
+	// Mailgun thinks you might have a typo. May be empty, in which case
+	// Mailgun has no recommendation to give.
+	DidYouMean string `json:"did_you_mean"`
+	// Indicates whether Mailgun thinks the address is from a known
+	// disposable mailbox provider.
+	IsDisposableAddress bool `json:"is_disposable_address"`
+	// Indicates whether Mailgun thinks the address is an email distribution list.
+	IsRoleAddress bool `json:"is_role_address"`
+	// A human readable reason the address is reported as invalid
+	Reason string `json:"reason"`
 }
 
 type addressParseResult struct {
@@ -76,7 +76,7 @@ func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 	return &EmailValidatorImpl{
 		client:      http.DefaultClient,
 		isPublicKey: isPublicKey,
-		apiBase:     ApiBase,
+		apiBase:     APIBase,
 		apiKey:      apiKey,
 	}
 }
@@ -101,7 +101,7 @@ func NewEmailValidatorFromEnv() (*EmailValidatorImpl, error) {
 	return v, nil
 }
 
-// ApiBase returns the API Base URL configured for this client.
+// APIBase returns the API Base URL configured for this client.
 func (m *EmailValidatorImpl) APIBase() string {
 	return m.apiBase
 }
@@ -135,7 +135,7 @@ func (m *EmailValidatorImpl) getAddressURL(endpoint string) string {
 
 // ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.
 // It may also be used to break an email address into its sub-components.  (See example.)
-func (m *EmailValidatorImpl) ValidateEmail(email string, mailBoxVerify bool) (EmailVerification, error) {
+func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
 	r := newHTTPRequest(m.getAddressURL("validate"))
 	r.setClient(m.Client())
 	r.addParameter("address", email)
@@ -145,7 +145,7 @@ func (m *EmailValidatorImpl) ValidateEmail(email string, mailBoxVerify bool) (Em
 	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var response EmailVerification
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	if err != nil {
 		return EmailVerification{}, err
 	}
@@ -155,14 +155,14 @@ func (m *EmailValidatorImpl) ValidateEmail(email string, mailBoxVerify bool) (Em
 
 // ParseAddresses takes a list of addresses and sorts them into valid and invalid address categories.
 // NOTE: Use of this function requires a proper public API key.  The private API key will not work.
-func (m *EmailValidatorImpl) ParseAddresses(addresses ...string) ([]string, []string, error) {
+func (m *EmailValidatorImpl) ParseAddresses(ctx context.Context, addresses ...string) ([]string, []string, error) {
 	r := newHTTPRequest(m.getAddressURL("parse"))
 	r.setClient(m.Client())
 	r.addParameter("addresses", strings.Join(addresses, ","))
 	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var response addressParseResult
-	err := getResponseFromJSON(r, &response)
+	err := getResponseFromJSON(ctx, r, &response)
 	if err != nil {
 		return nil, nil, err
 	}

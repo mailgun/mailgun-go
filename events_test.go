@@ -1,189 +1,166 @@
-package mailgun
+package mailgun_test
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"testing"
 	"time"
 
 	"github.com/facebookgo/ensure"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/mailgun/mailgun-go/v3"
+	"github.com/mailgun/mailgun-go/v3/events"
 )
 
-var _ = Describe("ListEvents()", func() {
-	var t GinkgoTInterface
-	var it *EventIterator
-	var mg Mailgun
-	var err error
+func TestEventIteratorGetNext(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
-	BeforeEach(func() {
-		t = GinkgoT()
-		mg, err = NewMailgunFromEnv()
-		Expect(err).To(BeNil())
-		it = mg.ListEvents(&EventsOptions{Limit: 5})
-	})
+	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 5})
 
-	Describe("it.Next()", func() {
-		It("Should iterate forward through pages of events", func() {
-			var firstPage, secondPage []Event
+	var firstPage, secondPage, previousPage []mailgun.Event
+	var ctx = context.Background()
 
-			ensure.True(t, it.Next(&firstPage))
-			ensure.True(t, it.Paging.Next != "")
-			ensure.True(t, len(firstPage) != 0)
-			//firstIterator := *it
+	ensure.True(t, it.Next(ctx, &firstPage))
+	ensure.True(t, it.Paging.Next != "")
+	ensure.True(t, len(firstPage) != 0)
+	firstIterator := *it
 
-			ensure.True(t, it.Next(&secondPage))
-			ensure.True(t, len(secondPage) != 0)
+	ensure.True(t, it.Next(ctx, &secondPage))
+	ensure.True(t, len(secondPage) != 0)
 
-			// Pages should be different
-			/*ensure.NotDeepEqual(t, firstPage, secondPage)
-			ensure.True(t, firstIterator.Paging.Next != it.Paging.Next)
-			ensure.True(t, firstIterator.Paging.Previous != it.Paging.Previous)
-			ensure.Nil(t, it.Err())*/
-		})
-	})
+	// Pages should be different
+	ensure.NotDeepEqual(t, firstPage, secondPage)
+	ensure.True(t, firstIterator.Paging.Next != it.Paging.Next)
+	ensure.True(t, firstIterator.Paging.Previous != it.Paging.Previous)
+	ensure.Nil(t, it.Err())
 
-	Describe("it.Previous()", func() {
-		It("Should iterate backward through pages of events", func() {
-			var firstPage, secondPage, previousPage []Event
-			ensure.True(t, it.Next(&firstPage))
-			ensure.True(t, it.Next(&secondPage))
+	// Previous()
+	ensure.True(t, it.First(ctx, &firstPage))
+	ensure.True(t, it.Next(ctx, &secondPage))
 
-			ensure.True(t, it.Previous(&previousPage))
-			ensure.True(t, len(previousPage) != 0)
-			//ensure.DeepEqual(t, previousPage, firstPage)
-		})
-	})
+	ensure.True(t, it.Previous(ctx, &previousPage))
+	ensure.True(t, len(previousPage) != 0)
+	ensure.DeepEqual(t, previousPage[0].GetID(), firstPage[0].GetID())
 
-	Describe("it.First()", func() {
-		It("Should retrieve the first page of events", func() {
-			var firstPage, secondPage []Event
-			ensure.True(t, it.First(&firstPage))
-			ensure.True(t, len(firstPage) != 0)
+	// First()
+	ensure.True(t, it.First(ctx, &firstPage))
+	ensure.True(t, len(firstPage) != 0)
 
-			// Calling first resets the iterator to the first page
-			ensure.True(t, it.Next(&secondPage))
-			//ensure.NotDeepEqual(t, firstPage, secondPage)
-		})
-	})
+	// Calling first resets the iterator to the first page
+	ensure.True(t, it.Next(ctx, &secondPage))
+	ensure.NotDeepEqual(t, firstPage, secondPage)
 
-	Describe("it.Last()", func() {
-		Context("If First() or Next() was not called first", func() {
-			It("Should fail with error", func() {
-				var lastPage []Event
-				// Calling Last() is invalid unless you first use First() or Next()
-				ensure.False(t, it.Last(&lastPage))
-				ensure.True(t, len(lastPage) == 0)
-			})
+	// Last()
+	var lastPage []mailgun.Event
+	ensure.True(t, it.Next(ctx, &firstPage))
+	ensure.True(t, len(firstPage) != 0)
 
-		})
-	})
+	// Calling Last() is invalid unless you first use First() or Next()
+	ensure.True(t, it.Last(ctx, &lastPage))
+	ensure.True(t, len(lastPage) != 0)
+}
 
-	/*Describe("it.Last()", func() {
-		It("Should retrieve the last page of events", func() {
-			var firstPage, lastPage, previousPage []Event
-			ensure.True(t, it.Next(&firstPage))
-			ensure.True(t, len(firstPage) != 0)
+func TestEventPoller(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
-			ensure.True(t, it.Last(&lastPage))
-			ensure.True(t, len(lastPage) != 0)
+	begin := time.Now().Add(time.Second * -3)
 
-			// Calling first resets the iterator to the first page
-			ensure.True(t, it.Previous(&previousPage))
-			ensure.NotDeepEqual(t, lastPage, previousPage)
-		})
-	})*/
-})
+	// Very short poll interval
+	it := mg.PollEvents(&mailgun.ListEventOptions{
+		// Only events with a timestamp after this date/time will be returned
+		Begin: &begin,
+		// How often we poll the api for new events
+		PollInterval: time.Second * 4})
 
-var _ = Describe("EventIterator()", func() {
-	log := log.New(GinkgoWriter, "EventIterator() - ", 0)
-	var t GinkgoTInterface
-	var mg Mailgun
-	var err error
-
-	BeforeEach(func() {
-		t = GinkgoT()
-		mg, err = NewMailgunFromEnv()
-		ensure.Nil(t, err)
-	})
-
-	Describe("GetFirstPage()", func() {
-		Context("When no parameters are supplied", func() {
-			It("Should return a list of events", func() {
-				ei := mg.NewEventIterator()
-				err := ei.GetFirstPage(GetEventsOptions{})
-				ensure.Nil(t, err)
-
-				// Print out the kind of event and timestamp.
-				// Specifics about each event will depend on the "event" type.
-				events := ei.Events
-				log.Printf("Event\tTimestamp\t")
-				for _, event := range events {
-					log.Printf("%s\t%v\t\n", event.Event, event.Timestamp)
-				}
-				log.Printf("%d events dumped\n\n", len(events))
-				ensure.True(t, len(events) != 0)
-
-				// TODO: (thrawn01) The more I look at this and test it,
-				// the more I doubt it will ever work consistently
-				//ei.GetPrevious()
-			})
-		})
-	})
-})
-
-var _ = Describe("PollEvents()", func() {
-	log := log.New(GinkgoWriter, "PollEvents() - ", 0)
-	var t GinkgoTInterface
-	var it *EventPoller
-	var mg Mailgun
-	var err error
-
-	BeforeEach(func() {
-		t = GinkgoT()
-	})
-
-	Describe("it.Poll()", func() {
-		It("Should return events once the threshold age has expired", func() {
-			mg, err = NewMailgunFromEnv()
-			b := time.Now().Add(time.Second * -3)
-			Expect(err).To(BeNil())
-
-			// Very short poll interval
-			it = mg.PollEvents(&EventsOptions{
-				// Poll() returns after this threshold is met
-				// or events older than this threshold appear
-				ThresholdAge: time.Second * 10,
-				// Only events with a timestamp after this date/time will be returned
-				Begin: &b,
-				// How often we poll the api for new events
-				PollInterval: time.Second * 4})
-
-			// Send an email
-			toUser := reqEnv(t, "MG_EMAIL_TO")
-			m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-			msg, id, err := mg.Send(m)
-			ensure.Nil(t, err)
-
-			log.Printf("New Email: %s Id: %s\n", msg, id)
-
-			// Wait for our email event to arrive
-			var events []Event
-			it.Poll(&events)
-
-			var found bool
-			// Log the events we received
-			for _, event := range events {
-				messageID, _ := event.Message.ID()
-				log.Printf("Event: %s <%s> - %v", messageID, event.Event, event.Timestamp)
-
-				// If we find our accepted email event
-				if id == ("<"+messageID+">") && event.Event == EventAccepted {
-					found = true
-				}
+	eventChan := make(chan mailgun.Event, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		// Poll until our email event arrives
+		var page []mailgun.Event
+		for it.Poll(ctx, &page) {
+			for _, e := range page {
+				eventChan <- e
 			}
-			// Ensure we found our email
-			ensure.Nil(t, it.Err())
-			ensure.True(t, found)
-		})
-	})
-})
+		}
+		close(eventChan)
+	}()
+
+	// Send an email
+	m := mg.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
+	msg, id, err := mg.Send(ctx, m)
+	ensure.Nil(t, err)
+
+	t.Logf("New Email: %s Id: %s\n", msg, id)
+
+	var accepted *events.Accepted
+	for e := range eventChan {
+		switch event := e.(type) {
+		case *events.Accepted:
+			t.Logf("Accepted Event: %s - %v", event.Message.Headers.MessageID, event.GetTimestamp())
+			// If we find our accepted email event
+			if id == ("<" + event.Message.Headers.MessageID + ">") {
+				accepted = event
+				cancel()
+			}
+		}
+	}
+	// Ensure we found our email
+	ensure.NotNil(t, it.Err())
+	ensure.True(t, accepted != nil)
+	ensure.DeepEqual(t, accepted.Recipient, "user@"+testDomain)
+}
+
+func ExampleMailgunImpl_ListEvents() {
+	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+	mg.SetAPIBase(server.URL())
+
+	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
+
+	var page []mailgun.Event
+
+	// The entire operation should not take longer than 30 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	// For each page of 100 events
+	for it.Next(ctx, &page) {
+		for _, e := range page {
+			// You can access some fields via the interface
+			//fmt.Printf("Event: '%s' TimeStamp: '%s'\n", e.GetName(), e.GetTimestamp())
+
+			// and you can act upon each event by type
+			switch event := e.(type) {
+			case *events.Accepted:
+				fmt.Printf("Accepted: auth: %t\n", event.Flags.IsAuthenticated)
+			case *events.Delivered:
+				fmt.Printf("Delivered transport: %s\n", event.Envelope.Transport)
+			case *events.Failed:
+				fmt.Printf("Failed reason: %s\n", event.Reason)
+			case *events.Clicked:
+				fmt.Printf("Clicked GeoLocation: %s\n", event.GeoLocation.Country)
+			case *events.Opened:
+				fmt.Printf("Opened GeoLocation: %s\n", event.GeoLocation.Country)
+			case *events.Rejected:
+				fmt.Printf("Rejected reason: %s\n", event.Reject.Reason)
+			case *events.Stored:
+				fmt.Printf("Stored URL: %s\n", event.Storage.URL)
+			case *events.Unsubscribed:
+				fmt.Printf("Unsubscribed client OS: %s\n", event.ClientInfo.ClientOS)
+			}
+		}
+	}
+	// Accepted: auth: false
+	// Accepted: auth: true
+	// Delivered transport: smtp
+	// Delivered transport: http
+	// Stored URL: http://mailgun.text/some/url
+	// Clicked GeoLocation: US
+	// Clicked GeoLocation: US
+	// Clicked GeoLocation: US
+	// Opened GeoLocation: US
+	// Opened GeoLocation: US
+	// Opened GeoLocation: US
+	// Unsubscribed client OS: OS X
+	// Unsubscribed client OS: OS X
+}
