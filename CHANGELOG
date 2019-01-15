@@ -1,0 +1,74 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.0.0] - 2019-01-15
+### Added
+* Added CHANGELOG
+* Added `AddDomainIP()`
+* Added `ListDomainIPS()`
+* Added `DeleteDomainIP()`
+* Added `ListIPS()`
+* Added `GetIP()`
+* Added `GetDomainTracking()`
+* Added `GetDomainConnection()`
+* Added `UpdateDomainConnection()`
+* Added `CreateExport()`
+* Added `ListExports()`
+* Added `GetExports()`
+* Added `GetExportLink()`
+* Added `CreateTemplate()`
+* Added `GetTemplate()`
+* Added `UpdateTemplate()`
+* Added `DeleteTemplate()`
+* Added `ListTemplates()`
+* Added `AddTemplateVersion()`
+* Added `GetTemplateVersion()`
+* Added `UpdateTemplateVersion()`
+* Added `DeleteTemplateVersion()`
+* Added `ListTemplateVersions()`
+
+### Changed
+* Added a `mailgun.MockServer` which duplicates part of the mailgun API; suitable for testing
+* `ListMailingLists()` now uses the `/pages` API and returns an iterator
+* `ListMembers()` now uses the `/pages` API and returns an iterator
+* Renamed public interface methods to be consistent. IE: `GetThing(), ListThing(), CreateThing()`
+* Moved event objects into the `mailgun/events` package, so names like
+  `MailingList` returned by API calls and `MailingList` as an event object
+  don't conflict and confuse users.
+* Now using context.Context for all network operations
+* Test suite will run without MG_ env vars defined
+* ListRoutes() now uses the iterator interface
+* Added SkipNetworkTest()
+* Renamed GetStatsTotals() to GetStats()
+* Renamed GetUnsubscribes to ListUnsubscribes()
+* Renamed Unsubscribe() to CreateUnsubscribe()
+* Renamed RemoveUnsubscribe() to DeleteUnsubscribe()
+* GetStats() now takes an `*opt` argument to pass optional parameters
+* Modified GetUnsubscribe() to follow the API
+* Now using golang modules
+* ListCredentials() now returns an iterator
+* ListUnsubscribes() now returns an paging iterator
+* CreateDomain now accepts CreateDomainOption{}
+* CreateDomain() now supports all optional parameters not just spam_action and wildcard.
+* ListComplaints() now returns a page iterator
+* Renamed `TagItem` to `Tag`
+* ListBounces() now returns a page iterator
+* API responses with CreatedAt fields are now unmarshalled into RFC2822
+* DomainList() now returns an iterator
+* Updated godoc documentation
+* Renamed ApiBase to APIBase
+* Updated copyright to 2019
+* `ListEvents()` now returns a list of typed events
+
+### Removed
+* Removed more deprecated types
+* Removed gobuffalo/envy dependency
+* Remove mention of the CLI in the README
+* Removed mailgun cli from project
+* Removed GetCode() from `Bounce` struct. Verified API returns 'string' and not 'int'
+* Removed deprecated methods NewMessage and NewMIMEMessage
+* Removed ginkgo and gomega tests
+* Removed GetStats() As the /stats endpoint is depreciated
