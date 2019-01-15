@@ -24,4 +24,3 @@ func spendMoney(t *testing.T, tFunc func()) {
 		t.Log("Money spending not allowed, not running function.")
 	}
 }
-

@@ -341,7 +341,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 		exampleBoolVarKey   = "test-bool-key"
 		exampleBoolVarVal   = "false"
 		exampleMapVarKey    = "test-map-key"
-		exampleMapVarStrVal    = `{"test":"123"}`
+		exampleMapVarStrVal = `{"test":"123"}`
 	)
 	var (
 		exampleMapVarVal = map[string]string{"test": "123"}
@@ -376,12 +376,11 @@ func TestSendMGMessageVariables(t *testing.T) {
 	ensure.DeepEqual(t, id, exampleID)
 }
 
-
 func TestSendEOFError(t *testing.T) {
 	const (
-		exampleDomain       = "testDomain"
-		exampleAPIKey       = "testAPIKey"
-		toUser              = "test@test.com"
+		exampleDomain = "testDomain"
+		exampleAPIKey = "testAPIKey"
+		toUser        = "test@test.com"
 	)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -400,11 +399,12 @@ func TestSendEOFError(t *testing.T) {
 	ensure.StringContains(t, err.Error(), "remote server prematurely closed connection: Post ")
 	ensure.StringContains(t, err.Error(), "/messages: EOF")
 }
+
 func TestHasRecipient(t *testing.T) {
 	const (
-		exampleDomain       = "testDomain"
-		exampleAPIKey       = "testAPIKey"
-		recipient              = "test@test.com"
+		exampleDomain = "testDomain"
+		exampleAPIKey = "testAPIKey"
+		recipient     = "test@test.com"
 	)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
