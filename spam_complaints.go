@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"context"
 	"strconv"
 )
 
@@ -9,73 +10,165 @@ const (
 )
 
 // Complaint structures track how many times one of your emails have been marked as spam.
-// CreatedAt indicates when the first report arrives from a given recipient, identified by Address.
-// Count provides a running counter of how many times
 // the recipient thought your messages were not solicited.
 type Complaint struct {
-	Count     int    `json:"count"`
-	CreatedAt string `json:"created_at"`
-	Address   string `json:"address"`
+	Count     int         `json:"count"`
+	CreatedAt RFC2822Time `json:"created_at"`
+	Address   string      `json:"address"`
 }
 
-type complaintsEnvelope struct {
-	Items  []Complaint `json:"items"`
+type complaintsResponse struct {
 	Paging Paging      `json:"paging"`
+	Items  []Complaint `json:"items"`
 }
 
-// GetComplaints returns a set of spam complaints registered against your domain.
+// ListComplaints returns a set of spam complaints registered against your domain.
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
-func (m *MailgunImpl) GetComplaints(limit, skip int) (int, []Complaint, error) {
-	r := newHTTPRequest(generateApiUrl(m, complaintsEndpoint))
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
-
-	if limit != -1 {
-		r.addParameter("limit", strconv.Itoa(limit))
+func (mg *MailgunImpl) ListComplaints(opts *ListOptions) *ComplaintsIterator {
+	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	if opts != nil {
+		if opts.Limit != 0 {
+			r.addParameter("limit", strconv.Itoa(opts.Limit))
+		}
 	}
-	if skip != -1 {
-		r.addParameter("skip", strconv.Itoa(skip))
+	url, err := r.generateUrlWithParameters()
+	return &ComplaintsIterator{
+		mg:                 mg,
+		complaintsResponse: complaintsResponse{Paging: Paging{Next: url, First: url}},
+		err:                err,
 	}
-
-	var envelope complaintsEnvelope
-	err := getResponseFromJSON(r, &envelope)
-	if err != nil {
-		return -1, nil, err
-	}
-	return len(envelope.Items), envelope.Items, nil
 }
 
-// GetSingleComplaint returns a single complaint record filed by a recipient at the email address provided.
+type ComplaintsIterator struct {
+	complaintsResponse
+	mg  Mailgun
+	err error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ci *ComplaintsIterator) Err() error {
+	return ci.err
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ci *ComplaintsIterator) Next(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Next)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ci *ComplaintsIterator) First(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.First)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ci *ComplaintsIterator) Last(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Last)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ci *ComplaintsIterator) Previous(ctx context.Context, items *[]Complaint) bool {
+	if ci.err != nil {
+		return false
+	}
+	if ci.Paging.Previous == "" {
+		return false
+	}
+	ci.err = ci.fetch(ctx, ci.Paging.Previous)
+	if ci.err != nil {
+		return false
+	}
+	cpy := make([]Complaint, len(ci.Items))
+	copy(cpy, ci.Items)
+	*items = cpy
+	if len(ci.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {
+	r := newHTTPRequest(url)
+	r.setClient(ci.mg.Client())
+	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
+
+	return getResponseFromJSON(ctx, r, &ci.complaintsResponse)
+}
+
+// GetComplaint returns a single complaint record filed by a recipient at the email address provided.
 // If no complaint exists, the Complaint instance returned will be empty.
-func (m *MailgunImpl) GetSingleComplaint(address string) (Complaint, error) {
-	r := newHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+func (mg *MailgunImpl) GetComplaint(ctx context.Context, address string) (Complaint, error) {
+	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint) + "/" + address)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var c Complaint
-	err := getResponseFromJSON(r, &c)
+	err := getResponseFromJSON(ctx, r, &c)
 	return c, err
 }
 
 // CreateComplaint registers the specified address as a recipient who has complained of receiving spam
 // from your domain.
-func (m *MailgunImpl) CreateComplaint(address string) error {
-	r := newHTTPRequest(generateApiUrl(m, complaintsEndpoint))
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
+func (mg *MailgunImpl) CreateComplaint(ctx context.Context, address string) error {
+	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("address", address)
-	_, err := makePostRequest(r, p)
+	_, err := makePostRequest(ctx, r, p)
 	return err
 }
 
 // DeleteComplaint removes a previously registered e-mail address from the list of people who complained
 // of receiving spam from your domain.
-func (m *MailgunImpl) DeleteComplaint(address string) error {
-	r := newHTTPRequest(generateApiUrl(m, complaintsEndpoint) + "/" + address)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.APIKey())
-	_, err := makeDeleteRequest(r)
+func (mg *MailgunImpl) DeleteComplaint(ctx context.Context, address string) error {
+	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint) + "/" + address)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }

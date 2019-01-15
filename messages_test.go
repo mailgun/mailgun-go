@@ -1,15 +1,18 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go/v3/events"
 )
 
 const (
@@ -30,105 +33,11 @@ Testing some Mailgun MIME awesomeness!
 	templateText = "Greetings %recipient.name%!  Your reserved seat is at table %recipient.table%."
 )
 
-func TestSendLegacyPlain(t *testing.T) {
-	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		msg, id, err := mg.Send(m)
-		ensure.Nil(t, err)
-		t.Log("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
-	})
-}
-
-func TestSendLegacyPlainWithTracking(t *testing.T) {
-	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		m.SetTracking(true)
-		msg, id, err := mg.Send(m)
-		ensure.Nil(t, err)
-		t.Log("TestSendPlainWithTracking:MSG(" + msg + "),ID(" + id + ")")
-	})
-}
-
-func TestSendLegacyPlainAt(t *testing.T) {
-	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
-		msg, id, err := mg.Send(m)
-		ensure.Nil(t, err)
-		t.Log("TestSendPlainAt:MSG(" + msg + "),ID(" + id + ")")
-	})
-}
-
-func TestSendLegacyHtml(t *testing.T) {
-	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		m.SetHtml(exampleHtml)
-		msg, id, err := mg.Send(m)
-		ensure.Nil(t, err)
-		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
-	})
-}
-
-func TestSendLegacyTracking(t *testing.T) {
-	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		m := NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
-		m.SetTracking(false)
-		msg, id, err := mg.Send(m)
-		ensure.Nil(t, err)
-		t.Log("TestSendTracking:MSG(" + msg + "),ID(" + id + ")")
-	})
-}
-
-func TestSendLegacyTag(t *testing.T) {
-	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		m := NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
-		m.AddTag("FooTag")
-		m.AddTag("BarTag")
-		m.AddTag("BlortTag")
-		msg, id, err := mg.Send(m)
-		ensure.Nil(t, err)
-		t.Log("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
-	})
-}
-
-func TestSendLegacyMIME(t *testing.T) {
-	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		m := NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
-		msg, id, err := mg.Send(m)
-		ensure.Nil(t, err)
-		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
-	})
-}
-
 func TestGetStoredMessage(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
@@ -139,8 +48,9 @@ func TestGetStoredMessage(t *testing.T) {
 			return
 		}
 
+		ctx := context.Background()
 		// First, get our stored message.
-		msg, err := mg.GetStoredMessage(id)
+		msg, err := mg.GetStoredMessage(ctx, id)
 		ensure.Nil(t, err)
 
 		fields := map[string]string{
@@ -155,132 +65,168 @@ func TestGetStoredMessage(t *testing.T) {
 		}
 
 		// We're done with it; now delete it.
-		ensure.Nil(t, mg.DeleteStoredMessage(id))
+		ensure.Nil(t, mg.DeleteStoredMessage(ctx, id))
 	})
 }
 
 // Tries to locate the first stored event type, returning the associated stored message key.
 func findStoredMessageID(mg Mailgun) (string, error) {
-	ei := mg.NewEventIterator()
-	err := ei.GetFirstPage(GetEventsOptions{})
-	for {
-		if err != nil {
-			return "", err
-		}
-		if len(ei.Events) == 0 {
-			break
-		}
-		for _, event := range ei.Events {
-			if event.Event == EventStored {
-				return event.Storage.Key, nil
+	it := mg.ListEvents(nil)
+
+	var page []Event
+	for it.Next(context.Background(), &page) {
+		for _, event := range page {
+			if event.GetName() == events.EventStored {
+				return event.(*events.Stored).Storage.Key, nil
 			}
 		}
-		err = ei.GetNext()
+	}
+	if it.Err() != nil {
+		return "", it.Err()
 	}
 	return "", fmt.Errorf("No stored messages found.  Try changing MG_EMAIL_TO to an address that stores messages and try again.")
 }
 
 func TestSendMGPlain(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		msg, id, err := mg.Send(m)
+		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
 func TestSendMGPlainWithTracking(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
-		msg, id, err := mg.Send(m)
+		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendPlainWithTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
 func TestSendMGPlainAt(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
-		msg, id, err := mg.Send(m)
+		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendPlainAt:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
 func TestSendMGHtml(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
-		msg, id, err := mg.Send(m)
+		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
 func TestSendMGTracking(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
-		msg, id, err := mg.Send(m)
+		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
 func TestSendMGTag(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
 		m.AddTag("FooTag")
 		m.AddTag("BarTag")
 		m.AddTag("BlortTag")
-		msg, id, err := mg.Send(m)
+		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
 func TestSendMGMIME(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
-		msg, id, err := mg.Send(m)
+		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
 func TestSendMGBatchFailRecipients(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
@@ -296,40 +242,42 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 }
 
 func TestSendMGBatchRecipientVariables(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	spendMoney(t, func() {
-		toUser := reqEnv(t, "MG_EMAIL_TO")
+		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
+		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, templateText)
 		err = m.AddRecipientAndVariables(toUser, map[string]interface{}{
 			"name":  "Joe Cool Example",
 			"table": 42,
 		})
 		ensure.Nil(t, err)
-		_, _, err = mg.Send(m)
+		_, _, err = mg.Send(ctx, m)
 		ensure.Nil(t, err)
 	})
 }
 
 func TestSendMGOffline(t *testing.T) {
 	const (
-		exampleDomain       = "testDomain"
-		exampleAPIKey       = "testAPIKey"
-		toUser              = "test@test.com"
-		exampleMessage      = "Queue. Thank you"
-		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
+		exampleDomain  = "testDomain"
+		exampleAPIKey  = "testAPIKey"
+		toUser         = "test@test.com"
+		exampleMessage = "Queue. Thank you"
+		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
 		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", exampleDomain))
-		values, err := parseContentType(req)
-		ensure.Nil(t, err)
-		ensure.True(t, len(values) != 0)
-		ensure.DeepEqual(t, values.Get("from"), fromUser)
-		ensure.DeepEqual(t, values.Get("subject"), exampleSubject)
-		ensure.DeepEqual(t, values.Get("text"), exampleText)
-		ensure.DeepEqual(t, values.Get("to"), toUser)
+		ensure.DeepEqual(t, req.FormValue("from"), fromUser)
+		ensure.DeepEqual(t, req.FormValue("subject"), exampleSubject)
+		ensure.DeepEqual(t, req.FormValue("text"), exampleText)
+		ensure.DeepEqual(t, req.FormValue("to"), toUser)
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -337,9 +285,10 @@ func TestSendMGOffline(t *testing.T) {
 
 	mg := NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL)
+	ctx := context.Background()
 
-	m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
-	msg, id, err := mg.Send(m)
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	msg, id, err := mg.Send(ctx, m)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
@@ -350,21 +299,18 @@ func TestSendMGSeparateDomain(t *testing.T) {
 		exampleDomain = "testDomain"
 		signingDomain = "signingDomain"
 
-		exampleAPIKey       = "testAPIKey"
-		toUser              = "test@test.com"
-		exampleMessage      = "Queue. Thank you"
-		exampleID           = "<20111114174239.25659.5817@samples.mailgun.org>"
+		exampleAPIKey  = "testAPIKey"
+		toUser         = "test@test.com"
+		exampleMessage = "Queue. Thank you"
+		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
 		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", signingDomain))
-		values, err := parseContentType(req)
-		ensure.Nil(t, err)
-		ensure.True(t, len(values) != 0)
-		ensure.DeepEqual(t, values.Get("from"), fromUser)
-		ensure.DeepEqual(t, values.Get("subject"), exampleSubject)
-		ensure.DeepEqual(t, values.Get("text"), exampleText)
-		ensure.DeepEqual(t, values.Get("to"), toUser)
+		ensure.DeepEqual(t, req.FormValue("from"), fromUser)
+		ensure.DeepEqual(t, req.FormValue("subject"), exampleSubject)
+		ensure.DeepEqual(t, req.FormValue("text"), exampleText)
+		ensure.DeepEqual(t, req.FormValue("to"), toUser)
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -373,11 +319,119 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	mg := NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL)
 
-	m := NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	ctx := context.Background()
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	m.AddDomain(signingDomain)
 
-	msg, id, err := mg.Send(m)
+	msg, id, err := mg.Send(ctx, m)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
+}
+
+func TestSendMGMessageVariables(t *testing.T) {
+	const (
+		exampleDomain       = "testDomain"
+		exampleAPIKey       = "testAPIKey"
+		toUser              = "test@test.com"
+		exampleMessage      = "Queue. Thank you"
+		exampleID           = "<20111114174239.25659.5820@samples.mailgun.org>"
+		exampleStrVarKey    = "test-str-key"
+		exampleStrVarVal    = "test-str-val"
+		exampleBoolVarKey   = "test-bool-key"
+		exampleBoolVarVal   = "false"
+		exampleMapVarKey    = "test-map-key"
+		exampleMapVarStrVal = `{"test":"123"}`
+	)
+	var (
+		exampleMapVarVal = map[string]string{"test": "123"}
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", exampleDomain))
+
+		ensure.DeepEqual(t, req.FormValue("from"), fromUser)
+		ensure.DeepEqual(t, req.FormValue("subject"), exampleSubject)
+		ensure.DeepEqual(t, req.FormValue("text"), exampleText)
+		ensure.DeepEqual(t, req.FormValue("to"), toUser)
+		ensure.DeepEqual(t, req.FormValue("v:"+exampleMapVarKey), exampleMapVarStrVal)
+		ensure.DeepEqual(t, req.FormValue("v:"+exampleBoolVarKey), exampleBoolVarVal)
+		ensure.DeepEqual(t, req.FormValue("v:"+exampleStrVarKey), exampleStrVarVal)
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m.AddVariable(exampleStrVarKey, exampleStrVarVal)
+	m.AddVariable(exampleBoolVarKey, false)
+	m.AddVariable(exampleMapVarKey, exampleMapVarVal)
+
+	msg, id, err := mg.Send(context.Background(), m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
+}
+
+func TestSendEOFError(t *testing.T) {
+	const (
+		exampleDomain = "testDomain"
+		exampleAPIKey = "testAPIKey"
+		toUser        = "test@test.com"
+	)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		//ensure.True(t, false)
+		panic("")
+		return
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	_, _, err := mg.Send(context.Background(), m)
+	ensure.NotNil(t, err)
+	ensure.StringContains(t, err.Error(), "remote server prematurely closed connection: Post ")
+	ensure.StringContains(t, err.Error(), "/messages: EOF")
+}
+
+func TestHasRecipient(t *testing.T) {
+	const (
+		exampleDomain = "testDomain"
+		exampleAPIKey = "testAPIKey"
+		recipient     = "test@test.com"
+	)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/%s/messages", exampleDomain))
+		fmt.Fprint(w, `{"message":"Queued, Thank you", "id":"<20111114174239.25659.5820@samples.mailgun.org>"}`)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL)
+
+	// No recipient
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
+	_, _, err := mg.Send(context.Background(), m)
+	ensure.NotNil(t, err)
+	ensure.DeepEqual(t, err.Error(), "message not valid")
+
+	// Provided Bcc
+	m = mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m.AddBCC(recipient)
+	_, _, err = mg.Send(context.Background(), m)
+	ensure.Nil(t, err)
+
+	// Provided cc
+	m = mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m.AddCC(recipient)
+	_, _, err = mg.Send(context.Background(), m)
+	ensure.Nil(t, err)
 }

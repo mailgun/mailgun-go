@@ -1,44 +1,177 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 )
 
 // A Credential structure describes a principle allowed to send or receive mail at the domain.
 type Credential struct {
-	CreatedAt string `json:"created_at"`
-	Login     string `json:"login"`
-	Password  string `json:"password"`
+	CreatedAt RFC2822Time `json:"created_at"`
+	Login     string      `json:"login"`
+	Password  string      `json:"password"`
 }
 
-// ErrEmptyParam results occur when a required parameter is missing.
+type credentialsListResponse struct {
+	// is -1 if Next() or First() have not been called
+	TotalCount int          `json:"total_count"`
+	Items      []Credential `json:"items"`
+}
+
+// Returned when a required parameter is missing.
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
-// GetCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) GetCredentials(limit, skip int) (int, []Credential, error) {
-	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
-	r.setClient(mg.Client())
-	if limit != DefaultLimit {
-		r.addParameter("limit", strconv.Itoa(limit))
+// ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
+func (mg *MailgunImpl) ListCredentials(opts *ListOptions) *CredentialsIterator {
+	var limit int
+	if opts != nil {
+		limit = opts.Limit
 	}
-	if skip != DefaultSkip {
+	return &CredentialsIterator{
+		mg:                      mg,
+		url:                     generateCredentialsUrl(mg, ""),
+		credentialsListResponse: credentialsListResponse{TotalCount: -1},
+		limit:                   limit,
+	}
+}
+
+type CredentialsIterator struct {
+	credentialsListResponse
+
+	limit  int
+	mg     Mailgun
+	offset int
+	url    string
+	err    error
+}
+
+// If an error occurred during iteration `Err()` will return non nil
+func (ri *CredentialsIterator) Err() error {
+	return ri.err
+}
+
+// Returns the current offset of the iterator
+func (ri *CredentialsIterator) Offset() int {
+	return ri.offset
+}
+
+// Retrieves the next page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
+	}
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
+	}
+	ri.err = ri.fetch(ctx, 0, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	ri.offset = len(ri.Items)
+	return true
+}
+
+// Retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.TotalCount - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	return true
+}
+
+// Retrieves the previous page of items from the api. Returns false when there
+// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	if ri.TotalCount == -1 {
+		return false
+	}
+
+	ri.offset = ri.offset - ri.limit
+	if ri.offset < 0 {
+		ri.offset = 0
+	}
+
+	ri.err = ri.fetch(ctx, ri.offset, ri.limit)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]Credential, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error {
+	r := newHTTPRequest(ri.url)
+	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
+	r.setClient(ri.mg.Client())
+
+	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
 	}
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var envelope struct {
-		TotalCount int          `json:"total_count"`
-		Items      []Credential `json:"items"`
+	if limit != 0 {
+		r.addParameter("limit", strconv.Itoa(limit))
 	}
-	err := getResponseFromJSON(r, &envelope)
-	if err != nil {
-		return -1, nil, err
-	}
-	return envelope.TotalCount, envelope.Items, nil
+
+	return getResponseFromJSON(ctx, r, &ri.credentialsListResponse)
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.
-func (mg *MailgunImpl) CreateCredential(login, password string) error {
+func (mg *MailgunImpl) CreateCredential(ctx context.Context, login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
@@ -48,12 +181,12 @@ func (mg *MailgunImpl) CreateCredential(login, password string) error {
 	p := newUrlEncodedPayload()
 	p.addValue("login", login)
 	p.addValue("password", password)
-	_, err := makePostRequest(r, p)
+	_, err := makePostRequest(ctx, r, p)
 	return err
 }
 
 // ChangeCredentialPassword attempts to alter the indicated credential's password.
-func (mg *MailgunImpl) ChangeCredentialPassword(id, password string) error {
+func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, id, password string) error {
 	if (id == "") || (password == "") {
 		return ErrEmptyParam
 	}
@@ -62,18 +195,18 @@ func (mg *MailgunImpl) ChangeCredentialPassword(id, password string) error {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("password", password)
-	_, err := makePutRequest(r, p)
+	_, err := makePutRequest(ctx, r, p)
 	return err
 }
 
 // DeleteCredential attempts to remove the indicated principle from the domain.
-func (mg *MailgunImpl) DeleteCredential(id string) error {
+func (mg *MailgunImpl) DeleteCredential(ctx context.Context, id string) error {
 	if id == "" {
 		return ErrEmptyParam
 	}
 	r := newHTTPRequest(generateCredentialsUrl(mg, id))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(r)
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }

@@ -2,8 +2,10 @@ package mailgun
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -128,7 +130,7 @@ func (f *formDataPayload) addFile(key, file string) {
 }
 
 func (f *formDataPayload) addBuffer(key, file string, buff []byte) {
-	f.Buffers = append(f.Buffers, keyNameBuff{key: key, name: file, value:buff})
+	f.Buffers = append(f.Buffers, keyNameBuff{key: key, name: file, value: buff})
 }
 
 func (f *formDataPayload) addReadCloser(key, name string, rc io.ReadCloser) {
@@ -198,23 +200,23 @@ func (r *httpRequest) addHeader(name, value string) {
 	r.Headers[name] = value
 }
 
-func (r *httpRequest) makeGetRequest() (*httpResponse, error) {
-	return r.makeRequest("GET", nil)
+func (r *httpRequest) makeGetRequest(ctx context.Context) (*httpResponse, error) {
+	return r.makeRequest(ctx, "GET", nil)
 }
 
-func (r *httpRequest) makePostRequest(payload payload) (*httpResponse, error) {
-	return r.makeRequest("POST", payload)
+func (r *httpRequest) makePostRequest(ctx context.Context, payload payload) (*httpResponse, error) {
+	return r.makeRequest(ctx, "POST", payload)
 }
 
-func (r *httpRequest) makePutRequest(payload payload) (*httpResponse, error) {
-	return r.makeRequest("PUT", payload)
+func (r *httpRequest) makePutRequest(ctx context.Context, payload payload) (*httpResponse, error) {
+	return r.makeRequest(ctx, "PUT", payload)
 }
 
-func (r *httpRequest) makeDeleteRequest() (*httpResponse, error) {
-	return r.makeRequest("DELETE", nil)
+func (r *httpRequest) makeDeleteRequest(ctx context.Context) (*httpResponse, error) {
+	return r.makeRequest(ctx, "DELETE", nil)
 }
 
-func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse, error) {
+func (r *httpRequest) NewRequest(ctx context.Context, method string, payload payload) (*http.Request, error) {
 	url, err := r.generateUrlWithParameters()
 	if err != nil {
 		return nil, err
@@ -228,11 +230,12 @@ func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse
 	} else {
 		body = nil
 	}
-
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
+
+	req = req.WithContext(ctx)
 
 	if payload != nil && payload.getContentType() != "" {
 		req.Header.Add("Content-Type", payload.getContentType())
@@ -244,6 +247,14 @@ func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse
 
 	for header, value := range r.Headers {
 		req.Header.Add(header, value)
+	}
+	return req, nil
+}
+
+func (r *httpRequest) makeRequest(ctx context.Context, method string, payload payload) (*httpResponse, error) {
+	req, err := r.NewRequest(ctx, method, payload)
+	if err != nil {
+		return nil, err
 	}
 
 	if Debug {
@@ -257,13 +268,18 @@ func (r *httpRequest) makeRequest(method string, payload payload) (*httpResponse
 		response.Code = resp.StatusCode
 	}
 	if err != nil {
-		return nil, err
+		if urlErr, ok := err.(*url.Error); ok {
+			if urlErr.Err == io.EOF {
+				return nil, errors.Wrap(err, "remote server prematurely closed connection")
+			}
+		}
+		return nil, errors.Wrap(err, "while making http request")
 	}
 
 	defer resp.Body.Close()
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while reading response body")
 	}
 
 	response.Data = responseBody
