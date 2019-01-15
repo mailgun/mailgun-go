@@ -376,6 +376,34 @@ func TestSendMGMessageVariables(t *testing.T) {
 	ensure.DeepEqual(t, id, exampleID)
 }
 
+func TestAddRecipientsError(t *testing.T) {
+	var err error
+	m := NewMessage(fromUser, exampleSubject, exampleText)
+
+	for i := 0; i < 1000; i++ {
+		recipient := fmt.Sprintf("recipient_%d@example.com", i)
+		err = m.AddRecipient(recipient)
+		ensure.Nil(t, err)
+	}
+
+	err = m.AddRecipient("recipient_1001@example.com")
+	ensure.DeepEqual(t, err.Error(), "recipient limit exceeded (max 1000)")
+}
+
+func TestAddRecipientAndVariablesError(t *testing.T) {
+	var err error
+	m := NewMessage(fromUser, exampleSubject, exampleText)
+
+	for i := 0; i < 1000; i++ {
+		recipient := fmt.Sprintf("recipient_%d@example.com", i)
+		err = m.AddRecipientAndVariables(recipient, map[string]interface{}{"id": i})
+		ensure.Nil(t, err)
+	}
+
+	err = m.AddRecipientAndVariables("recipient_1001@example.com", map[string]interface{}{"id": 1001})
+	ensure.DeepEqual(t, err.Error(), "recipient limit exceeded (max 1000)")
+}
+
 func TestSendEOFError(t *testing.T) {
 	const (
 		exampleDomain = "testDomain"
@@ -384,7 +412,6 @@ func TestSendEOFError(t *testing.T) {
 	)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		//ensure.True(t, false)
 		panic("")
 		return
 	}))

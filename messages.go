@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
@@ -239,28 +240,17 @@ func (m *Message) AddInline(inline string) {
 }
 
 // AddRecipient appends a receiver to the To: header of a message.
-//
-// NOTE: Above a certain limit (currently 1000 recipients),
-// this function will cause the message as it's currently defined to be sent.
-// This allows you to support large mailing lists without running into Mailgun's API limitations.
+// It will return an error if the limit of recipients have been exceeded for this message
 func (m *Message) AddRecipient(recipient string) error {
 	return m.AddRecipientAndVariables(recipient, nil)
 }
 
 // AddRecipientAndVariables appends a receiver to the To: header of a message,
 // and as well attaches a set of variables relevant for this recipient.
-//
-// NOTE: Above a certain limit (see MaxNumberOfRecipients),
-// this function will cause the message as it's currently defined to be sent.
-// This allows you to support large mailing lists without running into Mailgun's API limitations.
+// It will return an error if the limit of recipients have been exceeded for this message
 func (m *Message) AddRecipientAndVariables(r string, vars map[string]interface{}) error {
 	if m.RecipientCount() >= MaxNumberOfRecipients {
-		_, _, err := m.send(context.TODO())
-		if err != nil {
-			return err
-		}
-		m.to = make([]string, len(m.to))
-		m.recipientVariables = make(map[string]map[string]interface{}, len(m.recipientVariables))
+		return fmt.Errorf("recipient limit exceeded (max %d)", MaxNumberOfRecipients)
 	}
 	m.to = append(m.to, r)
 	if vars != nil {
