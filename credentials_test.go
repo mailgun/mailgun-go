@@ -1,7 +1,9 @@
 package mailgun
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -9,21 +11,32 @@ import (
 )
 
 func TestGetCredentials(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
-	n, cs, err := mg.GetCredentials(DefaultLimit, DefaultSkip)
-	ensure.Nil(t, err)
+	ctx := context.Background()
+	it := mg.ListCredentials(nil)
 
-	t.Logf("Login\tCreated At\t\n")
-	for _, c := range cs {
-		t.Logf("%s\t%s\t\n", c.Login, c.CreatedAt)
+	var page []Credential
+	for it.Next(ctx, &page) {
+		t.Logf("Login\tCreated At\t\n")
+		for _, c := range page {
+			t.Logf("%s\t%s\t\n", c.Login, c.CreatedAt)
+		}
 	}
-	t.Logf("%d credentials listed out of %d\n", len(cs), n)
+	ensure.Nil(t, it.Err())
 }
 
 func TestCreateDeleteCredentials(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
+	domain := os.Getenv("MG_DOMAIN")
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
 
@@ -31,7 +44,8 @@ func TestCreateDeleteCredentials(t *testing.T) {
 	randomID := strings.ToLower(randomString(16, "usr"))
 	randomLogin := fmt.Sprintf("%s@%s", randomID, domain)
 
-	ensure.Nil(t, mg.CreateCredential(randomLogin, randomPassword))
-	ensure.Nil(t, mg.ChangeCredentialPassword(randomID, randomString(16, "pw2")))
-	ensure.Nil(t, mg.DeleteCredential(randomID))
+	ctx := context.Background()
+	ensure.Nil(t, mg.CreateCredential(ctx, randomLogin, randomPassword))
+	ensure.Nil(t, mg.ChangeCredentialPassword(ctx, randomID, randomString(16, "pw2")))
+	ensure.Nil(t, mg.DeleteCredential(ctx, randomID))
 }

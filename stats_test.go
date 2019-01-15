@@ -1,27 +1,40 @@
 package mailgun
 
 import (
+	"context"
 	"testing"
 
 	"github.com/facebookgo/ensure"
 )
 
-func TestGetStats(t *testing.T) {
+func TestListStats(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
 	ensure.Nil(t, err)
+	ctx := context.Background()
 
-	totalCount, stats, err := mg.GetStats(-1, -1, nil, "sent", "opened")
+	stats, err := mg.GetStats(ctx, []string{"accepted", "delivered"}, nil)
 	ensure.Nil(t, err)
 
-	t.Logf("Total Count: %d\n", totalCount)
-	t.Logf("Id\tEvent\tCreatedAt\tTotalCount\t\n")
-	for _, stat := range stats {
-		t.Logf("%s\t%s\t%s\t%d\t\n", stat.Id, stat.Event, stat.CreatedAt, stat.TotalCount)
+	if len(stats) > 0 {
+		firstStatsTotal := stats[0]
+		t.Logf("Time: %s\n", firstStatsTotal.Time)
+		t.Logf("Accepted Total: %d\n", firstStatsTotal.Accepted.Total)
+		t.Logf("Delivered Total: %d\n", firstStatsTotal.Delivered.Total)
 	}
 }
 
 func TestDeleteTag(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
 	mg, err := NewMailgunFromEnv()
+	ctx := context.Background()
+
 	ensure.Nil(t, err)
-	ensure.Nil(t, mg.DeleteTag("newsletter"))
+	ensure.Nil(t, mg.DeleteTag(ctx, "newsletter"))
 }

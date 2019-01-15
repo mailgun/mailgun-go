@@ -1,65 +1,62 @@
 package mailgun
 
 import (
+	"context"
 	"net/url"
 	"strconv"
 	"time"
 )
 
-type TagItem struct {
+type Tag struct {
 	Value       string     `json:"tag"`
 	Description string     `json:"description"`
 	FirstSeen   *time.Time `json:"first-seen,omitempty"`
 	LastSeen    *time.Time `json:"last-seen,omitempty"`
 }
 
-type TagsPage struct {
-	Items  []TagItem `json:"items"`
-	Paging Paging    `json:"paging"`
+type tagsResponse struct {
+	Items  []Tag  `json:"items"`
+	Paging Paging `json:"paging"`
 }
 
-type TagOptions struct {
+type ListTagOptions struct {
 	// Restrict the page size to this limit
 	Limit int
 	// Return only the tags starting with the given prefix
 	Prefix string
-	// The page direction based off the 'tag' parameter; valid choices are (first, last, next, prev)
-	Page string
-	// The tag that marks piviot point for the 'page' parameter
-	Tag string
 }
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
-func (m *MailgunImpl) DeleteTag(tag string) error {
-	r := newHTTPRequest(generateApiUrl(m, tagsEndpoint) + "/" + tag)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
-	_, err := makeDeleteRequest(r)
+func (mg *MailgunImpl) DeleteTag(ctx context.Context, tag string) error {
+	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // GetTag retrieves metadata about the tag from the api
-func (m *MailgunImpl) GetTag(tag string) (TagItem, error) {
-	r := newHTTPRequest(generateApiUrl(m, tagsEndpoint) + "/" + tag)
-	r.setClient(m.Client())
-	r.setBasicAuth(basicAuthUser, m.ApiKey())
-	var tagItem TagItem
-	return tagItem, getResponseFromJSON(r, &tagItem)
+func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
+	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	var tagItem Tag
+	return tagItem, getResponseFromJSON(ctx, r, &tagItem)
 }
 
 // ListTags returns a cursor used to iterate through a list of tags
 //	it := mg.ListTags(nil)
-//	var page TagsPage
+//	var page []mailgun.Tag
 //	for it.Next(&page) {
-//		for _, tag := range(page.Items) {
+//		for _, tag := range(page) {
 //			// Do stuff with tags
 //		}
 //	}
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (m *MailgunImpl) ListTags(opts *TagOptions) *TagIterator {
-	req := newHTTPRequest(generateApiUrl(m, tagsEndpoint))
+func (mg *MailgunImpl) ListTags(opts *ListTagOptions) *TagIterator {
+	req := newHTTPRequest(generateApiUrl(mg, tagsEndpoint))
 	if opts != nil {
 		if opts.Limit != 0 {
 			req.addParameter("limit", strconv.Itoa(opts.Limit))
@@ -67,95 +64,104 @@ func (m *MailgunImpl) ListTags(opts *TagOptions) *TagIterator {
 		if opts.Prefix != "" {
 			req.addParameter("prefix", opts.Prefix)
 		}
-		if opts.Page != "" {
-			req.addParameter("page", opts.Page)
-		}
-		if opts.Tag != "" {
-			req.addParameter("tag", opts.Tag)
-		}
 	}
 
-	initialUrl, _ := req.generateUrlWithParameters()
-	tagPage := TagsPage{
-		Paging: Paging{
-			First:    initialUrl,
-			Next:     initialUrl,
-			Last:     initialUrl,
-			Previous: initialUrl,
-		},
+	url, err := req.generateUrlWithParameters()
+	return &TagIterator{
+		tagsResponse: tagsResponse{Paging: Paging{Next: url, First: url}},
+		err:          err,
+		mg:           mg,
 	}
-	return NewTagCursor(tagPage, m)
 }
 
 type TagIterator struct {
-	mg   Mailgun
-	curr TagsPage
-	err  error
-}
-
-// Creates a new cursor from a taglist
-func NewTagCursor(tagPage TagsPage, mailgun Mailgun) *TagIterator {
-	return &TagIterator{curr: tagPage, mg: mailgun}
+	tagsResponse
+	mg  Mailgun
+	err error
 }
 
 // Returns the next page in the list of tags
-func (t *TagIterator) Next(tagPage *TagsPage) bool {
-	if !canFetchPage(t.curr.Paging.Next) {
+func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
+	if ti.err != nil {
 		return false
 	}
 
-	if err := t.cursorRequest(tagPage, t.curr.Paging.Next); err != nil {
-		t.err = err
+	if !canFetchPage(ti.Paging.Next) {
 		return false
 	}
-	t.curr = *tagPage
+
+	ti.err = ti.fetch(ctx, ti.Paging.Next)
+	if ti.err != nil {
+		return false
+	}
+	*items = ti.Items
+	if len(ti.Items) == 0 {
+		return false
+	}
 	return true
 }
 
 // Returns the previous page in the list of tags
-func (t *TagIterator) Previous(tagPage *TagsPage) bool {
-	if !canFetchPage(t.curr.Paging.Previous) {
+func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
+	if ti.err != nil {
 		return false
 	}
 
-	if err := t.cursorRequest(tagPage, t.curr.Paging.Previous); err != nil {
-		t.err = err
+	if ti.Paging.Previous == "" {
 		return false
 	}
-	t.curr = *tagPage
+
+	if !canFetchPage(ti.Paging.Previous) {
+		return false
+	}
+
+	ti.err = ti.fetch(ctx, ti.Paging.Previous)
+	if ti.err != nil {
+		return false
+	}
+	*items = ti.Items
+	if len(ti.Items) == 0 {
+		return false
+	}
 	return true
 }
 
 // Returns the first page in the list of tags
-func (t *TagIterator) First(tagPage *TagsPage) bool {
-	if err := t.cursorRequest(tagPage, t.curr.Paging.First); err != nil {
-		t.err = err
+func (ti *TagIterator) First(ctx context.Context, items *[]Tag) bool {
+	if ti.err != nil {
 		return false
 	}
-	t.curr = *tagPage
+	ti.err = ti.fetch(ctx, ti.Paging.First)
+	if ti.err != nil {
+		return false
+	}
+	*items = ti.Items
 	return true
 }
 
 // Returns the last page in the list of tags
-func (t *TagIterator) Last(tagPage *TagsPage) bool {
-	if err := t.cursorRequest(tagPage, t.curr.Paging.Last); err != nil {
-		t.err = err
+func (ti *TagIterator) Last(ctx context.Context, items *[]Tag) bool {
+	if ti.err != nil {
 		return false
 	}
-	t.curr = *tagPage
+	ti.err = ti.fetch(ctx, ti.Paging.Last)
+	if ti.err != nil {
+		return false
+	}
+	*items = ti.Items
 	return true
 }
 
 // Return any error if one occurred
-func (t *TagIterator) Err() error {
-	return t.err
+func (ti *TagIterator) Err() error {
+	return ti.err
 }
 
-func (t *TagIterator) cursorRequest(tagPage *TagsPage, url string) error {
+func (ti *TagIterator) fetch(ctx context.Context, url string) error {
 	req := newHTTPRequest(url)
-	req.setClient(t.mg.Client())
-	req.setBasicAuth(basicAuthUser, t.mg.ApiKey())
-	return getResponseFromJSON(req, tagPage)
+	req.setClient(ti.mg.Client())
+	req.setBasicAuth(basicAuthUser, ti.mg.APIKey())
+	return getResponseFromJSON(ctx, req, &ti.tagsResponse)
 }
 
 func canFetchPage(slug string) bool {

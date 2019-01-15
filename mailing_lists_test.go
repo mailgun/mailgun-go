@@ -1,83 +1,82 @@
-package mailgun
+package mailgun_test
 
 import (
-	"fmt"
-	"strings"
+	"context"
 	"testing"
 
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go/v3"
 )
 
-func setup(t *testing.T) (Mailgun, string) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+func TestMailingListMembers(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
-	address := fmt.Sprintf("%s@%s", strings.ToLower(randomString(6, "list")), domain)
-	_, err = mg.CreateList(List{
+	ctx := context.Background()
+	address := randomEmail("list", testDomain)
+	_, err := mg.CreateMailingList(ctx, mailgun.MailingList{
 		Address:     address,
 		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
-		AccessLevel: Members,
+		AccessLevel: mailgun.AccessLevelMembers,
 	})
 	ensure.Nil(t, err)
-	return mg, address
-}
+	defer func() {
+		ensure.Nil(t, mg.DeleteMailingList(ctx, address))
+	}()
 
-func teardown(t *testing.T, mg Mailgun, address string) {
-	ensure.Nil(t, mg.DeleteList(address))
-}
+	var countMembers = func() int {
+		var page []mailgun.Member
+		var count int
 
-func TestMailingListMembers(t *testing.T) {
-	mg, address := setup(t)
-	defer teardown(t, mg, address)
-
-	var countPeople = func() int {
-		n, _, err := mg.GetMembers(DefaultLimit, DefaultSkip, All, address)
-		ensure.Nil(t, err)
-		return n
+		it := mg.ListMembers(address, nil)
+		for it.Next(ctx, &page) {
+			count += len(page)
+		}
+		ensure.Nil(t, it.Err())
+		return count
 	}
 
-	startCount := countPeople()
-	protoJoe := Member{
+	startCount := countMembers()
+	protoJoe := mailgun.Member{
 		Address:    "joe@example.com",
 		Name:       "Joe Example",
-		Subscribed: Subscribed,
+		Subscribed: mailgun.Subscribed,
 	}
-	ensure.Nil(t, mg.CreateMember(true, address, protoJoe))
-	newCount := countPeople()
+	ensure.Nil(t, mg.CreateMember(ctx, true, address, protoJoe))
+	newCount := countMembers()
 	ensure.False(t, newCount <= startCount)
 
-	theMember, err := mg.GetMemberByAddress("joe@example.com", address)
+	theMember, err := mg.GetMember(ctx, "joe@example.com", address)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, theMember.Address, protoJoe.Address)
 	ensure.DeepEqual(t, theMember.Name, protoJoe.Name)
 	ensure.DeepEqual(t, theMember.Subscribed, protoJoe.Subscribed)
 	ensure.True(t, len(theMember.Vars) == 0)
 
-	_, err = mg.UpdateMember("joe@example.com", address, Member{
+	_, err = mg.UpdateMember(ctx, "joe@example.com", address, mailgun.Member{
 		Name: "Joe Cool",
 	})
 	ensure.Nil(t, err)
 
-	theMember, err = mg.GetMemberByAddress("joe@example.com", address)
+	theMember, err = mg.GetMember(ctx, "joe@example.com", address)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, theMember.Name, "Joe Cool")
-	ensure.Nil(t, mg.DeleteMember("joe@example.com", address))
-	ensure.DeepEqual(t, countPeople(), startCount)
+	ensure.Nil(t, mg.DeleteMember(ctx, "joe@example.com", address))
+	ensure.DeepEqual(t, countMembers(), startCount)
 
-	err = mg.CreateMemberList(nil, address, []interface{}{
-		Member{
+	err = mg.CreateMemberList(ctx, nil, address, []interface{}{
+		mailgun.Member{
 			Address:    "joe.user1@example.com",
 			Name:       "Joe's debugging account",
-			Subscribed: Unsubscribed,
+			Subscribed: mailgun.Unsubscribed,
 		},
-		Member{
+		mailgun.Member{
 			Address:    "Joe Cool <joe.user2@example.com>",
 			Name:       "Joe's Cool Account",
-			Subscribed: Subscribed,
+			Subscribed: mailgun.Subscribed,
 		},
-		Member{
+		mailgun.Member{
 			Address: "joe.user3@example.com",
 			Vars: map[string]interface{}{
 				"packet-email": "KW9ABC @ BOGBBS-4.#NCA.CA.USA.NOAM",
@@ -86,7 +85,7 @@ func TestMailingListMembers(t *testing.T) {
 	})
 	ensure.Nil(t, err)
 
-	theMember, err = mg.GetMemberByAddress("joe.user2@example.com", address)
+	theMember, err = mg.GetMember(ctx, "joe.user2@example.com", address)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, theMember.Name, "Joe's Cool Account")
 	ensure.NotNil(t, theMember.Subscribed)
@@ -94,48 +93,53 @@ func TestMailingListMembers(t *testing.T) {
 }
 
 func TestMailingLists(t *testing.T) {
-	domain := reqEnv(t, "MG_DOMAIN")
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
 
-	listAddr := fmt.Sprintf("%s@%s", strings.ToLower(randomString(7, "list")), domain)
-	protoList := List{
-		Address:     listAddr,
+	address := randomEmail("list", testDomain)
+	protoList := mailgun.MailingList{
+		Address:     address,
 		Name:        "List1",
 		Description: "A list created by an acceptance test.",
-		AccessLevel: Members,
+		AccessLevel: mailgun.AccessLevelMembers,
 	}
 
 	var countLists = func() int {
-		total, _, err := mg.GetLists(DefaultLimit, DefaultSkip, "")
-		ensure.Nil(t, err)
-		return total
+		var count int
+		it := mg.ListMailingLists(nil)
+		var page []mailgun.MailingList
+		for it.Next(ctx, &page) {
+			count += len(page)
+		}
+		ensure.Nil(t, it.Err())
+		return count
 	}
 
-	_, err = mg.CreateList(protoList)
+	_, err := mg.CreateMailingList(ctx, protoList)
 	ensure.Nil(t, err)
 	defer func() {
-		ensure.Nil(t, mg.DeleteList(listAddr))
+		ensure.Nil(t, mg.DeleteMailingList(ctx, address))
 
-		_, err := mg.GetListByAddress(listAddr)
+		_, err := mg.GetMailingList(ctx, address)
 		ensure.NotNil(t, err)
 	}()
 
 	actualCount := countLists()
 	ensure.False(t, actualCount < 1)
 
-	theList, err := mg.GetListByAddress(listAddr)
+	theList, err := mg.GetMailingList(ctx, address)
 	ensure.Nil(t, err)
 
 	protoList.CreatedAt = theList.CreatedAt // ignore this field when comparing.
 	ensure.DeepEqual(t, theList, protoList)
 
-	_, err = mg.UpdateList(listAddr, List{
+	_, err = mg.UpdateMailingList(ctx, address, mailgun.MailingList{
 		Description: "A list whose description changed",
 	})
 	ensure.Nil(t, err)
 
-	theList, err = mg.GetListByAddress(listAddr)
+	theList, err = mg.GetMailingList(ctx, address)
 	ensure.Nil(t, err)
 
 	newList := protoList
