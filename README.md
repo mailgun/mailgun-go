@@ -196,12 +196,6 @@ Install the go library
 $ go get github.com/mailgun/mailgun-go/v3
 ```
 
-Install the mailgun CLI
-
-```bash
-$ go install github.com/mailgun/mailgun-go/v3/cmd/mailgun/./...
-```
-
 ## Testing
 
 *WARNING* - running the tests will cost you money!
