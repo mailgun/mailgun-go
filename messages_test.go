@@ -31,6 +31,8 @@ Date: Thu, 6 Mar 2014 00:37:52 +0000
 Testing some Mailgun MIME awesomeness!
 `
 	templateText = "Greetings %recipient.name%!  Your reserved seat is at table %recipient.table%."
+	exampleDomain       = "testDomain"
+	exampleAPIKey       = "testAPIKey"
 )
 
 func TestGetStoredMessage(t *testing.T) {
@@ -377,22 +379,25 @@ func TestSendMGMessageVariables(t *testing.T) {
 }
 
 func TestAddRecipientsError(t *testing.T) {
-	var err error
-	m := NewMessage(fromUser, exampleSubject, exampleText)
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
-		err = m.AddRecipient(recipient)
-		ensure.Nil(t, err)
+		ensure.Nil(t, m.AddRecipient(recipient))
 	}
 
-	err = m.AddRecipient("recipient_1001@example.com")
+	err := m.AddRecipient("recipient_1001@example.com")
+	ensure.NotNil(t, err)
 	ensure.DeepEqual(t, err.Error(), "recipient limit exceeded (max 1000)")
 }
 
 func TestAddRecipientAndVariablesError(t *testing.T) {
 	var err error
-	m := NewMessage(fromUser, exampleSubject, exampleText)
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
