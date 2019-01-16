@@ -19,8 +19,7 @@ type Template struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	//CreatedAt   RFC2822Time `json:"createdAt"`
-	CreatedAt string          `json:"createdAt"`
+	CreatedAt   RFC2822Time `json:"createdAt"`
 	Version   TemplateVersion `json:"version,omitempty"`
 }
 

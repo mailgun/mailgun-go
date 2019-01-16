@@ -9,8 +9,7 @@ type TemplateVersion struct {
 	Id        string         `json:"id"`
 	Template  string         `json:"template,omitempty"`
 	Engine    TemplateEngine `json:"engine"`
-	CreatedAt string         `json:"createdAt"`
-	//CreatedAt RFC2822Time    `json:"createdAt"`
+	CreatedAt RFC2822Time    `json:"createdAt"`
 	Comment string `json:"comment"`
 	Active  bool   `json:"active"`
 }
