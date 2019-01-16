@@ -12,7 +12,7 @@ import (
 // ListEventOptions{} modifies the behavior of ListEvents()
 type ListEventOptions struct {
 	// Limits the results to a specific start and end time
-	Begin, End *time.Time
+	Begin, End time.Time
 	// ForceAscending and ForceDescending are used to force Mailgun to use a given
 	// traversal order of the events. If both ForceAscending and ForceDescending are
 	// true, an error will result. If none, the default will be inferred from the Begin
@@ -50,10 +50,10 @@ func (mg *MailgunImpl) ListEvents(opts *ListEventOptions) *EventIterator {
 		} else if opts.ForceDescending {
 			req.addParameter("ascending", "no")
 		}
-		if opts.Begin != nil {
+		if !opts.Begin.IsZero() {
 			req.addParameter("begin", formatMailgunTime(opts.Begin))
 		}
-		if opts.End != nil {
+		if !opts.End.IsZero() {
 			req.addParameter("end", formatMailgunTime(opts.End))
 		}
 		if opts.Filter != nil {
@@ -198,9 +198,8 @@ func (mg *MailgunImpl) PollEvents(opts *ListEventOptions) *EventPoller {
 	opts.ForceAscending = true
 
 	// Default begin time is 30 minutes ago
-	if opts.Begin == nil {
-		t := now.Add(time.Minute * -30)
-		opts.Begin = &t
+	if opts.Begin.IsZero() {
+		opts.Begin = now.Add(time.Minute * -30)
 	}
 
 	// Set a 15 second poll interval if none set
@@ -224,9 +223,8 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 	var currentPage string
 	var results []Event
 
-	ep.beginTime = time.Now().UTC()
-	if ep.opts.Begin != nil {
-		ep.beginTime = *ep.opts.Begin
+	if ep.opts.Begin.IsZero() {
+		ep.beginTime = time.Now().UTC()
 	}
 
 	for {

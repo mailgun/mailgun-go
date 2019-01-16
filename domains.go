@@ -80,7 +80,7 @@ type domainTrackingResponse struct {
 }
 
 // ListDomains retrieves a set of domains from Mailgun.
-func (mg *MailgunImpl) ListDomains(ctx context.Context, opts *ListOptions) *DomainsIterator {
+func (mg *MailgunImpl) ListDomains(opts *ListOptions) *DomainsIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit

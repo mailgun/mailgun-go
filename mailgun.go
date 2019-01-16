@@ -125,6 +125,7 @@ type Mailgun interface {
 	SetAPIBase(url string)
 
 	Send(ctx context.Context, m *Message) (string, string, error)
+	ReSend(ctx context.Context, id string, recipients ...string) (string,string, error)
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
@@ -138,7 +139,7 @@ type Mailgun interface {
 	DeleteTag(ctx context.Context, tag string) error
 	ListTags(*ListTagOptions) *TagIterator
 
-	ListDomains(ctx context.Context, opts *ListOptions) *DomainsIterator
+	ListDomains(opts *ListOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error)
 	CreateDomain(ctx context.Context, name string, pass string, opts *CreateDomainOptions) error
 	DeleteDomain(ctx context.Context, name string) error
@@ -368,6 +369,6 @@ func parseMailgunTime(ts string) (t time.Time, err error) {
 }
 
 // formatMailgunTime translates a timestamp into a human-readable form.
-func formatMailgunTime(t *time.Time) string {
+func formatMailgunTime(t time.Time) string {
 	return t.Format("Mon, 2 Jan 2006 15:04:05 -0700")
 }

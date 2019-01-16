@@ -64,12 +64,11 @@ func TestEventPoller(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
 
-	begin := time.Now().Add(time.Second * -3)
 
 	// Very short poll interval
 	it := mg.PollEvents(&mailgun.ListEventOptions{
 		// Only events with a timestamp after this date/time will be returned
-		Begin: &begin,
+		Begin: time.Now().Add(time.Second * -3),
 		// How often we poll the api for new events
 		PollInterval: time.Second * 4})
 

@@ -19,7 +19,7 @@ func TestListDomains(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	it := mg.ListDomains(ctx, nil)
+	it := mg.ListDomains(nil)
 	var page []mailgun.Domain
 	for it.Next(ctx, &page) {
 		for _, d := range page {
@@ -36,7 +36,7 @@ func TestGetSingleDomain(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	it := mg.ListDomains(ctx, nil)
+	it := mg.ListDomains(nil)
 	var page []mailgun.Domain
 	ensure.True(t, it.Next(ctx, &page))
 	ensure.Nil(t, it.Err())

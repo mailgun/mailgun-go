@@ -23,7 +23,7 @@ type Message struct {
 	tags              []string
 	campaigns         []string
 	dkim              bool
-	deliveryTime      *time.Time
+	deliveryTime      time.Time
 	attachments       []string
 	readerAttachments []ReaderAttachment
 	inlines           []string
@@ -44,6 +44,8 @@ type Message struct {
 	trackingSet       bool
 	trackingClicksSet bool
 	trackingOpensSet  bool
+	requireTLS        bool
+	skipVerification  bool
 
 	specific features
 	mg       Mailgun
@@ -334,7 +336,7 @@ func (mm *mimeMessage) setHtml(_ string) {}
 // Refer to the Mailgun documentation for further details.
 func (m *Message) AddTag(tag ...string) error {
 	if len(m.tags) >= MaxNumberOfTags {
-		return fmt.Errorf("Cannot add any new tags. Message tag limit (%b) reached.", MaxNumberOfTags)
+		return fmt.Errorf("cannot add any new tags. Message tag limit (%b) reached", MaxNumberOfTags)
 	}
 
 	m.tags = append(m.tags, tag...)
@@ -369,9 +371,7 @@ func (m *Message) EnableTestMode() {
 // Pass nil to remove any installed schedule.
 // Refer to the Mailgun documentation for more information.
 func (m *Message) SetDeliveryTime(dt time.Time) {
-	pdt := new(time.Time)
-	*pdt = dt
-	m.deliveryTime = pdt
+	m.deliveryTime = dt
 }
 
 // SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis,
@@ -390,6 +390,16 @@ func (m *Message) SetTracking(tracking bool) {
 func (m *Message) SetTrackingClicks(trackingClicks bool) {
 	m.trackingClicks = trackingClicks
 	m.trackingClicksSet = true
+}
+
+// Refer to the Mailgun documentation for more information.
+func (m *Message) SetRequireTLS(b bool) {
+	m.requireTLS = b
+}
+
+// Refer to the Mailgun documentation for more information.
+func (m *Message) SetSkipVerification(b bool) {
+	m.skipVerification = b
 }
 
 // Refer to the Mailgun documentation for more information.
@@ -471,7 +481,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 	if message.dkimSet {
 		payload.addValue("o:dkim", yesNo(message.dkim))
 	}
-	if message.deliveryTime != nil {
+	if !message.deliveryTime.IsZero() {
 		payload.addValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
 	}
 	if message.nativeSend {
@@ -488,6 +498,12 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 	}
 	if message.trackingOpensSet {
 		payload.addValue("o:tracking-opens", yesNo(message.trackingOpens))
+	}
+	if message.requireTLS {
+		payload.addValue("o:require-tls", trueFalse(message.requireTLS))
+	}
+	if message.skipVerification {
+		payload.addValue("o:skip-verification", trueFalse(message.skipVerification))
 	}
 	if message.headers != nil {
 		for header, value := range message.headers {
@@ -582,9 +598,15 @@ func (mm *mimeMessage) endpoint() string {
 func yesNo(b bool) string {
 	if b {
 		return "yes"
-	} else {
-		return "no"
 	}
+	return "no"
+}
+
+func trueFalse(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
 }
 
 // isValid returns true if, and only if,
@@ -670,6 +692,32 @@ func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, id string) (StoredM
 	var response StoredMessage
 	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
+}
+
+// Given a storage id resend the stored message to the specified recipients
+func (mg *MailgunImpl) ReSend(ctx context.Context, storageURL string, recipients ...string) (string, string, error) {
+	url := generateDomainApiUrl(mg, messagesEndpoint) + "/" + storageURL
+	r := newHTTPRequest(url)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newFormDataPayload()
+
+	if len(recipients) == 0 {
+		return "", "", errors.New("must provide at least one recipient")
+	}
+
+	for _, to := range recipients {
+		payload.addValue("to", to)
+	}
+
+	var resp sendMessageResponse
+	err := postResponseFromJSON(ctx, r, payload, &resp)
+	if err != nil {
+		return "", "", err
+	}
+	return resp.Message, resp.Id, nil
+
 }
 
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.

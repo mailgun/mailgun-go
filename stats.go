@@ -83,8 +83,6 @@ type GetStatOptions struct {
 	Duration   string
 	Start      time.Time
 	End        time.Time
-	Limit      int
-	Skip       int
 }
 
 // Returns total stats for a given domain for the specified time period
