@@ -8,6 +8,8 @@ import (
 	"encoding/hex"
 	"io"
 	"net/http"
+
+	"github.com/mailgun/mailgun-go/v3/events"
 )
 
 // ListWebhooks returns the complete set of webhooks configured for your domain.
@@ -82,6 +84,39 @@ func (mg *MailgunImpl) UpdateWebhook(ctx context.Context, t string, urls []strin
 	return err
 }
 
+// Represents the signature portion of the webhook POST body
+type Signature struct {
+	TimeStamp string `json:"timestamp"`
+	Token     string `json:"token"`
+	Signature string `json:"signature"`
+}
+
+// Represents the JSON payload provided when a Webhook is called by mailgun
+type WebhookPayload struct {
+	Signature Signature      `json:"signature"`
+	EventData events.RawJSON `json:"event-data"`
+}
+
+// Use this method to parse the webhook signature given as JSON in the webhook response
+func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err error) {
+	h := hmac.New(sha256.New, []byte(mg.APIKey()))
+	io.WriteString(h, sig.TimeStamp)
+	io.WriteString(h, sig.Token)
+
+	calculatedSignature := h.Sum(nil)
+	signature, err := hex.DecodeString(sig.Signature)
+	if err != nil {
+		return false, err
+	}
+	if len(calculatedSignature) != len(signature) {
+		return false, nil
+	}
+
+	return subtle.ConstantTimeCompare(signature, calculatedSignature) == 1, nil
+}
+
+// Deprecated: Please use the VerifyWebhookSignature() to parse the latest
+// version of WebHooks from mailgun
 func (mg *MailgunImpl) VerifyWebhookRequest(req *http.Request) (verified bool, err error) {
 	h := hmac.New(sha256.New, []byte(mg.APIKey()))
 	io.WriteString(h, req.FormValue("timestamp"))

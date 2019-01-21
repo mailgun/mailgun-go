@@ -62,13 +62,28 @@ var signedTests = []bool{
 	false,
 }
 
-func TestVerifyWebhookRequest_Form(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
+func TestVerifyWebhookSignature(t *testing.T) {
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
 
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	for _, v := range signedTests {
+		fields := getSignatureFields(mg.APIKey(), v)
+		sig := Signature{
+			TimeStamp: fields["timestamp"],
+			Token:     fields["token"],
+			Signature: fields["signature"],
+		}
+
+		verified, err := mg.VerifyWebhookSignature(sig)
+		ensure.Nil(t, err)
+
+		if v != verified {
+			t.Errorf("VerifyWebhookSignature should return '%v' but got '%v'", v, verified)
+		}
+	}
+}
+
+func TestVerifyWebhookRequest_Form(t *testing.T) {
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.APIKey(), v)
@@ -84,12 +99,7 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 }
 
 func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.APIKey(), v)
