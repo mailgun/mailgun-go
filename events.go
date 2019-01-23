@@ -86,7 +86,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = parseEvents(ei.Items)
+	*events, ei.err = ParseEvents(ei.Items)
 	if len(ei.Items) == 0 {
 		return false
 	}
@@ -104,7 +104,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = parseEvents(ei.Items)
+	*events, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
@@ -120,7 +120,7 @@ func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = parseEvents(ei.Items)
+	*events, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
@@ -138,7 +138,7 @@ func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = parseEvents(ei.Items)
+	*events, ei.err = ParseEvents(ei.Items)
 	if len(ei.Items) == 0 {
 		return false
 	}

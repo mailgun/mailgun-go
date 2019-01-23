@@ -45,18 +45,6 @@ func new_(e interface{}) func() Event {
 	}
 }
 
-func parseEvents(raw []events.RawJSON) ([]Event, error) {
-	var result []Event
-	for _, value := range raw {
-		event, err := parse(value)
-		if err != nil {
-			return nil, fmt.Errorf("while parsing event: %s", err)
-		}
-		result = append(result, event)
-	}
-	return result, nil
-}
-
 func parseResponse(raw []byte) ([]Event, error) {
 	var resp events.Response
 	if err := easyjson.Unmarshal(raw, &resp); err != nil {
@@ -65,7 +53,7 @@ func parseResponse(raw []byte) ([]Event, error) {
 
 	var result []Event
 	for _, value := range resp.Items {
-		event, err := parse(value)
+		event, err := ParseEvent(value)
 		if err != nil {
 			return nil, fmt.Errorf("while parsing event: %s", err)
 		}
@@ -74,8 +62,21 @@ func parseResponse(raw []byte) ([]Event, error) {
 	return result, nil
 }
 
-// Parse converts raw bytes data into an event struct.
-func parse(raw []byte) (Event, error) {
+// Given a slice of events.RawJSON events return a slice of Event for each parsed event
+func ParseEvents(raw []events.RawJSON) ([]Event, error) {
+	var result []Event
+	for _, value := range raw {
+		event, err := ParseEvent(value)
+		if err != nil {
+			return nil, fmt.Errorf("while parsing event: %s", err)
+		}
+		result = append(result, event)
+	}
+	return result, nil
+}
+
+// Parse converts raw bytes data into an event struct. Can accept events.RawJSON as input
+func ParseEvent(raw []byte) (Event, error) {
 	// Try to recognize the event first.
 	var e events.EventName
 	if err := easyjson.Unmarshal(raw, &e); err != nil {
