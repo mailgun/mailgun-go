@@ -85,6 +85,10 @@ func (mg *MailgunImpl) ListDomains(opts *ListOptions) *DomainsIterator {
 	if opts != nil {
 		limit = opts.Limit
 	}
+
+	if limit == 0 {
+		limit = 100
+	}
 	return &DomainsIterator{
 		mg:                  mg,
 		url:                 generatePublicApiUrl(mg, domainsEndpoint),
@@ -132,7 +136,7 @@ func (ri *DomainsIterator) Next(ctx context.Context, items *[]Domain) bool {
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = len(ri.Items)
+	ri.offset = ri.offset + len(ri.Items)
 	return true
 }
 
@@ -194,7 +198,7 @@ func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
 		return false
 	}
 
-	ri.offset = ri.offset - ri.limit
+	ri.offset = ri.offset - (ri.limit * 2)
 	if ri.offset < 0 {
 		ri.offset = 0
 	}

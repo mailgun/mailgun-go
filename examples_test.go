@@ -16,7 +16,7 @@ import (
 )
 
 func ExampleMailgunImpl_ValidateEmail() {
-	v := mailgun.NewEmailValidator("my_public_api_key")
+	v := mailgun.NewEmailValidator("my_public_validation_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -36,7 +36,7 @@ func ExampleMailgunImpl_ValidateEmail() {
 }
 
 func ExampleMailgunImpl_ParseAddresses() {
-	v := mailgun.NewEmailValidator("my_public_api_key")
+	v := mailgun.NewEmailValidator("my_public_validation_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
