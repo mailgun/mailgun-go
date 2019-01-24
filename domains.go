@@ -39,7 +39,7 @@ type DNSRecord struct {
 	Value      string
 }
 
-type domainResponse struct {
+type DomainResponse struct {
 	Domain              Domain      `json:"domain"`
 	ReceivingDNSRecords []DNSRecord `json:"receiving_dns_records"`
 	SendingDNSRecords   []DNSRecord `json:"sending_dns_records"`
@@ -228,13 +228,13 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 }
 
 // Retrieve detailed information about the named domain.
-func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error) {
+func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (DomainResponse, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp domainResponse
+	var resp DomainResponse
 	err := getResponseFromJSON(ctx, r, &resp)
-	return resp.Domain, resp.ReceivingDNSRecords, resp.SendingDNSRecords, err
+	return resp, err
 }
 
 // Optional parameters when creating a domain
@@ -252,7 +252,7 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password string, opts *CreateDomainOptions) error {
+func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password string, opts *CreateDomainOptions) (DomainResponse, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -278,8 +278,9 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password s
 			payload.addValue("ips", strings.Join(opts.IPS, ","))
 		}
 	}
-	_, err := makePostRequest(ctx, r, payload)
-	return err
+	var resp DomainResponse
+	err := postResponseFromJSON(ctx, r, payload, &resp)
+	return resp, err
 }
 
 // Returns delivery connection settings for the defined domain

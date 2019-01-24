@@ -125,7 +125,7 @@ type Mailgun interface {
 	SetAPIBase(url string)
 
 	Send(ctx context.Context, m *Message) (string, string, error)
-	ReSend(ctx context.Context, id string, recipients ...string) (string,string, error)
+	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
@@ -140,8 +140,8 @@ type Mailgun interface {
 	ListTags(*ListTagOptions) *TagIterator
 
 	ListDomains(opts *ListOptions) *DomainsIterator
-	GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error)
-	CreateDomain(ctx context.Context, name string, pass string, opts *CreateDomainOptions) error
+	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
+	CreateDomain(ctx context.Context, name string, pass string, opts *CreateDomainOptions) (DomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
