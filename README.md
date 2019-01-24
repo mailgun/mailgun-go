@@ -184,6 +184,71 @@ func main() {
 }
 ```
 
+## Webhook Handling
+```go
+package main
+
+import (
+    "context"
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "os"
+    "time"
+
+    "github.com/mailgun/mailgun-go/v3"
+    "github.com/mailgun/mailgun-go/v3/events"
+)
+
+func main() {
+    mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+		var payload mailgun.WebhookPayload
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			fmt.Printf("decode JSON error: %s", err)
+			w.WriteHeader(http.StatusNotAcceptable)
+			return
+		}
+
+		verified, err := mg.VerifyWebhookSignature(payload.Signature)
+		if err != nil {
+			fmt.Printf("verify error: %s\n", err)
+			w.WriteHeader(http.StatusNotAcceptable)
+			return
+		}
+
+		if !verified {
+			w.WriteHeader(http.StatusNotAcceptable)
+			fmt.Printf("failed verification %+v\n", payload.Signature)
+			return
+		}
+
+		fmt.Printf("Verified Signature\n")
+
+		// Parse the event provided by the webhook payload
+		e, err := mailgun.ParseEvent(payload.EventData)
+		if err != nil {
+			fmt.Printf("parse event error: %s\n", err)
+			return
+		}
+
+		switch event := e.(type) {
+		case *events.Accepted:
+			fmt.Printf("Accepted: auth: %t\n", event.Flags.IsAuthenticated)
+		case *events.Delivered:
+			fmt.Printf("Delivered transport: %s\n", event.Envelope.Transport)
+		}
+	})
+
+	fmt.Println("Serve on :9090...")
+	if err := http.ListenAndServe(":9090", nil); err != nil {
+		fmt.Printf("serve error: %s\n", err)
+		os.Exit(1)
+	}
+}
+```
 The official mailgun documentation includes examples using this library. Go
 [here](https://documentation.mailgun.com/en/latest/api_reference.html#api-reference)
 and click on the "Go" button at the top of the page.

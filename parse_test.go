@@ -11,13 +11,13 @@ import (
 )
 
 func TestParseErrors(t *testing.T) {
-	_, err := parse([]byte(""))
+	_, err := ParseEvent([]byte(""))
 	ensure.DeepEqual(t, err.Error(), "failed to recognize event: EOF")
 
-	_, err = parse([]byte(`{"event": "unknown_event"}`))
+	_, err = ParseEvent([]byte(`{"event": "unknown_event"}`))
 	ensure.DeepEqual(t, err.Error(), "unsupported event: 'unknown_event'")
 
-	_, err = parse([]byte(`{
+	_, err = ParseEvent([]byte(`{
 		"event": "accepted",
 		"timestamp": "1420255392.850187"
 	}`))
@@ -26,7 +26,7 @@ func TestParseErrors(t *testing.T) {
 }
 
 func TestParseSuccess(t *testing.T) {
-	event, err := parse([]byte(`{
+	event, err := ParseEvent([]byte(`{
 		"event": "accepted",
 		"timestamp": 1420255392.850187,
 		"user-variables": "{}",
@@ -75,7 +75,7 @@ func TestParseSuccess(t *testing.T) {
 	ensure.DeepEqual(t, subject, "Test message going through the bus.")
 
 	// Make sure the next event parsing attempt will zero the fields.
-	event2, err := parse([]byte(`{
+	event2, err := ParseEvent([]byte(`{
 		"event": "accepted",
 		"timestamp": 1533922516.538978,
 		"recipient": "someone@example.com"
@@ -133,7 +133,7 @@ func TestTimeStamp(t *testing.T) {
 
 func TestEventNames(t *testing.T) {
 	for name := range EventNames {
-		event, err := parse([]byte(fmt.Sprintf(`{"event": "%s"}`, name)))
+		event, err := ParseEvent([]byte(fmt.Sprintf(`{"event": "%s"}`, name)))
 		ensure.Nil(t, err)
 		ensure.DeepEqual(t, event.GetName(), name)
 	}
@@ -152,7 +152,7 @@ func TestEventMessageWithAttachment(t *testing.T) {
                                  "content-type": "application/pdf",
                                  "size": 139214}],
                 "size": 142698}}`)
-	event, err := parse(body)
+	event, err := ParseEvent(body)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, event.(*events.Delivered).Message.Attachments[0].FileName, "doc.pdf")
 }
@@ -166,7 +166,7 @@ func TestStored(t *testing.T) {
             "key": "%s",
             "url": "%s"
         }}`, key, url))
-	event, err := parse(body)
+	event, err := ParseEvent(body)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, event.(*events.Stored).Storage.Key, key)
 	ensure.DeepEqual(t, event.(*events.Stored).Storage.URL, url)
