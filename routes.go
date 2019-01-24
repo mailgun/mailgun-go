@@ -45,6 +45,11 @@ func (mg *MailgunImpl) ListRoutes(opts *ListOptions) *RoutesIterator {
 	if opts != nil {
 		limit = opts.Limit
 	}
+
+	if limit == 0 {
+		limit = 100
+	}
+
 	return &RoutesIterator{
 		mg:                 mg,
 		url:                generatePublicApiUrl(mg, routesEndpoint),
@@ -92,7 +97,7 @@ func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = len(ri.Items)
+	ri.offset = ri.offset + len(ri.Items)
 	return true
 }
 
@@ -154,7 +159,7 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 		return false
 	}
 
-	ri.offset = ri.offset - ri.limit
+	ri.offset = ri.offset - (ri.limit * 2)
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
