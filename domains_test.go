@@ -122,6 +122,6 @@ func TestDomainVerify(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	state, err := mg.VerifyDomain(ctx, testDomain)
+	_, err := mg.VerifyDomain(ctx, testDomain)
 	ensure.Nil(t, err)
 }
