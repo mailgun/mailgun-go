@@ -39,7 +39,7 @@ type DNSRecord struct {
 	Value      string
 }
 
-type domainResponse struct {
+type DomainResponse struct {
 	Domain              Domain      `json:"domain"`
 	ReceivingDNSRecords []DNSRecord `json:"receiving_dns_records"`
 	SendingDNSRecords   []DNSRecord `json:"sending_dns_records"`
@@ -84,6 +84,10 @@ func (mg *MailgunImpl) ListDomains(opts *ListOptions) *DomainsIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
+	}
+
+	if limit == 0 {
+		limit = 100
 	}
 	return &DomainsIterator{
 		mg:                  mg,
@@ -132,7 +136,7 @@ func (ri *DomainsIterator) Next(ctx context.Context, items *[]Domain) bool {
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = len(ri.Items)
+	ri.offset = ri.offset + len(ri.Items)
 	return true
 }
 
@@ -194,7 +198,7 @@ func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
 		return false
 	}
 
-	ri.offset = ri.offset - ri.limit
+	ri.offset = ri.offset - (ri.limit * 2)
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
@@ -228,13 +232,13 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 }
 
 // Retrieve detailed information about the named domain.
-func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (Domain, []DNSRecord, []DNSRecord, error) {
+func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (DomainResponse, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp domainResponse
+	var resp DomainResponse
 	err := getResponseFromJSON(ctx, r, &resp)
-	return resp.Domain, resp.ReceivingDNSRecords, resp.SendingDNSRecords, err
+	return resp, err
 }
 
 func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (string, error) {
@@ -263,7 +267,7 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password string, opts *CreateDomainOptions) error {
+func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password string, opts *CreateDomainOptions) (DomainResponse, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -289,8 +293,9 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password s
 			payload.addValue("ips", strings.Join(opts.IPS, ","))
 		}
 	}
-	_, err := makePostRequest(ctx, r, payload)
-	return err
+	var resp DomainResponse
+	err := postResponseFromJSON(ctx, r, payload, &resp)
+	return resp, err
 }
 
 // Returns delivery connection settings for the defined domain

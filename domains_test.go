@@ -41,16 +41,16 @@ func TestGetSingleDomain(t *testing.T) {
 	ensure.True(t, it.Next(ctx, &page))
 	ensure.Nil(t, it.Err())
 
-	dr, rxDnsRecords, txDnsRecords, err := mg.GetDomain(ctx, page[0].Name)
+	dr, err := mg.GetDomain(ctx, page[0].Name)
 	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(rxDnsRecords) != 0, true)
-	ensure.DeepEqual(t, len(txDnsRecords) != 0, true)
+	ensure.DeepEqual(t, len(dr.ReceivingDNSRecords) != 0, true)
+	ensure.DeepEqual(t, len(dr.SendingDNSRecords) != 0, true)
 
 	t.Logf("TestGetSingleDomain: %#v\n", dr)
-	for _, rxd := range rxDnsRecords {
+	for _, rxd := range dr.ReceivingDNSRecords {
 		t.Logf("TestGetSingleDomains:   %#v\n", rxd)
 	}
-	for _, txd := range txDnsRecords {
+	for _, txd := range dr.SendingDNSRecords {
 		t.Logf("TestGetSingleDomains:   %#v\n", txd)
 	}
 }
@@ -60,7 +60,7 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
-	_, _, _, err := mg.GetDomain(ctx, "unknown.domain")
+	_, err := mg.GetDomain(ctx, "unknown.domain")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
@@ -75,8 +75,10 @@ func TestAddDeleteDomain(t *testing.T) {
 	ctx := context.Background()
 
 	// First, we need to add the domain.
-	ensure.Nil(t, mg.CreateDomain(ctx, "mx.mailgun.test", "supersecret",
-		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag}))
+	_, err := mg.CreateDomain(ctx, "mx.mailgun.test", "supersecret",
+		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag})
+	ensure.Nil(t, err)
+
 	// Next, we delete it.
 	ensure.Nil(t, mg.DeleteDomain(ctx, "mx.mailgun.test"))
 }

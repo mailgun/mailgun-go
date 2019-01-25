@@ -84,7 +84,7 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 	r.Get("/domains", ms.listDomains)
 	r.Post("/domains", ms.createDomain)
 	r.Get("/domains/{domain}", ms.getDomain)
-	//r.Put("/domains/{domain}/verify", ms.verifyDomain)
+	r.Put("/domains/{domain}/verify", ms.getDomain)
 	r.Delete("/domains/{domain}", ms.deleteDomain)
 	//r.Get("/domains/{domain}/credentials", ms.getCredentials)
 	//r.Post("/domains/{domain}/credentials", ms.createCredentials)

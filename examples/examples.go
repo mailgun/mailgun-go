@@ -27,7 +27,7 @@ func CreateComplaint(domain, apiKey string) error {
 	return mg.CreateComplaint(ctx, "bob@example.com")
 }
 
-func AddDomain(domain, apiKey string) error {
+func AddDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -136,7 +136,7 @@ func CreateCredential(domain, apiKey string) error {
 	return mg.CreateCredential(ctx, "alice@example.com", "secret")
 }
 
-func CreateDomain(domain, apiKey string) error {
+func CreateDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -400,7 +400,7 @@ func ListCredentials(domain, apiKey string) ([]mailgun.Credential, error) {
 	return result, nil
 }
 
-func GetDomain(domain, apiKey string) (mailgun.Domain, []mailgun.DNSRecord, []mailgun.DNSRecord, error) {
+func GetDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)

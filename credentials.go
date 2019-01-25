@@ -28,6 +28,10 @@ func (mg *MailgunImpl) ListCredentials(opts *ListOptions) *CredentialsIterator {
 	if opts != nil {
 		limit = opts.Limit
 	}
+
+	if limit == 0 {
+		limit = 100
+	}
 	return &CredentialsIterator{
 		mg:                      mg,
 		url:                     generateCredentialsUrl(mg, ""),
@@ -75,7 +79,7 @@ func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bo
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = len(ri.Items)
+	ri.offset = ri.offset + len(ri.Items)
 	return true
 }
 
@@ -137,7 +141,7 @@ func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential
 		return false
 	}
 
-	ri.offset = ri.offset - ri.limit
+	ri.offset = ri.offset - (ri.limit * 2)
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
