@@ -247,7 +247,7 @@ func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (string,
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
-	var resp domainResponse
+	var resp DomainResponse
 	err := putResponseFromJSON(ctx, r, payload, &resp)
 	return resp.Domain.State, err
 }
