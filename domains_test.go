@@ -118,3 +118,12 @@ func TestDomainTracking(t *testing.T) {
 	ensure.DeepEqual(t, info.Click.Active, true)
 	ensure.DeepEqual(t, info.Open.Active, true)
 }
+
+func TestDomainVerify(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
+
+	_, err := mg.VerifyDomain(ctx, testDomain)
+	ensure.Nil(t, err)
+}
