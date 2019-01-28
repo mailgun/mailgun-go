@@ -143,6 +143,7 @@ type Mailgun interface {
 	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
 	CreateDomain(ctx context.Context, name string, pass string, opts *CreateDomainOptions) (DomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
+	VerifyDomain(ctx context.Context, name string) (string, error)
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
 	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)
