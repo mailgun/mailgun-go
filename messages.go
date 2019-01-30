@@ -444,6 +444,11 @@ func (m *Message) AddDomain(domain string) {
 	m.domain = domain
 }
 
+// Retrieve the http headers associated with this message
+func (m *Message) GetHeaders() map[string]string {
+	return m.headers
+}
+
 // Returned by `Send()` when the `mailgun.Message` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
 
