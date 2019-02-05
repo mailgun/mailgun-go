@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v3/events"
+	"github.com/mailgun/mailgun-go/events"
 	"github.com/mailru/easyjson"
 )
 

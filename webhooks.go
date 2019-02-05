@@ -9,7 +9,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mailgun/mailgun-go/v3/events"
+	"github.com/mailgun/mailgun-go/events"
 )
 
 // ListWebhooks returns the complete set of webhooks configured for your domain.
