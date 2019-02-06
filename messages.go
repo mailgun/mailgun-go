@@ -778,3 +778,15 @@ func (mg *MailgunImpl) DeleteStoredMessage(ctx context.Context, id string) error
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
+
+// GetStoredAttachmentForURL retrieves the raw MIME body of a received e-mail message attachment.
+func (mg *MailgunImpl) GetStoredAttachmentForURL(ctx context.Context, url string) ([]byte, error) {
+	r := newHTTPRequest(url)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	r.addHeader("Accept", "message/rfc2822")
+
+	response, err := makeGetRequest(ctx, r)
+
+	return response.Data, err
+}
