@@ -152,6 +152,7 @@ type Mailgun interface {
 	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
 	GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error)
 	GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error)
+	GetStoredAttachmentForURL(ctx context.Context, url string) ([]byte, error)
 	DeleteStoredMessage(ctx context.Context, id string) error
 
 	ListCredentials(opts *ListOptions) *CredentialsIterator
