@@ -688,8 +688,7 @@ func validateStringList(list []string, requireOne bool) bool {
 
 // GetStoredMessage retrieves information about a received e-mail message.
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, id string) (StoredMessage, error) {
-	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (StoredMessage, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -700,8 +699,7 @@ func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, id string) (StoredM
 }
 
 // Given a storage id resend the stored message to the specified recipients
-func (mg *MailgunImpl) ReSend(ctx context.Context, storageURL string, recipients ...string) (string, string, error) {
-	url := generateDomainApiUrl(mg, messagesEndpoint) + "/" + storageURL
+func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...string) (string, string, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -728,8 +726,7 @@ func (mg *MailgunImpl) ReSend(ctx context.Context, storageURL string, recipients
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
 // Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
 // thus delegates to the caller the required parsing.
-func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error) {
-	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
+func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (StoredMessageRaw, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -740,47 +737,18 @@ func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, id string) (Stor
 	return response, err
 }
 
-// GetStoredMessageForURL retrieves information about a received e-mail message.
-// This provides visibility into, e.g., replies to a message sent to a mailing list.
+// Deprecated: Use GetStoreMessage() instead
 func (mg *MailgunImpl) GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error) {
-	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-
-	var response StoredMessage
-	err := getResponseFromJSON(ctx, r, &response)
-	return response, err
+	return mg.GetStoredMessage(ctx, url)
 }
 
-// GetStoredMessageRawForURL retrieves the raw MIME body of a received e-mail message.
-// Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
-// thus delegates to the caller the required parsing.
+// Deprecated: Use GetStoreMessageRaw() instead
 func (mg *MailgunImpl) GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error) {
-	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	r.addHeader("Accept", "message/rfc2822")
-
-	var response StoredMessageRaw
-	err := getResponseFromJSON(ctx, r, &response)
-	return response, err
-
+	return mg.GetStoredMessageRaw(ctx, url)
 }
 
-// DeleteStoredMessage removes a previously stored message.
-// Note that Mailgun institutes a policy of automatically deleting messages after a set time.
-// Consult the current Mailgun API documentation for more details.
-func (mg *MailgunImpl) DeleteStoredMessage(ctx context.Context, id string) error {
-	url := generateStoredMessageUrl(mg, messagesEndpoint, id)
-	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	_, err := makeDeleteRequest(ctx, r)
-	return err
-}
-
-// GetStoredAttachmentForURL retrieves the raw MIME body of a received e-mail message attachment.
-func (mg *MailgunImpl) GetStoredAttachmentForURL(ctx context.Context, url string) ([]byte, error) {
+// Retrieves the raw MIME body of a received e-mail message attachment.
+func (mg *MailgunImpl) GetStoredAttachment(ctx context.Context, url string) ([]byte, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
