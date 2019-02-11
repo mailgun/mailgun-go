@@ -2,6 +2,7 @@ package mailgun_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -19,13 +20,13 @@ func TestTemplateCRUD(t *testing.T) {
 	ensure.Nil(t, err)
 	ctx := context.Background()
 
-	findTemplate := func(id string) bool {
+	findTemplate := func(name string) bool {
 		it := mg.ListTemplates(nil)
 
 		var page []mailgun.Template
 		for it.Next(ctx, &page) {
 			for _, template := range page {
-				if template.Id == id {
+				if template.Name == name {
 					return true
 				}
 			}
@@ -35,7 +36,7 @@ func TestTemplateCRUD(t *testing.T) {
 	}
 
 	const (
-		Name        = "Mailgun-Go TestTemplateCRUD"
+		Name        = "Mailgun-Go-TestTemplateCRUD"
 		Description = "Mailgun-Go Test Template Description"
 		UpdatedDesc = "Mailgun-Go Test Updated Description"
 	)
@@ -47,28 +48,26 @@ func TestTemplateCRUD(t *testing.T) {
 
 	// Create a template
 	ensure.Nil(t, mg.CreateTemplate(ctx, &tmpl))
-	ensure.True(t, tmpl.Id != "")
+	ensure.DeepEqual(t, tmpl.Name, strings.ToLower(Name))
 	ensure.DeepEqual(t, tmpl.Description, Description)
-	ensure.DeepEqual(t, tmpl.Name, Name)
 
 	// Wait the template to show up
-	ensure.Nil(t, waitForTemplate(mg, tmpl.Id))
+	ensure.Nil(t, waitForTemplate(mg, tmpl.Name))
 
 	// Ensure the template is in the list
-	ensure.True(t, findTemplate(tmpl.Id))
+	ensure.True(t, findTemplate(tmpl.Name))
 
 	// Update the description
 	tmpl.Description = UpdatedDesc
 	ensure.Nil(t, mg.UpdateTemplate(ctx, &tmpl))
 
 	// Ensure update took
-	updated, err := mg.GetTemplate(ctx, tmpl.Id)
+	updated, err := mg.GetTemplate(ctx, tmpl.Name)
 
-	ensure.DeepEqual(t, updated.Id, tmpl.Id)
 	ensure.DeepEqual(t, updated.Description, UpdatedDesc)
 
 	// Delete the template
-	ensure.Nil(t, mg.DeleteTemplate(ctx, tmpl.Id))
+	ensure.Nil(t, mg.DeleteTemplate(ctx, tmpl.Name))
 }
 
 func waitForTemplate(mg mailgun.Mailgun, id string) error {

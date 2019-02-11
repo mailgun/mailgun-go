@@ -6,31 +6,34 @@ import (
 )
 
 type TemplateVersion struct {
-	Id        string         `json:"id"`
+	Tag       string         `json:"tag"`
 	Template  string         `json:"template,omitempty"`
 	Engine    TemplateEngine `json:"engine"`
 	CreatedAt RFC2822Time    `json:"createdAt"`
-	Comment string `json:"comment"`
-	Active  bool   `json:"active"`
+	Comment   string         `json:"comment"`
+	Active    bool           `json:"active"`
 }
 
 type templateVersionListResp struct {
-	Item struct {
+	Template struct {
 		Template
 		Versions []TemplateVersion `json:"versions,omitempty"`
-	} `json:"item"`
+	} `json:"template"`
 	Paging Paging `json:"paging"`
 }
 
 // Add a template version to a template
-func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions")
+func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("template", version.Template)
 
+	if version.Tag != "" {
+		payload.addValue("tag", string(version.Tag))
+	}
 	if version.Engine != "" {
 		payload.addValue("engine", string(version.Engine))
 	}
@@ -50,8 +53,8 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateId string
 }
 
 // Get a specific version of a template
-func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateId, versionId string) (TemplateVersion, error) {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions/" + versionId)
+func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateName, tag string) (TemplateVersion, error) {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -64,8 +67,8 @@ func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateId, versi
 }
 
 // Update the comment and mark a version of a template active
-func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions/" + version.Id)
+func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + version.Tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -87,8 +90,8 @@ func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateId str
 }
 
 // Delete a specific version of a template
-func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, templateId, versionId string) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions/" + versionId)
+func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, templateName, tag string) error {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -102,8 +105,8 @@ type TemplateVersionsIterator struct {
 }
 
 // List all the versions of a specific template
-func (mg *MailgunImpl) ListTemplateVersions(templateId string, opts *ListOptions) *TemplateVersionsIterator {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateId + "/versions")
+func (mg *MailgunImpl) ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
@@ -135,10 +138,10 @@ func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]TemplateV
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Item.Versions))
-	copy(cpy, li.Item.Versions)
+	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	copy(cpy, li.Template.Versions)
 	*items = cpy
-	if len(li.Item.Versions) == 0 {
+	if len(li.Template.Versions) == 0 {
 		return false
 	}
 	return true
@@ -155,8 +158,8 @@ func (li *TemplateVersionsIterator) First(ctx context.Context, items *[]Template
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Item.Versions))
-	copy(cpy, li.Item.Versions)
+	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	copy(cpy, li.Template.Versions)
 	*items = cpy
 	return true
 }
@@ -173,8 +176,8 @@ func (li *TemplateVersionsIterator) Last(ctx context.Context, items *[]TemplateV
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Item.Versions))
-	copy(cpy, li.Item.Versions)
+	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	copy(cpy, li.Template.Versions)
 	*items = cpy
 	return true
 }
@@ -193,10 +196,10 @@ func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]Templ
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Item.Versions))
-	copy(cpy, li.Item.Versions)
+	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	copy(cpy, li.Template.Versions)
 	*items = cpy
-	if len(li.Item.Versions) == 0 {
+	if len(li.Template.Versions) == 0 {
 		return false
 	}
 	return true
