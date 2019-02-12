@@ -148,12 +148,14 @@ type Mailgun interface {
 	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
 	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)
 
-	GetStoredMessage(ctx context.Context, id string) (StoredMessage, error)
+	GetStoredMessage(ctx context.Context, url string) (StoredMessage, error)
 	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
+	GetStoredAttachment(ctx context.Context, url string) ([]byte, error)
+
+	// Deprecated
 	GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error)
+	// Deprecated
 	GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error)
-	GetStoredAttachmentForURL(ctx context.Context, url string) ([]byte, error)
-	DeleteStoredMessage(ctx context.Context, id string) error
 
 	ListCredentials(opts *ListOptions) *CredentialsIterator
 	CreateCredential(ctx context.Context, login, password string) error

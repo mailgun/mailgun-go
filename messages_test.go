@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/facebookgo/ensure"
-	"github.com/mailgun/mailgun-go/v3/events"
 )
 
 const (
@@ -34,60 +33,6 @@ Testing some Mailgun MIME awesomeness!
 	exampleDomain = "testDomain"
 	exampleAPIKey = "testAPIKey"
 )
-
-func TestGetStoredMessage(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	spendMoney(t, func() {
-		mg, err := NewMailgunFromEnv()
-		ensure.Nil(t, err)
-
-		id, err := findStoredMessageID(mg) // somehow...
-		if err != nil {
-			t.Log(err)
-			return
-		}
-
-		ctx := context.Background()
-		// First, get our stored message.
-		msg, err := mg.GetStoredMessage(ctx, id)
-		ensure.Nil(t, err)
-
-		fields := map[string]string{
-			"       From": msg.From,
-			"     Sender": msg.Sender,
-			"    Subject": msg.Subject,
-			"Attachments": fmt.Sprintf("%d", len(msg.Attachments)),
-			"    Headers": fmt.Sprintf("%d", len(msg.MessageHeaders)),
-		}
-		for k, v := range fields {
-			fmt.Printf("%13s: %s\n", k, v)
-		}
-
-		// We're done with it; now delete it.
-		ensure.Nil(t, mg.DeleteStoredMessage(ctx, id))
-	})
-}
-
-// Tries to locate the first stored event type, returning the associated stored message key.
-func findStoredMessageID(mg Mailgun) (string, error) {
-	it := mg.ListEvents(nil)
-
-	var page []Event
-	for it.Next(context.Background(), &page) {
-		for _, event := range page {
-			if event.GetName() == events.EventStored {
-				return event.(*events.Stored).Storage.Key, nil
-			}
-		}
-	}
-	if it.Err() != nil {
-		return "", it.Err()
-	}
-	return "", fmt.Errorf("No stored messages found.  Try changing MG_EMAIL_TO to an address that stores messages and try again.")
-}
 
 func TestSendMGPlain(t *testing.T) {
 	if reason := SkipNetworkTest(); reason != "" {
@@ -478,7 +423,7 @@ func TestResendStored(t *testing.T) {
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
-		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/domains/%s/messages/some-url", exampleDomain))
+		ensure.DeepEqual(t, req.URL.Path, "/some-url")
 		ensure.DeepEqual(t, req.FormValue("to"), toUser)
 
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
@@ -489,11 +434,11 @@ func TestResendStored(t *testing.T) {
 	mg := NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL)
 
-	msg, id, err := mg.ReSend(context.Background(), "some-url")
+	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/some-url")
 	ensure.NotNil(t, err)
 	ensure.DeepEqual(t, err.Error(), "must provide at least one recipient")
 
-	msg, id, err = mg.ReSend(context.Background(), "some-url", toUser)
+	msg, id, err = mg.ReSend(context.Background(), srv.URL+"/some-url", toUser)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)

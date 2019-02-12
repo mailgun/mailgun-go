@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changes
 * Updated Template calls to reflect the most recent Template API changes.
+* GetStoredMessage() now accepts a URL instead of an id
+* Deprecated GetStoredMessageForURL()
+* Deprecated GetStoredMessageRawForURL()
 
 ### Added
-* Added `GetStoredAttachmentForURL()`
+* Added `GetStoredAttachment()`
+
+### Removed
+* Method `DeleteStoredMessage()` mailgun API no long allows this call
 
 ## [3.3.0] - 2019-01-28
 ### Changes
