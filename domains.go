@@ -267,14 +267,14 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password string, opts *CreateDomainOptions) (DomainResponse, error) {
+func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, smtpPassword string, opts *CreateDomainOptions) (DomainResponse, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("name", name)
-	payload.addValue("smtp_password", password)
+	payload.addValue("smtp_password", smtpPassword)
 
 	if opts != nil {
 		if opts.SpamAction != "" {
