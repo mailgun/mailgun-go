@@ -274,7 +274,9 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, smtpPasswo
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("name", name)
-	payload.addValue("smtp_password", smtpPassword)
+	if smtpPassword != "" {
+		payload.addValue("smtp_password", smtpPassword)
+	}
 
 	if opts != nil {
 		if opts.SpamAction != "" {
