@@ -248,7 +248,7 @@ func NewMailgun(domain, apiKey string) *MailgunImpl {
 	}
 }
 
-// Return a new Mailgun client using the environment variables
+// NewMailgunFromEnv returns a new Mailgun client using the environment variables
 // MG_API_KEY, MG_DOMAIN, and MG_URL
 func NewMailgunFromEnv() (*MailgunImpl, error) {
 	apiKey := os.Getenv("MG_API_KEY")

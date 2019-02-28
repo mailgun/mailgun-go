@@ -81,7 +81,7 @@ func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 	}
 }
 
-// Return a new EmailValidator using environment variables
+// NewEmailValidatorFromEnv returns a new EmailValidator using environment variables
 // If MG_PUBLIC_API_KEY is set, assume using the free validation subject to daily usage limits
 // If only MG_API_KEY is set, assume using the /private validation routes with no daily usage limits
 func NewEmailValidatorFromEnv() (*EmailValidatorImpl, error) {
@@ -121,7 +121,7 @@ func (m *EmailValidatorImpl) Client() *http.Client {
 	return m.client
 }
 
-// Returns the API key used for validations
+// APIKey returns the API key used for validations
 func (m *EmailValidatorImpl) APIKey() string {
 	return m.apiKey
 }

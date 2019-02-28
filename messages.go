@@ -444,7 +444,7 @@ func (m *Message) AddDomain(domain string) {
 	m.domain = domain
 }
 
-// Retrieve the http headers associated with this message
+// GetHeaders retrieves the http headers associated with this message
 func (m *Message) GetHeaders() map[string]string {
 	return m.headers
 }
@@ -747,7 +747,7 @@ func (mg *MailgunImpl) GetStoredMessageRawForURL(ctx context.Context, url string
 	return mg.GetStoredMessageRaw(ctx, url)
 }
 
-// Retrieves the raw MIME body of a received e-mail message attachment.
+// GetStoredAttachment retrieves the raw MIME body of a received e-mail message attachment.
 func (mg *MailgunImpl) GetStoredAttachment(ctx context.Context, url string) ([]byte, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())

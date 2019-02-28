@@ -73,12 +73,12 @@ func (ri *RoutesIterator) Err() error {
 	return ri.err
 }
 
-// Returns the current offset of the iterator
+// Offset returns the current offset of the iterator
 func (ri *RoutesIterator) Offset() int {
 	return ri.offset
 }
 
-// Retrieves the next page of items from the api. Returns false when there
+// Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
@@ -101,7 +101,7 @@ func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
 	return true
 }
 
-// Retrieves the first page of items from the api. Returns false if there
+// First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (ri *RoutesIterator) First(ctx context.Context, items *[]Route) bool {
@@ -119,7 +119,7 @@ func (ri *RoutesIterator) First(ctx context.Context, items *[]Route) bool {
 	return true
 }
 
-// Retrieves the last page of items from the api.
+// Last retrieves the last page of items from the api.
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
@@ -147,7 +147,7 @@ func (ri *RoutesIterator) Last(ctx context.Context, items *[]Route) bool {
 	return true
 }
 
-// Retrieves the previous page of items from the api. Returns false when there
+// Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {

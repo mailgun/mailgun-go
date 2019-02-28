@@ -75,7 +75,7 @@ func (ei *EventIterator) Err() error {
 	return ei.err
 }
 
-// Retrieves the next page of events from the api. Returns false when there
+// Next retrieves the next page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
@@ -93,7 +93,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 	return true
 }
 
-// Retrieves the first page of events from the api. Returns false if there
+// First retrieves the first page of events from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
@@ -108,7 +108,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 	return true
 }
 
-// Retrieves the last page of events from the api.
+// Last retrieves the last page of events from the api.
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
@@ -124,7 +124,7 @@ func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
 	return true
 }
 
-// Retrieves the previous page of events from the api. Returns false when there
+// Previous retrieves the previous page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {

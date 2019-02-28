@@ -7,7 +7,7 @@ type TagLimits struct {
 	Count int `json:"count"`
 }
 
-// Returns tracking settings for a domain
+// GetTagLimits returns tracking settings for a domain
 func (mg *MailgunImpl) GetTagLimits(ctx context.Context, domain string) (TagLimits, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/limits/tag")
 	r.setClient(mg.Client())

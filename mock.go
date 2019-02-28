@@ -54,7 +54,7 @@ func (ms *MockServer) Stop() {
 	ms.srv.Close()
 }
 
-// Return the URL used to connect to the mock server
+// URL returns the URL used to connect to the mock server
 func (ms *MockServer) URL() string {
 	return ms.srv.URL + "/v3"
 }

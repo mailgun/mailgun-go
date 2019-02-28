@@ -112,12 +112,12 @@ func (ri *DomainsIterator) Err() error {
 	return ri.err
 }
 
-// Returns the current offset of the iterator
+// Offset returns the current offset of the iterator
 func (ri *DomainsIterator) Offset() int {
 	return ri.offset
 }
 
-// Retrieves the next page of items from the api. Returns false when there
+// Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (ri *DomainsIterator) Next(ctx context.Context, items *[]Domain) bool {
@@ -140,7 +140,7 @@ func (ri *DomainsIterator) Next(ctx context.Context, items *[]Domain) bool {
 	return true
 }
 
-// Retrieves the first page of items from the api. Returns false if there
+// First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (ri *DomainsIterator) First(ctx context.Context, items *[]Domain) bool {
@@ -158,7 +158,7 @@ func (ri *DomainsIterator) First(ctx context.Context, items *[]Domain) bool {
 	return true
 }
 
-// Retrieves the last page of items from the api.
+// Last retrieves the last page of items from the api.
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
@@ -186,7 +186,7 @@ func (ri *DomainsIterator) Last(ctx context.Context, items *[]Domain) bool {
 	return true
 }
 
-// Retrieves the previous page of items from the api. Returns false when there
+// Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
@@ -231,7 +231,7 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 	return getResponseFromJSON(ctx, r, &ri.domainsListResponse)
 }
 
-// Retrieve detailed information about the named domain.
+// GetDomain retrieves detailed information about the named domain.
 func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (DomainResponse, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.Client())
@@ -298,7 +298,7 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password s
 	return resp, err
 }
 
-// Returns delivery connection settings for the defined domain
+// GetDomainConnection returns delivery connection settings for the defined domain
 func (mg *MailgunImpl) GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.Client())
@@ -330,7 +330,7 @@ func (mg *MailgunImpl) DeleteDomain(ctx context.Context, name string) error {
 	return err
 }
 
-// Returns tracking settings for a domain
+// GetDomainTracking returns tracking settings for a domain
 func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking")
 	r.setClient(mg.Client())

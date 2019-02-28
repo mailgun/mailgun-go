@@ -62,7 +62,7 @@ func (ci *BouncesIterator) Err() error {
 	return ci.err
 }
 
-// Retrieves the next page of items from the api. Returns false when there
+// Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
@@ -82,7 +82,7 @@ func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
 	return true
 }
 
-// Retrieves the first page of items from the api. Returns false if there
+// First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
@@ -99,7 +99,7 @@ func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
 	return true
 }
 
-// Retrieves the last page of items from the api.
+// Last retrieves the last page of items from the api.
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
@@ -117,7 +117,7 @@ func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
 	return true
 }
 
-// Retrieves the previous page of items from the api. Returns false when there
+// Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
