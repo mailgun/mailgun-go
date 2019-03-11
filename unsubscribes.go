@@ -46,7 +46,7 @@ func (ci *UnsubscribesIterator) Err() error {
 	return ci.err
 }
 
-// Retrieves the next page of items from the api. Returns false when there
+// Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (ci *UnsubscribesIterator) Next(ctx context.Context, items *[]Unsubscribe) bool {
@@ -66,7 +66,7 @@ func (ci *UnsubscribesIterator) Next(ctx context.Context, items *[]Unsubscribe) 
 	return true
 }
 
-// Retrieves the first page of items from the api. Returns false if there
+// First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (ci *UnsubscribesIterator) First(ctx context.Context, items *[]Unsubscribe) bool {
@@ -83,7 +83,7 @@ func (ci *UnsubscribesIterator) First(ctx context.Context, items *[]Unsubscribe)
 	return true
 }
 
-// Retrieves the last page of items from the api.
+// Last retrieves the last page of items from the api.
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
@@ -101,7 +101,7 @@ func (ci *UnsubscribesIterator) Last(ctx context.Context, items *[]Unsubscribe) 
 	return true
 }
 
-// Retrieves the previous page of items from the api. Returns false when there
+// Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (ci *UnsubscribesIterator) Previous(ctx context.Context, items *[]Unsubscribe) bool {
@@ -156,7 +156,7 @@ func (mg *MailgunImpl) CreateUnsubscribe(ctx context.Context, address, tag strin
 	return err
 }
 
-// Removes the e-mail address given from the domain's unsubscription table.
+// DeleteUnsubscribe removes the e-mail address given from the domain's unsubscription table.
 // If passing in an ID (discoverable from, e.g., ListUnsubscribes()), the e-mail address associated
 // with the given ID will be removed.
 func (mg *MailgunImpl) DeleteUnsubscribe(ctx context.Context, address string) error {
@@ -167,7 +167,7 @@ func (mg *MailgunImpl) DeleteUnsubscribe(ctx context.Context, address string) er
 	return err
 }
 
-// Removes the e-mail address given from the domain's unsubscription table with a matching tag.
+// DeleteUnsubscribeWithTag removes the e-mail address given from the domain's unsubscription table with a matching tag.
 // If passing in an ID (discoverable from, e.g., ListUnsubscribes()), the e-mail address associated
 // with the given ID will be removed.
 func (mg *MailgunImpl) DeleteUnsubscribeWithTag(ctx context.Context, a, t string) error {

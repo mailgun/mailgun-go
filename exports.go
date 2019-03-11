@@ -50,7 +50,7 @@ func (mg *MailgunImpl) ListExports(ctx context.Context, url string) ([]Export, e
 	return result, nil
 }
 
-// Get an export by id
+// GetExport gets an export by id
 func (mg *MailgunImpl) GetExport(ctx context.Context, id string) (Export, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint) + "/" + id)
 	r.setClient(mg.Client())

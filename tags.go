@@ -80,7 +80,7 @@ type TagIterator struct {
 	err error
 }
 
-// Returns the next page in the list of tags
+// Next returns the next page in the list of tags
 func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
@@ -101,7 +101,7 @@ func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
 	return true
 }
 
-// Returns the previous page in the list of tags
+// Previous returns the previous page in the list of tags
 func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
@@ -126,7 +126,7 @@ func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
 	return true
 }
 
-// Returns the first page in the list of tags
+// First returns the first page in the list of tags
 func (ti *TagIterator) First(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
@@ -139,7 +139,7 @@ func (ti *TagIterator) First(ctx context.Context, items *[]Tag) bool {
 	return true
 }
 
-// Returns the last page in the list of tags
+// Last returns the last page in the list of tags
 func (ti *TagIterator) Last(ctx context.Context, items *[]Tag) bool {
 	if ti.err != nil {
 		return false
@@ -152,7 +152,7 @@ func (ti *TagIterator) Last(ctx context.Context, items *[]Tag) bool {
 	return true
 }
 
-// Return any error if one occurred
+// Err returns any error if one occurred
 func (ti *TagIterator) Err() error {
 	return ti.err
 }

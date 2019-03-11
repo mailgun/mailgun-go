@@ -18,7 +18,7 @@ type okResp struct {
 	Message string `json:"message"`
 }
 
-// Returns a list of IPs assigned to your account
+// ListIPS returns a list of IPs assigned to your account
 func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint))
 	r.setClient(mg.Client())
@@ -38,7 +38,7 @@ func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress
 	return result, nil
 }
 
-// Returns information about the specified IP
+// GetIP returns information about the specified IP
 func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint) + "/" + ip)
 	r.setClient(mg.Client())
@@ -48,7 +48,7 @@ func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) 
 	return resp, err
 }
 
-// Returns a list of IPs currently assigned to the specified domain.
+// ListDomainIPS returns a list of IPs currently assigned to the specified domain.
 func (mg *MailgunImpl) ListDomainIPS(ctx context.Context) ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips")
 	r.setClient(mg.Client())

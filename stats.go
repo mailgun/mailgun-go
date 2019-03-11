@@ -85,7 +85,7 @@ type GetStatOptions struct {
 	End        time.Time
 }
 
-// Returns total stats for a given domain for the specified time period
+// GetStats returns total stats for a given domain for the specified time period
 func (mg *MailgunImpl) GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error) {
 	r := newHTTPRequest(generateApiUrl(mg, statsTotalEndpoint))
 

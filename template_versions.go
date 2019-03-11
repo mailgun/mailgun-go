@@ -22,7 +22,7 @@ type templateVersionListResp struct {
 	Paging Paging `json:"paging"`
 }
 
-// Add a template version to a template
+// AddTemplateVersion adds a template version to a template
 func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions")
 	r.setClient(mg.Client())
@@ -52,7 +52,7 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateName stri
 	return nil
 }
 
-// Get a specific version of a template
+// GetTemplateVersion gets a specific version of a template
 func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateName, tag string) (TemplateVersion, error) {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.Client())
@@ -127,7 +127,7 @@ func (li *TemplateVersionsIterator) Err() error {
 	return li.err
 }
 
-// Retrieves the next page of items from the api. Returns false when there
+// Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]TemplateVersion) bool {
@@ -147,7 +147,7 @@ func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]TemplateV
 	return true
 }
 
-// Retrieves the first page of items from the api. Returns false if there
+// First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
 func (li *TemplateVersionsIterator) First(ctx context.Context, items *[]TemplateVersion) bool {
@@ -164,7 +164,7 @@ func (li *TemplateVersionsIterator) First(ctx context.Context, items *[]Template
 	return true
 }
 
-// Retrieves the last page of items from the api.
+// Last retrieves the last page of items from the api.
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
@@ -182,7 +182,7 @@ func (li *TemplateVersionsIterator) Last(ctx context.Context, items *[]TemplateV
 	return true
 }
 
-// Retrieves the previous page of items from the api. Returns false when there
+// Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
 func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]TemplateVersion) bool {
