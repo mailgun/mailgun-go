@@ -134,15 +134,14 @@ func (ci *UnsubscribesIterator) fetch(ctx context.Context, url string) error {
 
 // Retreives a single unsubscribe record. Can be used to check if a given address is present in the list of unsubscribed users.
 func (mg *MailgunImpl) GetUnsubscribe(ctx context.Context, address string) (Unsubscribe, error) {
-	// TODO: Test this method!
 	r := newHTTPRequest(generateApiUrlWithTarget(mg, unsubscribesEndpoint, address))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var envelope struct {
-		Unsubscribe Unsubscribe `json:"unsubscribe"`
-	}
+
+	envelope := Unsubscribe{}
 	err := getResponseFromJSON(ctx, r, &envelope)
-	return envelope.Unsubscribe, err
+
+	return envelope, err
 }
 
 // Unsubscribe adds an e-mail address to the domain's unsubscription table.
