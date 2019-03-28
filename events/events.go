@@ -54,12 +54,13 @@ type Accepted struct {
 	Message  Message  `json:"message"`
 	Flags    Flags    `json:"flags"`
 
-	Recipient       string     `json:"recipient"`
-	RecipientDomain string     `json:"recipient-domain"`
-	Method          string     `json:"method"`
-	OriginatingIP   string     `json:"originating-ip"`
-	Tags            []string   `json:"tags"`
-	Campaigns       []Campaign `json:"campaigns"`
+	Recipient       string            `json:"recipient"`
+	RecipientDomain string            `json:"recipient-domain"`
+	Method          string            `json:"method"`
+	OriginatingIP   string            `json:"originating-ip"`
+	Tags            []string          `json:"tags"`
+	Campaigns       []Campaign        `json:"campaigns"`
+	UserVariables   map[string]string `json:"user-variables"`
 }
 
 type Rejected struct {
@@ -74,8 +75,9 @@ type Rejected struct {
 	Storage Storage `json:"storage"`
 	Flags   Flags   `json:"flags"`
 
-	Tags      []string   `json:"tags"`
-	Campaigns []Campaign `json:"campaigns"`
+	Tags          []string          `json:"tags"`
+	Campaigns     []Campaign        `json:"campaigns"`
+	UserVariables map[string]string `json:"user-variables"`
 }
 
 type Delivered struct {
@@ -91,7 +93,8 @@ type Delivered struct {
 	Tags            []string   `json:"tags"`
 	Campaigns       []Campaign `json:"campaigns"`
 
-	DeliveryStatus DeliveryStatus `json:"delivery-status"`
+	DeliveryStatus DeliveryStatus    `json:"delivery-status"`
+	UserVariables  map[string]string `json:"user-variables"`
 }
 
 type Failed struct {
@@ -107,9 +110,10 @@ type Failed struct {
 	Tags            []string   `json:"tags"`
 	Campaigns       []Campaign `json:"campaigns"`
 
-	DeliveryStatus DeliveryStatus `json:"delivery-status"`
-	Severity       string         `json:"severity"`
-	Reason         string         `json:"reason"`
+	DeliveryStatus DeliveryStatus    `json:"delivery-status"`
+	Severity       string            `json:"severity"`
+	Reason         string            `json:"reason"`
+	UserVariables  map[string]string `json:"user-variables"`
 }
 
 type Stored struct {
@@ -119,8 +123,9 @@ type Stored struct {
 	Storage Storage `json:"storage"`
 	Flags   Flags   `json:"flags"`
 
-	Tags      []string   `json:"tags"`
-	Campaigns []Campaign `json:"campaigns"`
+	Tags          []string          `json:"tags"`
+	Campaigns     []Campaign        `json:"campaigns"`
+	UserVariables map[string]string `json:"user-variables"`
 }
 
 //
@@ -189,8 +194,9 @@ type Complained struct {
 	Message   Message    `json:"message"`
 	Campaigns []Campaign `json:"campaigns"`
 
-	Recipient string   `json:"recipient"`
-	Tags      []string `json:"tags"`
+	Recipient     string            `json:"recipient"`
+	Tags          []string          `json:"tags"`
+	UserVariables map[string]string `json:"user-variables"`
 }
 
 //

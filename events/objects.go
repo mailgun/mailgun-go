@@ -70,9 +70,7 @@ type Campaign struct {
 }
 
 type DeliveryStatus struct {
-	// The code is an int or a string from time to time so
-	// we can't uncomment this field until all emitters unified.
-	// Code        string  `json:"code"`
+	Code           int     `json:"code"`
 	Message        string  `json:"message"`
 	SessionSeconds float64 `json:"session-seconds"`
 }
