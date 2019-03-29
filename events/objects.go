@@ -71,6 +71,8 @@ type Campaign struct {
 
 type DeliveryStatus struct {
 	Code           int     `json:"code"`
+	AttemptNo      int     `json:"attempt-no"`
+	Description    string  `json:"description"`
 	Message        string  `json:"message"`
 	SessionSeconds float64 `json:"session-seconds"`
 }
