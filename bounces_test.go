@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/facebookgo/ensure"
 )
@@ -84,6 +85,9 @@ func TestAddDelBounces(t *testing.T) {
 	// Add the bounce for our address.
 	err = mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
 	ensure.Nil(t, err)
+
+	// Give API some time to refresh cache
+	time.Sleep(time.Second)
 
 	// We should now have one bounce listed when we query the API.
 	if !findBounce(exampleEmail) {

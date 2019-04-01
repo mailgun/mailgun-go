@@ -29,7 +29,7 @@ func TestParseSuccess(t *testing.T) {
 	event, err := ParseEvent([]byte(`{
 		"event": "accepted",
 		"timestamp": 1420255392.850187,
-		"user-variables": "{}",
+		"user-variables": {},
 		"envelope": {
 		    "sender": "noreply@example.com",
 		    "transport": "smtp",
