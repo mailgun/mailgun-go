@@ -837,6 +837,12 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents7(in *jlexer.Lexer, ou
 			continue
 		}
 		switch key {
+		case "code":
+			out.Code = int(in.Int())
+		case "attempt-no":
+			out.AttemptNo = int(in.Int())
+		case "description":
+			out.Description = string(in.String())
 		case "message":
 			out.Message = string(in.String())
 		case "session-seconds":
@@ -855,6 +861,36 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents7(out *jwriter.Writer,
 	out.RawByte('{')
 	first := true
 	_ = first
+	{
+		const prefix string = ",\"code\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Code))
+	}
+	{
+		const prefix string = ",\"attempt-no\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.AttemptNo))
+	}
+	{
+		const prefix string = ",\"description\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Description))
+	}
 	{
 		const prefix string = ",\"message\":"
 		if first {

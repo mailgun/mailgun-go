@@ -401,6 +401,26 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents1(in *jlexer.Lexer, ou
 				}
 				in.Delim(']')
 			}
+		case "user-variables":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.UserVariables = make(map[string]string)
+				} else {
+					out.UserVariables = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v11 string
+					v11 = string(in.String())
+					(out.UserVariables)[key] = v11
+					in.WantComma()
+				}
+				in.Delim('}')
+			}
 		case "timestamp":
 			out.Timestamp = float64(in.Float64())
 		case "id":
@@ -463,11 +483,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v11, v12 := range in.Tags {
-				if v11 > 0 {
+			for v12, v13 := range in.Tags {
+				if v12 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v12))
+				out.String(string(v13))
 			}
 			out.RawByte(']')
 		}
@@ -484,13 +504,39 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v13, v14 := range in.Campaigns {
-				if v13 > 0 {
+			for v14, v15 := range in.Campaigns {
+				if v14 > 0 {
 					out.RawByte(',')
 				}
-				(v14).MarshalEasyJSON(out)
+				(v15).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"user-variables\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.UserVariables == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v16First := true
+			for v16Name, v16Value := range in.UserVariables {
+				if v16First {
+					v16First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v16Name))
+				out.RawByte(':')
+				out.String(string(v16Value))
+			}
+			out.RawByte('}')
 		}
 	}
 	{
@@ -584,11 +630,11 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, ou
 					out.Items = (out.Items)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v15 RawJSON
+					var v17 RawJSON
 					if data := in.Raw(); in.Ok() {
-						in.AddError((v15).UnmarshalJSON(data))
+						in.AddError((v17).UnmarshalJSON(data))
 					}
-					out.Items = append(out.Items, v15)
+					out.Items = append(out.Items, v17)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -621,11 +667,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v16, v17 := range in.Items {
-				if v16 > 0 {
+			for v18, v19 := range in.Items {
+				if v18 > 0 {
 					out.RawByte(',')
 				}
-				out.Base64Bytes(v17)
+				out.Base64Bytes(v19)
 			}
 			out.RawByte(']')
 		}
@@ -709,9 +755,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents3(in *jlexer.Lexer, ou
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v20 string
-					v20 = string(in.String())
-					out.Tags = append(out.Tags, v20)
+					var v22 string
+					v22 = string(in.String())
+					out.Tags = append(out.Tags, v22)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -732,12 +778,32 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents3(in *jlexer.Lexer, ou
 					out.Campaigns = (out.Campaigns)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v21 Campaign
-					(v21).UnmarshalEasyJSON(in)
-					out.Campaigns = append(out.Campaigns, v21)
+					var v23 Campaign
+					(v23).UnmarshalEasyJSON(in)
+					out.Campaigns = append(out.Campaigns, v23)
 					in.WantComma()
 				}
 				in.Delim(']')
+			}
+		case "user-variables":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.UserVariables = make(map[string]string)
+				} else {
+					out.UserVariables = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v24 string
+					v24 = string(in.String())
+					(out.UserVariables)[key] = v24
+					in.WantComma()
+				}
+				in.Delim('}')
 			}
 		case "timestamp":
 			out.Timestamp = float64(in.Float64())
@@ -811,11 +877,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v22, v23 := range in.Tags {
-				if v22 > 0 {
+			for v25, v26 := range in.Tags {
+				if v25 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v23))
+				out.String(string(v26))
 			}
 			out.RawByte(']')
 		}
@@ -832,13 +898,39 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v24, v25 := range in.Campaigns {
-				if v24 > 0 {
+			for v27, v28 := range in.Campaigns {
+				if v27 > 0 {
 					out.RawByte(',')
 				}
-				(v25).MarshalEasyJSON(out)
+				(v28).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"user-variables\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.UserVariables == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v29First := true
+			for v29Name, v29Value := range in.UserVariables {
+				if v29First {
+					v29First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v29Name))
+				out.RawByte(':')
+				out.String(string(v29Value))
+			}
+			out.RawByte('}')
 		}
 	}
 	{
@@ -1106,9 +1198,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, ou
 					out.Campaigns = (out.Campaigns)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v26 Campaign
-					(v26).UnmarshalEasyJSON(in)
-					out.Campaigns = append(out.Campaigns, v26)
+					var v30 Campaign
+					(v30).UnmarshalEasyJSON(in)
+					out.Campaigns = append(out.Campaigns, v30)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1135,15 +1227,13 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, ou
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v27 string
-					v27 = string(in.String())
-					out.Tags = append(out.Tags, v27)
+					var v31 string
+					v31 = string(in.String())
+					out.Tags = append(out.Tags, v31)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
-		case "timestamp":
-			out.Timestamp = float64(in.Float64())
 		case "ip":
 			out.IP = string(in.String())
 		case "client-info":
@@ -1163,13 +1253,15 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, ou
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v28 string
-					v28 = string(in.String())
-					(out.UserVariables)[key] = v28
+					var v32 string
+					v32 = string(in.String())
+					(out.UserVariables)[key] = v32
 					in.WantComma()
 				}
 				in.Delim('}')
 			}
+		case "timestamp":
+			out.Timestamp = float64(in.Float64())
 		case "id":
 			out.ID = string(in.String())
 		case "event":
@@ -1210,11 +1302,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v29, v30 := range in.Campaigns {
-				if v29 > 0 {
+			for v33, v34 := range in.Campaigns {
+				if v33 > 0 {
 					out.RawByte(',')
 				}
-				(v30).MarshalEasyJSON(out)
+				(v34).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -1261,24 +1353,14 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v31, v32 := range in.Tags {
-				if v31 > 0 {
+			for v35, v36 := range in.Tags {
+				if v35 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v32))
+				out.String(string(v36))
 			}
 			out.RawByte(']')
 		}
-	}
-	{
-		const prefix string = ",\"timestamp\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Float64(float64(in.Timestamp))
 	}
 	{
 		const prefix string = ",\"ip\":"
@@ -1322,19 +1404,29 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 			out.RawString(`null`)
 		} else {
 			out.RawByte('{')
-			v33First := true
-			for v33Name, v33Value := range in.UserVariables {
-				if v33First {
-					v33First = false
+			v37First := true
+			for v37Name, v37Value := range in.UserVariables {
+				if v37First {
+					v37First = false
 				} else {
 					out.RawByte(',')
 				}
-				out.String(string(v33Name))
+				out.String(string(v37Name))
 				out.RawByte(':')
-				out.String(string(v33Value))
+				out.String(string(v37Value))
 			}
 			out.RawByte('}')
 		}
+	}
+	{
+		const prefix string = ",\"timestamp\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Float64(float64(in.Timestamp))
 	}
 	{
 		const prefix string = ",\"id\":"
@@ -1423,9 +1515,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents6(in *jlexer.Lexer, ou
 					out.Vars = (out.Vars)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v34 string
-					v34 = string(in.String())
-					out.Vars = append(out.Vars, v34)
+					var v38 string
+					v38 = string(in.String())
+					out.Vars = append(out.Vars, v38)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -1486,11 +1578,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents6(out *jwriter.Writer,
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v35, v36 := range in.Vars {
-				if v35 > 0 {
+			for v39, v40 := range in.Vars {
+				if v39 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v36))
+				out.String(string(v40))
 			}
 			out.RawByte(']')
 		}
@@ -2211,9 +2303,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents12(in *jlexer.Lexer, o
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v37 string
-					v37 = string(in.String())
-					out.Tags = append(out.Tags, v37)
+					var v41 string
+					v41 = string(in.String())
+					out.Tags = append(out.Tags, v41)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2234,9 +2326,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents12(in *jlexer.Lexer, o
 					out.Campaigns = (out.Campaigns)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v38 Campaign
-					(v38).UnmarshalEasyJSON(in)
-					out.Campaigns = append(out.Campaigns, v38)
+					var v42 Campaign
+					(v42).UnmarshalEasyJSON(in)
+					out.Campaigns = append(out.Campaigns, v42)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2247,6 +2339,26 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents12(in *jlexer.Lexer, o
 			out.Severity = string(in.String())
 		case "reason":
 			out.Reason = string(in.String())
+		case "user-variables":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.UserVariables = make(map[string]string)
+				} else {
+					out.UserVariables = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v43 string
+					v43 = string(in.String())
+					(out.UserVariables)[key] = v43
+					in.WantComma()
+				}
+				in.Delim('}')
+			}
 		case "timestamp":
 			out.Timestamp = float64(in.Float64())
 		case "id":
@@ -2339,11 +2451,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v39, v40 := range in.Tags {
-				if v39 > 0 {
+			for v44, v45 := range in.Tags {
+				if v44 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v40))
+				out.String(string(v45))
 			}
 			out.RawByte(']')
 		}
@@ -2360,11 +2472,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v41, v42 := range in.Campaigns {
-				if v41 > 0 {
+			for v46, v47 := range in.Campaigns {
+				if v46 > 0 {
 					out.RawByte(',')
 				}
-				(v42).MarshalEasyJSON(out)
+				(v47).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -2398,6 +2510,32 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 			out.RawString(prefix)
 		}
 		out.String(string(in.Reason))
+	}
+	{
+		const prefix string = ",\"user-variables\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.UserVariables == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v48First := true
+			for v48Name, v48Value := range in.UserVariables {
+				if v48First {
+					v48First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v48Name))
+				out.RawByte(':')
+				out.String(string(v48Value))
+			}
+			out.RawByte('}')
+		}
 	}
 	{
 		const prefix string = ",\"timestamp\":"
@@ -2573,9 +2711,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents14(in *jlexer.Lexer, o
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v43 string
-					v43 = string(in.String())
-					out.Tags = append(out.Tags, v43)
+					var v49 string
+					v49 = string(in.String())
+					out.Tags = append(out.Tags, v49)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2596,15 +2734,35 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents14(in *jlexer.Lexer, o
 					out.Campaigns = (out.Campaigns)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v44 Campaign
-					(v44).UnmarshalEasyJSON(in)
-					out.Campaigns = append(out.Campaigns, v44)
+					var v50 Campaign
+					(v50).UnmarshalEasyJSON(in)
+					out.Campaigns = append(out.Campaigns, v50)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
 		case "delivery-status":
 			(out.DeliveryStatus).UnmarshalEasyJSON(in)
+		case "user-variables":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.UserVariables = make(map[string]string)
+				} else {
+					out.UserVariables = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v51 string
+					v51 = string(in.String())
+					(out.UserVariables)[key] = v51
+					in.WantComma()
+				}
+				in.Delim('}')
+			}
 		case "timestamp":
 			out.Timestamp = float64(in.Float64())
 		case "id":
@@ -2697,11 +2855,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v45, v46 := range in.Tags {
-				if v45 > 0 {
+			for v52, v53 := range in.Tags {
+				if v52 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v46))
+				out.String(string(v53))
 			}
 			out.RawByte(']')
 		}
@@ -2718,11 +2876,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v47, v48 := range in.Campaigns {
-				if v47 > 0 {
+			for v54, v55 := range in.Campaigns {
+				if v54 > 0 {
 					out.RawByte(',')
 				}
-				(v48).MarshalEasyJSON(out)
+				(v55).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -2736,6 +2894,32 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 			out.RawString(prefix)
 		}
 		(in.DeliveryStatus).MarshalEasyJSON(out)
+	}
+	{
+		const prefix string = ",\"user-variables\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.UserVariables == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v56First := true
+			for v56Name, v56Value := range in.UserVariables {
+				if v56First {
+					v56First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v56Name))
+				out.RawByte(':')
+				out.String(string(v56Value))
+			}
+			out.RawByte('}')
+		}
 	}
 	{
 		const prefix string = ",\"timestamp\":"
@@ -2830,9 +3014,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents15(in *jlexer.Lexer, o
 					out.Campaigns = (out.Campaigns)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v49 Campaign
-					(v49).UnmarshalEasyJSON(in)
-					out.Campaigns = append(out.Campaigns, v49)
+					var v57 Campaign
+					(v57).UnmarshalEasyJSON(in)
+					out.Campaigns = append(out.Campaigns, v57)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -2855,12 +3039,32 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents15(in *jlexer.Lexer, o
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v50 string
-					v50 = string(in.String())
-					out.Tags = append(out.Tags, v50)
+					var v58 string
+					v58 = string(in.String())
+					out.Tags = append(out.Tags, v58)
 					in.WantComma()
 				}
 				in.Delim(']')
+			}
+		case "user-variables":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.UserVariables = make(map[string]string)
+				} else {
+					out.UserVariables = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v59 string
+					v59 = string(in.String())
+					(out.UserVariables)[key] = v59
+					in.WantComma()
+				}
+				in.Delim('}')
 			}
 		case "timestamp":
 			out.Timestamp = float64(in.Float64())
@@ -2904,11 +3108,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents15(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v51, v52 := range in.Campaigns {
-				if v51 > 0 {
+			for v60, v61 := range in.Campaigns {
+				if v60 > 0 {
 					out.RawByte(',')
 				}
-				(v52).MarshalEasyJSON(out)
+				(v61).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -2935,13 +3139,39 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents15(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v53, v54 := range in.Tags {
-				if v53 > 0 {
+			for v62, v63 := range in.Tags {
+				if v62 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v54))
+				out.String(string(v63))
 			}
 			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"user-variables\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.UserVariables == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v64First := true
+			for v64Name, v64Value := range in.UserVariables {
+				if v64First {
+					v64First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v64Name))
+				out.RawByte(':')
+				out.String(string(v64Value))
+			}
+			out.RawByte('}')
 		}
 	}
 	{
@@ -3039,9 +3269,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents16(in *jlexer.Lexer, o
 					out.Campaigns = (out.Campaigns)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v55 Campaign
-					(v55).UnmarshalEasyJSON(in)
-					out.Campaigns = append(out.Campaigns, v55)
+					var v65 Campaign
+					(v65).UnmarshalEasyJSON(in)
+					out.Campaigns = append(out.Campaigns, v65)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -3068,15 +3298,13 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents16(in *jlexer.Lexer, o
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v56 string
-					v56 = string(in.String())
-					out.Tags = append(out.Tags, v56)
+					var v66 string
+					v66 = string(in.String())
+					out.Tags = append(out.Tags, v66)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
-		case "timestamp":
-			out.Timestamp = float64(in.Float64())
 		case "ip":
 			out.IP = string(in.String())
 		case "client-info":
@@ -3096,13 +3324,15 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents16(in *jlexer.Lexer, o
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v57 string
-					v57 = string(in.String())
-					(out.UserVariables)[key] = v57
+					var v67 string
+					v67 = string(in.String())
+					(out.UserVariables)[key] = v67
 					in.WantComma()
 				}
 				in.Delim('}')
 			}
+		case "timestamp":
+			out.Timestamp = float64(in.Float64())
 		case "id":
 			out.ID = string(in.String())
 		case "event":
@@ -3153,11 +3383,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v58, v59 := range in.Campaigns {
-				if v58 > 0 {
+			for v68, v69 := range in.Campaigns {
+				if v68 > 0 {
 					out.RawByte(',')
 				}
-				(v59).MarshalEasyJSON(out)
+				(v69).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -3204,24 +3434,14 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v60, v61 := range in.Tags {
-				if v60 > 0 {
+			for v70, v71 := range in.Tags {
+				if v70 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v61))
+				out.String(string(v71))
 			}
 			out.RawByte(']')
 		}
-	}
-	{
-		const prefix string = ",\"timestamp\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Float64(float64(in.Timestamp))
 	}
 	{
 		const prefix string = ",\"ip\":"
@@ -3265,19 +3485,29 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 			out.RawString(`null`)
 		} else {
 			out.RawByte('{')
-			v62First := true
-			for v62Name, v62Value := range in.UserVariables {
-				if v62First {
-					v62First = false
+			v72First := true
+			for v72Name, v72Value := range in.UserVariables {
+				if v72First {
+					v72First = false
 				} else {
 					out.RawByte(',')
 				}
-				out.String(string(v62Name))
+				out.String(string(v72Name))
 				out.RawByte(':')
-				out.String(string(v62Value))
+				out.String(string(v72Value))
 			}
 			out.RawByte('}')
 		}
+	}
+	{
+		const prefix string = ",\"timestamp\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Float64(float64(in.Timestamp))
 	}
 	{
 		const prefix string = ",\"id\":"
@@ -3374,9 +3604,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents17(in *jlexer.Lexer, o
 					out.Tags = (out.Tags)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v63 string
-					v63 = string(in.String())
-					out.Tags = append(out.Tags, v63)
+					var v73 string
+					v73 = string(in.String())
+					out.Tags = append(out.Tags, v73)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -3397,12 +3627,32 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents17(in *jlexer.Lexer, o
 					out.Campaigns = (out.Campaigns)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v64 Campaign
-					(v64).UnmarshalEasyJSON(in)
-					out.Campaigns = append(out.Campaigns, v64)
+					var v74 Campaign
+					(v74).UnmarshalEasyJSON(in)
+					out.Campaigns = append(out.Campaigns, v74)
 					in.WantComma()
 				}
 				in.Delim(']')
+			}
+		case "user-variables":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.UserVariables = make(map[string]string)
+				} else {
+					out.UserVariables = nil
+				}
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v75 string
+					v75 = string(in.String())
+					(out.UserVariables)[key] = v75
+					in.WantComma()
+				}
+				in.Delim('}')
 			}
 		case "timestamp":
 			out.Timestamp = float64(in.Float64())
@@ -3506,11 +3756,11 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents17(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v65, v66 := range in.Tags {
-				if v65 > 0 {
+			for v76, v77 := range in.Tags {
+				if v76 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v66))
+				out.String(string(v77))
 			}
 			out.RawByte(']')
 		}
@@ -3527,13 +3777,39 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents17(out *jwriter.Writer
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v67, v68 := range in.Campaigns {
-				if v67 > 0 {
+			for v78, v79 := range in.Campaigns {
+				if v78 > 0 {
 					out.RawByte(',')
 				}
-				(v68).MarshalEasyJSON(out)
+				(v79).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"user-variables\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.UserVariables == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v80First := true
+			for v80Name, v80Value := range in.UserVariables {
+				if v80First {
+					v80First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v80Name))
+				out.RawByte(':')
+				out.String(string(v80Value))
+			}
+			out.RawByte('}')
 		}
 	}
 	{
