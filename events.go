@@ -87,6 +87,9 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 		return false
 	}
 	*events, ei.err = ParseEvents(ei.Items)
+	if ei.err != nil {
+		return false
+	}
 	if len(ei.Items) == 0 {
 		return false
 	}
