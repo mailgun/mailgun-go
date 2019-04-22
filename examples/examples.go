@@ -33,7 +33,8 @@ func AddDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateDomain(ctx, "example.com", "super_secret", &mailgun.CreateDomainOptions{
+	return mg.CreateDomain(ctx, "example.com", &mailgun.CreateDomainOptions{
+		Password:   "super_secret",
 		SpamAction: mailgun.SpamActionTag,
 		Wildcard:   false,
 	})
@@ -142,7 +143,8 @@ func CreateDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateDomain(ctx, "example.com", "super_secret", &mailgun.CreateDomainOptions{
+	return mg.CreateDomain(ctx, "example.com", &mailgun.CreateDomainOptions{
+		Password:   "super_secret",
 		SpamAction: mailgun.SpamActionTag,
 		Wildcard:   false,
 	})
@@ -979,6 +981,24 @@ func GetTemplate(domain, apiKey string) (mailgun.Template, error) {
 	defer cancel()
 
 	return mg.GetTemplate(ctx, "my-template")
+}
+
+func ListActiveTemplates(domain, apiKey string) ([]mailgun.Template, error) {
+	mg := mailgun.NewMailgun(domain, apiKey)
+	it := mg.ListTemplates(&mailgun.ListTemplateOptions{Active: true})
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	var page, result []mailgun.Template
+	for it.Next(ctx, &page) {
+		result = append(result, page...)
+	}
+
+	if it.Err() != nil {
+		return nil, it.Err()
+	}
+	return result, nil
 }
 
 func ListTemplates(domain, apiKey string) ([]mailgun.Template, error) {

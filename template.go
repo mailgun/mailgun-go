@@ -122,14 +122,22 @@ type TemplatesIterator struct {
 	err error
 }
 
+type ListTemplateOptions struct {
+	Limit  int
+	Active bool
+}
+
 // List all available templates
-func (mg *MailgunImpl) ListTemplates(opts *ListOptions) *TemplatesIterator {
+func (mg *MailgunImpl) ListTemplates(opts *ListTemplateOptions) *TemplatesIterator {
 	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
 			r.addParameter("limit", strconv.Itoa(opts.Limit))
+		}
+		if opts.Active {
+			r.addParameter("active", "yes")
 		}
 	}
 	url, err := r.generateUrlWithParameters()

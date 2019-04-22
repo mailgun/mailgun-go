@@ -254,6 +254,7 @@ func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (string,
 
 // Optional parameters when creating a domain
 type CreateDomainOptions struct {
+	Password           string
 	SpamAction         SpamAction
 	Wildcard           bool
 	ForceDKIMAuthority bool
@@ -267,14 +268,13 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password string, opts *CreateDomainOptions) (DomainResponse, error) {
+func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
 	payload.addValue("name", name)
-	payload.addValue("smtp_password", password)
 
 	if opts != nil {
 		if opts.SpamAction != "" {
@@ -291,6 +291,9 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, password s
 		}
 		if len(opts.IPS) != 0 {
 			payload.addValue("ips", strings.Join(opts.IPS, ","))
+		}
+		if len(opts.Password) != 0 {
+			payload.addValue("smtp_password", opts.Password)
 		}
 	}
 	var resp DomainResponse
