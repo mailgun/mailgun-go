@@ -110,12 +110,13 @@ type StoredMessageRaw struct {
 // although from, subject, and text are set when the message is created with
 // NewMessage.
 type plainMessage struct {
-	from    string
-	cc      []string
-	bcc     []string
-	subject string
-	text    string
-	html    string
+	from     string
+	cc       []string
+	bcc      []string
+	subject  string
+	text     string
+	html     string
+	template string
 }
 
 // mimeMessage contains fields relevant to pre-packaged MIME messages.
@@ -142,6 +143,7 @@ type features interface {
 	isValid() bool
 	endpoint() string
 	recipientCount() int
+	setTemplate(string)
 }
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
@@ -342,6 +344,18 @@ func (m *Message) AddTag(tag ...string) error {
 	m.tags = append(m.tags, tag...)
 	return nil
 }
+
+// SetTemplate sets the name of a template stored via the template API.
+// See https://documentation.mailgun.com/en/latest/user_manual.html#templating
+func (m *Message) SetTemplate(t string) {
+	m.specific.setTemplate(t)
+}
+
+func (pm *plainMessage) setTemplate(t string) {
+	pm.template = t
+}
+
+func (mm *mimeMessage) setTemplate(t string) {}
 
 // This feature is deprecated for new software.
 func (m *Message) AddCampaign(campaign string) {
@@ -585,6 +599,9 @@ func (pm *plainMessage) addValues(p *formDataPayload) {
 	if pm.html != "" {
 		p.addValue("html", pm.html)
 	}
+	if pm.template != "" {
+		p.addValue("template", pm.template)
+	}
 }
 
 func (mm *mimeMessage) addValues(p *formDataPayload) {
@@ -651,6 +668,11 @@ func (pm *plainMessage) isValid() bool {
 
 	if !validateStringList(pm.bcc, false) {
 		return false
+	}
+
+	if pm.template != "" {
+		// pm.text or pm.html not needed if template is supplied
+		return true
 	}
 
 	if pm.text == "" && pm.html == "" {
