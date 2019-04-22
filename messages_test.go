@@ -481,7 +481,6 @@ func TestSendTLSOptions(t *testing.T) {
 }
 
 func TestSendTemplate(t *testing.T) {
-	Debug = true
 	const (
 		exampleDomain  = "testDomain"
 		exampleAPIKey  = "testAPIKey"

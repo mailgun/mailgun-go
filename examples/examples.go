@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"context"
@@ -893,4 +893,44 @@ func VerifyWebhookSignature(domain, apiKey, timestamp, token, signature string) 
 		Token:     token,
 		Signature: signature,
 	})
+}
+
+func SendMessageWithTemplate(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+	var err error
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	// Create a new template
+	err = mg.CreateTemplate(ctx, &mailgun.Template{
+		Name: "my-template",
+		Version: mailgun.TemplateVersion{
+			Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
+			Engine:   mailgun.TemplateEngineGo,
+			Tag:      "v1",
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Give time for template to show up in the system.
+	time.Sleep(time.Second * 1)
+
+	// Create a new message with template
+	m := mg.NewMessage("Excited User <excited@example.com>", "Template example", "")
+	m.SetTemplate("my-template")
+
+	// Add recipients
+	m.AddRecipient("bob@example.com")
+	m.AddRecipient("alice@example.com")
+
+	// Add the variables to be used by the template
+	m.AddVariable("title", "Hello Templates")
+	m.AddVariable("body", "Body of the message")
+
+	_, id, err := mg.Send(ctx, m)
+	fmt.Printf("Queued: %s", id)
+	return err
 }
