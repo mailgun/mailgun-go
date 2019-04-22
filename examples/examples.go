@@ -934,3 +934,132 @@ func SendMessageWithTemplate(domain, apiKey string) error {
 	fmt.Printf("Queued: %s", id)
 	return err
 }
+
+func CreateTemplate(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.CreateTemplate(ctx, &mailgun.Template{
+		Name: "my-template",
+		Version: mailgun.TemplateVersion{
+			Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
+			Engine:   mailgun.TemplateEngineGo,
+			Tag:      "v1",
+		},
+	})
+}
+
+func DeleteTemplate(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.DeleteTemplate(ctx, "my-template")
+}
+
+func UpdateTemplate(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.UpdateTemplate(ctx, &mailgun.Template{
+		Name:        "my-template",
+		Description: "Add a description to the template",
+	})
+}
+
+func GetTemplate(domain, apiKey string) (mailgun.Template, error) {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.GetTemplate(ctx, "my-template")
+}
+
+func ListTemplates(domain, apiKey string) ([]mailgun.Template, error) {
+	mg := mailgun.NewMailgun(domain, apiKey)
+	it := mg.ListTemplates(nil)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	var page, result []mailgun.Template
+	for it.Next(ctx, &page) {
+		result = append(result, page...)
+	}
+
+	if it.Err() != nil {
+		return nil, it.Err()
+	}
+	return result, nil
+}
+
+func AddTemplateVersion(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.AddTemplateVersion(ctx, "my-template", &mailgun.TemplateVersion{
+		Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
+		Engine:   mailgun.TemplateEngineGo,
+		Tag:      "v2",
+		Active:   true,
+	})
+}
+
+func DeleteTemplateVersion(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	// Delete the template version tagged as 'v2'
+	return mg.DeleteTemplateVersion(ctx, "my-template", "v2")
+}
+
+func GetTemplateVersion(domain, apiKey string) (mailgun.TemplateVersion, error) {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	// Get the template version tagged as 'v2'
+	return mg.GetTemplateVersion(ctx, "my-template", "v2")
+}
+
+func UpdateTemplateVersion(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.UpdateTemplateVersion(ctx, "my-template", &mailgun.TemplateVersion{
+		Comment: "Add a comment to the template and make it 'active'",
+		Tag:     "v2",
+		Active:  true,
+	})
+}
+
+func ListTemplateVersions(domain, apiKey string) ([]mailgun.TemplateVersion, error) {
+	mg := mailgun.NewMailgun(domain, apiKey)
+	it := mg.ListTemplateVersions("my-template", nil)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	var page, result []mailgun.TemplateVersion
+	for it.Next(ctx, &page) {
+		result = append(result, page...)
+	}
+
+	if it.Err() != nil {
+		return nil, it.Err()
+	}
+	return result, nil
+}
