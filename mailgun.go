@@ -141,7 +141,7 @@ type Mailgun interface {
 
 	ListDomains(opts *ListOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
-	CreateDomain(ctx context.Context, name string, pass string, opts *CreateDomainOptions) (DomainResponse, error)
+	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
 	VerifyDomain(ctx context.Context, name string) (string, error)
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
@@ -219,7 +219,7 @@ type Mailgun interface {
 	GetTemplate(ctx context.Context, id string) (Template, error)
 	UpdateTemplate(ctx context.Context, template *Template) error
 	DeleteTemplate(ctx context.Context, id string) error
-	ListTemplates(opts *ListOptions) *TemplatesIterator
+	ListTemplates(opts *ListTemplateOptions) *TemplatesIterator
 
 	AddTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error
 	GetTemplateVersion(ctx context.Context, templateId, versionId string) (TemplateVersion, error)

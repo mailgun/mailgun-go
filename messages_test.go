@@ -479,3 +479,32 @@ func TestSendTLSOptions(t *testing.T) {
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
+
+func TestSendTemplate(t *testing.T) {
+	const (
+		exampleDomain  = "testDomain"
+		exampleAPIKey  = "testAPIKey"
+		toUser         = "test@test.com"
+		exampleMessage = "Queue. Thank you"
+		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
+		templateName   = "my-template"
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.FormValue("template"), templateName)
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL)
+	ctx := context.Background()
+
+	m := mg.NewMessage(fromUser, exampleSubject, "", toUser)
+	m.SetTemplate(templateName)
+
+	msg, id, err := mg.Send(ctx, m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
+}
