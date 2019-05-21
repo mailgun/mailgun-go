@@ -24,6 +24,7 @@ type MockServer struct {
 	mailingList []mailingListContainer
 	routeList   []Route
 	events      []Event
+	webhooks    WebHooksListResponse
 }
 
 // Create a new instance of the mailgun API mock server
@@ -42,6 +43,7 @@ func NewMockServer() MockServer {
 		ms.addMessagesRoutes(r)
 		ms.addValidationRoutes(r)
 		ms.addRoutes(r)
+		ms.addWebhookRoutes(r)
 	})
 
 	// Start the server

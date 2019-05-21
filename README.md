@@ -275,6 +275,16 @@ in your code should work fine even if you do not have golang modules enabled for
 $ go get github.com/mailgun/mailgun-go
 ```
 
+**NOTE for go dep users**
+
+Using version 3 of the mailgun-go library with go dep currently results in the following error
+```
+"github.com/mailgun/mailgun-go/v3/events", which contains malformed code: no package exists at ...
+```
+This is a known bug in go dep. You can follow the PR to fix this bug [here](https://github.com/golang/dep/pull/1963)
+Until this bug is fixed, the best way to use version 3 of the mailgun-go library is to use the golang community 
+supported [golang modules](https://github.com/golang/go/wiki/Modules).
+
 ## Testing
 
 *WARNING* - running the tests will cost you money!

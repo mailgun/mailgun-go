@@ -1,4 +1,4 @@
-package mailgun
+package mailgun_test
 
 import (
 	"bytes"
@@ -14,27 +14,43 @@ import (
 	"testing"
 
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go/v3"
 )
 
-func TestWebhookCRUD(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
+func TestGetWebhook(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
 	ctx := context.Background()
+	list, err := mg.ListWebhooks(ctx)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, len(list), 2)
+
+	urls, err := mg.GetWebhook(ctx, "new-webhook")
+	ensure.Nil(t, err)
+
+	ensure.DeepEqual(t, urls, []string{"http://example.com/new"})
+}
+
+func TestWebhookCRUD(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+
+	ctx := context.Background()
+	list, err := mg.ListWebhooks(ctx)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, len(list), 2)
 
 	var countHooks = func() int {
 		hooks, err := mg.ListWebhooks(ctx)
 		ensure.Nil(t, err)
 		return len(hooks)
 	}
-
 	hookCount := countHooks()
 
-	domainURL := "http://api.mailgun.net"
-	ensure.Nil(t, mg.CreateWebhook(ctx, "deliver", []string{domainURL}))
+	webHookURLs := []string{"http://api.mailgun.net/webhook"}
+	ensure.Nil(t, mg.CreateWebhook(ctx, "deliver", webHookURLs))
+
 	defer func() {
 		ensure.Nil(t, mg.DeleteWebhook(ctx, "deliver"))
 		newCount := countHooks()
@@ -44,17 +60,16 @@ func TestWebhookCRUD(t *testing.T) {
 	newCount := countHooks()
 	ensure.False(t, newCount <= hookCount)
 
-	theURL, err := mg.GetWebhook(ctx, "deliver")
+	urls, err := mg.GetWebhook(ctx, "deliver")
 	ensure.Nil(t, err)
-	ensure.DeepEqual(t, theURL, domainURL)
+	ensure.DeepEqual(t, urls, webHookURLs)
 
-	updatedDomainURL := "http://api.mailgun.net/messages"
-	ensure.Nil(t, mg.UpdateWebhook(ctx, "deliver", []string{updatedDomainURL}))
+	updatedWebHookURL := []string{"http://api.mailgun.net/messages"}
+	ensure.Nil(t, mg.UpdateWebhook(ctx, "deliver", updatedWebHookURL))
 
 	hooks, err := mg.ListWebhooks(ctx)
 	ensure.Nil(t, err)
-
-	ensure.DeepEqual(t, hooks["deliver"], updatedDomainURL)
+	ensure.DeepEqual(t, hooks["deliver"], updatedWebHookURL)
 }
 
 var signedTests = []bool{
@@ -63,11 +78,11 @@ var signedTests = []bool{
 }
 
 func TestVerifyWebhookSignature(t *testing.T) {
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(testDomain, testKey)
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.APIKey(), v)
-		sig := Signature{
+		sig := mailgun.Signature{
 			TimeStamp: fields["timestamp"],
 			Token:     fields["token"],
 			Signature: fields["signature"],
@@ -83,7 +98,7 @@ func TestVerifyWebhookSignature(t *testing.T) {
 }
 
 func TestVerifyWebhookRequest_Form(t *testing.T) {
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(testDomain, testKey)
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.APIKey(), v)
@@ -99,7 +114,7 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 }
 
 func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(testDomain, testKey)
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.APIKey(), v)

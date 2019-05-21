@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2019-05-21
+### Added
+* Added notice in README about go dep bug.
+* Added endpoints for webhooks in mock server
+### Changes
+* Change names of some parameters on public methods to make their use clearer.
+* Changed signature of `GetWebhook()` now returns []string.
+* Changed signature of `ListWebhooks()` now returns map[string][]string.
+* Both `GetWebhooks()` and `ListWebhooks()` now handle new and legacy webhooks properly.
+
+## [3.4.0] - 2019-04-23
+### Added
+* Added `Message.SetTemplate()` to allow sending with the body of a template.
+### Changes
+* Changed signature of `CreateDomain()` moved password into `CreateDomainOptions`
+
 ## [3.4.0] - 2019-04-23
 ### Added
 * Added `Message.SetTemplate()` to allow sending with the body of a template.

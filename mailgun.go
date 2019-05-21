@@ -159,8 +159,8 @@ type Mailgun interface {
 
 	ListCredentials(opts *ListOptions) *CredentialsIterator
 	CreateCredential(ctx context.Context, login, password string) error
-	ChangeCredentialPassword(ctx context.Context, id, password string) error
-	DeleteCredential(ctx context.Context, id string) error
+	ChangeCredentialPassword(ctx context.Context, login, password string) error
+	DeleteCredential(ctx context.Context, login string) error
 
 	ListUnsubscribes(opts *ListOptions) *UnsubscribesIterator
 	GetUnsubscribe(ctx context.Context, address string) (Unsubscribe, error)
@@ -179,10 +179,10 @@ type Mailgun interface {
 	DeleteRoute(ctx context.Context, address string) error
 	UpdateRoute(ctx context.Context, address string, r Route) (Route, error)
 
-	ListWebhooks(ctx context.Context) (map[string]string, error)
+	ListWebhooks(ctx context.Context) (map[string][]string, error)
 	CreateWebhook(ctx context.Context, kind string, url []string) error
 	DeleteWebhook(ctx context.Context, kind string) error
-	GetWebhook(ctx context.Context, kind string) (string, error)
+	GetWebhook(ctx context.Context, kind string) ([]string, error)
 	UpdateWebhook(ctx context.Context, kind string, url []string) error
 	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
 
@@ -216,16 +216,16 @@ type Mailgun interface {
 	GetTagLimits(ctx context.Context, domain string) (TagLimits, error)
 
 	CreateTemplate(ctx context.Context, template *Template) error
-	GetTemplate(ctx context.Context, id string) (Template, error)
+	GetTemplate(ctx context.Context, name string) (Template, error)
 	UpdateTemplate(ctx context.Context, template *Template) error
-	DeleteTemplate(ctx context.Context, id string) error
+	DeleteTemplate(ctx context.Context, name string) error
 	ListTemplates(opts *ListTemplateOptions) *TemplatesIterator
 
-	AddTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error
-	GetTemplateVersion(ctx context.Context, templateId, versionId string) (TemplateVersion, error)
-	UpdateTemplateVersion(ctx context.Context, templateId string, version *TemplateVersion) error
-	DeleteTemplateVersion(ctx context.Context, templateId, versionId string) error
-	ListTemplateVersions(templateId string, opts *ListOptions) *TemplateVersionsIterator
+	AddTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
+	GetTemplateVersion(ctx context.Context, templateName, tag string) (TemplateVersion, error)
+	UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
+	DeleteTemplateVersion(ctx context.Context, templateName, tag string) error
+	ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
@@ -336,10 +336,10 @@ func generateDomainApiUrl(m Mailgun, endpoint string) string {
 
 // generateCredentialsUrl renders a URL as generateDomainApiUrl,
 // but focuses on the SMTP credentials family of API functions.
-func generateCredentialsUrl(m Mailgun, id string) string {
+func generateCredentialsUrl(m Mailgun, login string) string {
 	tail := ""
-	if id != "" {
-		tail = fmt.Sprintf("/%s", id)
+	if login != "" {
+		tail = fmt.Sprintf("/%s", login)
 	}
 	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail))
 	// return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
