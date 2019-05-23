@@ -29,7 +29,11 @@ func TestParseSuccess(t *testing.T) {
 	event, err := ParseEvent([]byte(`{
 		"event": "accepted",
 		"timestamp": 1420255392.850187,
-		"user-variables": {},
+		"user-variables": {
+			"custom": "value",
+			"parent": {"child": "user defined variable"},
+			"a-list": [1,2,3,4,5]
+		},
 		"envelope": {
 		    "sender": "noreply@example.com",
 		    "transport": "smtp",
@@ -87,6 +91,12 @@ func TestParseSuccess(t *testing.T) {
 	ensure.DeepEqual(t, event2.(*events.Accepted).Message.Headers.Subject, "")
 	// Make sure the second attempt of Parse doesn't overwrite the first event struct.
 	ensure.DeepEqual(t, event.(*events.Accepted).Recipient, "dude@example.com")
+
+	ensure.DeepEqual(t, event.(*events.Accepted).UserVariables["custom"], "value")
+	child := event.(*events.Accepted).UserVariables["parent"].(map[string]interface{})["child"]
+	ensure.DeepEqual(t, child, "user defined variable")
+	aList := event.(*events.Accepted).UserVariables["a-list"].([]interface{})
+	ensure.DeepEqual(t, aList, []interface{}{1.0, 2.0, 3.0, 4.0, 5.0})
 }
 
 func TestParseResponse(t *testing.T) {
