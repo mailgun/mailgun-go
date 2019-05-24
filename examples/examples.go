@@ -626,7 +626,7 @@ func ValidateEmail(apiKey string) (mailgun.EmailVerification, error) {
 	return mv.ValidateEmail(ctx, "foo@mailgun.net", false)
 }
 
-func GetWebhook(domain, apiKey string) (string, error) {
+func GetWebhook(domain, apiKey string) ([]string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -635,7 +635,7 @@ func GetWebhook(domain, apiKey string) (string, error) {
 	return mg.GetWebhook(ctx, "clicked")
 }
 
-func ListWebhooks(domain, apiKey string) (map[string]string, error) {
+func ListWebhooks(domain, apiKey string) (map[string][]string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
