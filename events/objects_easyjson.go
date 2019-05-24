@@ -227,7 +227,9 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, ou
 		}
 		switch key {
 		case "headers":
-			(out.Headers).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Headers).UnmarshalJSON(data))
+			}
 		case "attachments":
 			if in.IsNull() {
 				in.Skip()
@@ -245,7 +247,9 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, ou
 				}
 				for !in.IsDelim(']') {
 					var v1 Attachment
-					(v1).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v1).UnmarshalJSON(data))
+					}
 					out.Attachments = append(out.Attachments, v1)
 					in.WantComma()
 				}
@@ -298,7 +302,7 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Headers).MarshalEasyJSON(out)
+		out.Raw((in.Headers).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"attachments\":"
@@ -316,7 +320,7 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer,
 				if v3 > 0 {
 					out.RawByte(',')
 				}
-				(v4).MarshalEasyJSON(out)
+				out.Raw((v4).MarshalJSON())
 			}
 			out.RawByte(']')
 		}

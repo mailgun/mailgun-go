@@ -37,7 +37,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents(in *jlexer.Lexer, out
 		}
 		switch key {
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "campaigns":
 			if in.IsNull() {
 				in.Skip()
@@ -55,14 +57,18 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents(in *jlexer.Lexer, out
 				}
 				for !in.IsDelim(']') {
 					var v1 Campaign
-					(v1).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v1).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v1)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
 		case "mailing-list":
-			(out.MailingList).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.MailingList).UnmarshalJSON(data))
+			}
 		case "recipient":
 			out.Recipient = string(in.String())
 		case "recipient-domain":
@@ -93,24 +99,34 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents(in *jlexer.Lexer, out
 		case "ip":
 			out.IP = string(in.String())
 		case "client-info":
-			(out.ClientInfo).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.ClientInfo).UnmarshalJSON(data))
+			}
 		case "geolocation":
-			(out.GeoLocation).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.GeoLocation).UnmarshalJSON(data))
+			}
 		case "user-variables":
 			if in.IsNull() {
 				in.Skip()
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v3 string
-					v3 = string(in.String())
+					var v3 interface{}
+					if m, ok := v3.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v3.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v3 = in.Interface()
+					}
 					(out.UserVariables)[key] = v3
 					in.WantComma()
 				}
@@ -144,7 +160,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, 
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"campaigns\":"
@@ -162,7 +178,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, 
 				if v4 > 0 {
 					out.RawByte(',')
 				}
-				(v5).MarshalEasyJSON(out)
+				out.Raw((v5).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -175,7 +191,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, 
 		} else {
 			out.RawString(prefix)
 		}
-		(in.MailingList).MarshalEasyJSON(out)
+		out.Raw((in.MailingList).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"recipient\":"
@@ -236,7 +252,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, 
 		} else {
 			out.RawString(prefix)
 		}
-		(in.ClientInfo).MarshalEasyJSON(out)
+		out.Raw((in.ClientInfo).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"geolocation\":"
@@ -246,7 +262,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, 
 		} else {
 			out.RawString(prefix)
 		}
-		(in.GeoLocation).MarshalEasyJSON(out)
+		out.Raw((in.GeoLocation).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"user-variables\":"
@@ -269,7 +285,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, 
 				}
 				out.String(string(v8Name))
 				out.RawByte(':')
-				out.String(string(v8Value))
+				if m, ok := v8Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v8Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v8Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -350,11 +372,17 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents1(in *jlexer.Lexer, ou
 		}
 		switch key {
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "storage":
-			(out.Storage).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Storage).UnmarshalJSON(data))
+			}
 		case "flags":
-			(out.Flags).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Flags).UnmarshalJSON(data))
+			}
 		case "tags":
 			if in.IsNull() {
 				in.Skip()
@@ -395,7 +423,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents1(in *jlexer.Lexer, ou
 				}
 				for !in.IsDelim(']') {
 					var v10 Campaign
-					(v10).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v10).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v10)
 					in.WantComma()
 				}
@@ -407,15 +437,21 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents1(in *jlexer.Lexer, ou
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v11 string
-					v11 = string(in.String())
+					var v11 interface{}
+					if m, ok := v11.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v11.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v11 = in.Interface()
+					}
 					(out.UserVariables)[key] = v11
 					in.WantComma()
 				}
@@ -449,7 +485,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"storage\":"
@@ -459,7 +495,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Storage).MarshalEasyJSON(out)
+		out.Raw((in.Storage).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"flags\":"
@@ -469,7 +505,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Flags).MarshalEasyJSON(out)
+		out.Raw((in.Flags).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"tags\":"
@@ -508,7 +544,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 				if v14 > 0 {
 					out.RawByte(',')
 				}
-				(v15).MarshalEasyJSON(out)
+				out.Raw((v15).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -534,7 +570,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 				}
 				out.String(string(v16Name))
 				out.RawByte(':')
-				out.String(string(v16Value))
+				if m, ok := v16Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v16Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v16Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -640,7 +682,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, ou
 				in.Delim(']')
 			}
 		case "paging":
-			(out.Paging).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Paging).UnmarshalJSON(data))
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -684,7 +728,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Paging).MarshalEasyJSON(out)
+		out.Raw((in.Paging).MarshalJSON())
 	}
 	out.RawByte('}')
 }
@@ -734,11 +778,17 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents3(in *jlexer.Lexer, ou
 		case "reject":
 			easyjson692db02bDecode(in, &out.Reject)
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "storage":
-			(out.Storage).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Storage).UnmarshalJSON(data))
+			}
 		case "flags":
-			(out.Flags).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Flags).UnmarshalJSON(data))
+			}
 		case "tags":
 			if in.IsNull() {
 				in.Skip()
@@ -779,7 +829,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents3(in *jlexer.Lexer, ou
 				}
 				for !in.IsDelim(']') {
 					var v23 Campaign
-					(v23).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v23).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v23)
 					in.WantComma()
 				}
@@ -791,15 +843,21 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents3(in *jlexer.Lexer, ou
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v24 string
-					v24 = string(in.String())
+					var v24 interface{}
+					if m, ok := v24.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v24.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v24 = in.Interface()
+					}
 					(out.UserVariables)[key] = v24
 					in.WantComma()
 				}
@@ -843,7 +901,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"storage\":"
@@ -853,7 +911,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Storage).MarshalEasyJSON(out)
+		out.Raw((in.Storage).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"flags\":"
@@ -863,7 +921,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Flags).MarshalEasyJSON(out)
+		out.Raw((in.Flags).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"tags\":"
@@ -902,7 +960,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 				if v27 > 0 {
 					out.RawByte(',')
 				}
-				(v28).MarshalEasyJSON(out)
+				out.Raw((v28).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -928,7 +986,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 				}
 				out.String(string(v29Name))
 				out.RawByte(':')
-				out.String(string(v29Value))
+				if m, ok := v29Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v29Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v29Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -1181,7 +1245,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, ou
 		}
 		switch key {
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "campaigns":
 			if in.IsNull() {
 				in.Skip()
@@ -1199,14 +1265,18 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, ou
 				}
 				for !in.IsDelim(']') {
 					var v30 Campaign
-					(v30).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v30).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v30)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
 		case "mailing-list":
-			(out.MailingList).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.MailingList).UnmarshalJSON(data))
+			}
 		case "recipient":
 			out.Recipient = string(in.String())
 		case "recipient-domain":
@@ -1237,24 +1307,34 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, ou
 		case "ip":
 			out.IP = string(in.String())
 		case "client-info":
-			(out.ClientInfo).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.ClientInfo).UnmarshalJSON(data))
+			}
 		case "geolocation":
-			(out.GeoLocation).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.GeoLocation).UnmarshalJSON(data))
+			}
 		case "user-variables":
 			if in.IsNull() {
 				in.Skip()
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v32 string
-					v32 = string(in.String())
+					var v32 interface{}
+					if m, ok := v32.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v32.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v32 = in.Interface()
+					}
 					(out.UserVariables)[key] = v32
 					in.WantComma()
 				}
@@ -1288,7 +1368,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"campaigns\":"
@@ -1306,7 +1386,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 				if v33 > 0 {
 					out.RawByte(',')
 				}
-				(v34).MarshalEasyJSON(out)
+				out.Raw((v34).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -1319,7 +1399,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.MailingList).MarshalEasyJSON(out)
+		out.Raw((in.MailingList).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"recipient\":"
@@ -1380,7 +1460,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.ClientInfo).MarshalEasyJSON(out)
+		out.Raw((in.ClientInfo).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"geolocation\":"
@@ -1390,7 +1470,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.GeoLocation).MarshalEasyJSON(out)
+		out.Raw((in.GeoLocation).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"user-variables\":"
@@ -1413,7 +1493,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 				}
 				out.String(string(v37Name))
 				out.RawByte(':')
-				out.String(string(v37Value))
+				if m, ok := v37Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v37Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v37Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -1704,7 +1790,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents8(in *jlexer.Lexer, ou
 		}
 		switch key {
 		case "mailing-list":
-			(out.MailingList).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.MailingList).UnmarshalJSON(data))
+			}
 		case "is-upsert":
 			out.IsUpsert = bool(in.Bool())
 		case "format":
@@ -1714,7 +1802,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents8(in *jlexer.Lexer, ou
 		case "failed-count":
 			out.FailedCount = int(in.Int())
 		case "member":
-			(out.Member).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Member).UnmarshalJSON(data))
+			}
 		case "subscribed":
 			out.Subscribed = bool(in.Bool())
 		case "task-id":
@@ -1747,7 +1837,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents8(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.MailingList).MarshalEasyJSON(out)
+		out.Raw((in.MailingList).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"is-upsert\":"
@@ -1797,7 +1887,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents8(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Member).MarshalEasyJSON(out)
+		out.Raw((in.Member).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"subscribed\":"
@@ -1895,9 +1985,13 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents9(in *jlexer.Lexer, ou
 		}
 		switch key {
 		case "mailing-list":
-			(out.MailingList).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.MailingList).UnmarshalJSON(data))
+			}
 		case "member":
-			(out.Member).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Member).UnmarshalJSON(data))
+			}
 		case "task-id":
 			out.TaskID = string(in.String())
 		case "timestamp":
@@ -1928,7 +2022,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents9(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.MailingList).MarshalEasyJSON(out)
+		out.Raw((in.MailingList).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"member\":"
@@ -1938,7 +2032,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents9(out *jwriter.Writer,
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Member).MarshalEasyJSON(out)
+		out.Raw((in.Member).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"task-id\":"
@@ -2026,7 +2120,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents10(in *jlexer.Lexer, o
 		}
 		switch key {
 		case "mailing-list":
-			(out.MailingList).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.MailingList).UnmarshalJSON(data))
+			}
 		case "task-id":
 			out.TaskID = string(in.String())
 		case "format":
@@ -2034,7 +2130,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents10(in *jlexer.Lexer, o
 		case "member-description":
 			out.MemberDescription = string(in.String())
 		case "error":
-			(out.Error).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Error).UnmarshalJSON(data))
+			}
 		case "timestamp":
 			out.Timestamp = float64(in.Float64())
 		case "id":
@@ -2063,7 +2161,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents10(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.MailingList).MarshalEasyJSON(out)
+		out.Raw((in.MailingList).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"task-id\":"
@@ -2103,7 +2201,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents10(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Error).MarshalEasyJSON(out)
+		out.Raw((in.Error).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"timestamp\":"
@@ -2276,11 +2374,17 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents12(in *jlexer.Lexer, o
 		}
 		switch key {
 		case "envelope":
-			(out.Envelope).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Envelope).UnmarshalJSON(data))
+			}
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "flags":
-			(out.Flags).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Flags).UnmarshalJSON(data))
+			}
 		case "recipient":
 			out.Recipient = string(in.String())
 		case "recipient-domain":
@@ -2327,14 +2431,18 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents12(in *jlexer.Lexer, o
 				}
 				for !in.IsDelim(']') {
 					var v42 Campaign
-					(v42).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v42).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v42)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
 		case "delivery-status":
-			(out.DeliveryStatus).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.DeliveryStatus).UnmarshalJSON(data))
+			}
 		case "severity":
 			out.Severity = string(in.String())
 		case "reason":
@@ -2345,15 +2453,21 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents12(in *jlexer.Lexer, o
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v43 string
-					v43 = string(in.String())
+					var v43 interface{}
+					if m, ok := v43.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v43.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v43 = in.Interface()
+					}
 					(out.UserVariables)[key] = v43
 					in.WantComma()
 				}
@@ -2387,7 +2501,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Envelope).MarshalEasyJSON(out)
+		out.Raw((in.Envelope).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"message\":"
@@ -2397,7 +2511,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"flags\":"
@@ -2407,7 +2521,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Flags).MarshalEasyJSON(out)
+		out.Raw((in.Flags).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"recipient\":"
@@ -2476,7 +2590,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 				if v46 > 0 {
 					out.RawByte(',')
 				}
-				(v47).MarshalEasyJSON(out)
+				out.Raw((v47).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -2489,7 +2603,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.DeliveryStatus).MarshalEasyJSON(out)
+		out.Raw((in.DeliveryStatus).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"severity\":"
@@ -2532,7 +2646,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents12(out *jwriter.Writer
 				}
 				out.String(string(v48Name))
 				out.RawByte(':')
-				out.String(string(v48Value))
+				if m, ok := v48Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v48Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v48Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -2684,11 +2804,17 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents14(in *jlexer.Lexer, o
 		}
 		switch key {
 		case "envelope":
-			(out.Envelope).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Envelope).UnmarshalJSON(data))
+			}
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "flags":
-			(out.Flags).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Flags).UnmarshalJSON(data))
+			}
 		case "recipient":
 			out.Recipient = string(in.String())
 		case "recipient-domain":
@@ -2735,29 +2861,39 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents14(in *jlexer.Lexer, o
 				}
 				for !in.IsDelim(']') {
 					var v50 Campaign
-					(v50).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v50).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v50)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
 		case "delivery-status":
-			(out.DeliveryStatus).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.DeliveryStatus).UnmarshalJSON(data))
+			}
 		case "user-variables":
 			if in.IsNull() {
 				in.Skip()
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v51 string
-					v51 = string(in.String())
+					var v51 interface{}
+					if m, ok := v51.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v51.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v51 = in.Interface()
+					}
 					(out.UserVariables)[key] = v51
 					in.WantComma()
 				}
@@ -2791,7 +2927,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Envelope).MarshalEasyJSON(out)
+		out.Raw((in.Envelope).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"message\":"
@@ -2801,7 +2937,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"flags\":"
@@ -2811,7 +2947,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Flags).MarshalEasyJSON(out)
+		out.Raw((in.Flags).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"recipient\":"
@@ -2880,7 +3016,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 				if v54 > 0 {
 					out.RawByte(',')
 				}
-				(v55).MarshalEasyJSON(out)
+				out.Raw((v55).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -2893,7 +3029,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.DeliveryStatus).MarshalEasyJSON(out)
+		out.Raw((in.DeliveryStatus).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"user-variables\":"
@@ -2916,7 +3052,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents14(out *jwriter.Writer
 				}
 				out.String(string(v56Name))
 				out.RawByte(':')
-				out.String(string(v56Value))
+				if m, ok := v56Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v56Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v56Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -2997,7 +3139,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents15(in *jlexer.Lexer, o
 		}
 		switch key {
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "campaigns":
 			if in.IsNull() {
 				in.Skip()
@@ -3015,7 +3159,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents15(in *jlexer.Lexer, o
 				}
 				for !in.IsDelim(']') {
 					var v57 Campaign
-					(v57).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v57).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v57)
 					in.WantComma()
 				}
@@ -3052,15 +3198,21 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents15(in *jlexer.Lexer, o
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v59 string
-					v59 = string(in.String())
+					var v59 interface{}
+					if m, ok := v59.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v59.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v59 = in.Interface()
+					}
 					(out.UserVariables)[key] = v59
 					in.WantComma()
 				}
@@ -3094,7 +3246,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents15(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"campaigns\":"
@@ -3112,7 +3264,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents15(out *jwriter.Writer
 				if v60 > 0 {
 					out.RawByte(',')
 				}
-				(v61).MarshalEasyJSON(out)
+				out.Raw((v61).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -3169,7 +3321,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents15(out *jwriter.Writer
 				}
 				out.String(string(v64Name))
 				out.RawByte(':')
-				out.String(string(v64Value))
+				if m, ok := v64Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v64Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v64Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -3252,7 +3410,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents16(in *jlexer.Lexer, o
 		case "url":
 			out.Url = string(in.String())
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "campaigns":
 			if in.IsNull() {
 				in.Skip()
@@ -3270,14 +3430,18 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents16(in *jlexer.Lexer, o
 				}
 				for !in.IsDelim(']') {
 					var v65 Campaign
-					(v65).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v65).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v65)
 					in.WantComma()
 				}
 				in.Delim(']')
 			}
 		case "mailing-list":
-			(out.MailingList).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.MailingList).UnmarshalJSON(data))
+			}
 		case "recipient":
 			out.Recipient = string(in.String())
 		case "recipient-domain":
@@ -3308,24 +3472,34 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents16(in *jlexer.Lexer, o
 		case "ip":
 			out.IP = string(in.String())
 		case "client-info":
-			(out.ClientInfo).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.ClientInfo).UnmarshalJSON(data))
+			}
 		case "geolocation":
-			(out.GeoLocation).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.GeoLocation).UnmarshalJSON(data))
+			}
 		case "user-variables":
 			if in.IsNull() {
 				in.Skip()
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v67 string
-					v67 = string(in.String())
+					var v67 interface{}
+					if m, ok := v67.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v67.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v67 = in.Interface()
+					}
 					(out.UserVariables)[key] = v67
 					in.WantComma()
 				}
@@ -3369,7 +3543,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"campaigns\":"
@@ -3387,7 +3561,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 				if v68 > 0 {
 					out.RawByte(',')
 				}
-				(v69).MarshalEasyJSON(out)
+				out.Raw((v69).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -3400,7 +3574,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.MailingList).MarshalEasyJSON(out)
+		out.Raw((in.MailingList).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"recipient\":"
@@ -3461,7 +3635,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.ClientInfo).MarshalEasyJSON(out)
+		out.Raw((in.ClientInfo).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"geolocation\":"
@@ -3471,7 +3645,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.GeoLocation).MarshalEasyJSON(out)
+		out.Raw((in.GeoLocation).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"user-variables\":"
@@ -3494,7 +3668,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents16(out *jwriter.Writer
 				}
 				out.String(string(v72Name))
 				out.RawByte(':')
-				out.String(string(v72Value))
+				if m, ok := v72Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v72Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v72Value))
+				}
 			}
 			out.RawByte('}')
 		}
@@ -3575,11 +3755,17 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents17(in *jlexer.Lexer, o
 		}
 		switch key {
 		case "envelope":
-			(out.Envelope).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Envelope).UnmarshalJSON(data))
+			}
 		case "message":
-			(out.Message).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Message).UnmarshalJSON(data))
+			}
 		case "flags":
-			(out.Flags).UnmarshalEasyJSON(in)
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Flags).UnmarshalJSON(data))
+			}
 		case "recipient":
 			out.Recipient = string(in.String())
 		case "recipient-domain":
@@ -3628,7 +3814,9 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents17(in *jlexer.Lexer, o
 				}
 				for !in.IsDelim(']') {
 					var v74 Campaign
-					(v74).UnmarshalEasyJSON(in)
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v74).UnmarshalJSON(data))
+					}
 					out.Campaigns = append(out.Campaigns, v74)
 					in.WantComma()
 				}
@@ -3640,15 +3828,21 @@ func easyjson692db02bDecodeGithubComMailgunMailgunGoEvents17(in *jlexer.Lexer, o
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.UserVariables = make(map[string]string)
+					out.UserVariables = make(map[string]interface{})
 				} else {
 					out.UserVariables = nil
 				}
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v75 string
-					v75 = string(in.String())
+					var v75 interface{}
+					if m, ok := v75.(easyjson.Unmarshaler); ok {
+						m.UnmarshalEasyJSON(in)
+					} else if m, ok := v75.(json.Unmarshaler); ok {
+						_ = m.UnmarshalJSON(in.Raw())
+					} else {
+						v75 = in.Interface()
+					}
 					(out.UserVariables)[key] = v75
 					in.WantComma()
 				}
@@ -3682,7 +3876,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents17(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Envelope).MarshalEasyJSON(out)
+		out.Raw((in.Envelope).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"message\":"
@@ -3692,7 +3886,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents17(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Message).MarshalEasyJSON(out)
+		out.Raw((in.Message).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"flags\":"
@@ -3702,7 +3896,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents17(out *jwriter.Writer
 		} else {
 			out.RawString(prefix)
 		}
-		(in.Flags).MarshalEasyJSON(out)
+		out.Raw((in.Flags).MarshalJSON())
 	}
 	{
 		const prefix string = ",\"recipient\":"
@@ -3781,7 +3975,7 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents17(out *jwriter.Writer
 				if v78 > 0 {
 					out.RawByte(',')
 				}
-				(v79).MarshalEasyJSON(out)
+				out.Raw((v79).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
@@ -3807,7 +4001,13 @@ func easyjson692db02bEncodeGithubComMailgunMailgunGoEvents17(out *jwriter.Writer
 				}
 				out.String(string(v80Name))
 				out.RawByte(':')
-				out.String(string(v80Value))
+				if m, ok := v80Value.(easyjson.Marshaler); ok {
+					m.MarshalEasyJSON(out)
+				} else if m, ok := v80Value.(json.Marshaler); ok {
+					out.Raw(m.MarshalJSON())
+				} else {
+					out.Raw(json.Marshal(v80Value))
+				}
 			}
 			out.RawByte('}')
 		}
