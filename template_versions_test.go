@@ -2,7 +2,6 @@ package mailgun_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/facebookgo/ensure"
@@ -19,7 +18,6 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	ctx := context.Background()
 
 	findVersion := func(templateName, tag string) bool {
-		fmt.Printf("List\n")
 		it := mg.ListTemplateVersions(templateName, nil)
 
 		var page []mailgun.TemplateVersion
@@ -42,7 +40,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	)
 
 	tmpl := mailgun.Template{
-		Name: "Mailgun-go-TestTemplateVersionsCRUD",
+		Name: randomString(10, "Mailgun-go-TestTemplateVersionsCRUD-"),
 	}
 
 	// Create a template
