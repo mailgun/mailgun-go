@@ -117,6 +117,32 @@ func TestDomainTracking(t *testing.T) {
 	ensure.DeepEqual(t, len(info.Unsubscribe.TextFooter) != 0, true)
 	ensure.DeepEqual(t, info.Click.Active, true)
 	ensure.DeepEqual(t, info.Open.Active, true)
+
+	// Click Tracking
+	err = mg.UpdateClickTracking(ctx, testDomain, "no")
+	ensure.Nil(t, err)
+
+	info, err = mg.GetDomainTracking(ctx, testDomain)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, info.Click.Active, false)
+
+	// Open Tracking
+	err = mg.UpdateOpenTracking(ctx, testDomain, "no")
+	ensure.Nil(t, err)
+
+	info, err = mg.GetDomainTracking(ctx, testDomain)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, info.Open.Active, false)
+
+	// Unsubscribe
+	err = mg.UpdateUnsubscribeTracking(ctx, testDomain, "yes", "<h2>Hi</h2>", "Hi")
+	ensure.Nil(t, err)
+
+	info, err = mg.GetDomainTracking(ctx, testDomain)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, info.Unsubscribe.Active, true)
+	ensure.DeepEqual(t, info.Unsubscribe.HTMLFooter, "<h2>Hi</h2>")
+	ensure.DeepEqual(t, info.Unsubscribe.TextFooter, "Hi")
 }
 
 func TestDomainVerify(t *testing.T) {

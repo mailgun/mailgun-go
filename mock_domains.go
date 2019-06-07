@@ -93,7 +93,9 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 	r.Get("/domains/{domain}/connection", ms.getConnection)
 	r.Put("/domains/{domain}/connection", ms.updateConnection)
 	r.Get("/domains/{domain}/tracking", ms.getTracking)
-	//r.Put("/domains/{domain}/tracking/{type}", ms.updateTracking)
+	r.Put("/domains/{domain}/tracking/click", ms.updateClickTracking)
+	r.Put("/domains/{domain}/tracking/open", ms.updateOpenTracking)
+	r.Put("/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
 	r.Get("/domains/{domain}/limits/tag", ms.getTagLimits)
 }
 
@@ -215,6 +217,48 @@ func (ms *MockServer) getTracking(w http.ResponseWriter, r *http.Request) {
 				Tracking: *d.Tracking,
 			}
 			toJSON(w, resp)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
+}
+
+func (ms *MockServer) updateClickTracking(w http.ResponseWriter, r *http.Request) {
+	for i, d := range ms.domainList {
+		if d.Domain.Name == chi.URLParam(r, "domain") {
+			ms.domainList[i].Tracking.Click.Active = stringToBool(r.FormValue("active"))
+			toJSON(w, okResp{Message: "Domain tracking settings have been updated"})
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
+}
+
+func (ms *MockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request) {
+	for i, d := range ms.domainList {
+		if d.Domain.Name == chi.URLParam(r, "domain") {
+			ms.domainList[i].Tracking.Open.Active = stringToBool(r.FormValue("active"))
+			toJSON(w, okResp{Message: "Domain tracking settings have been updated"})
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
+}
+
+func (ms *MockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request) {
+	for i, d := range ms.domainList {
+		if d.Domain.Name == chi.URLParam(r, "domain") {
+			ms.domainList[i].Tracking.Unsubscribe.Active = stringToBool(r.FormValue("active"))
+			if len(r.FormValue("html_footer")) != 0 {
+				ms.domainList[i].Tracking.Unsubscribe.HTMLFooter = r.FormValue("html_footer")
+			}
+			if len(r.FormValue("text_footer")) != 0 {
+				ms.domainList[i].Tracking.Unsubscribe.TextFooter = r.FormValue("text_footer")
+			}
+			toJSON(w, okResp{Message: "Domain tracking settings have been updated"})
 			return
 		}
 	}

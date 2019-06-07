@@ -147,6 +147,9 @@ type Mailgun interface {
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
 	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)
+	UpdateClickTracking(ctx context.Context, domain, active string) error
+	UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error
+	UpdateOpenTracking(ctx context.Context, domain, active string) error
 
 	GetStoredMessage(ctx context.Context, url string) (StoredMessage, error)
 	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)

@@ -343,6 +343,41 @@ func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (Do
 	return resp.Tracking, err
 }
 
+func (mg *MailgunImpl) UpdateClickTracking(ctx context.Context, domain, active string) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/click")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("active", active)
+	_, err := makePutRequest(ctx, r, payload)
+	return err
+}
+
+func (mg *MailgunImpl) UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/unsubscribe")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("active", active)
+	payload.addValue("html_footer", htmlFooter)
+	payload.addValue("text_footer", textFooter)
+	_, err := makePutRequest(ctx, r, payload)
+	return err
+}
+
+func (mg *MailgunImpl) UpdateOpenTracking(ctx context.Context, domain, active string) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/open")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("active", active)
+	_, err := makePutRequest(ctx, r, payload)
+	return err
+}
+
 func boolToString(b bool) string {
 	if b {
 		return "true"
