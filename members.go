@@ -41,7 +41,7 @@ type memberListResponse struct {
 }
 
 type memberResponse struct {
-	Member Member `json:"list"`
+	Member Member `json:"member"`
 }
 
 type MemberListIterator struct {
