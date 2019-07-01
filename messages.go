@@ -338,7 +338,7 @@ func (mm *mimeMessage) setHtml(_ string) {}
 // Refer to the Mailgun documentation for further details.
 func (m *Message) AddTag(tag ...string) error {
 	if len(m.tags) >= MaxNumberOfTags {
-		return fmt.Errorf("cannot add any new tags. Message tag limit (%b) reached", MaxNumberOfTags)
+		return fmt.Errorf("cannot add any new tags. Message tag limit (%d) reached", MaxNumberOfTags)
 	}
 
 	m.tags = append(m.tags, tag...)
