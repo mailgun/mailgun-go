@@ -91,6 +91,8 @@ var Debug = false
 const (
 	// Base Url the library uses to contact mailgun. Use SetAPIBase() to override
 	APIBase              = "https://api.mailgun.net/v3"
+	APIBaseUS            = APIBase
+	APIBaseEU            = "https://api.eu.mailgun.net/v3"
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
@@ -299,6 +301,14 @@ func (mg *MailgunImpl) SetClient(c *http.Client) {
 }
 
 // SetAPIBase updates the API Base URL for this client.
+//  // For EU Customers
+//  mg.SetAPIBase(mailgun.APIBaseEU)
+//
+//  // For US Customers
+//  mg.SetAPIBase(mailgun.APIBaseUS)
+//
+//  // Set a custom base API
+//  mg.SetAPIBase("https://localhost/v3")
 func (mg *MailgunImpl) SetAPIBase(address string) {
 	mg.apiBase = address
 }

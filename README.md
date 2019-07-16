@@ -260,6 +260,13 @@ The official mailgun documentation includes examples using this library. Go
 [here](https://documentation.mailgun.com/en/latest/api_reference.html#api-reference)
 and click on the "Go" button at the top of the page.
 
+### EU Region
+European customers will need to change the default API Base to access your domains
+
+```go
+mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
+mg.SetAPIBase(mailgun.APIBaseEU)
+```
 ## Installation
 
 If you are using [golang modules](https://github.com/golang/go/wiki/Modules) make sure you
