@@ -13,8 +13,11 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 )
+
+var validURL = regexp.MustCompile(`^/v[2-4].*`)
 
 type httpRequest struct {
 	URL               string
@@ -291,6 +294,11 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	if !validURL.MatchString(url.Path) {
+		return "", errors.New(`BaseAPI must end with a /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
+	}
+
 	q := url.Query()
 	if r.Parameters != nil && len(r.Parameters) > 0 {
 		for name, values := range r.Parameters {
