@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strconv"
 	"time"
 )
 
@@ -36,7 +35,7 @@ type Message struct {
 	trackingClicks     bool
 	trackingOpens      bool
 	headers            map[string]string
-	variables          map[string]string
+	variables          map[string]interface{}
 	recipientVariables map[string]map[string]interface{}
 	domain             string
 
@@ -296,6 +295,7 @@ func (m *Message) send(ctx context.Context) (string, string, error) {
 	return m.mg.Send(ctx, m)
 }
 
+// SetReplyTo sets a receiver who should receive the replies
 func (m *Message) SetReplyTo(recipient string) {
 	m.AddHeader("Reply-To", recipient)
 }
@@ -435,21 +435,10 @@ func (m *Message) AddHeader(header, value string) {
 // Refer to the Mailgun documentation for more information.
 func (m *Message) AddVariable(variable string, value interface{}) error {
 	if m.variables == nil {
-		m.variables = make(map[string]string)
+		m.variables = make(map[string]interface{})
 	}
 
-	j, err := json.Marshal(value)
-	if err != nil {
-		return err
-	}
-
-	encoded := string(j)
-	v, err := strconv.Unquote(encoded)
-	if err != nil {
-		v = encoded
-	}
-
-	m.variables[variable] = v
+	m.variables[variable] = value
 	return nil
 }
 
@@ -529,9 +518,19 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 			payload.addValue("h:"+header, value)
 		}
 	}
+	// to send variables in the X-Mailgun-Variables array as a JSON string, we need to set all of the variables
+	// and the marshal them
 	if message.variables != nil {
-		for variable, value := range message.variables {
-			payload.addValue("v:"+variable, value)
+		variablesString, err := json.Marshal(message.variables)
+		if err == nil {
+			// map could be decoded as json
+			payload.addValue("h:X-Mailgun-Variables", string(variablesString))
+		} else {
+			// json could not be marshaled, so we could try to add it back as the v: header for compatibility
+			// not sure how often this would actually happen
+			for variable, value := range message.variables {
+				payload.addVariable("v:"+variable, value)
+			}
 		}
 	}
 	if message.recipientVariables != nil {
@@ -571,6 +570,9 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 	if message.domain == "" {
 		message.domain = mg.Domain()
 	}
+
+	// fmt.Printf("\n-----------------------------\n%+v\n----------------------%+v\n-------------------------\n", payload, message)
+	// return
 
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
 	r.setClient(mg.Client())

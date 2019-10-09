@@ -11,3 +11,5 @@ require (
 )
 
 replace github.com/mailgun/mailgun-go/v3/events => ./events
+
+go 1.13

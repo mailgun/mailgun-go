@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -15,6 +14,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var validURL = regexp.MustCompile(`^/v[2-4].*`)
@@ -41,7 +42,7 @@ type payload interface {
 
 type keyValuePair struct {
 	key   string
-	value string
+	value interface{}
 }
 
 type keyNameRC struct {
@@ -99,7 +100,9 @@ func (f *urlEncodedPayload) addValue(key, value string) {
 func (f *urlEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	data := url.Values{}
 	for _, keyVal := range f.Values {
-		data.Add(keyVal.key, keyVal.value)
+		if keyValString, keyValStringOK := keyVal.value.(string); keyValStringOK {
+			data.Add(keyVal.key, keyValString)
+		}
 	}
 	return bytes.NewBufferString(data.Encode()), nil
 }
@@ -128,6 +131,11 @@ func (f *formDataPayload) addValue(key, value string) {
 	f.Values = append(f.Values, keyValuePair{key: key, value: value})
 }
 
+// this was added so that addValue can continue to take a key / value but addVariable can take in an interface
+func (f *formDataPayload) addVariable(key string, value interface{}) {
+	f.Values = append(f.Values, keyValuePair{key: key, value: value})
+}
+
 func (f *formDataPayload) addFile(key, file string) {
 	f.Files = append(f.Files, keyValuePair{key: key, value: file})
 }
@@ -146,23 +154,27 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	defer writer.Close()
 
 	for _, keyVal := range f.Values {
-		if tmp, err := writer.CreateFormField(keyVal.key); err == nil {
-			tmp.Write([]byte(keyVal.value))
-		} else {
-			return nil, err
+		if keyValString, keyValStringOK := keyVal.value.(string); keyValStringOK {
+			if tmp, err := writer.CreateFormField(keyVal.key); err == nil {
+				tmp.Write([]byte(keyValString))
+			} else {
+				return nil, err
+			}
 		}
 	}
 
 	for _, file := range f.Files {
-		if tmp, err := writer.CreateFormFile(file.key, path.Base(file.value)); err == nil {
-			if fp, err := os.Open(file.value); err == nil {
-				defer fp.Close()
-				io.Copy(tmp, fp)
+		if fileValString, fileValStringOK := file.value.(string); fileValStringOK {
+			if tmp, err := writer.CreateFormFile(file.key, path.Base(fileValString)); err == nil {
+				if fp, err := os.Open(fileValString); err == nil {
+					defer fp.Close()
+					io.Copy(tmp, fp)
+				} else {
+					return nil, err
+				}
 			} else {
 				return nil, err
 			}
-		} else {
-			return nil, err
 		}
 	}
 
