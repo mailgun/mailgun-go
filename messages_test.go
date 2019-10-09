@@ -286,12 +286,14 @@ func TestSendMGMessageVariables(t *testing.T) {
 		exampleStrVarKey    = "test-str-key"
 		exampleStrVarVal    = "test-str-val"
 		exampleBoolVarKey   = "test-bool-key"
-		exampleBoolVarVal   = "false"
+		exampleBoolVarVal   = false
 		exampleMapVarKey    = "test-map-key"
 		exampleMapVarStrVal = `{"test":"123"}`
 	)
 	var (
-		exampleMapVarVal = map[string]string{"test": "123"}
+		exampleMapVarVal              = map[string]string{"test": "123"}
+		exampleExpectedVariableHeader = fmt.Sprintf(`{"%s":%v,"%s":%s,"%s":"%s"}`,
+			exampleBoolVarKey, exampleBoolVarVal, exampleMapVarKey, exampleMapVarStrVal, exampleStrVarKey, exampleStrVarVal)
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
@@ -301,9 +303,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 		ensure.DeepEqual(t, req.FormValue("subject"), exampleSubject)
 		ensure.DeepEqual(t, req.FormValue("text"), exampleText)
 		ensure.DeepEqual(t, req.FormValue("to"), toUser)
-		ensure.DeepEqual(t, req.FormValue("v:"+exampleMapVarKey), exampleMapVarStrVal)
-		ensure.DeepEqual(t, req.FormValue("v:"+exampleBoolVarKey), exampleBoolVarVal)
-		ensure.DeepEqual(t, req.FormValue("v:"+exampleStrVarKey), exampleStrVarVal)
+		ensure.DeepEqual(t, req.FormValue("h:X-Mailgun-Variables"), exampleExpectedVariableHeader)
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
