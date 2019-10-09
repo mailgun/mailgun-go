@@ -571,9 +571,6 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 		message.domain = mg.Domain()
 	}
 
-	// fmt.Printf("\n-----------------------------\n%+v\n----------------------%+v\n-------------------------\n", payload, message)
-	// return
-
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
