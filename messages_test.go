@@ -278,20 +278,27 @@ func TestSendMGSeparateDomain(t *testing.T) {
 
 func TestSendMGMessageVariables(t *testing.T) {
 	const (
-		exampleDomain       = "testDomain"
-		exampleAPIKey       = "testAPIKey"
-		toUser              = "test@test.com"
-		exampleMessage      = "Queue. Thank you"
-		exampleID           = "<20111114174239.25659.5820@samples.mailgun.org>"
-		exampleStrVarKey    = "test-str-key"
-		exampleStrVarVal    = "test-str-val"
-		exampleBoolVarKey   = "test-bool-key"
-		exampleBoolVarVal   = "false"
-		exampleMapVarKey    = "test-map-key"
-		exampleMapVarStrVal = `{"test":"123"}`
+		exampleDomain         = "testDomain"
+		exampleAPIKey         = "testAPIKey"
+		toUser                = "test@test.com"
+		exampleMessage        = "Queue. Thank you"
+		exampleID             = "<20111114174239.25659.5820@samples.mailgun.org>"
+		exampleStrVarKey      = "test-str-key"
+		exampleStrVarVal      = "test-str-val"
+		exampleBoolVarKey     = "test-bool-key"
+		exampleBoolVarVal     = "false"
+		exampleMapVarKey      = "test-map-key"
+		exampleMapVarStrVal   = `{"test":"123"}`
+		exampleTemplateStrVal = `{"templateVariable":{"key":{"nested":"yes","status":"test"}}}`
 	)
 	var (
-		exampleMapVarVal = map[string]string{"test": "123"}
+		exampleMapVarVal        = map[string]string{"test": "123"}
+		exampleTemplateVariable = map[string]interface{}{
+			"key": map[string]string{
+				"nested": "yes",
+				"status": "test",
+			},
+		}
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ensure.DeepEqual(t, req.Method, http.MethodPost)
@@ -304,6 +311,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 		ensure.DeepEqual(t, req.FormValue("v:"+exampleMapVarKey), exampleMapVarStrVal)
 		ensure.DeepEqual(t, req.FormValue("v:"+exampleBoolVarKey), exampleBoolVarVal)
 		ensure.DeepEqual(t, req.FormValue("v:"+exampleStrVarKey), exampleStrVarVal)
+		ensure.DeepEqual(t, req.FormValue("h:X-Mailgun-Variables"), exampleTemplateStrVal)
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -316,6 +324,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	m.AddVariable(exampleStrVarKey, exampleStrVarVal)
 	m.AddVariable(exampleBoolVarKey, false)
 	m.AddVariable(exampleMapVarKey, exampleMapVarVal)
+	m.AddTemplateVariable("templateVariable", exampleTemplateVariable)
 
 	msg, id, err := mg.Send(context.Background(), m)
 	ensure.Nil(t, err)
