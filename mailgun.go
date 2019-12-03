@@ -133,7 +133,7 @@ type Mailgun interface {
 
 	ListBounces(opts *ListOptions) *BouncesIterator
 	GetBounce(ctx context.Context, address string) (Bounce, error)
-	AddBounce(ctx context.Context, address, code, error string) error
+	AddBounce(ctx context.Context, address, code, err string) error
 	DeleteBounce(ctx context.Context, address string) error
 
 	GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error)
