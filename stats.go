@@ -2,10 +2,9 @@ package mailgun
 
 import (
 	"context"
+	"strconv"
 	"time"
 )
-
-const iso8601date = "2006-01-02"
 
 // Stats on accepted messages
 type Accepted struct {
@@ -91,10 +90,10 @@ func (mg *MailgunImpl) GetStats(ctx context.Context, events []string, opts *GetS
 
 	if opts != nil {
 		if !opts.Start.IsZero() {
-			r.addParameter("start", opts.Start.Format(iso8601date))
+			r.addParameter("start", strconv.Itoa(int(opts.Start.Unix())))
 		}
 		if !opts.End.IsZero() {
-			r.addParameter("end", opts.End.Format(iso8601date))
+			r.addParameter("end", strconv.Itoa(int(opts.End.Unix())))
 		}
 		if opts.Resolution != "" {
 			r.addParameter("resolution", string(opts.Resolution))
