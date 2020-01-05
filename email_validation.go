@@ -51,8 +51,8 @@ type addressParseResult struct {
 }
 
 type EmailValidator interface {
-	ValidateEmail(email string, mailBoxVerify bool) (EmailVerification, error)
-	ParseAddresses(addresses ...string) ([]string, []string, error)
+	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error)
+	ParseAddresses(ctx context.Context, addresses ...string) ([]string, []string, error)
 }
 
 type EmailValidatorImpl struct {
