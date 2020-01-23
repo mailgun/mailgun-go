@@ -19,8 +19,8 @@ const (
 	exampleSubject = "Mailgun-go Example Subject"
 	exampleText    = "Testing some Mailgun awesomeness!"
 	exampleHtml    = "<html><head /><body><p>Testing some <a href=\"http://google.com?q=abc&r=def&s=ghi\">Mailgun HTML awesomeness!</a> at www.kc5tja@yahoo.com</p></body></html>"
-
-	exampleMime = `Content-Type: text/plain; charset="ascii"
+	exampleAMPHtml = `<!doctype html><html ⚡4email><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js"></script><style amp4email-boilerplate>body{visibility:hidden}</style><style amp-custom>h1{margin: 1rem;}</style></head><body><h1>Hello, I am an AMP EMAIL!</h1></body></html>`
+	exampleMime    = `Content-Type: text/plain; charset="ascii"
 Subject: Joe's Example Subject
 From: Joe Example <joe@example.com>
 To: BARGLEGARF <sam.falvo@rackspace.com>
@@ -103,6 +103,26 @@ func TestSendMGHtml(t *testing.T) {
 		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
+		msg, id, err := mg.Send(ctx, m)
+		ensure.Nil(t, err)
+		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
+	})
+}
+
+func TestSendMGAMPHtml(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
+	spendMoney(t, func() {
+		toUser := os.Getenv("MG_EMAIL_TO")
+		mg, err := NewMailgunFromEnv()
+		ensure.Nil(t, err)
+
+		ctx := context.Background()
+		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m.SetHtml(exampleHtml)
+		m.SetAMPHtml(exampleAMPHtml)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
