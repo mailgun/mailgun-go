@@ -92,11 +92,22 @@ func TestParseSuccess(t *testing.T) {
 	// Make sure the second attempt of Parse doesn't overwrite the first event struct.
 	ensure.DeepEqual(t, event.(*events.Accepted).Recipient, "dude@example.com")
 
-	ensure.DeepEqual(t, event.(*events.Accepted).UserVariables["custom"], "value")
-	child := event.(*events.Accepted).UserVariables["parent"].(map[string]interface{})["child"]
+	ensure.DeepEqual(t, event.(*events.Accepted).UserVariables.(map[string]interface{})["custom"], "value")
+	child := event.(*events.Accepted).UserVariables.(map[string]interface{})["parent"].(map[string]interface{})["child"]
 	ensure.DeepEqual(t, child, "user defined variable")
-	aList := event.(*events.Accepted).UserVariables["a-list"].([]interface{})
+	aList := event.(*events.Accepted).UserVariables.(map[string]interface{})["a-list"].([]interface{})
 	ensure.DeepEqual(t, aList, []interface{}{1.0, 2.0, 3.0, 4.0, 5.0})
+}
+
+func TestParseSuccessInvalidUserVariables(t *testing.T) {
+	event, err := ParseEvent([]byte(`{
+		"event": "accepted",
+		"timestamp": 1420255392.850187,
+		"user-variables": "Could not load user-variables. They were either truncated or invalid JSON"
+	}`))
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, reflect.TypeOf(event).String(), "*events.Accepted")
+	ensure.DeepEqual(t, event.(*events.Accepted).UserVariables, "Could not load user-variables. They were either truncated or invalid JSON")
 }
 
 func TestParseResponse(t *testing.T) {

@@ -54,13 +54,13 @@ type Accepted struct {
 	Message  Message  `json:"message"`
 	Flags    Flags    `json:"flags"`
 
-	Recipient       string                 `json:"recipient"`
-	RecipientDomain string                 `json:"recipient-domain"`
-	Method          string                 `json:"method"`
-	OriginatingIP   string                 `json:"originating-ip"`
-	Tags            []string               `json:"tags"`
-	Campaigns       []Campaign             `json:"campaigns"`
-	UserVariables   map[string]interface{} `json:"user-variables"`
+	Recipient       string      `json:"recipient"`
+	RecipientDomain string      `json:"recipient-domain"`
+	Method          string      `json:"method"`
+	OriginatingIP   string      `json:"originating-ip"`
+	Tags            []string    `json:"tags"`
+	Campaigns       []Campaign  `json:"campaigns"`
+	UserVariables   interface{} `json:"user-variables"`
 }
 
 type Rejected struct {
@@ -75,9 +75,9 @@ type Rejected struct {
 	Storage Storage `json:"storage"`
 	Flags   Flags   `json:"flags"`
 
-	Tags          []string               `json:"tags"`
-	Campaigns     []Campaign             `json:"campaigns"`
-	UserVariables map[string]interface{} `json:"user-variables"`
+	Tags          []string    `json:"tags"`
+	Campaigns     []Campaign  `json:"campaigns"`
+	UserVariables interface{} `json:"user-variables"`
 }
 
 type Delivered struct {
@@ -93,8 +93,8 @@ type Delivered struct {
 	Tags            []string   `json:"tags"`
 	Campaigns       []Campaign `json:"campaigns"`
 
-	DeliveryStatus DeliveryStatus         `json:"delivery-status"`
-	UserVariables  map[string]interface{} `json:"user-variables"`
+	DeliveryStatus DeliveryStatus `json:"delivery-status"`
+	UserVariables  interface{}    `json:"user-variables"`
 }
 
 type Failed struct {
@@ -110,10 +110,10 @@ type Failed struct {
 	Tags            []string   `json:"tags"`
 	Campaigns       []Campaign `json:"campaigns"`
 
-	DeliveryStatus DeliveryStatus         `json:"delivery-status"`
-	Severity       string                 `json:"severity"`
-	Reason         string                 `json:"reason"`
-	UserVariables  map[string]interface{} `json:"user-variables"`
+	DeliveryStatus DeliveryStatus `json:"delivery-status"`
+	Severity       string         `json:"severity"`
+	Reason         string         `json:"reason"`
+	UserVariables  interface{}    `json:"user-variables"`
 }
 
 type Stored struct {
@@ -123,9 +123,9 @@ type Stored struct {
 	Storage Storage `json:"storage"`
 	Flags   Flags   `json:"flags"`
 
-	Tags          []string               `json:"tags"`
-	Campaigns     []Campaign             `json:"campaigns"`
-	UserVariables map[string]interface{} `json:"user-variables"`
+	Tags          []string    `json:"tags"`
+	Campaigns     []Campaign  `json:"campaigns"`
+	UserVariables interface{} `json:"user-variables"`
 }
 
 //
@@ -147,7 +147,7 @@ type Opened struct {
 	ClientInfo  ClientInfo  `json:"client-info"`
 	GeoLocation GeoLocation `json:"geolocation"`
 
-	UserVariables map[string]interface{} `json:"user-variables"`
+	UserVariables interface{} `json:"user-variables"`
 }
 
 type Clicked struct {
@@ -167,7 +167,7 @@ type Clicked struct {
 	ClientInfo  ClientInfo  `json:"client-info"`
 	GeoLocation GeoLocation `json:"geolocation"`
 
-	UserVariables map[string]interface{} `json:"user-variables"`
+	UserVariables interface{} `json:"user-variables"`
 }
 
 type Unsubscribed struct {
@@ -185,7 +185,7 @@ type Unsubscribed struct {
 	ClientInfo  ClientInfo  `json:"client-info"`
 	GeoLocation GeoLocation `json:"geolocation"`
 
-	UserVariables map[string]interface{} `json:"user-variables"`
+	UserVariables interface{} `json:"user-variables"`
 }
 
 type Complained struct {
@@ -194,9 +194,9 @@ type Complained struct {
 	Message   Message    `json:"message"`
 	Campaigns []Campaign `json:"campaigns"`
 
-	Recipient     string                 `json:"recipient"`
-	Tags          []string               `json:"tags"`
-	UserVariables map[string]interface{} `json:"user-variables"`
+	Recipient     string      `json:"recipient"`
+	Tags          []string    `json:"tags"`
+	UserVariables interface{} `json:"user-variables"`
 }
 
 //
