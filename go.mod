@@ -1,4 +1,6 @@
-module github.com/mailgun/mailgun-go/v3
+module github.com/mailgun/mailgun-go/v4
+
+go 1.13
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -8,10 +10,4 @@ require (
 	github.com/go-chi/chi v4.0.0+incompatible
 	github.com/mailru/easyjson v0.7.0
 	github.com/pkg/errors v0.8.1
-	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7 // indirect
-	github.com/ugorji/go v1.1.7 // indirect
 )
-
-replace github.com/mailgun/mailgun-go/v3/events => ./events
-
-go 1.13

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v3"
-	"github.com/mailgun/mailgun-go/v3/events"
+	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/events"
 )
 
 func ExampleMailgunImpl_ValidateEmail() {
