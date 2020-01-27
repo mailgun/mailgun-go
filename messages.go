@@ -117,6 +117,7 @@ type plainMessage struct {
 	subject  string
 	text     string
 	html     string
+	ampHtml  string
 	template string
 }
 
@@ -131,8 +132,8 @@ type sendMessageResponse struct {
 }
 
 // features abstracts the common characteristics between regular and MIME messages.
-// addCC, addBCC, recipientCount, and setHTML are invoked via the package-global AddCC, AddBCC,
-// RecipientCount, and SetHtml calls, as these functions are ignored for MIME messages.
+// addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the package-global AddCC, AddBCC,
+// RecipientCount, SetHtml and SetAMPHtml calls, as these functions are ignored for MIME messages.
 // Send() invokes addValues to add message-type-specific MIME headers for the API call
 // to Mailgun.  isValid yeilds true if and only if the message is valid enough for sending
 // through the API.  Finally, endpoint() tells Send() which endpoint to use to submit the API call.
@@ -140,6 +141,7 @@ type features interface {
 	addCC(string)
 	addBCC(string)
 	setHtml(string)
+	setAMPHtml(string)
 	addValues(*formDataPayload)
 	isValid() bool
 	endpoint() string
@@ -335,6 +337,18 @@ func (pm *plainMessage) setHtml(h string) {
 }
 
 func (mm *mimeMessage) setHtml(_ string) {}
+
+// SetAMP is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
+// an AMP-For-Email representation of your message in addition to your html & plain-text content.
+func (m *Message) SetAMPHtml(html string) {
+	m.specific.setAMPHtml(html)
+}
+
+func (pm *plainMessage) setAMPHtml(h string) {
+	pm.ampHtml = h
+}
+
+func (mm *mimeMessage) setAMPHtml(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -621,6 +635,9 @@ func (pm *plainMessage) addValues(p *formDataPayload) {
 	}
 	if pm.template != "" {
 		p.addValue("template", pm.template)
+	}
+	if pm.ampHtml != "" {
+		p.addValue("amp-html", pm.ampHtml)
 	}
 }
 
