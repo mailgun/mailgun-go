@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents(in *jlexer.Lexer, out *Storage) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events(in *jlexer.Lexer, out *Storage) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -50,28 +50,18 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents(in *jlexer.Lexer, out
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, in Storage) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events(out *jwriter.Writer, in Storage) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"key\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Key))
 	}
 	{
 		const prefix string = ",\"url\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.URL))
 	}
 	out.RawByte('}')
@@ -80,27 +70,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents(out *jwriter.Writer, 
 // MarshalJSON supports json.Marshaler interface
 func (v Storage) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Storage) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Storage) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Storage) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents1(in *jlexer.Lexer, out *MessageHeaders) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events1(in *jlexer.Lexer, out *MessageHeaders) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -137,48 +127,28 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents1(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer, in MessageHeaders) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events1(out *jwriter.Writer, in MessageHeaders) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"to\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.To))
 	}
 	{
 		const prefix string = ",\"message-id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.MessageID))
 	}
 	{
 		const prefix string = ",\"from\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.From))
 	}
 	{
 		const prefix string = ",\"subject\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Subject))
 	}
 	out.RawByte('}')
@@ -187,27 +157,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents1(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v MessageHeaders) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents1(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v MessageHeaders) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents1(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *MessageHeaders) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents1(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *MessageHeaders) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents1(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events1(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, out *Message) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events2(in *jlexer.Lexer, out *Message) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -227,9 +197,7 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, ou
 		}
 		switch key {
 		case "headers":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Headers).UnmarshalJSON(data))
-			}
+			(out.Headers).UnmarshalEasyJSON(in)
 		case "attachments":
 			if in.IsNull() {
 				in.Skip()
@@ -247,9 +215,7 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, ou
 				}
 				for !in.IsDelim(']') {
 					var v1 Attachment
-					if data := in.Raw(); in.Ok() {
-						in.AddError((v1).UnmarshalJSON(data))
-					}
+					(v1).UnmarshalEasyJSON(in)
 					out.Attachments = append(out.Attachments, v1)
 					in.WantComma()
 				}
@@ -290,28 +256,18 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer, in Message) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events2(out *jwriter.Writer, in Message) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"headers\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Raw((in.Headers).MarshalJSON())
+		out.RawString(prefix[1:])
+		(in.Headers).MarshalEasyJSON(out)
 	}
 	{
 		const prefix string = ",\"attachments\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Attachments == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -320,19 +276,14 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer,
 				if v3 > 0 {
 					out.RawByte(',')
 				}
-				out.Raw((v4).MarshalJSON())
+				(v4).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
 	}
 	{
 		const prefix string = ",\"recipients\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		if in.Recipients == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
@@ -348,12 +299,7 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer,
 	}
 	{
 		const prefix string = ",\"size\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.Size))
 	}
 	out.RawByte('}')
@@ -362,27 +308,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v Message) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Message) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents2(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Message) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Message) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents2(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events2(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents3(in *jlexer.Lexer, out *MailingList) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events3(in *jlexer.Lexer, out *MailingList) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -417,38 +363,23 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents3(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer, in MailingList) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events3(out *jwriter.Writer, in MailingList) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"address\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.Address))
 	}
 	{
 		const prefix string = ",\"list-id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ListID))
 	}
 	{
 		const prefix string = ",\"sid\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.SID))
 	}
 	out.RawByte('}')
@@ -457,27 +388,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents3(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v MailingList) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents3(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v MailingList) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents3(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *MailingList) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents3(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *MailingList) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents3(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events3(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents4(in *jlexer.Lexer, out *GeoLocation) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events4(in *jlexer.Lexer, out *GeoLocation) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -512,38 +443,23 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents4(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents4(out *jwriter.Writer, in GeoLocation) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events4(out *jwriter.Writer, in GeoLocation) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"city\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.City))
 	}
 	{
 		const prefix string = ",\"country\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Country))
 	}
 	{
 		const prefix string = ",\"region\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Region))
 	}
 	out.RawByte('}')
@@ -552,27 +468,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents4(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v GeoLocation) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents4(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v GeoLocation) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents4(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *GeoLocation) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents4(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *GeoLocation) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents4(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events4(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, out *Flags) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events5(in *jlexer.Lexer, out *Flags) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -611,58 +527,33 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents5(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer, in Flags) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events5(out *jwriter.Writer, in Flags) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"is-authenticated\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Bool(bool(in.IsAuthenticated))
 	}
 	{
 		const prefix string = ",\"is-big\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.IsBig))
 	}
 	{
 		const prefix string = ",\"is-system-test\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.IsSystemTest))
 	}
 	{
 		const prefix string = ",\"is-test-mode\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.IsTestMode))
 	}
 	{
 		const prefix string = ",\"is-delayed-bounce\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Bool(bool(in.IsDelayedBounce))
 	}
 	out.RawByte('}')
@@ -671,27 +562,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents5(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v Flags) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents5(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Flags) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents5(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Flags) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents5(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Flags) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents5(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events5(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents6(in *jlexer.Lexer, out *Envelope) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events6(in *jlexer.Lexer, out *Envelope) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -732,68 +623,38 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents6(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents6(out *jwriter.Writer, in Envelope) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events6(out *jwriter.Writer, in Envelope) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"mail-from\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.MailFrom))
 	}
 	{
 		const prefix string = ",\"sender\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Sender))
 	}
 	{
 		const prefix string = ",\"transport\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Transport))
 	}
 	{
 		const prefix string = ",\"targets\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Targets))
 	}
 	{
 		const prefix string = ",\"sending-host\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.SendingHost))
 	}
 	{
 		const prefix string = ",\"sending-ip\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.SendingIP))
 	}
 	out.RawByte('}')
@@ -802,27 +663,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents6(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v Envelope) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents6(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Envelope) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents6(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Envelope) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents6(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Envelope) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents6(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events6(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents7(in *jlexer.Lexer, out *DeliveryStatus) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events7(in *jlexer.Lexer, out *DeliveryStatus) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -861,58 +722,33 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents7(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents7(out *jwriter.Writer, in DeliveryStatus) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events7(out *jwriter.Writer, in DeliveryStatus) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"code\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.Int(int(in.Code))
 	}
 	{
 		const prefix string = ",\"attempt-no\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.AttemptNo))
 	}
 	{
 		const prefix string = ",\"description\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Description))
 	}
 	{
 		const prefix string = ",\"message\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Message))
 	}
 	{
 		const prefix string = ",\"session-seconds\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Float64(float64(in.SessionSeconds))
 	}
 	out.RawByte('}')
@@ -921,27 +757,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents7(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v DeliveryStatus) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents7(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events7(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v DeliveryStatus) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents7(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events7(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *DeliveryStatus) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents7(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events7(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *DeliveryStatus) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents7(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events7(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents8(in *jlexer.Lexer, out *ClientInfo) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events8(in *jlexer.Lexer, out *ClientInfo) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -984,78 +820,43 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents8(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents8(out *jwriter.Writer, in ClientInfo) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events8(out *jwriter.Writer, in ClientInfo) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"accept-language\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.AcceptLanguage))
 	}
 	{
 		const prefix string = ",\"client-name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ClientName))
 	}
 	{
 		const prefix string = ",\"client-os\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ClientOS))
 	}
 	{
 		const prefix string = ",\"client-type\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ClientType))
 	}
 	{
 		const prefix string = ",\"device-type\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.DeviceType))
 	}
 	{
 		const prefix string = ",\"ip\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.IP))
 	}
 	{
 		const prefix string = ",\"user-agent\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.UserAgent))
 	}
 	out.RawByte('}')
@@ -1064,27 +865,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents8(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v ClientInfo) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents8(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events8(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ClientInfo) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents8(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events8(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ClientInfo) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents8(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events8(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ClientInfo) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents8(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events8(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents9(in *jlexer.Lexer, out *Campaign) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events9(in *jlexer.Lexer, out *Campaign) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1117,28 +918,18 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents9(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents9(out *jwriter.Writer, in Campaign) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events9(out *jwriter.Writer, in Campaign) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"id\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.ID))
 	}
 	{
 		const prefix string = ",\"name\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.Name))
 	}
 	out.RawByte('}')
@@ -1147,27 +938,27 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents9(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v Campaign) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents9(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events9(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Campaign) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents9(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events9(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Campaign) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents9(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events9(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Campaign) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents9(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events9(l, v)
 }
-func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents10(in *jlexer.Lexer, out *Attachment) {
+func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events10(in *jlexer.Lexer, out *Attachment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1202,38 +993,23 @@ func easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents10(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents10(out *jwriter.Writer, in Attachment) {
+func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events10(out *jwriter.Writer, in Attachment) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"filename\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.FileName))
 	}
 	{
 		const prefix string = ",\"content-type\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.String(string(in.ContentType))
 	}
 	{
 		const prefix string = ",\"size\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		out.Int(int(in.Size))
 	}
 	out.RawByte('}')
@@ -1242,23 +1018,23 @@ func easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents10(out *jwriter.Writer
 // MarshalJSON supports json.Marshaler interface
 func (v Attachment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents10(&w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events10(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Attachment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoEvents10(w, v)
+	easyjsonCce3d1beEncodeGithubComMailgunMailgunGoV3Events10(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Attachment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents10(&r, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events10(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Attachment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoEvents10(l, v)
+	easyjsonCce3d1beDecodeGithubComMailgunMailgunGoV3Events10(l, v)
 }
