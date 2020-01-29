@@ -5,10 +5,6 @@
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/api_reference.html).
 
-**NOTE: Backward compatibility has been broken with the v3.0 release which includes versioned paths required by 1.11 
-go modules (See [Releasing Modules](https://github.com/golang/go/wiki/Modules#releasing-modules-v2-or-higher)).
- Pin your dependencies to the v1.1.1 or v2.0 tag if you are not ready for v3.0**
-
 ## Usage
 ```go
 package main
@@ -19,7 +15,7 @@ import (
     "log"
     "time"
 
-    "github.com/mailgun/mailgun-go/v3"
+    "github.com/mailgun/mailgun-go/v4"
 )
 
 // Your available domain names can be found here:
@@ -66,8 +62,8 @@ import (
     "fmt"
     "time"
 
-    "github.com/mailgun/mailgun-go/v3"
-    "github.com/mailgun/mailgun-go/v3/events"
+    "github.com/mailgun/mailgun-go/v4"
+    "github.com/mailgun/mailgun-go/v4/events"
 )
 
 func main() {
@@ -122,7 +118,7 @@ import (
     "context"
     "time"
 
-    "github.com/mailgun/mailgun-go/v3"
+    "github.com/mailgun/mailgun-go/v4"
 )
 
 func main() {
@@ -163,7 +159,7 @@ import (
     "log"
     "time"
 
-    "github.com/mailgun/mailgun-go/v3"
+    "github.com/mailgun/mailgun-go/v4"
 )
 
 // If your plan does not include email validations but you have an account,
@@ -200,8 +196,8 @@ import (
     "os"
     "time"
 
-    "github.com/mailgun/mailgun-go/v3"
-    "github.com/mailgun/mailgun-go/v3/events"
+    "github.com/mailgun/mailgun-go/v4"
+    "github.com/mailgun/mailgun-go/v4/events"
 )
 
 func main() {
@@ -270,7 +266,7 @@ import (
     "log"
     "time"
 
-    "github.com/mailgun/mailgun-go/v3"
+    "github.com/mailgun/mailgun-go/v4"
 )
 
 // Your available domain names can be found here:
@@ -324,13 +320,13 @@ mg.SetAPIBase(mailgun.APIBaseEU)
 ## Installation
 
 If you are using [golang modules](https://github.com/golang/go/wiki/Modules) make sure you
-include the `/v3` at the end of your import paths
+include the `/v4` at the end of your import paths
 ```bash
-$ go get github.com/mailgun/mailgun-go/v3
+$ go get github.com/mailgun/mailgun-go/v4
 ```
 
-If you are **not** using golang modules, you can drop the `/v3` at the end of the import path.
-As long as you are using the latest 1.10 or 1.11 golang release, import paths that end in `/v3`
+If you are **not** using golang modules, you can drop the `/v4` at the end of the import path.
+As long as you are using the latest 1.10 or 1.11 golang release, import paths that end in `/v4`
 in your code should work fine even if you do not have golang modules enabled for your project.
 ```bash
 $ go get github.com/mailgun/mailgun-go
@@ -340,7 +336,7 @@ $ go get github.com/mailgun/mailgun-go
 
 Using version 3 of the mailgun-go library with go dep currently results in the following error
 ```
-"github.com/mailgun/mailgun-go/v3/events", which contains malformed code: no package exists at ...
+"github.com/mailgun/mailgun-go/v4/events", which contains malformed code: no package exists at ...
 ```
 This is a known bug in go dep. You can follow the PR to fix this bug [here](https://github.com/golang/dep/pull/1963)
 Until this bug is fixed, the best way to use version 3 of the mailgun-go library is to use the golang community 
