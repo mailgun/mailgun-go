@@ -537,3 +537,38 @@ func TestSendTemplate(t *testing.T) {
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
+
+func TestSendTemplateOptions(t *testing.T) {
+	const (
+		exampleDomain      = "testDomain"
+		exampleAPIKey      = "testAPIKey"
+		toUser             = "test@test.com"
+		exampleMessage     = "Queue. Thank you"
+		exampleID          = "<20111114174239.25659.5817@samples.mailgun.org>"
+		templateName       = "my-template"
+		templateVersionTag = "initial"
+		templateRenderText = "yes"
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.FormValue("template"), templateName)
+		ensure.DeepEqual(t, req.FormValue("t:version"), templateVersionTag)
+		ensure.DeepEqual(t, req.FormValue("t:text"), templateRenderText)
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL + "/v3")
+	ctx := context.Background()
+
+	m := mg.NewMessage(fromUser, exampleSubject, "", toUser)
+	m.SetTemplate(templateName)
+	m.SetTemplateRenderText(true)
+	m.SetTemplateVersion(templateVersionTag)
+
+	msg, id, err := mg.Send(ctx, m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
+}

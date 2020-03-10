@@ -40,6 +40,8 @@ type Message struct {
 	templateVariables  map[string]interface{}
 	recipientVariables map[string]map[string]interface{}
 	domain             string
+	templateVersionTag string
+	templateRenderText bool
 
 	dkimSet           bool
 	trackingSet       bool
@@ -438,6 +440,16 @@ func (m *Message) SetTrackingOpens(trackingOpens bool) {
 	m.trackingOpensSet = true
 }
 
+//SetTemplateVersion information is found in the Mailgun documentation.
+func (m *Message) SetTemplateVersion(tag string) {
+	m.templateVersionTag = tag
+}
+
+//SetTemplateRenderText information is found in the Mailgun documentation.
+func (m *Message) SetTemplateRenderText(render bool) {
+	m.templateRenderText = render
+}
+
 // AddHeader allows you to send custom MIME headers with the message.
 func (m *Message) AddHeader(header, value string) {
 	if m.headers == nil {
@@ -604,6 +616,14 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 
 	if message.domain == "" {
 		message.domain = mg.Domain()
+	}
+
+	if message.templateVersionTag != "" {
+		payload.addValue("t:version", message.templateVersionTag)
+	}
+
+	if message.templateRenderText {
+		payload.addValue("t:text", yesNo(message.templateRenderText))
 	}
 
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
