@@ -41,10 +41,10 @@ func NewMockServer() MockServer {
 		ms.addMailingListRoutes(r)
 		ms.addEventRoutes(r)
 		ms.addMessagesRoutes(r)
-		ms.addValidationRoutes(r)
 		ms.addRoutes(r)
 		ms.addWebhookRoutes(r)
 	})
+	ms.addValidationRoutes(r)
 
 	// Start the server
 	ms.srv = httptest.NewServer(r)
@@ -54,6 +54,10 @@ func NewMockServer() MockServer {
 // Stop the server
 func (ms *MockServer) Stop() {
 	ms.srv.Close()
+}
+
+func (ms *MockServer) URL4() string {
+	return ms.srv.URL + "/v4"
 }
 
 // URL returns the URL used to connect to the mock server

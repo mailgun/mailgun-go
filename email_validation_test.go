@@ -9,8 +9,9 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
-func TestEmailValidation(t *testing.T) {
+func TestEmailValidationV3(t *testing.T) {
 	v := mailgun.NewEmailValidator(testKey)
+	// API Base is set to `http://server/v3`
 	v.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -24,7 +25,29 @@ func TestEmailValidation(t *testing.T) {
 	ensure.True(t, ev.Parts.DisplayName == "")
 	ensure.DeepEqual(t, ev.Parts.LocalPart, "foo")
 	ensure.DeepEqual(t, ev.Parts.Domain, "mailgun.com")
-	ensure.True(t, ev.Reason == "")
+	ensure.DeepEqual(t, ev.Reason, "no-reason")
+	ensure.True(t, len(ev.Reasons) == 0)
+}
+
+func TestEmailValidationV4(t *testing.T) {
+	v := mailgun.NewEmailValidator(testKey)
+	// API Base is set to `http://server/v4`
+	v.SetAPIBase(server.URL4())
+	ctx := context.Background()
+
+	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
+	ensure.Nil(t, err)
+
+	ensure.True(t, ev.IsValid)
+	ensure.DeepEqual(t, ev.MailboxVerification, "")
+	ensure.False(t, ev.IsDisposableAddress)
+	ensure.False(t, ev.IsRoleAddress)
+	ensure.True(t, ev.Parts.DisplayName == "")
+	ensure.DeepEqual(t, ev.Parts.LocalPart, "foo")
+	ensure.DeepEqual(t, ev.Parts.Domain, "mailgun.com")
+	ensure.DeepEqual(t, ev.Reason, "")
+	ensure.True(t, len(ev.Reasons) != 0)
+	ensure.DeepEqual(t, ev.Reasons[0], "no-reason")
 }
 
 func TestParseAddresses(t *testing.T) {
@@ -61,7 +84,7 @@ func TestUnmarshallResponse(t *testing.T) {
 			"domain": "aol.com",
 			"local_part": "some_email"
 		},
-		"reason": null
+		"reason": "no-reason"
 	}`)
 	var ev mailgun.EmailVerification
 	err := json.Unmarshal(payload, &ev)
@@ -74,5 +97,5 @@ func TestUnmarshallResponse(t *testing.T) {
 	ensure.True(t, ev.Parts.DisplayName == "")
 	ensure.DeepEqual(t, ev.Parts.LocalPart, "some_email")
 	ensure.DeepEqual(t, ev.Parts.Domain, "aol.com")
-	ensure.True(t, ev.Reason == "")
+	ensure.DeepEqual(t, ev.Reason, "no-reason")
 }
