@@ -42,7 +42,7 @@ func main() {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
     defer cancel()
 
-    // Send the message	with a 10 second timeout
+    // Send the message with a 10 second timeout
     resp, id, err := mg.Send(ctx, message)
 
     if err != nil {
@@ -71,41 +71,41 @@ func main() {
     // (https://app.mailgun.com/app/account/security)
     mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
 
-	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
+    it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
 
-	var page []mailgun.Event
+    var page []mailgun.Event
 
-	// The entire operation should not take longer than 30 seconds
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
+    // The entire operation should not take longer than 30 seconds
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+    defer cancel()
 
-	// For each page of 100 events
-	for it.Next(ctx, &page) {
-		for _, e := range page {
-			// You can access some fields via the interface
-			fmt.Printf("Event: '%s' TimeStamp: '%s'\n", e.GetName(), e.GetTimestamp())
+    // For each page of 100 events
+    for it.Next(ctx, &page) {
+        for _, e := range page {
+            // You can access some fields via the interface
+            fmt.Printf("Event: '%s' TimeStamp: '%s'\n", e.GetName(), e.GetTimestamp())
 
-			// and you can act upon each event by type
-			switch event := e.(type) {
-			case *events.Accepted:
-				fmt.Printf("Accepted: auth: %t\n", event.Flags.IsAuthenticated)
-			case *events.Delivered:
-				fmt.Printf("Delivered transport: %s\n", event.Envelope.Transport)
-			case *events.Failed:
-				fmt.Printf("Failed reason: %s\n", event.Reason)
-			case *events.Clicked:
-				fmt.Printf("Clicked GeoLocation: %s\n", event.GeoLocation.Country)
-			case *events.Opened:
-				fmt.Printf("Opened GeoLocation: %s\n", event.GeoLocation.Country)
-			case *events.Rejected:
-				fmt.Printf("Rejected reason: %s\n", event.Reject.Reason)
-			case *events.Stored:
-				fmt.Printf("Stored URL: %s\n", event.Storage.URL)
-			case *events.Unsubscribed:
-				fmt.Printf("Unsubscribed client OS: %s\n", event.ClientInfo.ClientOS)
-			}
-		}
-	}
+            // and you can act upon each event by type
+            switch event := e.(type) {
+            case *events.Accepted:
+                fmt.Printf("Accepted: auth: %t\n", event.Flags.IsAuthenticated)
+            case *events.Delivered:
+                fmt.Printf("Delivered transport: %s\n", event.Envelope.Transport)
+            case *events.Failed:
+                fmt.Printf("Failed reason: %s\n", event.Reason)
+            case *events.Clicked:
+                fmt.Printf("Clicked GeoLocation: %s\n", event.GeoLocation.Country)
+            case *events.Opened:
+                fmt.Printf("Opened GeoLocation: %s\n", event.GeoLocation.Country)
+            case *events.Rejected:
+                fmt.Printf("Rejected reason: %s\n", event.Reject.Reason)
+            case *events.Stored:
+                fmt.Printf("Stored URL: %s\n", event.Storage.URL)
+            case *events.Unsubscribed:
+                fmt.Printf("Unsubscribed client OS: %s\n", event.ClientInfo.ClientOS)
+            }
+        }
+    }
 }
 ```
 
@@ -126,18 +126,18 @@ func main() {
     // (https://app.mailgun.com/app/account/security)
     mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
 
-	begin := time.Now().Add(time.Second * -3)
+    begin := time.Now().Add(time.Second * -3)
 
-	// Very short poll interval
-	it := mg.PollEvents(&mailgun.ListEventOptions{
-		// Only events with a timestamp after this date/time will be returned
-		Begin: &begin,
-		// How often we poll the api for new events
-		PollInterval: time.Second * 30,
-	})
+    // Very short poll interval
+    it := mg.PollEvents(&mailgun.ListEventOptions{
+        // Only events with a timestamp after this date/time will be returned
+        Begin: &begin,
+        // How often we poll the api for new events
+        PollInterval: time.Second * 30,
+    })
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+    ctx, cancel := context.WithCancel(context.Background())
+    defer cancel()
 
     // Poll until our email event arrives
     var page []mailgun.Event
@@ -170,11 +170,14 @@ import (
 var apiKey string = "your-api-key"
 
 func main() {
+    // To use the /v4 version of validations define MG_URL in the envronment
+    // as `https://api.mailgun.net/v4` or set `v.SetAPIBase("https://api.mailgun.net/v4")`
+
     // Create an instance of the Validator
     v := mailgun.NewEmailValidator(apiKey)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+    defer cancel()
 
     email, err := v.ValidateEmail(ctx, "recipient@example.com", false)
     if err != nil {
@@ -206,50 +209,50 @@ func main() {
     // (https://app.mailgun.com/app/account/security)
     mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
-		var payload mailgun.WebhookPayload
-		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-			fmt.Printf("decode JSON error: %s", err)
-			w.WriteHeader(http.StatusNotAcceptable)
-			return
-		}
+        var payload mailgun.WebhookPayload
+        if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+            fmt.Printf("decode JSON error: %s", err)
+            w.WriteHeader(http.StatusNotAcceptable)
+            return
+        }
 
-		verified, err := mg.VerifyWebhookSignature(payload.Signature)
-		if err != nil {
-			fmt.Printf("verify error: %s\n", err)
-			w.WriteHeader(http.StatusNotAcceptable)
-			return
-		}
+        verified, err := mg.VerifyWebhookSignature(payload.Signature)
+        if err != nil {
+            fmt.Printf("verify error: %s\n", err)
+            w.WriteHeader(http.StatusNotAcceptable)
+            return
+        }
 
-		if !verified {
-			w.WriteHeader(http.StatusNotAcceptable)
-			fmt.Printf("failed verification %+v\n", payload.Signature)
-			return
-		}
+        if !verified {
+            w.WriteHeader(http.StatusNotAcceptable)
+            fmt.Printf("failed verification %+v\n", payload.Signature)
+            return
+        }
 
-		fmt.Printf("Verified Signature\n")
+        fmt.Printf("Verified Signature\n")
 
-		// Parse the event provided by the webhook payload
-		e, err := mailgun.ParseEvent(payload.EventData)
-		if err != nil {
-			fmt.Printf("parse event error: %s\n", err)
-			return
-		}
+        // Parse the event provided by the webhook payload
+        e, err := mailgun.ParseEvent(payload.EventData)
+        if err != nil {
+            fmt.Printf("parse event error: %s\n", err)
+            return
+        }
 
-		switch event := e.(type) {
-		case *events.Accepted:
-			fmt.Printf("Accepted: auth: %t\n", event.Flags.IsAuthenticated)
-		case *events.Delivered:
-			fmt.Printf("Delivered transport: %s\n", event.Envelope.Transport)
-		}
-	})
+        switch event := e.(type) {
+        case *events.Accepted:
+            fmt.Printf("Accepted: auth: %t\n", event.Flags.IsAuthenticated)
+        case *events.Delivered:
+            fmt.Printf("Delivered transport: %s\n", event.Envelope.Transport)
+        }
+    })
 
-	fmt.Println("Serve on :9090...")
-	if err := http.ListenAndServe(":9090", nil); err != nil {
-		fmt.Printf("serve error: %s\n", err)
-		os.Exit(1)
-	}
+    fmt.Println("Serve on :9090...")
+    if err := http.ListenAndServe(":9090", nil); err != nil {
+        fmt.Printf("serve error: %s\n", err)
+        os.Exit(1)
+    }
 }
 ```
 
@@ -288,14 +291,14 @@ func main() {
     recipient := "recipient@example.com"
 
     // The message object allows you to add attachments and Bcc recipients
-		message := mg.NewMessage(sender, subject, body, recipient)
-		message.SetTemplate("passwordReset")
-		message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
+        message := mg.NewMessage(sender, subject, body, recipient)
+        message.SetTemplate("passwordReset")
+        message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
 
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
     defer cancel()
 
-    // Send the message	with a 10 second timeout
+    // Send the message with a 10 second timeout
     resp, id, err := mg.Send(ctx, message)
 
     if err != nil {
