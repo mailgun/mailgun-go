@@ -56,6 +56,9 @@ func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) e
 	if template.Version.Comment != "" {
 		payload.addValue("comment", template.Version.Comment)
 	}
+	if template.Version.Tag != "" {
+		payload.addValue("tag", template.Version.Tag)
+	}
 
 	var resp templateResp
 	if err := postResponseFromJSON(ctx, r, payload, &resp); err != nil {
