@@ -135,6 +135,7 @@ type Mailgun interface {
 	GetBounce(ctx context.Context, address string) (Bounce, error)
 	AddBounce(ctx context.Context, address, code, err string) error
 	DeleteBounce(ctx context.Context, address string) error
+	DeleteBounceList(ctx context.Context) error
 
 	GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error)
 	GetTag(ctx context.Context, tag string) (Tag, error)
