@@ -200,3 +200,12 @@ func (mg *MailgunImpl) DeleteBounce(ctx context.Context, address string) error {
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
+
+// DeleteBounceList removes all bounces in the bounce list
+func (mg *MailgunImpl) DeleteBounceList(ctx context.Context) error {
+	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	_, err := makeDeleteRequest(ctx, r)
+	return err
+}
