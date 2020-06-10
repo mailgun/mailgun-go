@@ -113,3 +113,59 @@ func TestAddDelBounces(t *testing.T) {
 	_, err = mg.GetBounce(ctx, exampleEmail)
 	ensure.NotNil(t, err)
 }
+
+func TestDelBounceList(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
+	domain := os.Getenv("MG_DOMAIN")
+	mg, err := NewMailgunFromEnv()
+	ctx := context.Background()
+	ensure.Nil(t, err)
+
+	findBounce := func(address string) bool {
+		it := mg.ListBounces(nil)
+		var page []Bounce
+		for it.Next(ctx, &page) {
+			ensure.True(t, len(page) != 0)
+			for _, bounce := range page {
+				t.Logf("Bounce Address: %s\n", bounce.Address)
+				if bounce.Address == address {
+					return true
+				}
+			}
+		}
+		if it.Err() != nil {
+			t.Logf("BounceIterator err: %s", it.Err())
+		}
+		return false
+	}
+
+	for i := 0; i < 3; i++ {
+		// Compute an e-mail address for our Bounce.
+		exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
+
+		// Add the bounce for our address.
+		err = mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
+		ensure.Nil(t, err)
+
+		// Give API some time to refresh cache
+		time.Sleep(time.Second)
+
+		// We should now have one bounce listed when we query the API.
+		if !findBounce(exampleEmail) {
+			t.Fatalf("Expected bounce for address %s in list of bounces", exampleEmail)
+		}
+	}
+
+	// Delete the bounce list.  This should put us back the way we were.
+	err = mg.DeleteBounceList(ctx)
+	ensure.Nil(t, err)
+
+	it := mg.ListBounces(nil)
+	var page []Bounce
+	if it.Next(ctx, &page) {
+		t.Fatalf("Expected no item in the bounce list")
+	}
+}
