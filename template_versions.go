@@ -79,6 +79,9 @@ func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateName s
 	if version.Active {
 		p.addValue("active", boolToString(version.Active))
 	}
+	if version.Template != "" {
+		p.addValue("template", version.Template)
+	}
 
 	var resp templateResp
 	err := putResponseFromJSON(ctx, r, p, &resp)
