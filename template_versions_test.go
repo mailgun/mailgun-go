@@ -65,12 +65,14 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 
 	// Update the Comment
 	version.Comment = UpdatedComment
+	version.Template = Template + "updated"
 	ensure.Nil(t, mg.UpdateTemplateVersion(ctx, tmpl.Name, &version))
 
 	// Ensure update took
 	updated, err := mg.GetTemplateVersion(ctx, tmpl.Name, version.Tag)
 
 	ensure.DeepEqual(t, updated.Comment, UpdatedComment)
+	ensure.DeepEqual(t, updated.Template, Template+"updated")
 
 	// Add a new active Version
 	version2 := mailgun.TemplateVersion{

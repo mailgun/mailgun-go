@@ -170,7 +170,7 @@ import (
 var apiKey string = "your-api-key"
 
 func main() {
-    // To use the /v4 version of validations define MG_URL in the envronment
+    // To use the /v4 version of validations define MG_URL in the environment
     // as `https://api.mailgun.net/v4` or set `v.SetAPIBase("https://api.mailgun.net/v4")`
 
     // Create an instance of the Validator

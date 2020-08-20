@@ -61,6 +61,7 @@ type Accepted struct {
 	Tags            []string    `json:"tags"`
 	Campaigns       []Campaign  `json:"campaigns"`
 	UserVariables   interface{} `json:"user-variables"`
+	Storage         Storage     `json:"storage"`
 }
 
 type Rejected struct {
@@ -92,6 +93,7 @@ type Delivered struct {
 	Method          string     `json:"method"`
 	Tags            []string   `json:"tags"`
 	Campaigns       []Campaign `json:"campaigns"`
+	Storage         Storage    `json:"storage"`
 
 	DeliveryStatus DeliveryStatus `json:"delivery-status"`
 	UserVariables  interface{}    `json:"user-variables"`
@@ -109,6 +111,7 @@ type Failed struct {
 	Method          string     `json:"method"`
 	Tags            []string   `json:"tags"`
 	Campaigns       []Campaign `json:"campaigns"`
+	Storage         Storage    `json:"storage"`
 
 	DeliveryStatus DeliveryStatus `json:"delivery-status"`
 	Severity       string         `json:"severity"`
