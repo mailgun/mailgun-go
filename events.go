@@ -35,9 +35,20 @@ type EventIterator struct {
 	err error
 }
 
+// Create an new iterator to fetch a page of events from the events api with a specific domain
+func (mg *MailgunImpl) ListEventsWithDomain(opts *ListEventOptions, domain string) *EventIterator {
+	url := generateApiUrlWithDomain(mg, eventsEndpoint, domain)
+	return mg.listEvents(url, opts)
+}
+
 // Create an new iterator to fetch a page of events from the events api
 func (mg *MailgunImpl) ListEvents(opts *ListEventOptions) *EventIterator {
-	req := newHTTPRequest(generateApiUrl(mg, eventsEndpoint))
+	url := generateApiUrl(mg, eventsEndpoint)
+	return mg.listEvents(url, opts)
+}
+
+func (mg *MailgunImpl) listEvents(url string, opts *ListEventOptions) *EventIterator {
+	req := newHTTPRequest(url)
 	if opts != nil {
 		if opts.Limit > 0 {
 			req.addParameter("limit", fmt.Sprintf("%d", opts.Limit))
