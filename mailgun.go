@@ -206,6 +206,7 @@ type Mailgun interface {
 	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
 	DeleteMember(ctx context.Context, Member, list string) error
 
+	ListEventsWithDomain(opts *ListEventOptions, domain string) *EventIterator
 	ListEvents(*ListEventOptions) *EventIterator
 	PollEvents(*ListEventOptions) *EventPoller
 
