@@ -84,15 +84,15 @@ func ParseEvent(raw []byte) (Event, error) {
 	}
 
 	// Get the event "constructor" from the map.
-	newEvent, ok := EventNames[e.Name]
+	newEvent, ok := EventNames[e.GetName()]
 	if !ok {
-		return nil, fmt.Errorf("unsupported event: '%s'", e.Name)
+		return nil, fmt.Errorf("unsupported event: '%s'", e.GetName())
 	}
 	event := newEvent()
 
 	// Parse the known event.
 	if err := easyjson.Unmarshal(raw, event); err != nil {
-		return nil, fmt.Errorf("failed to parse event '%s': %v", e.Name, err)
+		return nil, fmt.Errorf("failed to parse event '%s': %v", e.GetName(), err)
 	}
 
 	return event, nil
