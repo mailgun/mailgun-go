@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/mailgun/mailgun-go/v4/events"
-	"github.com/mailru/easyjson"
 )
 
 // ListEventOptions{} modifies the behavior of ListEvents()
@@ -169,7 +169,7 @@ func (ei *EventIterator) fetch(ctx context.Context, url string) error {
 		return err
 	}
 
-	if err := easyjson.Unmarshal(resp.Data, &ei.Response); err != nil {
+	if err := jsoniter.Unmarshal(resp.Data, &ei.Response); err != nil {
 		return fmt.Errorf("failed to un-marshall event.Response: %s", err)
 	}
 	return nil
