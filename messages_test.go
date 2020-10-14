@@ -403,7 +403,7 @@ func TestSendEOFError(t *testing.T) {
 	_, _, err := mg.Send(context.Background(), m)
 	ensure.NotNil(t, err)
 	ensure.StringContains(t, err.Error(), "remote server prematurely closed connection: Post ")
-	ensure.StringContains(t, err.Error(), "/messages: EOF")
+	ensure.StringContains(t, err.Error(), "EOF")
 }
 
 func TestHasRecipient(t *testing.T) {

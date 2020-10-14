@@ -12,7 +12,7 @@ import (
 
 func TestParseErrors(t *testing.T) {
 	_, err := ParseEvent([]byte(""))
-	ensure.DeepEqual(t, err.Error(), "failed to recognize event: EOF")
+	ensure.StringContains(t, err.Error(), "failed to recognize event")
 
 	_, err = ParseEvent([]byte(`{"event": "unknown_event"}`))
 	ensure.DeepEqual(t, err.Error(), "unsupported event: 'unknown_event'")
@@ -21,8 +21,7 @@ func TestParseErrors(t *testing.T) {
 		"event": "accepted",
 		"timestamp": "1420255392.850187"
 	}`))
-	errMsg := "failed to parse event 'accepted': parse error: expected number near offset 59 of '1420255392...'"
-	ensure.DeepEqual(t, err.Error(), errMsg)
+	ensure.StringContains(t, err.Error(), "failed to parse event 'accepted'")
 }
 
 func TestParseSuccess(t *testing.T) {
@@ -62,6 +61,10 @@ func TestParseSuccess(t *testing.T) {
 		        "name": "wantlist"
 		    }
 		],
+		"storage": {
+			"key": "AgEASDSGFB8y4--TSDGxvccvmQB==",
+			"url": "https://storage.eu.mailgun.net/v3/domains/example.com/messages/AgEASDSGFB8y4--TSDGxvccvmQB=="
+		},
 		"recipient": "dude@example.com",
 		"recipient-domain": "example.com",
 		"method": "http",
@@ -77,6 +80,7 @@ func TestParseSuccess(t *testing.T) {
 	ensure.DeepEqual(t, reflect.TypeOf(event).String(), "*events.Accepted")
 	subject := event.(*events.Accepted).Message.Headers.Subject
 	ensure.DeepEqual(t, subject, "Test message going through the bus.")
+	ensure.DeepEqual(t, event.(*events.Accepted).Storage.Key, "AgEASDSGFB8y4--TSDGxvccvmQB==")
 
 	// Make sure the next event parsing attempt will zero the fields.
 	event2, err := ParseEvent([]byte(`{
