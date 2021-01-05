@@ -162,7 +162,7 @@ func (mg *MailgunImpl) GetBounce(ctx context.Context, address string) (Bounce, e
 // AddBounce files a bounce report.
 // Address identifies the intended recipient of the message that bounced.
 // Code corresponds to the numeric response given by the e-mail server which rejected the message.
-// Error providees the corresponding human readable reason for the problem.
+// Error provides the corresponding human readable reason for the problem.
 // For example,
 // here's how the these two fields relate.
 // Suppose the SMTP server responds with an error, as below.
