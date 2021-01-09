@@ -10,7 +10,6 @@ type TemplateEngine string
 
 // Used by CreateTemplate() and AddTemplateVersion() to specify the template engine
 const (
-	TemplateEngineMustache   = TemplateEngine("mustache")
 	TemplateEngineHandlebars = TemplateEngine("handlebars")
 	TemplateEngineGo         = TemplateEngine("go")
 )
