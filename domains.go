@@ -378,6 +378,18 @@ func (mg *MailgunImpl) UpdateOpenTracking(ctx context.Context, domain, active st
 	return err
 }
 
+// Update the DKIM selector for a domain
+func (mg *MailgunImpl) UpdateDomainDkimSelector(ctx context.Context, domain string, dkim_selector string) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/dkim_selector")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("dkim_selector", dkim_selector)
+	_, err := makePutRequest(ctx, r, payload)
+	return err
+}
+
 func boolToString(b bool) string {
 	if b {
 		return "true"

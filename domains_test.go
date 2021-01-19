@@ -153,3 +153,13 @@ func TestDomainVerify(t *testing.T) {
 	_, err := mg.VerifyDomain(ctx, testDomain)
 	ensure.Nil(t, err)
 }
+
+func TestDomainDkimSelector(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
+
+	// Update Domain DKIM selector
+	err := mg.UpdateDomainDkimSelector(ctx, testDomain, "gotest")
+	ensure.Nil(t, err)
+}
