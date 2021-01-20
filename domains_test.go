@@ -163,3 +163,13 @@ func TestDomainDkimSelector(t *testing.T) {
 	err := mg.UpdateDomainDkimSelector(ctx, testDomain, "gotest")
 	ensure.Nil(t, err)
 }
+
+func TestDomainTrackingWebPrefix(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
+
+	// Update Domain Tracking Web Prefix
+	err := mg.UpdateDomainTrackingWebPrefix(ctx, testDomain, "gotest")
+	ensure.Nil(t, err)
+}
