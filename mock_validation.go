@@ -32,6 +32,7 @@ func (ms *MockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 		results.Parts.DisplayName = parts.Name
 	}
 	results.Reason = []string{"no-reason"}
+	results.Risk = "unknown"
 	toJSON(w, results)
 }
 
@@ -51,6 +52,7 @@ func (ms *MockServer) validateEmail(w http.ResponseWriter, r *http.Request) {
 		results.Parts.DisplayName = parts.Name
 	}
 	results.Reason = "no-reason"
+	results.Risk = "unknown"
 	toJSON(w, results)
 }
 

@@ -45,6 +45,8 @@ type EmailVerification struct {
 	Reason string `json:"reason"`
 	// A list of potential reasons why a specific validation may be unsuccessful. (Available in the v4 response)
 	Reasons []string
+	// Risk assessment for the provided email.
+	Risk string `json:"risk"`
 }
 
 type v4EmailValidationResp struct {
@@ -56,6 +58,7 @@ type v4EmailValidationResp struct {
 	IsDisposableAddress bool                   `json:"is_disposable_address"`
 	IsRoleAddress       bool                   `json:"is_role_address"`
 	Reason              []string               `json:"reason"`
+	Risk                string                 `json:"risk"`
 }
 
 type addressParseResult struct {
@@ -194,7 +197,8 @@ func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailB
 		DidYouMean:          res.DidYouMean,
 		IsDisposableAddress: res.IsDisposableAddress,
 		IsRoleAddress:       res.IsRoleAddress,
-		Reasons:             res.Reason}, nil
+		Reasons:             res.Reason,
+		Risk:                res.Risk}, nil
 }
 
 // ParseAddresses takes a list of addresses and sorts them into valid and invalid address categories.
