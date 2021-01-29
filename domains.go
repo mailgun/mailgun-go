@@ -379,13 +379,25 @@ func (mg *MailgunImpl) UpdateOpenTracking(ctx context.Context, domain, active st
 }
 
 // Update the DKIM selector for a domain
-func (mg *MailgunImpl) UpdateDomainDkimSelector(ctx context.Context, domain string, dkim_selector string) error {
+func (mg *MailgunImpl) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/dkim_selector")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
-	payload.addValue("dkim_selector", dkim_selector)
+	payload.addValue("dkim_selector", dkimSelector)
+	_, err := makePutRequest(ctx, r, payload)
+	return err
+}
+
+// Update the CNAME used for tracking opens and clicks
+func (mg *MailgunImpl) UpdateDomainTrackingWebPrefix(ctx context.Context, domain, webPrefix string) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/web_prefix")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("web_prefix", webPrefix)
 	_, err := makePutRequest(ctx, r, payload)
 	return err
 }

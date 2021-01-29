@@ -98,6 +98,7 @@ func (ms *MockServer) addDomainRoutes(r chi.Router) {
 	r.Put("/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
 	r.Get("/domains/{domain}/limits/tag", ms.getTagLimits)
 	r.Put("/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
+	r.Put("/domains/{domain}/web_prefix", ms.updateWebPrefix)
 }
 
 func (ms *MockServer) listDomains(w http.ResponseWriter, r *http.Request) {
@@ -291,6 +292,21 @@ func (ms *MockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request)
 				return
 			}
 			toJSON(w, okResp{Message: "updated dkim selector"})
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
+}
+
+func (ms *MockServer) updateWebPrefix(w http.ResponseWriter, r *http.Request) {
+	for _, d := range ms.domainList {
+		if d.Domain.Name == chi.URLParam(r, "domain") {
+			if r.FormValue("web_prefix") == "" {
+				toJSON(w, okResp{Message: "web_prefix param required"})
+				return
+			}
+			toJSON(w, okResp{Message: "updated web prefix"})
 			return
 		}
 	}
