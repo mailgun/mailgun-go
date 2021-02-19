@@ -33,7 +33,7 @@ type Message struct {
 	nativeSend         bool
 	testMode           bool
 	tracking           bool
-	trackingClicks     bool
+	trackingClicks     string
 	trackingOpens      bool
 	headers            map[string]string
 	variables          map[string]string
@@ -419,7 +419,7 @@ func (m *Message) SetTracking(tracking bool) {
 }
 
 // SetTrackingClicks information is found in the Mailgun documentation.
-func (m *Message) SetTrackingClicks(trackingClicks bool) {
+func (m *Message) SetTrackingClicks(trackingClicks string) {
 	m.trackingClicks = trackingClicks
 	m.trackingClicksSet = true
 }
@@ -552,7 +552,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 		payload.addValue("o:tracking", yesNo(message.tracking))
 	}
 	if message.trackingClicksSet {
-		payload.addValue("o:tracking-clicks", yesNo(message.trackingClicks))
+		payload.addValue("o:tracking-clicks", message.trackingClicks)
 	}
 	if message.trackingOpensSet {
 		payload.addValue("o:tracking-opens", yesNo(message.trackingOpens))

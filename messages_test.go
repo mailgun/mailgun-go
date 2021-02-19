@@ -17,7 +17,7 @@ import (
 const (
 	fromUser       = "=?utf-8?q?Katie_Brewer=2C_CFP=C2=AE?= <joe@example.com>"
 	exampleSubject = "Mailgun-go Example Subject"
-	exampleText    = "Testing some Mailgun awesomeness!"
+	exampleText    = "Testing some Mailgun awesomeness!\nhttps://www.mailgun.com/"
 	exampleHtml    = "<html><head /><body><p>Testing some <a href=\"http://google.com?q=abc&r=def&s=ghi\">Mailgun HTML awesomeness!</a> at www.kc5tja@yahoo.com</p></body></html>"
 	exampleAMPHtml = `<!doctype html><html ⚡4email><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js"></script><style amp4email-boilerplate>body{visibility:hidden}</style><style amp-custom>h1{margin: 1rem;}</style></head><body><h1>Hello, I am an AMP EMAIL!</h1></body></html>`
 	exampleMime    = `Content-Type: text/plain; charset="ascii"
@@ -145,6 +145,26 @@ func TestSendMGTracking(t *testing.T) {
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendTracking:MSG(" + msg + "),ID(" + id + ")")
+	})
+}
+
+func TestSendMGHtmlWithTrackingClicksHtmlOnly(t *testing.T) {
+	if reason := SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
+	spendMoney(t, func() {
+		toUser := os.Getenv("MG_EMAIL_TO")
+		mg, err := NewMailgunFromEnv()
+		ensure.Nil(t, err)
+
+		ctx := context.Background()
+		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m.SetHtml(exampleHtml)
+		m.SetTrackingClicks("htmlonly")
+		msg, id, err := mg.Send(ctx, m)
+		ensure.Nil(t, err)
+		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
 
