@@ -209,6 +209,7 @@ func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]Templ
 }
 
 func (li *TemplateVersionsIterator) fetch(ctx context.Context, url string) error {
+	li.Template.Versions = nil
 	r := newHTTPRequest(url)
 	r.setClient(li.mg.Client())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())

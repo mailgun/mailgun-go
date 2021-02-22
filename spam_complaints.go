@@ -132,6 +132,7 @@ func (ci *ComplaintsIterator) Previous(ctx context.Context, items *[]Complaint) 
 }
 
 func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {
+	ci.Items = nil
 	r := newHTTPRequest(url)
 	r.setClient(ci.mg.Client())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())

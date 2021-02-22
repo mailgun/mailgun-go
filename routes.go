@@ -178,6 +178,7 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 }
 
 func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
+	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
 	r.setClient(ri.mg.Client())

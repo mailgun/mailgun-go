@@ -151,6 +151,7 @@ func (li *ListsIterator) Previous(ctx context.Context, items *[]MailingList) boo
 }
 
 func (li *ListsIterator) fetch(ctx context.Context, url string) error {
+	li.Items = nil
 	r := newHTTPRequest(url)
 	r.setClient(li.mg.Client())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())

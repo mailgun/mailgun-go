@@ -217,6 +217,7 @@ func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
 }
 
 func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
+	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
 	r.setClient(ri.mg.Client())

@@ -148,6 +148,7 @@ func (li *MemberListIterator) Previous(ctx context.Context, items *[]Member) boo
 }
 
 func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
+	li.Lists = nil
 	r := newHTTPRequest(url)
 	r.setClient(li.mg.Client())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
