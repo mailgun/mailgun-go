@@ -60,6 +60,17 @@ func (ms *MockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		accepted.Message.Headers.MessageID = accepted.ID
 		accepted.Message.Headers.Subject = r.FormValue("subject")
 
+		if r.MultipartForm.File != nil {
+			for _, fh := range r.MultipartForm.File {
+				for _, fd := range fh {
+					accepted.Message.Attachments = append(accepted.Message.Attachments, events.Attachment{
+						FileName:    fd.Filename,
+						ContentType: fd.Header.Get("Content-Type"),
+						Size:        int(fd.Size),
+					})
+				}
+			}
+		}
 		accepted.Recipient = r.FormValue("to")
 		accepted.RecipientDomain = strings.Split(to.Address, "@")[1]
 		accepted.Flags = events.Flags{
