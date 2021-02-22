@@ -2,6 +2,7 @@ package mailgun_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/facebookgo/ensure"
@@ -145,4 +146,46 @@ func TestMailingLists(t *testing.T) {
 	newList := protoList
 	newList.Description = "A list whose description changed"
 	ensure.DeepEqual(t, theList, newList)
+}
+
+func TestListMailingListRegression(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
+	address := "test@example.com"
+
+	_, err := mg.CreateMailingList(ctx, mailgun.MailingList{
+		Address:     address,
+		Name:        "paging",
+		Description: "Test paging",
+	})
+	ensure.Nil(t, err)
+
+	for i := 0; i < 200; i++ {
+		var vars map[string]interface{}
+		if i == 5 {
+			vars = map[string]interface{}{"has": "vars"}
+		}
+
+		err := mg.CreateMember(ctx, false, address, mailgun.Member{
+			Address: fmt.Sprintf("%03d@example.com", i),
+			Vars:    vars,
+		})
+		ensure.Nil(t, err)
+	}
+
+	it := mg.ListMembers(address, nil)
+
+	var members []mailgun.Member
+	var found int
+	for it.Next(ctx, &members) {
+		for _, m := range members {
+			if m.Vars != nil {
+				found++
+			}
+			//t.Logf("%v %v", m.Address, m.Vars)
+		}
+	}
+	ensure.DeepEqual(t, found, 1)
+	ensure.Nil(t, err)
 }

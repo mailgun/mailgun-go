@@ -160,6 +160,7 @@ func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential
 }
 
 func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error {
+	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
 	r.setClient(ri.mg.Client())

@@ -158,6 +158,7 @@ func (ti *TagIterator) Err() error {
 }
 
 func (ti *TagIterator) fetch(ctx context.Context, url string) error {
+	ti.Items = nil
 	req := newHTTPRequest(url)
 	req.setClient(ti.mg.Client())
 	req.setBasicAuth(basicAuthUser, ti.mg.APIKey())

@@ -160,6 +160,7 @@ func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
 }
 
 func (ei *EventIterator) fetch(ctx context.Context, url string) error {
+	ei.Items = nil
 	r := newHTTPRequest(url)
 	r.setClient(ei.mg.Client())
 	r.setBasicAuth(basicAuthUser, ei.mg.APIKey())

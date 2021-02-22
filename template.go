@@ -234,6 +234,7 @@ func (ti *TemplatesIterator) Previous(ctx context.Context, items *[]Template) bo
 }
 
 func (ti *TemplatesIterator) fetch(ctx context.Context, url string) error {
+	ti.Items = nil
 	r := newHTTPRequest(url)
 	r.setClient(ti.mg.Client())
 	r.setBasicAuth(basicAuthUser, ti.mg.APIKey())
