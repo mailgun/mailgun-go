@@ -161,7 +161,7 @@ func TestSendMGHtmlWithTrackingClicksHtmlOnly(t *testing.T) {
 		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
-		m.SetTrackingClicks("htmlonly")
+		m.SetTrackingClicks(true)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")

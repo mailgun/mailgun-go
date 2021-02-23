@@ -419,9 +419,10 @@ func (m *Message) SetTracking(tracking bool) {
 }
 
 // SetTrackingClicks information is found in the Mailgun documentation.
-func (m *Message) SetTrackingClicks(trackingClicks string) {
-	m.trackingClicks = trackingClicks
+func (m *Message) SetTrackingClicks(trackingClicks bool) {
+	m.trackingClicks = yesNo(trackingClicks)
 	m.trackingClicksSet = true
+}
 }
 
 // SetRequireTLS information is found in the Mailgun documentation.
