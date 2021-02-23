@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 )
 
 type mailingListContainer struct {
@@ -14,19 +14,19 @@ type mailingListContainer struct {
 	Members     []Member
 }
 
-func (ms *MockServer) addMailingListRoutes(r chi.Router) {
-	r.Get("/lists/pages", ms.listMailingLists)
-	r.Get("/lists/{address}", ms.getMailingList)
-	r.Post("/lists", ms.createMailingList)
-	r.Put("/lists/{address}", ms.updateMailingList)
-	r.Delete("/lists/{address}", ms.deleteMailingList)
+func (ms *MockServer) addMailingListRoutes(r *mux.Router) {
+	r.HandleFunc("/lists/pages", ms.listMailingLists).Methods(http.MethodGet)
+	r.HandleFunc("/lists/{address}", ms.getMailingList).Methods(http.MethodGet)
+	r.HandleFunc("/lists", ms.createMailingList).Methods(http.MethodPost)
+	r.HandleFunc("/lists/{address}", ms.updateMailingList).Methods(http.MethodPut)
+	r.HandleFunc("/lists/{address}", ms.deleteMailingList).Methods(http.MethodDelete)
 
-	r.Get("/lists/{address}/members/pages", ms.listMembers)
-	r.Get("/lists/{address}/members/{member}", ms.getMember)
-	r.Post("/lists/{address}/members", ms.createMember)
-	r.Put("/lists/{address}/members/{member}", ms.updateMember)
-	r.Delete("/lists/{address}/members/{member}", ms.deleteMember)
-	r.Post("/lists/{address}/members.json", ms.bulkCreate)
+	r.HandleFunc("/lists/{address}/members/pages", ms.listMembers).Methods(http.MethodGet)
+	r.HandleFunc("/lists/{address}/members/{member}", ms.getMember).Methods(http.MethodGet)
+	r.HandleFunc("/lists/{address}/members", ms.createMember).Methods(http.MethodPost)
+	r.HandleFunc("/lists/{address}/members/{member}", ms.updateMember).Methods(http.MethodPut)
+	r.HandleFunc("/lists/{address}/members/{member}", ms.deleteMember).Methods(http.MethodDelete)
+	r.HandleFunc("/lists/{address}/members.json", ms.bulkCreate).Methods(http.MethodPost)
 
 	ms.mailingList = append(ms.mailingList, mailingListContainer{
 		MailingList: MailingList{
@@ -91,7 +91,7 @@ func (ms *MockServer) listMailingLists(w http.ResponseWriter, r *http.Request) {
 
 func (ms *MockServer) getMailingList(w http.ResponseWriter, r *http.Request) {
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			toJSON(w, mailingListResponse{MailingList: ml.MailingList})
 			return
 		}
@@ -103,7 +103,7 @@ func (ms *MockServer) getMailingList(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) deleteMailingList(w http.ResponseWriter, r *http.Request) {
 	result := ms.mailingList[:0]
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			continue
 		}
 		result = append(result, ml)
@@ -121,7 +121,7 @@ func (ms *MockServer) deleteMailingList(w http.ResponseWriter, r *http.Request) 
 
 func (ms *MockServer) updateMailingList(w http.ResponseWriter, r *http.Request) {
 	for i, d := range ms.mailingList {
-		if d.MailingList.Address == chi.URLParam(r, "address") {
+		if d.MailingList.Address == mux.Vars(r)["address"] {
 			if r.FormValue("address") != "" {
 				ms.mailingList[i].MailingList.Address = r.FormValue("address")
 			}
@@ -161,7 +161,7 @@ func (ms *MockServer) listMembers(w http.ResponseWriter, r *http.Request) {
 	var found bool
 
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			found = true
 			for _, member := range ml.Members {
 				list = append(list, member)
@@ -213,10 +213,10 @@ func (ms *MockServer) listMembers(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) getMember(w http.ResponseWriter, r *http.Request) {
 	var found bool
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			found = true
 			for _, member := range ml.Members {
-				if member.Address == chi.URLParam(r, "member") {
+				if member.Address == mux.Vars(r)["member"] {
 					toJSON(w, memberResponse{Member: member})
 					return
 				}
@@ -237,7 +237,7 @@ func (ms *MockServer) getMember(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) deleteMember(w http.ResponseWriter, r *http.Request) {
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			idx = i
 		}
 	}
@@ -250,7 +250,7 @@ func (ms *MockServer) deleteMember(w http.ResponseWriter, r *http.Request) {
 
 	result := ms.mailingList[idx].Members[:0]
 	for _, m := range ms.mailingList[idx].Members {
-		if m.Address == chi.URLParam(r, "member") {
+		if m.Address == mux.Vars(r)["member"] {
 			continue
 		}
 		result = append(result, m)
@@ -269,7 +269,7 @@ func (ms *MockServer) deleteMember(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) updateMember(w http.ResponseWriter, r *http.Request) {
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			idx = i
 		}
 	}
@@ -281,7 +281,7 @@ func (ms *MockServer) updateMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i, m := range ms.mailingList[idx].Members {
-		if m.Address == chi.URLParam(r, "member") {
+		if m.Address == mux.Vars(r)["member"] {
 			if r.FormValue("address") != "" {
 				ms.mailingList[idx].Members[i].Address = parseAddress(r.FormValue("address"))
 			}
@@ -306,7 +306,7 @@ func (ms *MockServer) updateMember(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) createMember(w http.ResponseWriter, r *http.Request) {
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			idx = i
 		}
 	}
@@ -349,7 +349,7 @@ func (ms *MockServer) createMember(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) bulkCreate(w http.ResponseWriter, r *http.Request) {
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == mux.Vars(r)["address"] {
 			idx = i
 		}
 	}

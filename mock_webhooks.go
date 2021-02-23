@@ -3,17 +3,17 @@ package mailgun
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 )
 
-func (ms *MockServer) addWebhookRoutes(r chi.Router) {
-	r.Route("/domains/{domain}/webhooks", func(r chi.Router) {
-		r.Get("/", ms.listWebHooks)
-		r.Post("/", ms.postWebHook)
-		r.Get("/{webhook}", ms.getWebHook)
-		r.Put("/{webhook}", ms.putWebHook)
-		r.Delete("/{webhook}", ms.deleteWebHook)
-	})
+func (ms *MockServer) addWebhookRoutes(r *mux.Router) {
+	sr := r.PathPrefix("/domains/{domain}/webhooks").Subrouter()
+	sr.HandleFunc("", ms.listWebHooks).Methods(http.MethodGet)
+	sr.HandleFunc("", ms.postWebHook).Methods(http.MethodPost)
+	sr.HandleFunc("/{webhook}", ms.getWebHook).Methods(http.MethodGet)
+	sr.HandleFunc("/{webhook}", ms.putWebHook).Methods(http.MethodPut)
+	sr.HandleFunc("/{webhook}", ms.deleteWebHook).Methods(http.MethodDelete)
+
 	ms.webhooks = WebHooksListResponse{
 		Webhooks: map[string]UrlOrUrls{
 			"new-webhook": {
@@ -33,7 +33,7 @@ func (ms *MockServer) listWebHooks(w http.ResponseWriter, _ *http.Request) {
 func (ms *MockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
 	resp := WebHookResponse{
 		Webhook: UrlOrUrls{
-			Urls: ms.webhooks.Webhooks[chi.URLParam(r, "webhook")].Urls,
+			Urls: ms.webhooks.Webhooks[mux.Vars(r)["webhook"]].Urls,
 		},
 	}
 	toJSON(w, resp)
@@ -66,18 +66,18 @@ func (ms *MockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
 	for _, url := range r.Form["url"] {
 		urls = append(urls, url)
 	}
-	ms.webhooks.Webhooks[chi.URLParam(r, "webhook")] = UrlOrUrls{Urls: urls}
+	ms.webhooks.Webhooks[mux.Vars(r)["webhook"]] = UrlOrUrls{Urls: urls}
 
 	toJSON(w, okResp{Message: "success"})
 }
 
 func (ms *MockServer) deleteWebHook(w http.ResponseWriter, r *http.Request) {
-	_, ok := ms.webhooks.Webhooks[chi.URLParam(r, "webhook")]
+	_, ok := ms.webhooks.Webhooks[mux.Vars(r)["webhook"]]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		toJSON(w, okResp{Message: "webhook not found"})
 	}
 
-	delete(ms.webhooks.Webhooks, chi.URLParam(r, "webhook"))
+	delete(ms.webhooks.Webhooks, mux.Vars(r)["webhook"])
 	toJSON(w, okResp{Message: "success"})
 }
