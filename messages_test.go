@@ -148,7 +148,7 @@ func TestSendMGTracking(t *testing.T) {
 	})
 }
 
-func TestSendMGHtmlWithTrackingClicksHtmlOnly(t *testing.T) {
+func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
 	if reason := SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
@@ -161,7 +161,12 @@ func TestSendMGHtmlWithTrackingClicksHtmlOnly(t *testing.T) {
 		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
-		m.SetTrackingClicks(true)
+		options := TrackingOptions{
+			Tracking:       true,
+			TrackingClicks: "htmlonly",
+			TrackingOpens:  true,
+		}
+		m.SetTrackingOptions(&options)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")

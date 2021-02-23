@@ -133,6 +133,13 @@ type sendMessageResponse struct {
 	Id      string `json:"id"`
 }
 
+// TrackingOptions contains fields relevant to trackings.
+type TrackingOptions struct {
+	Tracking       bool
+	TrackingClicks string
+	TrackingOpens  bool
+}
+
 // features abstracts the common characteristics between regular and MIME messages.
 // addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the package-global AddCC, AddBCC,
 // RecipientCount, SetHtml and SetAMPHtml calls, as these functions are ignored for MIME messages.
@@ -423,6 +430,17 @@ func (m *Message) SetTrackingClicks(trackingClicks bool) {
 	m.trackingClicks = yesNo(trackingClicks)
 	m.trackingClicksSet = true
 }
+
+// SetTrackingOptions sets the o:tracking, o:tracking-clicks and o:tracking-opens at once.
+func (m *Message) SetTrackingOptions(options *TrackingOptions) {
+	m.tracking = options.Tracking
+	m.trackingSet = true
+
+	m.trackingClicks = options.TrackingClicks
+	m.trackingClicksSet = true
+
+	m.trackingOpens = options.TrackingOpens
+	m.trackingOpensSet = true
 }
 
 // SetRequireTLS information is found in the Mailgun documentation.
