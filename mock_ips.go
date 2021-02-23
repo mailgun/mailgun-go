@@ -3,18 +3,18 @@ package mailgun
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 )
 
-func (ms *MockServer) addIPRoutes(r chi.Router) {
-	r.Get("/ips", ms.listIPS)
-	r.Get("/ips/{ip}", ms.getIPAddress)
-	r.Route("/domains/{domain}/ips", func(r chi.Router) {
-		r.Get("/", ms.listDomainIPS)
-		r.Get("/{ip}", ms.getIPAddress)
-		r.Post("/", ms.postDomainIPS)
-		r.Delete("/{ip}", ms.deleteDomainIPS)
-	})
+func (ms *MockServer) addIPRoutes(r *mux.Router) {
+	r.HandleFunc("/ips", ms.listIPS).Methods(http.MethodGet)
+	r.HandleFunc("/ips/{ip}", ms.getIPAddress).Methods(http.MethodGet)
+	func(r *mux.Router) {
+		r.HandleFunc("", ms.listDomainIPS).Methods(http.MethodGet)
+		r.HandleFunc("/{ip}", ms.getIPAddress).Methods(http.MethodGet)
+		r.HandleFunc("", ms.postDomainIPS).Methods(http.MethodPost)
+		r.HandleFunc("/{ip}", ms.deleteDomainIPS).Methods(http.MethodDelete)
+	}(r.PathPrefix("/domains/{domain}/ips").Subrouter())
 }
 
 func (ms *MockServer) listIPS(w http.ResponseWriter, _ *http.Request) {
@@ -26,7 +26,7 @@ func (ms *MockServer) listIPS(w http.ResponseWriter, _ *http.Request) {
 
 func (ms *MockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, IPAddress{
-		IP:        chi.URLParam(r, "ip"),
+		IP:        mux.Vars(r)["ip"],
 		RDNS:      "luna.mailgun.net",
 		Dedicated: true,
 	})
@@ -47,7 +47,7 @@ func (ms *MockServer) postDomainIPS(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) deleteDomainIPS(w http.ResponseWriter, r *http.Request) {
 	result := ms.domainIPS[:0]
 	for _, ip := range ms.domainIPS {
-		if ip == chi.URLParam(r, "ip") {
+		if ip == mux.Vars(r)["ip"] {
 			continue
 		}
 		result = append(result, ip)

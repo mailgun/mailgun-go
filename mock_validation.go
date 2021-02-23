@@ -5,15 +5,15 @@ import (
 	"net/mail"
 	"strings"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 )
 
-func (ms *MockServer) addValidationRoutes(r chi.Router) {
-	r.Get("/v3/address/validate", ms.validateEmail)
-	r.Get("/v3/address/parse", ms.parseEmail)
-	r.Get("/v3/address/private/validate", ms.validateEmail)
-	r.Get("/v3/address/private/parse", ms.parseEmail)
-	r.Get("/v4/address/validate", ms.validateEmailV4)
+func (ms *MockServer) addValidationRoutes(r *mux.Router) {
+	r.HandleFunc("/v3/address/validate", ms.validateEmail).Methods(http.MethodGet)
+	r.HandleFunc("/v3/address/parse", ms.parseEmail).Methods(http.MethodGet)
+	r.HandleFunc("/v3/address/private/validate", ms.validateEmail).Methods(http.MethodGet)
+	r.HandleFunc("/v3/address/private/parse", ms.parseEmail).Methods(http.MethodGet)
+	r.HandleFunc("/v4/address/validate", ms.validateEmailV4).Methods(http.MethodGet)
 }
 
 func (ms *MockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {

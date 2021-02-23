@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 )
 
-func (ms *MockServer) addExportRoutes(r chi.Router) {
-	r.Post("/exports", ms.postExports)
-	r.Get("/exports", ms.listExports)
-	r.Get("/exports/{id}", ms.getExport)
-	r.Get("/exports/{id}/download_url", ms.getExportLink)
+func (ms *MockServer) addExportRoutes(r *mux.Router) {
+	r.HandleFunc("/exports", ms.postExports).Methods(http.MethodPost)
+	r.HandleFunc("/exports", ms.listExports).Methods(http.MethodGet)
+	r.HandleFunc("/exports/{id}", ms.getExport).Methods(http.MethodGet)
+	r.HandleFunc("/exports/{id}/download_url", ms.getExportLink).Methods(http.MethodGet)
 }
 
 func (ms *MockServer) postExports(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +33,7 @@ func (ms *MockServer) listExports(w http.ResponseWriter, _ *http.Request) {
 
 func (ms *MockServer) getExport(w http.ResponseWriter, r *http.Request) {
 	for _, export := range ms.exportList {
-		if export.ID == chi.URLParam(r, "id") {
+		if export.ID == mux.Vars(r)["id"] {
 			toJSON(w, export)
 			return
 		}

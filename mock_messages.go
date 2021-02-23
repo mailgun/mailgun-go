@@ -6,16 +6,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 	"github.com/mailgun/mailgun-go/v4/events"
 )
 
-func (ms *MockServer) addMessagesRoutes(r chi.Router) {
-	r.Post("/{domain}/messages", ms.createMessages)
+func (ms *MockServer) addMessagesRoutes(r *mux.Router) {
+	r.HandleFunc("/{domain}/messages", ms.createMessages).Methods(http.MethodPost)
 
 	// This path is made up; it could be anything as the storage url could change over time
-	r.Get("/se.storage.url/messages/{id}", ms.getStoredMessages)
-	r.Post("/se.storage.url/messages/{id}", ms.sendStoredMessages)
+	r.HandleFunc("/se.storage.url/messages/{id}", ms.getStoredMessages).Methods(http.MethodGet)
+	r.HandleFunc("/se.storage.url/messages/{id}", ms.sendStoredMessages).Methods(http.MethodPost)
 }
 
 // TODO: This implementation doesn't support multiple recipients
@@ -83,7 +83,7 @@ func (ms *MockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *MockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	id := mux.Vars(r)["id"]
 
 	// Find our stored event
 	var stored *events.Stored
@@ -113,7 +113,7 @@ func (ms *MockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ms *MockServer) sendStoredMessages(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	id := mux.Vars(r)["id"]
 
 	// Find our stored event
 	var stored *events.Stored

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 )
 
 // A mailgun api mock suitable for testing
@@ -32,9 +32,9 @@ func NewMockServer() MockServer {
 	ms := MockServer{}
 
 	// Add all our handlers
-	r := chi.NewRouter()
+	r := mux.NewRouter()
 
-	r.Route("/v3", func(r chi.Router) {
+	func(r *mux.Router) {
 		ms.addIPRoutes(r)
 		ms.addExportRoutes(r)
 		ms.addDomainRoutes(r)
@@ -43,7 +43,7 @@ func NewMockServer() MockServer {
 		ms.addMessagesRoutes(r)
 		ms.addRoutes(r)
 		ms.addWebhookRoutes(r)
-	})
+	}(r.PathPrefix("/v3").Subrouter())
 	ms.addValidationRoutes(r)
 
 	// Start the server

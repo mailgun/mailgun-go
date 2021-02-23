@@ -5,12 +5,12 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/go-chi/chi"
+	"github.com/gorilla/mux"
 	"github.com/mailgun/mailgun-go/v4/events"
 )
 
-func (ms *MockServer) addEventRoutes(r chi.Router) {
-	r.Get("/{domain}/events", ms.listEvents)
+func (ms *MockServer) addEventRoutes(r *mux.Router) {
+	r.HandleFunc("/{domain}/events", ms.listEvents).Methods(http.MethodGet)
 
 	var (
 		tags            = []string{"tag1", "tag2"}

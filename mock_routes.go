@@ -2,21 +2,22 @@ package mailgun
 
 import (
 	"fmt"
-	"github.com/go-chi/chi"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type routeResponse struct {
 	Route Route `json:"route"`
 }
 
-func (ms *MockServer) addRoutes(r chi.Router) {
-	r.Post("/routes", ms.createRoute)
-	r.Get("/routes", ms.listRoutes)
-	r.Get("/routes/{id}", ms.getRoute)
-	r.Put("/routes/{id}", ms.updateRoute)
-	r.Delete("/routes/{id}", ms.deleteRoute)
+func (ms *MockServer) addRoutes(r *mux.Router) {
+	r.HandleFunc("/routes", ms.createRoute).Methods(http.MethodPost)
+	r.HandleFunc("/routes", ms.listRoutes).Methods(http.MethodGet)
+	r.HandleFunc("/routes/{id}", ms.getRoute).Methods(http.MethodGet)
+	r.HandleFunc("/routes/{id}", ms.updateRoute).Methods(http.MethodPut)
+	r.HandleFunc("/routes/{id}", ms.deleteRoute).Methods(http.MethodDelete)
 
 	for i := 0; i < 10; i++ {
 		ms.routeList = append(ms.routeList, Route{
@@ -65,7 +66,7 @@ func (ms *MockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
 
 func (ms *MockServer) getRoute(w http.ResponseWriter, r *http.Request) {
 	for _, item := range ms.routeList {
-		if item.Id == chi.URLParam(r, "id") {
+		if item.Id == mux.Vars(r)["id"] {
 			toJSON(w, routeResponse{Route: item})
 			return
 		}
@@ -97,7 +98,7 @@ func (ms *MockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 
 func (ms *MockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 	for i, item := range ms.routeList {
-		if item.Id == chi.URLParam(r, "id") {
+		if item.Id == mux.Vars(r)["id"] {
 
 			if r.FormValue("action") != "" {
 				ms.routeList[i].Actions = r.Form["action"]
@@ -122,7 +123,7 @@ func (ms *MockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 func (ms *MockServer) deleteRoute(w http.ResponseWriter, r *http.Request) {
 	result := ms.routeList[:0]
 	for _, item := range ms.routeList {
-		if item.Id == chi.URLParam(r, "id") {
+		if item.Id == mux.Vars(r)["id"] {
 			continue
 		}
 		result = append(result, item)
