@@ -33,7 +33,7 @@ type Message struct {
 	nativeSend         bool
 	testMode           bool
 	tracking           bool
-	trackingClicks     bool
+	trackingClicks     string
 	trackingOpens      bool
 	headers            map[string]string
 	variables          map[string]string
@@ -131,6 +131,13 @@ type mimeMessage struct {
 type sendMessageResponse struct {
 	Message string `json:"message"`
 	Id      string `json:"id"`
+}
+
+// TrackingOptions contains fields relevant to trackings.
+type TrackingOptions struct {
+	Tracking       bool
+	TrackingClicks string
+	TrackingOpens  bool
 }
 
 // features abstracts the common characteristics between regular and MIME messages.
@@ -420,8 +427,20 @@ func (m *Message) SetTracking(tracking bool) {
 
 // SetTrackingClicks information is found in the Mailgun documentation.
 func (m *Message) SetTrackingClicks(trackingClicks bool) {
-	m.trackingClicks = trackingClicks
+	m.trackingClicks = yesNo(trackingClicks)
 	m.trackingClicksSet = true
+}
+
+// SetTrackingOptions sets the o:tracking, o:tracking-clicks and o:tracking-opens at once.
+func (m *Message) SetTrackingOptions(options *TrackingOptions) {
+	m.tracking = options.Tracking
+	m.trackingSet = true
+
+	m.trackingClicks = options.TrackingClicks
+	m.trackingClicksSet = true
+
+	m.trackingOpens = options.TrackingOpens
+	m.trackingOpensSet = true
 }
 
 // SetRequireTLS information is found in the Mailgun documentation.
@@ -552,7 +571,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 		payload.addValue("o:tracking", yesNo(message.tracking))
 	}
 	if message.trackingClicksSet {
-		payload.addValue("o:tracking-clicks", yesNo(message.trackingClicks))
+		payload.addValue("o:tracking-clicks", message.trackingClicks)
 	}
 	if message.trackingOpensSet {
 		payload.addValue("o:tracking-opens", yesNo(message.trackingOpens))
