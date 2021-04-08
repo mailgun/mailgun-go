@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (ms *MockServer) addIPRoutes(r *mux.Router) {
+func (ms *mockServer) addIPRoutes(r *mux.Router) {
 	r.HandleFunc("/ips", ms.listIPS).Methods(http.MethodGet)
 	r.HandleFunc("/ips/{ip}", ms.getIPAddress).Methods(http.MethodGet)
 	func(r *mux.Router) {
@@ -17,14 +17,14 @@ func (ms *MockServer) addIPRoutes(r *mux.Router) {
 	}(r.PathPrefix("/domains/{domain}/ips").Subrouter())
 }
 
-func (ms *MockServer) listIPS(w http.ResponseWriter, _ *http.Request) {
+func (ms *mockServer) listIPS(w http.ResponseWriter, _ *http.Request) {
 	toJSON(w, ipAddressListResponse{
 		TotalCount: 2,
 		Items:      []string{"172.0.0.1", "192.168.1.1"},
 	})
 }
 
-func (ms *MockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, IPAddress{
 		IP:        mux.Vars(r)["ip"],
 		RDNS:      "luna.mailgun.net",
@@ -32,19 +32,19 @@ func (ms *MockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *MockServer) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
+func (ms *mockServer) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
 	toJSON(w, ipAddressListResponse{
 		TotalCount: 2,
 		Items:      ms.domainIPS,
 	})
 }
 
-func (ms *MockServer) postDomainIPS(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) postDomainIPS(w http.ResponseWriter, r *http.Request) {
 	ms.domainIPS = append(ms.domainIPS, r.FormValue("ip"))
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *MockServer) deleteDomainIPS(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) deleteDomainIPS(w http.ResponseWriter, r *http.Request) {
 	result := ms.domainIPS[:0]
 	for _, ip := range ms.domainIPS {
 		if ip == mux.Vars(r)["ip"] {

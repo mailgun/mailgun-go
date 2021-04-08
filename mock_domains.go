@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type domainContainer struct {
+type DomainContainer struct {
 	Domain              Domain            `json:"domain"`
 	ReceivingDNSRecords []DNSRecord       `json:"receiving_dns_records"`
 	SendingDNSRecords   []DNSRecord       `json:"sending_dns_records"`
@@ -16,9 +16,9 @@ type domainContainer struct {
 	TagLimits           *TagLimits        `json:"limits,omitempty"`
 }
 
-func (ms *MockServer) addDomainRoutes(r *mux.Router) {
+func (ms *mockServer) addDomainRoutes(r *mux.Router) {
 
-	ms.domainList = append(ms.domainList, domainContainer{
+	ms.domainList = append(ms.domainList, DomainContainer{
 		Domain: Domain{
 			CreatedAt:    RFC2822Time(time.Now().UTC()),
 			Name:         "mailgun.test",
@@ -101,7 +101,7 @@ func (ms *MockServer) addDomainRoutes(r *mux.Router) {
 	r.HandleFunc("/domains/{domain}/web_prefix", ms.updateWebPrefix).Methods(http.MethodPut)
 }
 
-func (ms *MockServer) listDomains(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
 	var list []Domain
 	for _, domain := range ms.domainList {
 		list = append(list, domain.Domain)
@@ -137,7 +137,7 @@ func (ms *MockServer) listDomains(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *MockServer) getDomain(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getDomain(w http.ResponseWriter, r *http.Request) {
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			d.Connection = nil
@@ -149,8 +149,8 @@ func (ms *MockServer) getDomain(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) createDomain(w http.ResponseWriter, r *http.Request) {
-	ms.domainList = append(ms.domainList, domainContainer{
+func (ms *mockServer) createDomain(w http.ResponseWriter, r *http.Request) {
+	ms.domainList = append(ms.domainList, DomainContainer{
 		Domain: Domain{
 			CreatedAt:    RFC2822Time(time.Now()),
 			Name:         r.FormValue("name"),
@@ -164,7 +164,7 @@ func (ms *MockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "Domain has been created"})
 }
 
-func (ms *MockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
 	result := ms.domainList[:0]
 	for _, domain := range ms.domainList {
 		if domain.Domain.Name == mux.Vars(r)["domain"] {
@@ -183,7 +183,7 @@ func (ms *MockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) getConnection(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getConnection(w http.ResponseWriter, r *http.Request) {
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			resp := domainConnectionResponse{
@@ -197,7 +197,7 @@ func (ms *MockServer) getConnection(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Connection = &DomainConnection{
@@ -212,7 +212,7 @@ func (ms *MockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) getTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getTracking(w http.ResponseWriter, r *http.Request) {
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			resp := domainTrackingResponse{
@@ -226,7 +226,7 @@ func (ms *MockServer) getTracking(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) updateClickTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) updateClickTracking(w http.ResponseWriter, r *http.Request) {
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Tracking.Click.Active = stringToBool(r.FormValue("active"))
@@ -238,7 +238,7 @@ func (ms *MockServer) updateClickTracking(w http.ResponseWriter, r *http.Request
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request) {
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Tracking.Open.Active = stringToBool(r.FormValue("active"))
@@ -250,7 +250,7 @@ func (ms *MockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request)
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request) {
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Tracking.Unsubscribe.Active = stringToBool(r.FormValue("active"))
@@ -268,7 +268,7 @@ func (ms *MockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			if d.TagLimits == nil {
@@ -284,7 +284,7 @@ func (ms *MockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request) {
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			if r.FormValue("dkim_selector") == "" {
@@ -299,7 +299,7 @@ func (ms *MockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request)
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *MockServer) updateWebPrefix(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) updateWebPrefix(w http.ResponseWriter, r *http.Request) {
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			if r.FormValue("web_prefix") == "" {

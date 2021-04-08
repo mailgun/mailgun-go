@@ -12,7 +12,7 @@ type routeResponse struct {
 	Route Route `json:"route"`
 }
 
-func (ms *MockServer) addRoutes(r *mux.Router) {
+func (ms *mockServer) addRoutes(r *mux.Router) {
 	r.HandleFunc("/routes", ms.createRoute).Methods(http.MethodPost)
 	r.HandleFunc("/routes", ms.listRoutes).Methods(http.MethodGet)
 	r.HandleFunc("/routes/{id}", ms.getRoute).Methods(http.MethodGet)
@@ -33,7 +33,7 @@ func (ms *MockServer) addRoutes(r *mux.Router) {
 	}
 }
 
-func (ms *MockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
 	skip := stringToInt(r.FormValue("skip"))
 	limit := stringToInt(r.FormValue("limit"))
 	if limit == 0 {
@@ -64,7 +64,7 @@ func (ms *MockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *MockServer) getRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getRoute(w http.ResponseWriter, r *http.Request) {
 	for _, item := range ms.routeList {
 		if item.Id == mux.Vars(r)["id"] {
 			toJSON(w, routeResponse{Route: item})
@@ -75,7 +75,7 @@ func (ms *MockServer) getRoute(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "route not found"})
 }
 
-func (ms *MockServer) createRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("action") == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		toJSON(w, okResp{Message: "'action' parameter is required"})
@@ -96,7 +96,7 @@ func (ms *MockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *MockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 	for i, item := range ms.routeList {
 		if item.Id == mux.Vars(r)["id"] {
 
@@ -120,7 +120,7 @@ func (ms *MockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "route not found"})
 }
 
-func (ms *MockServer) deleteRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) deleteRoute(w http.ResponseWriter, r *http.Request) {
 	result := ms.routeList[:0]
 	for _, item := range ms.routeList {
 		if item.Id == mux.Vars(r)["id"] {
