@@ -9,7 +9,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/events"
 )
 
-func (ms *MockServer) addEventRoutes(r *mux.Router) {
+func (ms *mockServer) addEventRoutes(r *mux.Router) {
 	r.HandleFunc("/{domain}/events", ms.listEvents).Methods(http.MethodGet)
 
 	var (
@@ -193,7 +193,7 @@ type eventsResponse struct {
 	Paging Paging  `json:"paging"`
 }
 
-func (ms *MockServer) listEvents(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
 	var idx []string
 
 	for _, e := range ms.events {

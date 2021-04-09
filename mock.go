@@ -14,22 +14,63 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type MockServer interface {
+	Stop()
+	URL4() string
+	URL() string
+	DomainIPS() []string
+	DomainList() []DomainContainer
+	ExportList() []Export
+	MailingList() []MailingListContainer
+	RouteList() []Route
+	Events() []Event
+	Webhooks() WebHooksListResponse
+}
+
 // A mailgun api mock suitable for testing
-type MockServer struct {
+type mockServer struct {
 	srv *httptest.Server
 
 	domainIPS   []string
-	domainList  []domainContainer
+	domainList  []DomainContainer
 	exportList  []Export
-	mailingList []mailingListContainer
+	mailingList []MailingListContainer
 	routeList   []Route
 	events      []Event
 	webhooks    WebHooksListResponse
 }
 
+func (ms *mockServer) DomainIPS() []string {
+	return ms.domainIPS
+}
+
+func (ms *mockServer) DomainList() []DomainContainer {
+	return ms.domainList
+}
+
+func (ms *mockServer) ExportList() []Export {
+	return ms.exportList
+}
+
+func (ms *mockServer) MailingList() []MailingListContainer {
+	return ms.mailingList
+}
+
+func (ms *mockServer) RouteList() []Route {
+	return ms.routeList
+}
+
+func (ms *mockServer) Events() []Event {
+	return ms.events
+}
+
+func (ms *mockServer) Webhooks() WebHooksListResponse {
+	return ms.webhooks
+}
+
 // Create a new instance of the mailgun API mock server
 func NewMockServer() MockServer {
-	ms := MockServer{}
+	ms := mockServer{}
 
 	// Add all our handlers
 	r := mux.NewRouter()
@@ -48,20 +89,20 @@ func NewMockServer() MockServer {
 
 	// Start the server
 	ms.srv = httptest.NewServer(r)
-	return ms
+	return &ms
 }
 
 // Stop the server
-func (ms *MockServer) Stop() {
+func (ms *mockServer) Stop() {
 	ms.srv.Close()
 }
 
-func (ms *MockServer) URL4() string {
+func (ms *mockServer) URL4() string {
 	return ms.srv.URL + "/v4"
 }
 
 // URL returns the URL used to connect to the mock server
-func (ms *MockServer) URL() string {
+func (ms *mockServer) URL() string {
 	return ms.srv.URL + "/v3"
 }
 

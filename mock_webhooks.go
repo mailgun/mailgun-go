@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (ms *MockServer) addWebhookRoutes(r *mux.Router) {
+func (ms *mockServer) addWebhookRoutes(r *mux.Router) {
 	sr := r.PathPrefix("/domains/{domain}/webhooks").Subrouter()
 	sr.HandleFunc("", ms.listWebHooks).Methods(http.MethodGet)
 	sr.HandleFunc("", ms.postWebHook).Methods(http.MethodPost)
@@ -26,11 +26,11 @@ func (ms *MockServer) addWebhookRoutes(r *mux.Router) {
 	}
 }
 
-func (ms *MockServer) listWebHooks(w http.ResponseWriter, _ *http.Request) {
+func (ms *mockServer) listWebHooks(w http.ResponseWriter, _ *http.Request) {
 	toJSON(w, ms.webhooks)
 }
 
-func (ms *MockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
 	resp := WebHookResponse{
 		Webhook: UrlOrUrls{
 			Urls: ms.webhooks.Webhooks[mux.Vars(r)["webhook"]].Urls,
@@ -39,7 +39,7 @@ func (ms *MockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, resp)
 }
 
-func (ms *MockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		toJSON(w, okResp{Message: err.Error()})
@@ -55,7 +55,7 @@ func (ms *MockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *MockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		toJSON(w, okResp{Message: err.Error()})
@@ -71,7 +71,7 @@ func (ms *MockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *MockServer) deleteWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) deleteWebHook(w http.ResponseWriter, r *http.Request) {
 	_, ok := ms.webhooks.Webhooks[mux.Vars(r)["webhook"]]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
