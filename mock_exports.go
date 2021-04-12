@@ -15,6 +15,8 @@ func (ms *mockServer) addExportRoutes(r *mux.Router) {
 }
 
 func (ms *mockServer) postExports(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	e := Export{
 		ID:     strconv.Itoa(len(ms.exportList)),
 		URL:    r.FormValue("url"),
@@ -26,12 +28,16 @@ func (ms *mockServer) postExports(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) listExports(w http.ResponseWriter, _ *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	toJSON(w, ExportList{
 		Items: ms.exportList,
 	})
 }
 
 func (ms *mockServer) getExport(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	for _, export := range ms.exportList {
 		if export.ID == mux.Vars(r)["id"] {
 			toJSON(w, export)

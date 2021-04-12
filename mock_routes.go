@@ -76,6 +76,9 @@ func (ms *mockServer) getRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) createRoute(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	if r.FormValue("action") == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		toJSON(w, okResp{Message: "'action' parameter is required"})
@@ -97,6 +100,9 @@ func (ms *mockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for i, item := range ms.routeList {
 		if item.Id == mux.Vars(r)["id"] {
 
@@ -121,6 +127,9 @@ func (ms *mockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) deleteRoute(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	result := ms.routeList[:0]
 	for _, item := range ms.routeList {
 		if item.Id == mux.Vars(r)["id"] {

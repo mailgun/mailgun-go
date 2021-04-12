@@ -27,10 +27,16 @@ func (ms *mockServer) addWebhookRoutes(r *mux.Router) {
 }
 
 func (ms *mockServer) listWebHooks(w http.ResponseWriter, _ *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	toJSON(w, ms.webhooks)
 }
 
 func (ms *mockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	resp := WebHookResponse{
 		Webhook: UrlOrUrls{
 			Urls: ms.webhooks.Webhooks[mux.Vars(r)["webhook"]].Urls,
@@ -40,6 +46,9 @@ func (ms *mockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	if err := r.ParseForm(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		toJSON(w, okResp{Message: err.Error()})
@@ -56,6 +65,9 @@ func (ms *mockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	if err := r.ParseForm(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		toJSON(w, okResp{Message: err.Error()})
@@ -72,6 +84,9 @@ func (ms *mockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) deleteWebHook(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	_, ok := ms.webhooks.Webhooks[mux.Vars(r)["webhook"]]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)

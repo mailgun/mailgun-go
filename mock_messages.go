@@ -49,7 +49,9 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		stored.Flags = events.Flags{
 			IsTestMode: false,
 		}
+		ms.mutex.Lock()
 		ms.events = append(ms.events, stored)
+		ms.mutex.Unlock()
 	default:
 		accepted := new(events.Accepted)
 		accepted.Name = events.EventAccepted
@@ -76,7 +78,9 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		accepted.Flags = events.Flags{
 			IsAuthenticated: true,
 		}
+		ms.mutex.Lock()
 		ms.events = append(ms.events, accepted)
+		ms.mutex.Unlock()
 	}
 
 	toJSON(w, okResp{ID: "<" + id + ">", Message: "Queued. Thank you."})
@@ -84,6 +88,8 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 
 func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 
 	// Find our stored event
 	var stored *events.Stored
@@ -114,6 +120,8 @@ func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) 
 
 func (ms *mockServer) sendStoredMessages(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 
 	// Find our stored event
 	var stored *events.Stored

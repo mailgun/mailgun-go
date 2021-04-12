@@ -102,6 +102,9 @@ func (ms *mockServer) addDomainRoutes(r *mux.Router) {
 }
 
 func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	var list []Domain
 	for _, domain := range ms.domainList {
 		list = append(list, domain.Domain)
@@ -138,6 +141,9 @@ func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) getDomain(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			d.Connection = nil
@@ -150,6 +156,9 @@ func (ms *mockServer) getDomain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) createDomain(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	ms.domainList = append(ms.domainList, DomainContainer{
 		Domain: Domain{
 			CreatedAt:    RFC2822Time(time.Now()),
@@ -165,6 +174,9 @@ func (ms *mockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	result := ms.domainList[:0]
 	for _, domain := range ms.domainList {
 		if domain.Domain.Name == mux.Vars(r)["domain"] {
@@ -184,6 +196,9 @@ func (ms *mockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) getConnection(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			resp := domainConnectionResponse{
@@ -198,6 +213,9 @@ func (ms *mockServer) getConnection(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Connection = &DomainConnection{
@@ -213,6 +231,9 @@ func (ms *mockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) getTracking(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			resp := domainTrackingResponse{
@@ -227,6 +248,9 @@ func (ms *mockServer) getTracking(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) updateClickTracking(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Tracking.Click.Active = stringToBool(r.FormValue("active"))
@@ -239,6 +263,9 @@ func (ms *mockServer) updateClickTracking(w http.ResponseWriter, r *http.Request
 }
 
 func (ms *mockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Tracking.Open.Active = stringToBool(r.FormValue("active"))
@@ -251,6 +278,9 @@ func (ms *mockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request)
 }
 
 func (ms *mockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for i, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			ms.domainList[i].Tracking.Unsubscribe.Active = stringToBool(r.FormValue("active"))
@@ -269,6 +299,9 @@ func (ms *mockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request
 }
 
 func (ms *mockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			if d.TagLimits == nil {
@@ -285,6 +318,9 @@ func (ms *mockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			if r.FormValue("dkim_selector") == "" {
@@ -300,6 +336,9 @@ func (ms *mockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request)
 }
 
 func (ms *mockServer) updateWebPrefix(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
 	for _, d := range ms.domainList {
 		if d.Domain.Name == mux.Vars(r)["domain"] {
 			if r.FormValue("web_prefix") == "" {
