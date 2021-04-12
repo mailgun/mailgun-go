@@ -33,6 +33,8 @@ func (ms *mockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	toJSON(w, ipAddressListResponse{
 		TotalCount: 2,
 		Items:      ms.domainIPS,
@@ -40,11 +42,15 @@ func (ms *mockServer) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (ms *mockServer) postDomainIPS(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	ms.domainIPS = append(ms.domainIPS, r.FormValue("ip"))
 	toJSON(w, okResp{Message: "success"})
 }
 
 func (ms *mockServer) deleteDomainIPS(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	result := ms.domainIPS[:0]
 	for _, ip := range ms.domainIPS {
 		if ip == mux.Vars(r)["ip"] {

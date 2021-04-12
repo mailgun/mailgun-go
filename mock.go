@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 )
@@ -38,33 +39,48 @@ type mockServer struct {
 	routeList   []Route
 	events      []Event
 	webhooks    WebHooksListResponse
+	mutex       sync.Mutex
 }
 
 func (ms *mockServer) DomainIPS() []string {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	return ms.domainIPS
 }
 
 func (ms *mockServer) DomainList() []DomainContainer {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	return ms.domainList
 }
 
 func (ms *mockServer) ExportList() []Export {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	return ms.exportList
 }
 
 func (ms *mockServer) MailingList() []MailingListContainer {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	return ms.mailingList
 }
 
 func (ms *mockServer) RouteList() []Route {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	return ms.routeList
 }
 
 func (ms *mockServer) Events() []Event {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	return ms.events
 }
 
 func (ms *mockServer) Webhooks() WebHooksListResponse {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	return ms.webhooks
 }
 

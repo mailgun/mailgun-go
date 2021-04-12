@@ -194,6 +194,8 @@ type eventsResponse struct {
 }
 
 func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
 	var idx []string
 
 	for _, e := range ms.events {
