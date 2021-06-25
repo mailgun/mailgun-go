@@ -154,6 +154,15 @@ func TestDomainVerify(t *testing.T) {
 	ensure.Nil(t, err)
 }
 
+func TestDomainVerifyAndReturn(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
+
+	_, err := mg.VerifyAndReturnDomain(ctx, testDomain)
+	ensure.Nil(t, err)
+}
+
 func TestDomainDkimSelector(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
