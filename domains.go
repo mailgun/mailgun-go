@@ -253,6 +253,18 @@ func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (string,
 	return resp.Domain.State, err
 }
 
+// VerifyAndReturnDomain verifies & retrieves detailed information about the named domain.
+func (mg *MailgunImpl) VerifyAndReturnDomain(ctx context.Context, domain string) (DomainResponse, error) {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/verify")
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	var resp DomainResponse
+	err := putResponseFromJSON(ctx, r, payload, &resp)
+	return resp, err
+}
+
 // Optional parameters when creating a domain
 type CreateDomainOptions struct {
 	Password           string
