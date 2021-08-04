@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go)
 [![Build Status](https://img.shields.io/travis/mailgun/mailgun-go/master.svg)](https://travis-ci.org/mailgun/mailgun-go)
 
-Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/api_reference.html).
+Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/en/latest/api_reference.html).
 
 ## Usage
 ```go
@@ -116,7 +116,8 @@ package main
 
 import (
     "context"
-    "time"
+	"log"
+	"time"
 
     "github.com/mailgun/mailgun-go/v4"
 )
@@ -131,7 +132,7 @@ func main() {
     // Very short poll interval
     it := mg.PollEvents(&mailgun.ListEventOptions{
         // Only events with a timestamp after this date/time will be returned
-        Begin: &begin,
+        Begin: begin,
         // How often we poll the api for new events
         PollInterval: time.Second * 30,
     })
@@ -143,7 +144,8 @@ func main() {
     var page []mailgun.Event
     for it.Poll(ctx, &page) {
         for _, e := range page {
-            // Do something with event
+			log.Printf("Got an event: %q (%q)", e.GetName(), e.GetID())
+			// Do something with event
         }
     }
 }
@@ -156,7 +158,6 @@ package main
 import (
     "context"
     "fmt"
-    "log"
     "time"
 
     "github.com/mailgun/mailgun-go/v4"
@@ -192,12 +193,10 @@ func main() {
 package main
 
 import (
-    "context"
     "encoding/json"
     "fmt"
     "net/http"
     "os"
-    "time"
 
     "github.com/mailgun/mailgun-go/v4"
     "github.com/mailgun/mailgun-go/v4/events"
@@ -256,6 +255,64 @@ func main() {
 }
 ```
 
+## Sending HTML templates
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/mailgun/mailgun-go/v4"
+)
+
+// Your available domain names can be found here:
+// (https://app.mailgun.com/app/domains)
+var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+
+// You can find the Private API Key in your Account Menu, under "Settings":
+// (https://app.mailgun.com/app/account/security)
+var privateAPIKey string = "your-private-key"
+
+
+func main() {
+	// Create an instance of the Mailgun Client
+	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
+
+	sender := "sender@example.com"
+	subject := "HTML email!"
+	recipient := "recipient@example.com"
+
+	message := mg.NewMessage(sender, subject, "", recipient)
+	body := `
+<html>
+<body>
+	<h1>Sending HTML emails with Mailgun</h1>
+	<p style="color:blue; font-size:30px;">Hello world</p>
+	<p style="font-size:30px;">More examples can be found <a href="https://documentation.mailgun.com/en/latest/api-sending.html#examples">here</a></p>
+</body>
+</html>
+`
+
+	message.SetHtml(body)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	// Send the message with a 10 second timeout
+	resp, id, err := mg.Send(ctx, message)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+}
+```
+
 ## Using Templates
 
 Templates enable you to create message templates on your Mailgun account and then populate the data variables at send-time. This allows you to have your layout and design managed on the server and handle the data on the client. The template variables are added as a JSON stringified `X-Mailgun-Variables` header. For example, if you have a template to send a password reset link, you could do the following:
@@ -291,10 +348,13 @@ func main() {
     recipient := "recipient@example.com"
 
     // The message object allows you to add attachments and Bcc recipients
-        message := mg.NewMessage(sender, subject, body, recipient)
-        message.SetTemplate("passwordReset")
-        message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
-
+    message := mg.NewMessage(sender, subject, body, recipient)
+    message.SetTemplate("passwordReset")
+    err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
     defer cancel()
 
