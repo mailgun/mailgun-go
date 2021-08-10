@@ -101,6 +101,20 @@ func CreateUnsubscribe(domain, apiKey string) error {
 	return mg.CreateUnsubscribe(ctx, "bob@example.com", "*")
 }
 
+func CreateUnsubscribes(domain, apiKey string) error {
+	mg := mailgun.NewMailgun(domain, apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	unsubscribes := []mailgun.Unsubscribe{
+		{Address: "alice@example.com"},
+		{Address: "bob@example.com", Tags: []string{"tag1"}},
+	}
+
+	return mg.CreateUnsubscribes(ctx, unsubscribes)
+}
+
 func CreateUnsubscribeWithTag(domain, apiKey string) error {
 	mg := mailgun.NewMailgun(domain, apiKey)
 

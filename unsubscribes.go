@@ -6,9 +6,9 @@ import (
 )
 
 type Unsubscribe struct {
-	CreatedAt RFC2822Time `json:"created_at"`
-	Tags      []string    `json:"tags"`
-	ID        string      `json:"id"`
+	CreatedAt RFC2822Time `json:"created_at,omitempty"`
+	Tags      []string    `json:"tags,omitempty"`
+	ID        string      `json:"id,omitempty"`
 	Address   string      `json:"address"`
 }
 
@@ -153,6 +153,18 @@ func (mg *MailgunImpl) CreateUnsubscribe(ctx context.Context, address, tag strin
 	p := newUrlEncodedPayload()
 	p.addValue("address", address)
 	p.addValue("tag", tag)
+	_, err := makePostRequest(ctx, r, p)
+	return err
+}
+
+// CreateUnsubscribes adds multiple e-mail addresses to the domain's unsubscription table.
+func (mg *MailgunImpl) CreateUnsubscribes(ctx context.Context, unsubscribes []Unsubscribe) error {
+	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	r.addHeader("Content-Type", "application/json")
+
+	p := newJSONEncodedPayload(unsubscribes)
 	_, err := makePostRequest(ctx, r, p)
 	return err
 }
