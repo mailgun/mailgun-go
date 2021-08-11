@@ -68,6 +68,10 @@ type urlEncodedPayload struct {
 	Values []keyValuePair
 }
 
+type jsonEncodedPayload struct {
+	payload interface{}
+}
+
 func newHTTPRequest(url string) *httpRequest {
 	return &httpRequest{URL: url, Client: http.DefaultClient}
 }
@@ -86,6 +90,27 @@ func (r *httpRequest) setClient(c *http.Client) {
 func (r *httpRequest) setBasicAuth(user, password string) {
 	r.BasicAuthUser = user
 	r.BasicAuthPassword = password
+}
+
+func newJSONEncodedPayload(payload interface{}) *jsonEncodedPayload {
+	return &jsonEncodedPayload{payload: payload}
+}
+
+func (j *jsonEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
+	b, err := json.Marshal(j.payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.NewBuffer(b), nil
+}
+
+func (j *jsonEncodedPayload) getContentType() string {
+	return "application/json"
+}
+
+func (j *jsonEncodedPayload) getValues() []keyValuePair {
+	return nil
 }
 
 func newUrlEncodedPayload() *urlEncodedPayload {
@@ -322,8 +347,16 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 	//parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
 
 	if p != nil {
-		for _, param := range p.getValues() {
-			parts = append(parts, fmt.Sprintf(" -F %s='%s'", param.key, param.value))
+		if p.getContentType() == "application/json" {
+			b, err := p.getPayloadBuffer()
+			if err != nil {
+				return "Unable to get payload buffer: " + err.Error()
+			}
+			parts = append(parts, fmt.Sprintf("--data '%s'", b.String()))
+		} else {
+			for _, param := range p.getValues() {
+				parts = append(parts, fmt.Sprintf(" -F %s='%s'", param.key, param.value))
+			}
 		}
 	}
 	return strings.Join(parts, " ")

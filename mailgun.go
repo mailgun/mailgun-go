@@ -171,6 +171,7 @@ type Mailgun interface {
 	ListUnsubscribes(opts *ListOptions) *UnsubscribesIterator
 	GetUnsubscribe(ctx context.Context, address string) (Unsubscribe, error)
 	CreateUnsubscribe(ctx context.Context, address, tag string) error
+	CreateUnsubscribes(ctx context.Context, unsubscribes []Unsubscribe) error
 	DeleteUnsubscribe(ctx context.Context, address string) error
 	DeleteUnsubscribeWithTag(ctx context.Context, a, t string) error
 
