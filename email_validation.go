@@ -47,7 +47,7 @@ type EmailVerification struct {
 	Reasons []string
 	// Risk assessment for the provided email.
 	Risk string `json:"risk"`
-	// Reason Either deliverable, undeliverable, catch_all or unknown.
+	// Result Either deliverable, undeliverable, catch_all or unknown.
 	Result string `json:"result"`
 }
 
