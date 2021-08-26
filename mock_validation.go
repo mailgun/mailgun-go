@@ -54,7 +54,6 @@ func (ms *mockServer) validateEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	results.Reason = "no-reason"
 	results.Risk = "unknown"
-	results.Result = "deliverable"
 	toJSON(w, results)
 }
 
