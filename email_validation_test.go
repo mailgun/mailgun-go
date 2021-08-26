@@ -28,7 +28,7 @@ func TestEmailValidationV3(t *testing.T) {
 	ensure.DeepEqual(t, ev.Reason, "no-reason")
 	ensure.True(t, len(ev.Reasons) == 0)
 	ensure.DeepEqual(t, ev.Risk, "unknown")
-	ensure.DeepEqual(t, ev.Result, "")
+	ensure.DeepEqual(t, ev.Result, "deliverable")
 
 }
 
@@ -52,7 +52,7 @@ func TestEmailValidationV4(t *testing.T) {
 	ensure.True(t, len(ev.Reasons) != 0)
 	ensure.DeepEqual(t, ev.Reasons[0], "no-reason")
 	ensure.DeepEqual(t, ev.Risk, "unknown")
-	ensure.DeepEqual(t, ev.Result, "")
+	ensure.DeepEqual(t, ev.Result, "deliverable")
 }
 
 func TestParseAddresses(t *testing.T) {
