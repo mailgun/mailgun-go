@@ -47,6 +47,8 @@ type EmailVerification struct {
 	Reasons []string
 	// Risk assessment for the provided email.
 	Risk string `json:"risk"`
+	// Result
+	Result string `json:"result"`
 }
 
 type v4EmailValidationResp struct {
@@ -59,6 +61,7 @@ type v4EmailValidationResp struct {
 	IsRoleAddress       bool                   `json:"is_role_address"`
 	Reason              []string               `json:"reason"`
 	Risk                string                 `json:"risk"`
+	Result              string                 `json:"result"`
 }
 
 type addressParseResult struct {
@@ -198,6 +201,7 @@ func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailB
 		IsDisposableAddress: res.IsDisposableAddress,
 		IsRoleAddress:       res.IsRoleAddress,
 		Reasons:             res.Reason,
+		Result:              res.Result,
 		Risk:                res.Risk}, nil
 }
 
