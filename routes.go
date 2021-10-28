@@ -2,7 +2,10 @@ package mailgun
 
 import (
 	"context"
+	"encoding/json"
+	"net/url"
 	"strconv"
+	"time"
 )
 
 // A Route structure contains information on a configured or to-be-configured route.
@@ -26,6 +29,68 @@ type Route struct {
 	CreatedAt RFC2822Time `json:"created_at,omitempty"`
 	// ID field provides a unique identifier for this route.
 	Id string `json:"id,omitempty"`
+}
+
+// ForwardRoute represents the payload the server will get on match
+// You can use ExtractForwardRoute() to extract PostForm into the struct, or you can use only the struct and parse the form manually
+type ForwardRoute struct {
+	BodyPlain      string            // body-plain
+	From           string            // from
+	MessageHeaders map[string]string // message-headers
+	Recipient      string            // recipient
+	Sender         string            // sender
+	Signature      string            // signature
+	StrippedHTML   string            // stripped-html
+	StrippedText   string            // stripped-text
+	Subject        string            // subject
+	Timestamp      time.Time         // timestamp
+	Token          string            // token
+}
+
+// ExtractForwardRoute extracts the forward route payload values from a parsed PostForm
+// Example usage:
+// func Handler(w http.ResponseWriter, r *http.Request) {
+//	err := r.ParseForm()
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	forwardRoute := mailgun.ExtractForwardRoute(r.PostForm)
+//	fmt.Printf("FORM: %#v", forwardRoute)
+//}
+func ExtractForwardRoute(values url.Values) ForwardRoute {
+	forwardRoute := ForwardRoute{}
+	forwardRoute.BodyPlain = values.Get("body-plain")
+	forwardRoute.From = values.Get("from")
+	forwardRoute.Recipient = values.Get("recipient")
+	forwardRoute.Sender = values.Get("sender")
+	forwardRoute.Signature = values.Get("signature")
+	forwardRoute.StrippedHTML = values.Get("stripped-html")
+	forwardRoute.StrippedText = values.Get("stripped-text")
+	forwardRoute.Subject = values.Get("subject")
+	forwardRoute.Token = values.Get("token")
+
+	timestampStr := values.Get("timestamp")
+	timeInt, err := strconv.Atoi(timestampStr)
+	if err != nil {
+		timeInt = 0
+	}
+	forwardRoute.Timestamp = time.Unix(int64(timeInt), 0)
+
+	headersStr := values.Get("message-headers")
+	headersParsed := make([][]string, 0)
+	err = json.Unmarshal([]byte(headersStr), &headersParsed)
+	messageHeaders := make(map[string]string)
+	if err == nil {
+		for _, header := range headersParsed {
+			if len(header) < 2 {
+				continue
+			}
+			messageHeaders[header[0]] = header[1]
+		}
+	}
+	forwardRoute.MessageHeaders = messageHeaders
+
+	return forwardRoute
 }
 
 type routesListResponse struct {
