@@ -2,7 +2,10 @@ package mailgun
 
 import (
 	"context"
+	"encoding/json"
+	"net/url"
 	"strconv"
+	"time"
 )
 
 // A Route structure contains information on a configured or to-be-configured route.
@@ -26,6 +29,68 @@ type Route struct {
 	CreatedAt RFC2822Time `json:"created_at,omitempty"`
 	// ID field provides a unique identifier for this route.
 	Id string `json:"id,omitempty"`
+}
+
+// ForwardedMessage represents the payload the server will get on match
+// You can use ExtractForwardRoute() to extract PostForm into the struct, or you can use only the struct and parse the form manually
+type ForwardedMessage struct {
+	BodyPlain      string            // body-plain
+	From           string            // from
+	MessageHeaders map[string]string // message-headers
+	Recipient      string            // recipient
+	Sender         string            // sender
+	Signature      string            // signature
+	StrippedHTML   string            // stripped-html
+	StrippedText   string            // stripped-text
+	Subject        string            // subject
+	Timestamp      time.Time         // timestamp
+	Token          string            // token
+}
+
+// ExtractForwardedMessage extracts the forward route payload values from a parsed PostForm
+// Example usage:
+// func Handler(w http.ResponseWriter, r *http.Request) {
+//	err := r.ParseForm()
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	forwardRoute := mailgun.ExtractForwardedMessage(r.PostForm)
+//	fmt.Printf("Forwarded message: %#v", forwardRoute)
+//}
+func ExtractForwardedMessage(formValues url.Values) ForwardedMessage {
+	forwardedMessage := ForwardedMessage{}
+	forwardedMessage.BodyPlain = formValues.Get("body-plain")
+	forwardedMessage.From = formValues.Get("from")
+	forwardedMessage.Recipient = formValues.Get("recipient")
+	forwardedMessage.Sender = formValues.Get("sender")
+	forwardedMessage.Signature = formValues.Get("signature")
+	forwardedMessage.StrippedHTML = formValues.Get("stripped-html")
+	forwardedMessage.StrippedText = formValues.Get("stripped-text")
+	forwardedMessage.Subject = formValues.Get("subject")
+	forwardedMessage.Token = formValues.Get("token")
+
+	timestampStr := formValues.Get("timestamp")
+	timeInt, err := strconv.Atoi(timestampStr)
+	if err != nil {
+		timeInt = 0
+	}
+	forwardedMessage.Timestamp = time.Unix(int64(timeInt), 0)
+
+	headersStr := formValues.Get("message-headers")
+	headersParsed := make([][]string, 0)
+	messageHeaders := make(map[string]string)
+	err = json.Unmarshal([]byte(headersStr), &headersParsed)
+	if err == nil {
+		for _, header := range headersParsed {
+			if len(header) < 2 {
+				continue
+			}
+			messageHeaders[header[0]] = header[1]
+		}
+	}
+	forwardedMessage.MessageHeaders = messageHeaders
+
+	return forwardedMessage
 }
 
 type routesListResponse struct {
