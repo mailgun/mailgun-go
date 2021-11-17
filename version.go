@@ -1,4 +1,4 @@
 package mailgun
 
 // Version of current release
-const Version = "4.5.3"
+const Version = "4.6.0"
