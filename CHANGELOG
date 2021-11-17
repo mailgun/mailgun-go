@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.6.0] - 2021-11-17
+### Changed
+* Add a struct and a function to parse route forward hook payloads.
+* Add missing VerifyAndReturnDomain method to the interface.
+
 ## [4.5.2] - 2021-06-28
 ### Changed
 * Change response for VerifyDomain method from (string, error) to (DomainResponse, error)
