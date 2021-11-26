@@ -12,12 +12,8 @@ import (
 )
 
 func TestTemplateCRUD(t *testing.T) {
-	if reason := mailgun.SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := mailgun.NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	findTemplate := func(name string) bool {
@@ -63,6 +59,7 @@ func TestTemplateCRUD(t *testing.T) {
 
 	// Ensure update took
 	updated, err := mg.GetTemplate(ctx, tmpl.Name)
+	ensure.Nil(t, err)
 
 	ensure.DeepEqual(t, updated.Description, UpdatedDesc)
 
