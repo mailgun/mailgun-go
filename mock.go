@@ -26,20 +26,23 @@ type MockServer interface {
 	RouteList() []Route
 	Events() []Event
 	Webhooks() WebHooksListResponse
+	Templates() []Template
 }
 
 // A mailgun api mock suitable for testing
 type mockServer struct {
 	srv *httptest.Server
 
-	domainIPS   []string
-	domainList  []DomainContainer
-	exportList  []Export
-	mailingList []MailingListContainer
-	routeList   []Route
-	events      []Event
-	webhooks    WebHooksListResponse
-	mutex       sync.Mutex
+	domainIPS        []string
+	domainList       []DomainContainer
+	exportList       []Export
+	mailingList      []MailingListContainer
+	routeList        []Route
+	events           []Event
+	templates        []Template
+	templateVersions map[string][]TemplateVersion
+	webhooks         WebHooksListResponse
+	mutex            sync.Mutex
 }
 
 func (ms *mockServer) DomainIPS() []string {
@@ -84,6 +87,12 @@ func (ms *mockServer) Webhooks() WebHooksListResponse {
 	return ms.webhooks
 }
 
+func (ms *mockServer) Templates() []Template {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+	return ms.templates
+}
+
 // Create a new instance of the mailgun API mock server
 func NewMockServer() MockServer {
 	ms := mockServer{}
@@ -100,6 +109,7 @@ func NewMockServer() MockServer {
 		ms.addMessagesRoutes(r)
 		ms.addRoutes(r)
 		ms.addWebhookRoutes(r)
+		ms.addTemplateRoutes(r)
 	}(r.PathPrefix("/v3").Subrouter())
 	ms.addValidationRoutes(r)
 
