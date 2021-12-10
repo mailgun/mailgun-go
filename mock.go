@@ -110,6 +110,7 @@ func NewMockServer() MockServer {
 		ms.addRoutes(r)
 		ms.addWebhookRoutes(r)
 		ms.addTemplateRoutes(r)
+		ms.addTemplateVersionRoutes(r)
 	}(r.PathPrefix("/v3").Subrouter())
 	ms.addValidationRoutes(r)
 

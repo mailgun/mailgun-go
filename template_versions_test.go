@@ -9,12 +9,8 @@ import (
 )
 
 func TestTemplateVersionsCRUD(t *testing.T) {
-	if reason := mailgun.SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := mailgun.NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	findVersion := func(templateName, tag string) bool {
@@ -71,6 +67,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	// Ensure update took
 	updated, err := mg.GetTemplateVersion(ctx, tmpl.Name, version.Tag)
 
+	ensure.Nil(t, err)
 	ensure.DeepEqual(t, updated.Comment, UpdatedComment)
 	ensure.DeepEqual(t, updated.Template, Template+"updated")
 
