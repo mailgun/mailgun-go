@@ -23,26 +23,14 @@ func (ms *mockServer) listTemplateVersions(w http.ResponseWriter, r *http.Reques
 	ms.mutex.Lock()
 
 	templateName := mux.Vars(r)["template"]
-	var template Template
-	found := false
-	for _, existingTemplate := range ms.templates {
-		if existingTemplate.Name == templateName {
-			template = existingTemplate
-			found = true
-			break
-		}
-	}
-
+	template, found := ms.fetchTemplate(templateName)
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("{\"message\": \"template not found\"}"))
 		return
 	}
 
-	templateVersions, exists := ms.templateVersions[templateName]
-	if !exists {
-
-	}
+	templateVersions := ms.templateVersions[templateName]
 
 	var idx []string
 	for _, t := range templateVersions {
@@ -114,32 +102,14 @@ func (ms *mockServer) getTemplateVersion(w http.ResponseWriter, r *http.Request)
 	templateVersionName := mux.Vars(r)["tag"]
 	templateVersionName = strings.ToLower(templateVersionName)
 
-	var template Template
-	templateFound := false
-	for _, existingTemplate := range ms.templates {
-		if existingTemplate.Name == templateName {
-			template = existingTemplate
-			templateFound = true
-			break
-		}
-	}
-
+	template, templateFound := ms.fetchTemplate(templateName)
 	if !templateFound {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("{\"message\": \"template not found\"}"))
 		return
 	}
 
-	var templateVersionFound bool
-	var templateVersion TemplateVersion
-	for _, tmplVersion := range ms.templateVersions[templateName] {
-		if tmplVersion.Tag == templateVersionName {
-			templateVersion = tmplVersion
-			templateVersionFound = true
-		}
-		break
-	}
-
+	templateVersion, templateVersionFound := ms.fetchTemplateVersion(templateName, templateVersionName)
 	if !templateVersionFound {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("{\"message\": \"template version not found\"}"))
@@ -174,30 +144,14 @@ func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var template Template
-	templateFound := false
-	for _, existingTemplate := range ms.templates {
-		if existingTemplate.Name == templateName {
-			template = existingTemplate
-			templateFound = true
-			break
-		}
-	}
-
+	template, templateFound := ms.fetchTemplate(templateName)
 	if !templateFound {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("{\"message\": \"template not found\"}"))
 		return
 	}
 
-	var templateVersionFound bool
-	for _, tmplVersion := range ms.templateVersions[templateName] {
-		if tmplVersion.Tag == tagName {
-			templateVersionFound = true
-			break
-		}
-	}
-
+	_, templateVersionFound := ms.fetchTemplateVersion(templateName, tagName)
 	if templateVersionFound {
 		w.WriteHeader(http.StatusConflict)
 		w.Write([]byte(fmt.Sprintf("{\"message\": \"version %s already exists\"}", tagName)))
@@ -208,7 +162,6 @@ func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Reque
 	active := r.FormValue("active")
 
 	engine := r.FormValue("engine")
-
 	if len(engine) != 0 {
 		if strings.ToLower(engine) != "go" && strings.ToLower(engine) != "handlebars" {
 			w.WriteHeader(http.StatusBadRequest)
@@ -251,14 +204,7 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	templateVersionName := mux.Vars(r)["tag"]
 	templateVersionName = strings.ToLower(templateVersionName)
 
-	templateFound := false
-	for _, existingTemplate := range ms.templates {
-		if existingTemplate.Name == templateName {
-			templateFound = true
-			break
-		}
-	}
-
+	_, templateFound := ms.fetchTemplate(templateName)
 	if !templateFound {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("{\"message\": \"template not found\"}"))
@@ -337,20 +283,12 @@ func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Reque
 	templateVersionName := mux.Vars(r)["tag"]
 	templateVersionName = strings.ToLower(templateVersionName)
 
-	templateFound := false
-	for _, existingTemplate := range ms.templates {
-		if existingTemplate.Name == templateName {
-			templateFound = true
-			break
-		}
-	}
-
+	_, templateFound := ms.fetchTemplate(templateName)
 	if !templateFound {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("{\"message\": \"template not found\"}"))
 		return
 	}
-
 	for i, templateVersion := range ms.templateVersions[templateName] {
 		if templateVersion.Tag == templateVersionName {
 			ms.templateVersions[templateName] = append(ms.templateVersions[templateName][:i], ms.templateVersions[templateName][i+1:len(ms.templateVersions[templateName])]...)
@@ -368,4 +306,25 @@ func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Reque
 			},
 		},
 	})
+}
+
+func (ms *mockServer) fetchTemplate(name string) (template Template, found bool) {
+	for _, existingTemplate := range ms.templates {
+		if existingTemplate.Name == name {
+			template = existingTemplate
+			return template, true
+		}
+	}
+
+	return Template{}, false
+}
+
+func (ms *mockServer) fetchTemplateVersion(templateName string, templateVersionTag string) (TemplateVersion, bool) {
+	for _, existingTemplate := range ms.templateVersions[templateName] {
+		if existingTemplate.Tag == templateVersionTag {
+			return existingTemplate, true
+		}
+	}
+
+	return TemplateVersion{}, false
 }
