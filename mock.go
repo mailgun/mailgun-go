@@ -41,6 +41,7 @@ type mockServer struct {
 	events           []Event
 	templates        []Template
 	templateVersions map[string][]TemplateVersion
+	unsubscribes     []Unsubscribe
 	webhooks         WebHooksListResponse
 	mutex            sync.Mutex
 }
@@ -93,6 +94,12 @@ func (ms *mockServer) Templates() []Template {
 	return ms.templates
 }
 
+func (ms *mockServer) Unsubscribes() []Unsubscribe {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+	return ms.unsubscribes
+}
+
 // Create a new instance of the mailgun API mock server
 func NewMockServer() MockServer {
 	ms := mockServer{}
@@ -111,6 +118,7 @@ func NewMockServer() MockServer {
 		ms.addWebhookRoutes(r)
 		ms.addTemplateRoutes(r)
 		ms.addTemplateVersionRoutes(r)
+		ms.addUnsubscribesRoutes(r)
 	}(r.PathPrefix("/v3").Subrouter())
 	ms.addValidationRoutes(r)
 
