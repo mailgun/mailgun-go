@@ -21,10 +21,6 @@ func TestCreateUnsubscriber(t *testing.T) {
 }
 
 func TestCreateUnsubscribes(t *testing.T) {
-	if reason := mailgun.SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
 	unsubscribes := []mailgun.Unsubscribe{
 		{
 			Address: randomEmail("unsubcribe", os.Getenv("MG_DOMAIN")),
@@ -34,8 +30,8 @@ func TestCreateUnsubscribes(t *testing.T) {
 			Tags:    []string{"tag1"},
 		},
 	}
-	mg, err := mailgun.NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	// Create unsubscription records
@@ -43,12 +39,8 @@ func TestCreateUnsubscribes(t *testing.T) {
 }
 
 func TestListUnsubscribes(t *testing.T) {
-	if reason := mailgun.SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := mailgun.NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	it := mg.ListUnsubscribes(nil)

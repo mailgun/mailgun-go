@@ -1,17 +1,21 @@
 package mailgun
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
 func (ms *mockServer) addUnsubscribesRoutes(r *mux.Router) {
+	r.HandleFunc("/{domain}/unsubscribes", ms.listUnsubscribes).Methods(http.MethodGet)
 	r.HandleFunc("/{domain}/unsubscribes/{address}", ms.getUnsubscribe).Methods(http.MethodGet)
-
-	r.HandleFunc("/{domain}/unsubscribes", ms.createUnsubscribe).Methods(http.MethodPost)
 	r.HandleFunc("/{domain}/unsubscribes/{address}", ms.deleteUnsubscribe).Methods(http.MethodDelete)
+	r.HandleFunc("/{domain}/unsubscribes", ms.createUnsubscribe).Methods(http.MethodPost)
 
 	ms.unsubscribes = append(ms.unsubscribes, Unsubscribe{
 		CreatedAt: RFC2822Time(time.Now()),
@@ -25,6 +29,65 @@ func (ms *mockServer) addUnsubscribesRoutes(r *mux.Router) {
 		Tags:      []string{"some", "tag"},
 		ID:        "2",
 		Address:   "alice@example.com",
+	})
+}
+
+func (ms *mockServer) listUnsubscribes(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	var idx []string
+	for _, t := range ms.unsubscribes {
+		idx = append(idx, t.Address)
+	}
+
+	limit := stringToInt(r.FormValue("limit"))
+	if limit == 0 {
+		limit = 100
+	}
+
+	page := r.FormValue("page")
+	var pivot string
+	if len(page) != 0 {
+		pivot = r.FormValue("p")
+		if pivot == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("{\"message\": \"Invalid parameter: pivot \"}"))
+			return
+		}
+	}
+	start, end := pageOffsets(idx, page, pivot, limit)
+	var nextAddress, prevAddress string
+	var results []Unsubscribe
+
+	if start != end {
+		results = ms.unsubscribes[start:end]
+		nextAddress = results[len(results)-1].Address
+		prevAddress = results[0].Address
+	} else {
+		results = []Unsubscribe{}
+		nextAddress = pivot
+		prevAddress = pivot
+	}
+
+	toJSON(w, unsubscribesResponse{
+		Paging: Paging{
+			First: getPageURL(r, url.Values{
+				"page": []string{"first"},
+			}),
+			Last: getPageURL(r, url.Values{
+				"page": []string{"last"},
+			}),
+			Next: getPageURL(r, url.Values{
+				"page": []string{"next"},
+				"p":    []string{nextAddress},
+			}),
+			Previous: getPageURL(r, url.Values{
+				"page": []string{"prev"},
+				"p":    []string{prevAddress},
+			}),
+		},
+		Items: results,
 	})
 }
 
@@ -46,47 +109,57 @@ func (ms *mockServer) createUnsubscribe(w http.ResponseWriter, r *http.Request) 
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	var unsubscribes []Unsubscribe
 	if r.Header.Get("Content-Type") == "application/json" {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("{\"message\": \"Add multiple unsubscribes is not yet implemented\"}"))
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	address := r.FormValue("address")
-	if len(address) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("{\"message\": \"Invalid format for parameter address: \"}"))
-		return
-	}
-
-	tag := r.FormValue("tag")
-
-	var addressExist bool
-	for i, unsubscribe := range ms.unsubscribes {
-		if unsubscribe.Address == address {
-			ms.unsubscribes[i].Tags = append(ms.unsubscribes[i].Tags, tag)
-			addressExist = true
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("{\"message\": \"Add multiple unsubscribes is not yet implemented\"}"))
+			return
 		}
+
+		err = json.Unmarshal(body, &unsubscribes)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(fmt.Sprintf("{\"message\": \"Invalid json: %s\"}", err.Error())))
+			return
+		}
+	} else {
+		if err := r.ParseForm(); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		tag := r.FormValue("tag")
+
+		address := r.FormValue("address")
+		if len(address) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("{\"message\": \"Invalid format for parameter address: \"}"))
+			return
+		}
+
+		unsubscribes = append(unsubscribes, Unsubscribe{Address: address, Tags: []string{tag}})
 	}
 
-	if !addressExist {
-		unsubscribe := Unsubscribe{
-			CreatedAt: RFC2822Time(time.Now()),
-			Tags:      []string{tag},
-			Address:   address,
+	for _, unsubscribe := range unsubscribes {
+		var addressExist bool
+		for i, existingUnsubscribe := range ms.unsubscribes {
+			if existingUnsubscribe.Address == unsubscribe.Address {
+				ms.unsubscribes[i].Tags = append(ms.unsubscribes[i].Tags, unsubscribe.Tags...)
+				addressExist = true
+			}
 		}
-		ms.unsubscribes = append(ms.unsubscribes, unsubscribe)
+
+		if !addressExist {
+			ms.unsubscribes = append(ms.unsubscribes, unsubscribe)
+		}
 	}
 
 	toJSON(w, map[string]interface{}{
 		"message": "Address has been added to the unsubscribes table",
-		"address": address,
+		"address": fmt.Sprint(unsubscribes),
 	})
 }
 
