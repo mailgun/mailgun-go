@@ -1,4 +1,4 @@
-package mailgun
+package mailgun_test
 
 import (
 	"context"
@@ -9,21 +9,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mailgun/mailgun-go/v4"
+
 	"github.com/facebookgo/ensure"
 )
 
 func TestGetBounces(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
 	it := mg.ListBounces(nil)
 
-	var page []Bounce
+	var page []mailgun.Bounce
 	for it.Next(ctx, &page) {
 		for _, bounce := range page {
 			t.Logf("Bounce: %+v\n", bounce)
@@ -33,37 +31,28 @@ func TestGetBounces(t *testing.T) {
 }
 
 func TestGetSingleBounce(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")),
 		os.Getenv("MG_DOMAIN"))
-	_, err = mg.GetBounce(ctx, exampleEmail)
+	_, err := mg.GetBounce(ctx, exampleEmail)
 	ensure.NotNil(t, err)
 
-	ure, ok := err.(*UnexpectedResponseError)
+	ure, ok := err.(*mailgun.UnexpectedResponseError)
 	ensure.True(t, ok)
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
 func TestAddDelBounces(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	domain := os.Getenv("MG_DOMAIN")
-	mg, err := NewMailgunFromEnv()
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
-	ensure.Nil(t, err)
 
 	findBounce := func(address string) bool {
 		it := mg.ListBounces(nil)
-		var page []Bounce
+		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
 			ensure.True(t, len(page) != 0)
 			for _, bounce := range page {
@@ -83,7 +72,7 @@ func TestAddDelBounces(t *testing.T) {
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
 
 	// Add the bounce for our address.
-	err = mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
+	err := mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
 	ensure.Nil(t, err)
 
 	// Give API some time to refresh cache
@@ -115,18 +104,14 @@ func TestAddDelBounces(t *testing.T) {
 }
 
 func TestDelBounceList(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
-	domain := os.Getenv("MG_DOMAIN")
-	mg, err := NewMailgunFromEnv()
 	ctx := context.Background()
-	ensure.Nil(t, err)
 
 	findBounce := func(address string) bool {
 		it := mg.ListBounces(nil)
-		var page []Bounce
+		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
 			ensure.True(t, len(page) != 0)
 			for _, bounce := range page {
@@ -147,7 +132,7 @@ func TestDelBounceList(t *testing.T) {
 		exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
 
 		// Add the bounce for our address.
-		err = mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
+		err := mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
 		ensure.Nil(t, err)
 
 		// Give API some time to refresh cache
@@ -160,11 +145,11 @@ func TestDelBounceList(t *testing.T) {
 	}
 
 	// Delete the bounce list.  This should put us back the way we were.
-	err = mg.DeleteBounceList(ctx)
+	err := mg.DeleteBounceList(ctx)
 	ensure.Nil(t, err)
 
 	it := mg.ListBounces(nil)
-	var page []Bounce
+	var page []mailgun.Bounce
 	if it.Next(ctx, &page) {
 		t.Fatalf("Expected no item in the bounce list")
 	}
