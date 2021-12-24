@@ -43,6 +43,7 @@ type mockServer struct {
 	templateVersions map[string][]TemplateVersion
 	unsubscribes     []Unsubscribe
 	complaints       []Complaint
+	bounces          []Bounce
 	webhooks         WebHooksListResponse
 	mutex            sync.Mutex
 }
@@ -121,6 +122,7 @@ func NewMockServer() MockServer {
 		ms.addTemplateVersionRoutes(r)
 		ms.addUnsubscribesRoutes(r)
 		ms.addComplaintsRoutes(r)
+		ms.addBouncesRoutes(r)
 	}(r.PathPrefix("/v3").Subrouter())
 	ms.addValidationRoutes(r)
 
