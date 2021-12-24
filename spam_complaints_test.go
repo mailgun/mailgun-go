@@ -2,12 +2,12 @@ package mailgun_test
 
 import (
 	"context"
-	"github.com/mailgun/mailgun-go/v4"
 	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go/v4"
 )
 
 func TestGetComplaints(t *testing.T) {
