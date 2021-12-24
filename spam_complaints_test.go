@@ -1,7 +1,8 @@
-package mailgun
+package mailgun_test
 
 import (
 	"context"
+	"github.com/mailgun/mailgun-go/v4"
 	"net/http"
 	"strings"
 	"testing"
@@ -10,54 +11,43 @@ import (
 )
 
 func TestGetComplaints(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
 	ctx := context.Background()
 
 	it := mg.ListComplaints(nil)
-	var page []Complaint
+	var page []mailgun.Complaint
 	for it.Next(ctx, &page) {
 		//spew.Dump(page)
 	}
-	ensure.Nil(t, err)
+	ensure.Nil(t, it.Err())
 }
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	_, err = mg.GetComplaint(ctx, randomString(64, "")+"@example.com")
+	_, err := mg.GetComplaint(ctx, randomString(64, "")+"@example.com")
 	ensure.NotNil(t, err)
 
-	ure, ok := err.(*UnexpectedResponseError)
+	ure, ok := err.(*mailgun.UnexpectedResponseError)
 	ensure.True(t, ok)
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
 		it := mg.ListComplaints(nil)
-		ensure.Nil(t, err)
+		ensure.Nil(t, it.Err())
 
-		var page []Complaint
+		var page []mailgun.Complaint
 		for it.Next(ctx, &page) {
 			for _, complaint := range page {
 				t.Logf("Complaint Address: %s\n", complaint.Address)
