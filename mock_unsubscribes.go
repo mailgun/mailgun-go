@@ -114,7 +114,7 @@ func (ms *mockServer) createUnsubscribe(w http.ResponseWriter, r *http.Request) 
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("{\"message\": \"Add multiple unsubscribes is not yet implemented\"}"))
+			w.Write([]byte("{\"message\": \"Can't read request body\"}"))
 			return
 		}
 
