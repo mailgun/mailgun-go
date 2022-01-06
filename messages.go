@@ -526,8 +526,25 @@ var ErrInvalidMessage = errors.New("message not valid")
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
-// a human-readable status message, and a message ID.  The status and message ID are set only
-// if no error occurred.
+// * A human-readable status message, typically "Queued. Thank you."
+// * A Message ID, which is the id used to track the queued message. The message id is useful
+//   when contacting support to report an issue with a specific message or to relate a
+//   delivered, accepted or failed event back to specific message.
+//
+// The status and message ID are only returned if no error occurred.
+//
+// Error returns can be of type `error.Error` which wrap internal and standard
+// golang errors like `url.Error`. The error can also be of type
+// mailgun.UnexpectedResponseError which contains the error returned by the mailgun API.
+//
+//  mailgun.UnexpectedResponseError {
+//    URL:      "https://api.mailgun.com/v3/messages",
+//    Expected: 200,
+//    Actual:   400,
+//    Data:     "Domain not found: example.com",
+//  }
+//
+//  See the public mailgun documentation for all possible return codes and error messages
 func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
