@@ -3,7 +3,6 @@ package mailgun_test
 import (
 	"context"
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -19,20 +18,18 @@ const (
 )
 
 func TestTags(t *testing.T) {
-	if reason := mailgun.SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-	mg, err := mailgun.NewMailgunFromEnv()
-	msg := mg.NewMessage(fromUser, exampleSubject, exampleText, os.Getenv("MG_EMAIL_TO"))
-	msg.AddTag("newsletter")
-	msg.AddTag("homer")
-	msg.AddTag("bart")
-	msg.AddTag("disco-steve")
-	msg.AddTag("newsletter")
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	msg := mg.NewMessage(fromUser, exampleSubject, exampleText, "test@example.com")
+	ensure.Nil(t, msg.AddTag("newsletter"))
+	ensure.Nil(t, msg.AddTag("homer"))
+	ensure.Nil(t, msg.AddTag("bart"))
+	ensure.NotNil(t, msg.AddTag("disco-steve"))
+	ensure.NotNil(t, msg.AddTag("newsletter"))
 
 	ctx := context.Background()
 	// Create an email with some tags attached
-	_, _, err = mg.Send(ctx, msg)
+	_, _, err := mg.Send(ctx, msg)
 	ensure.Nil(t, err)
 
 	// Wait for the tag to show up
@@ -87,4 +84,12 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 
 	}
 	return errors.Errorf("Waited to long for tag '%s' to show up", tag)
+}
+
+func TestDeleteTag(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
+
+	ensure.Nil(t, mg.DeleteTag(ctx, "newsletter"))
 }
