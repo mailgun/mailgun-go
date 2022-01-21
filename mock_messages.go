@@ -83,6 +83,21 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		ms.mutex.Unlock()
 	}
 
+	tags := r.Form["o:tag"]
+	for _, newTag := range tags {
+		var tagExists bool
+		for _, existingTag := range ms.tags {
+			if newTag == existingTag.Value {
+				tagExists = true
+				break
+			}
+		}
+
+		if !tagExists {
+			ms.tags = append(ms.tags, Tag{Value: newTag})
+		}
+	}
+
 	toJSON(w, okResp{ID: "<" + id + ">", Message: "Queued. Thank you."})
 }
 

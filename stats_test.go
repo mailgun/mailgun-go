@@ -1,19 +1,17 @@
-package mailgun
+package mailgun_test
 
 import (
 	"context"
 	"testing"
 
+	"github.com/mailgun/mailgun-go/v4"
+
 	"github.com/facebookgo/ensure"
 )
 
 func TestListStats(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := NewMailgunFromEnv()
-	ensure.Nil(t, err)
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	stats, err := mg.GetStats(ctx, []string{"accepted", "delivered"}, nil)
@@ -25,16 +23,4 @@ func TestListStats(t *testing.T) {
 		t.Logf("Accepted Total: %d\n", firstStatsTotal.Accepted.Total)
 		t.Logf("Delivered Total: %d\n", firstStatsTotal.Delivered.Total)
 	}
-}
-
-func TestDeleteTag(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
-		t.Skip(reason)
-	}
-
-	mg, err := NewMailgunFromEnv()
-	ctx := context.Background()
-
-	ensure.Nil(t, err)
-	ensure.Nil(t, mg.DeleteTag(ctx, "newsletter"))
 }
