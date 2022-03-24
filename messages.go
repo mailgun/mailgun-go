@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -548,6 +549,12 @@ var ErrInvalidMessage = errors.New("message not valid")
 func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
+		return
+	}
+
+	invalidChars := ":&'@(),!?#;%+=<>"
+	if i := strings.ContainsAny(mg.domain, invalidChars); i {
+		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
 		return
 	}
 
