@@ -408,6 +408,44 @@ func TestAddRecipientAndVariablesError(t *testing.T) {
 	ensure.DeepEqual(t, err.Error(), "recipient limit exceeded (max 1000)")
 }
 
+func TestSendDomainError(t *testing.T) {
+	cases := []struct {
+		domain  string
+		isValid bool
+	}{
+		{"http://example.com", false},
+		{"example.com", true},
+		{"mail.example.com", true},
+		{"mail.service.example.com", true},
+		{"http://example.com?email=yes", false},
+		{"https://example.com", false},
+		{"smtp://example.com", false},
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rsp := `{
+				"message":"Queued. Thank you",
+				"id":"<20111114174239.25659.5817@samples.mailgun.org>"
+				}`
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	for _, c := range cases {
+		ctx := context.Background()
+		mg := NewMailgun(c.domain, exampleAPIKey)
+		mg.SetAPIBase(srv.URL + "/v3")
+		m := mg.NewMessage(fromUser, exampleSubject, exampleText, "test@test.com")
+
+		_, _, err := mg.Send(ctx, m)
+		if c.isValid {
+			ensure.Nil(t, err)
+		} else {
+			ensure.DeepEqual(t, err.Error(), "you called Send() with a domain that contains invalid characters")
+		}
+	}
+}
+
 func TestSendEOFError(t *testing.T) {
 	const (
 		exampleDomain = "testDomain"
