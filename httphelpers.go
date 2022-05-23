@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-var validURL = regexp.MustCompile(`^/v[2-4].*`)
+var validURL = regexp.MustCompile(`/v[2-4].*`)
 
 type httpRequest struct {
 	URL               string
