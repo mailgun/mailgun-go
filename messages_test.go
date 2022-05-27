@@ -582,6 +582,8 @@ func TestAddOverrideHeader(t *testing.T) {
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
+
+	ensure.StringContains(t, mg.GetCurlOutput(), "Host:")
 }
 
 func TestCaptureCurlOutput(t *testing.T) {
