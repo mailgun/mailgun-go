@@ -80,8 +80,13 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 	if err != nil {
 		return "", err
 	}
+
 	if Debug {
-		fmt.Println(r.curlString(req, nil))
+		if CaptureCurlOutput {
+			r.capturedCurlOutput = r.curlString(req, nil)
+		} else {
+			fmt.Println(r.curlString(req, nil))
+		}
 	}
 
 	resp, err := r.Client.Do(req)

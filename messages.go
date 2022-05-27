@@ -684,6 +684,10 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 		id = response.Id
 	}
 
+	if r.capturedCurlOutput != "" {
+		mg.capturedCurlOutput = r.capturedCurlOutput
+	}
+
 	return
 }
 

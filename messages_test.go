@@ -1,4 +1,4 @@
-package mailgun
+package mailgun_test
 
 import (
 	"context"
@@ -12,12 +12,10 @@ import (
 	"time"
 
 	"github.com/facebookgo/ensure"
+	"github.com/mailgun/mailgun-go/v4"
 )
 
 const (
-	fromUser       = "=?utf-8?q?Katie_Brewer=2C_CFP=C2=AE?= <joe@example.com>"
-	exampleSubject = "Mailgun-go Example Subject"
-	exampleText    = "Testing some Mailgun awesomeness!\nhttps://www.mailgun.com/"
 	exampleHtml    = "<html><head /><body><p>Testing some <a href=\"http://google.com?q=abc&r=def&s=ghi\">Mailgun HTML awesomeness!</a> at www.kc5tja@yahoo.com</p></body></html>"
 	exampleAMPHtml = `<!doctype html><html ⚡4email><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/v0.js"></script><style amp4email-boilerplate>body{visibility:hidden}</style><style amp-custom>h1{margin: 1rem;}</style></head><body><h1>Hello, I am an AMP EMAIL!</h1></body></html>`
 	exampleMime    = `Content-Type: text/plain; charset="ascii"
@@ -34,14 +32,29 @@ Testing some Mailgun MIME awesomeness!
 	exampleAPIKey = "testAPIKey"
 )
 
+func init() {
+	mailgun.Debug = true
+	mailgun.CaptureCurlOutput = true
+	mailgun.RedactCurlAuth = true
+}
+
+func spendMoney(t *testing.T, tFunc func()) {
+	ok := os.Getenv("MG_SPEND_MONEY")
+	if ok != "" {
+		tFunc()
+	} else {
+		t.Log("Money spending not allowed, not running function.")
+	}
+}
+
 func TestSendMGPlain(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -53,13 +66,13 @@ func TestSendMGPlain(t *testing.T) {
 }
 
 func TestSendMGPlainWithTracking(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -72,13 +85,13 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 }
 
 func TestSendMGPlainAt(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -91,13 +104,13 @@ func TestSendMGPlainAt(t *testing.T) {
 }
 
 func TestSendMGHtml(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -110,13 +123,13 @@ func TestSendMGHtml(t *testing.T) {
 }
 
 func TestSendMGAMPHtml(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -130,13 +143,13 @@ func TestSendMGAMPHtml(t *testing.T) {
 }
 
 func TestSendMGTracking(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -149,19 +162,19 @@ func TestSendMGTracking(t *testing.T) {
 }
 
 func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHtml(exampleHtml)
-		options := TrackingOptions{
+		options := mailgun.TrackingOptions{
 			Tracking:       true,
 			TrackingClicks: "htmlonly",
 			TrackingOpens:  true,
@@ -174,13 +187,13 @@ func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
 }
 
 func TestSendMGTag(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -195,13 +208,13 @@ func TestSendMGTag(t *testing.T) {
 }
 
 func TestSendMGMIME(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -213,17 +226,17 @@ func TestSendMGMIME(t *testing.T) {
 }
 
 func TestSendMGBatchFailRecipients(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Batch\n")
-		for i := 0; i < MaxNumberOfRecipients; i++ {
+		for i := 0; i < mailgun.MaxNumberOfRecipients; i++ {
 			m.AddRecipient("") // We expect this to indicate a failure at the API
 		}
 		err = m.AddRecipientAndVariables(toUser, nil)
@@ -234,13 +247,13 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 }
 
 func TestSendMGBatchRecipientVariables(t *testing.T) {
-	if reason := SkipNetworkTest(); reason != "" {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)
 	}
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := NewMailgunFromEnv()
+		mg, err := mailgun.NewMailgunFromEnv()
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
@@ -275,7 +288,7 @@ func TestSendMGOffline(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
@@ -308,7 +321,7 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	ctx := context.Background()
@@ -362,7 +375,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
@@ -379,7 +392,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 
 func TestAddRecipientsError(t *testing.T) {
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
@@ -395,7 +408,7 @@ func TestAddRecipientsError(t *testing.T) {
 func TestAddRecipientAndVariablesError(t *testing.T) {
 	var err error
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
@@ -433,7 +446,7 @@ func TestSendDomainError(t *testing.T) {
 
 	for _, c := range cases {
 		ctx := context.Background()
-		mg := NewMailgun(c.domain, exampleAPIKey)
+		mg := mailgun.NewMailgun(c.domain, exampleAPIKey)
 		mg.SetAPIBase(srv.URL + "/v3")
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, "test@test.com")
 
@@ -459,7 +472,7 @@ func TestSendEOFError(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
@@ -483,7 +496,7 @@ func TestHasRecipient(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	// No recipient
@@ -523,7 +536,7 @@ func TestResendStored(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
@@ -555,7 +568,7 @@ func TestAddOverrideHeader(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	mg.AddOverrideHeader("Host", "example.com")
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
@@ -569,6 +582,36 @@ func TestAddOverrideHeader(t *testing.T) {
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
+}
+
+func TestCaptureCurlOutput(t *testing.T) {
+	const (
+		exampleDomain  = "testDomain"
+		exampleAPIKey  = "testAPIKey"
+		toUser         = "test@test.com"
+		exampleMessage = "Queue. Thank you"
+		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/v3/%s/messages", exampleDomain))
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL + "/v3")
+	ctx := context.Background()
+
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	msg, id, err := mg.Send(ctx, m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
+
+	ensure.StringContains(t, mg.GetCurlOutput(), "curl")
+	t.Logf("%s", mg.GetCurlOutput())
 }
 
 func TestSendTLSOptions(t *testing.T) {
@@ -593,7 +636,7 @@ func TestSendTLSOptions(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
@@ -623,7 +666,7 @@ func TestSendTemplate(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
@@ -656,7 +699,7 @@ func TestSendTemplateOptions(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
