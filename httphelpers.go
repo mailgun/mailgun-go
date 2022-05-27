@@ -359,6 +359,11 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 		}
 	}
 
+	// Special case for Host
+	if req.Host != "" {
+		parts = append(parts, fmt.Sprintf("-H \"Host: %s\"", req.Host))
+	}
+
 	//parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
 
 	if p != nil {
