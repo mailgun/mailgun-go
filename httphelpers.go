@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -15,6 +14,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var validURL = regexp.MustCompile(`/v[2-4].*`)
@@ -274,6 +275,11 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 	}
 
 	for header, value := range r.Headers {
+		// Special case, override the Host header
+		if header == "Host" {
+			req.Host = value
+			continue
+		}
 		req.Header.Add(header, value)
 	}
 	return req, nil

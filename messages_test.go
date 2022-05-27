@@ -536,6 +536,41 @@ func TestResendStored(t *testing.T) {
 	ensure.DeepEqual(t, id, exampleID)
 }
 
+func TestAddOverrideHeader(t *testing.T) {
+	const (
+		exampleDomain  = "testDomain"
+		exampleAPIKey  = "testAPIKey"
+		toUser         = "test@test.com"
+		exampleMessage = "Queue. Thank you"
+		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
+	)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ensure.DeepEqual(t, req.Method, http.MethodPost)
+		ensure.DeepEqual(t, req.URL.Path, fmt.Sprintf("/v3/%s/messages", exampleDomain))
+		ensure.DeepEqual(t, req.Header.Get("CustomHeader"), "custom-value")
+		ensure.DeepEqual(t, req.Host, "example.com")
+
+		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
+		fmt.Fprint(w, rsp)
+	}))
+	defer srv.Close()
+
+	mg := NewMailgun(exampleDomain, exampleAPIKey)
+	mg.SetAPIBase(srv.URL + "/v3")
+	mg.AddOverrideHeader("Host", "example.com")
+	mg.AddOverrideHeader("CustomHeader", "custom-value")
+	ctx := context.Background()
+
+	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m.SetRequireTLS(true)
+	m.SetSkipVerification(true)
+
+	msg, id, err := mg.Send(ctx, m)
+	ensure.Nil(t, err)
+	ensure.DeepEqual(t, msg, exampleMessage)
+	ensure.DeepEqual(t, id, exampleID)
+}
+
 func TestSendTLSOptions(t *testing.T) {
 	const (
 		exampleDomain  = "testDomain"
