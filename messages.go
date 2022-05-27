@@ -672,6 +672,10 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	// Override any HTTP headers if provided
+	for k, v := range mg.overrideHeaders {
+		r.addHeader(k, v)
+	}
 
 	var response sendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &response)
