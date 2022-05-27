@@ -21,12 +21,13 @@ import (
 var validURL = regexp.MustCompile(`/v[2-4].*`)
 
 type httpRequest struct {
-	URL               string
-	Parameters        map[string][]string
-	Headers           map[string]string
-	BasicAuthUser     string
-	BasicAuthPassword string
-	Client            *http.Client
+	URL                string
+	Parameters         map[string][]string
+	Headers            map[string]string
+	BasicAuthUser      string
+	BasicAuthPassword  string
+	Client             *http.Client
+	capturedCurlOutput string
 }
 
 type httpResponse struct {
@@ -292,7 +293,11 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	}
 
 	if Debug {
-		fmt.Println(r.curlString(req, payload))
+		if CaptureCurlOutput {
+			r.capturedCurlOutput = r.curlString(req, payload)
+		} else {
+			fmt.Println(r.curlString(req, payload))
+		}
 	}
 
 	response := httpResponse{}
@@ -347,7 +352,11 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 
 	parts := []string{"curl", "-i", "-X", req.Method, req.URL.String()}
 	for key, value := range req.Header {
-		parts = append(parts, fmt.Sprintf("-H \"%s: %s\"", key, value[0]))
+		if key == "Authorization" {
+			parts = append(parts, fmt.Sprintf("-H \"%s: %s\"", key, "<redacted>"))
+		} else {
+			parts = append(parts, fmt.Sprintf("-H \"%s: %s\"", key, value[0]))
+		}
 	}
 
 	//parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))

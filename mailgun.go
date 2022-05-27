@@ -85,8 +85,16 @@ import (
 	"time"
 )
 
-// Set true to write the HTTP requests in curl for to stdout
+// Debug set true to write the HTTP requests in curl for to stdout
 var Debug = false
+
+// CaptureCurlOutput if true, will capture the curl request of the last Send()
+// can be retrieved by calling GetCurlOutput()
+var CaptureCurlOutput = false
+
+// RedactCurlAuth will redact the authentication header when CaptureCurlOutput is
+// used.
+var RedactCurlAuth = false
 
 const (
 	// Base Url the library uses to contact mailgun. Use SetAPIBase() to override
@@ -126,6 +134,7 @@ type Mailgun interface {
 	SetClient(client *http.Client)
 	SetAPIBase(url string)
 	AddOverrideHeader(k string, v string)
+	GetCurlOutput() string
 
 	Send(ctx context.Context, m *Message) (string, string, error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
@@ -242,12 +251,13 @@ type Mailgun interface {
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
 // Colloquially, we refer to instances of this structure as "clients."
 type MailgunImpl struct {
-	apiBase         string
-	domain          string
-	apiKey          string
-	client          *http.Client
-	baseURL         string
-	overrideHeaders map[string]string
+	apiBase            string
+	domain             string
+	apiKey             string
+	client             *http.Client
+	baseURL            string
+	overrideHeaders    map[string]string
+	capturedCurlOutput string
 }
 
 // NewMailGun creates a new client instance.
@@ -327,6 +337,13 @@ func (mg *MailgunImpl) AddOverrideHeader(k string, v string) {
 		mg.overrideHeaders = make(map[string]string)
 	}
 	mg.overrideHeaders[k] = v
+}
+
+// GetCurlOutput will retrieve the output of the last Send() request as a curl command.
+// mailgun.CaptureCurlOutput must be set to true
+// This is mostly useful for testing the Mailgun API hosted at a different endpoint.
+func (mg *MailgunImpl) GetCurlOutput() string {
+	return mg.capturedCurlOutput
 }
 
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
