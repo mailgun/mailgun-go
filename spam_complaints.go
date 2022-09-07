@@ -164,6 +164,22 @@ func (mg *MailgunImpl) CreateComplaint(ctx context.Context, address string) erro
 	return err
 }
 
+func (mg *MailgunImpl) CreateComplaints(ctx context.Context, addresses []string) error {
+	r := newHTTPRequest(generateApiUrl(mg, complaintsEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	body := make([]map[string]string, len(addresses))
+	for i, addr := range addresses {
+		body[i] = map[string]string{"address": addr}
+	}
+
+	payload := newJSONEncodedPayload(body)
+
+	_, err := makePostRequest(ctx, r, payload)
+	return err
+}
+
 // DeleteComplaint removes a previously registered e-mail address from the list of people who complained
 // of receiving spam from your domain.
 func (mg *MailgunImpl) DeleteComplaint(ctx context.Context, address string) error {

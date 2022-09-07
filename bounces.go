@@ -193,6 +193,18 @@ func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, error strin
 	return err
 }
 
+// Add Bounces adds a list of bounces to the bounce list
+func (mg *MailgunImpl) AddBounces(ctx context.Context, bounces []Bounce) error {
+	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newJSONEncodedPayload(bounces)
+
+	_, err := makePostRequest(ctx, r, payload)
+	return err
+}
+
 // DeleteBounce removes all bounces associted with the provided e-mail address.
 func (mg *MailgunImpl) DeleteBounce(ctx context.Context, address string) error {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)

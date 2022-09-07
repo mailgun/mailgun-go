@@ -103,7 +103,7 @@ func TestAddDelBounces(t *testing.T) {
 	ensure.NotNil(t, err)
 }
 
-func TestDelBounceList(t *testing.T) {
+func TestAddDelBounceList(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
 
@@ -127,25 +127,48 @@ func TestDelBounceList(t *testing.T) {
 		return false
 	}
 
-	for i := 0; i < 3; i++ {
-		// Compute an e-mail address for our Bounce.
-		exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
+	createdAt, err := mailgun.NewRFC2822Time("Thu, 13 Oct 2011 18:02:00 UTC")
+	if err != nil {
+		t.Fatalf("invalid time")
+	}
 
-		// Add the bounce for our address.
-		err := mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
+	// Generate a list of bounces
+	bounces := []mailgun.Bounce{
+		{
+			Code:    "550",
+			Address: fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain),
+			Error:   "TestAddDelBounces-generated error",
+		},
+		{
+			Code:      "550",
+			Address:   fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain),
+			Error:     "TestAddDelBounces-generated error",
+			CreatedAt: createdAt,
+		},
+	}
+
+	// Add the bounce for our address.
+	err = mg.AddBounces(ctx, bounces)
+	ensure.Nil(t, err)
+
+	for _, expect := range bounces {
+		if !findBounce(expect.Address) {
+			t.Fatalf("Expected bounce for address %s in list of bounces", expect.Address)
+		}
+
+		bounce, err := mg.GetBounce(ctx, expect.Address)
 		ensure.Nil(t, err)
-
-		// Give API some time to refresh cache
-		time.Sleep(time.Second)
-
-		// We should now have one bounce listed when we query the API.
-		if !findBounce(exampleEmail) {
-			t.Fatalf("Expected bounce for address %s in list of bounces", exampleEmail)
+		if bounce.Address != expect.Address {
+			t.Fatalf("Expected at least one bounce for %s", expect.Address)
+		}
+		t.Logf("Bounce Created At: %s", bounce.CreatedAt)
+		if !expect.CreatedAt.IsZero() && bounce.CreatedAt != expect.CreatedAt {
+			t.Fatalf("Expected bounce createdAt to be %s, got %s", expect.CreatedAt, bounce.CreatedAt)
 		}
 	}
 
 	// Delete the bounce list.  This should put us back the way we were.
-	err := mg.DeleteBounceList(ctx)
+	err = mg.DeleteBounceList(ctx)
 	ensure.Nil(t, err)
 
 	it := mg.ListBounces(nil)
