@@ -273,6 +273,7 @@ type CreateDomainOptions struct {
 	ForceDKIMAuthority bool
 	DKIMKeySize        int
 	IPS                []string
+	WebScheme          string
 }
 
 // CreateDomain instructs Mailgun to create a new domain for your account.
@@ -307,6 +308,9 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 		}
 		if len(opts.Password) != 0 {
 			payload.addValue("smtp_password", opts.Password)
+		}
+		if opts.WebScheme != "" {
+			payload.addValue("web_scheme", string(opts.WebScheme))
 		}
 	}
 	var resp DomainResponse
