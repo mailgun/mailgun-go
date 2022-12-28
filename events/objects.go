@@ -8,6 +8,7 @@ type ClientInfo struct {
 	DeviceType     string `json:"device-type"`
 	IP             string `json:"ip"`
 	UserAgent      string `json:"user-agent"`
+	Bot            string `json:"bot"`
 }
 
 type GeoLocation struct {
