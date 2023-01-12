@@ -744,9 +744,8 @@ func SendInlineImage(domain, apiKey string) (string, error) {
 	)
 	m.AddCC("baz@example.com")
 	m.AddBCC("bar@example.com")
-	m.SetHtml("<html>HTML version of the body</html>")
+	m.SetHtml(`<html>Inline image here: <img alt="image" src="cid:test.jpg"/></html>`)
 	m.AddInline("files/test.jpg")
-	m.AddInline("files/test.txt")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
