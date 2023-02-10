@@ -67,3 +67,41 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	ensure.Nil(t, mg.DeleteComplaint(ctx, randomMail))
 	ensure.False(t, hasComplaint(randomMail))
 }
+
+func TestCreateDeleteComplaintList(t *testing.T) {
+	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg.SetAPIBase(server.URL())
+	ctx := context.Background()
+
+	var hasComplaint = func(email string) bool {
+		t.Logf("hasComplaint: %s\n", email)
+		it := mg.ListComplaints(nil)
+		ensure.Nil(t, it.Err())
+
+		var page []mailgun.Complaint
+		for it.Next(ctx, &page) {
+			for _, complaint := range page {
+				t.Logf("Complaint Address: %s\n", complaint.Address)
+				if complaint.Address == email {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	addresses := []string{
+		strings.ToLower(randomString(64, "")) + "@example1.com",
+		strings.ToLower(randomString(64, "")) + "@example2.com",
+		strings.ToLower(randomString(64, "")) + "@example3.com",
+	}
+
+	ensure.Nil(t, mg.CreateComplaints(ctx, addresses))
+
+	for _, address := range addresses {
+		ensure.True(t, hasComplaint(address))
+		ensure.Nil(t, mg.DeleteComplaint(ctx, address))
+		ensure.False(t, hasComplaint(address))
+	}
+
+}
