@@ -76,7 +76,7 @@ func TestAddDeleteDomain(t *testing.T) {
 
 	// First, we need to add the domain.
 	_, err := mg.CreateDomain(ctx, "mx.mailgun.test",
-		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag, Password: "supersecret"})
+		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag, Password: "supersecret", WebScheme: "https"})
 	ensure.Nil(t, err)
 
 	// Next, we delete it.
