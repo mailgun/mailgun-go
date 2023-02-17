@@ -23,6 +23,7 @@ type Delivered struct {
 // Stats on temporary failures
 type Temporary struct {
 	Espblock int `json:"espblock"`
+	Total    int `json:"total"`
 }
 
 // Stats on permanent failures
