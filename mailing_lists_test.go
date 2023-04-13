@@ -100,10 +100,11 @@ func TestMailingLists(t *testing.T) {
 
 	address := randomEmail("list", testDomain)
 	protoList := mailgun.MailingList{
-		Address:     address,
-		Name:        "List1",
-		Description: "A list created by an acceptance test.",
-		AccessLevel: mailgun.AccessLevelMembers,
+		Address:         address,
+		Name:            "List1",
+		Description:     "A list created by an acceptance test.",
+		AccessLevel:     mailgun.AccessLevelMembers,
+		ReplyPreference: mailgun.ReplyPreferenceSender,
 	}
 
 	var countLists = func() int {
