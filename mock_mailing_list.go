@@ -30,12 +30,13 @@ func (ms *mockServer) addMailingListRoutes(r *mux.Router) {
 
 	ms.mailingList = append(ms.mailingList, MailingListContainer{
 		MailingList: MailingList{
-			AccessLevel:  "everyone",
-			Address:      "foo@mailgun.test",
-			CreatedAt:    RFC2822Time(time.Now().UTC()),
-			Description:  "Mailgun developers list",
-			MembersCount: 1,
-			Name:         "",
+			ReplyPreference: "list",
+			AccessLevel:     "everyone",
+			Address:         "foo@mailgun.test",
+			CreatedAt:       RFC2822Time(time.Now().UTC()),
+			Description:     "Mailgun developers list",
+			MembersCount:    1,
+			Name:            "",
 		},
 		Members: []Member{
 			{
@@ -146,6 +147,9 @@ func (ms *mockServer) updateMailingList(w http.ResponseWriter, r *http.Request) 
 			if r.FormValue("access_level") != "" {
 				ms.mailingList[i].MailingList.AccessLevel = AccessLevel(r.FormValue("access_level"))
 			}
+			if r.FormValue("reply_preference") != "" {
+				ms.mailingList[i].MailingList.ReplyPreference = ReplyPreference(r.FormValue("reply_preference"))
+			}
 			toJSON(w, okResp{Message: "Mailing list member has been updated"})
 			return
 		}
@@ -160,11 +164,12 @@ func (ms *mockServer) createMailingList(w http.ResponseWriter, r *http.Request) 
 
 	ms.mailingList = append(ms.mailingList, MailingListContainer{
 		MailingList: MailingList{
-			CreatedAt:   RFC2822Time(time.Now().UTC()),
-			Name:        r.FormValue("name"),
-			Address:     r.FormValue("address"),
-			Description: r.FormValue("description"),
-			AccessLevel: AccessLevel(r.FormValue("access_level")),
+			CreatedAt:       RFC2822Time(time.Now().UTC()),
+			Name:            r.FormValue("name"),
+			Address:         r.FormValue("address"),
+			Description:     r.FormValue("description"),
+			AccessLevel:     AccessLevel(r.FormValue("access_level")),
+			ReplyPreference: ReplyPreference(r.FormValue("reply_preference")),
 		},
 	})
 	toJSON(w, okResp{Message: "Mailing list has been created"})

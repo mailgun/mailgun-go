@@ -22,16 +22,28 @@ const (
 // Specify the access of a mailing list member
 type AccessLevel string
 
+// Replies to a mailing list should go to one of two preferred destinations.
+const (
+	// List specifies that replies should be sent to the mailing list address.
+	ReplyPreferenceList = "list"
+	// Sender specifies that replies should be sent to the sender (FROM) address.
+	ReplyPreferenceSender = "sender"
+)
+
+// Set where replies should go
+type ReplyPreference string
+
 // A List structure provides information for a mailing list.
 //
 // AccessLevel may be one of ReadOnly, Members, or Everyone.
 type MailingList struct {
-	Address      string      `json:"address,omitempty"`
-	Name         string      `json:"name,omitempty"`
-	Description  string      `json:"description,omitempty"`
-	AccessLevel  AccessLevel `json:"access_level,omitempty"`
-	CreatedAt    RFC2822Time `json:"created_at,omitempty"`
-	MembersCount int         `json:"members_count,omitempty"`
+	Address         string          `json:"address,omitempty"`
+	Name            string          `json:"name,omitempty"`
+	Description     string          `json:"description,omitempty"`
+	AccessLevel     AccessLevel     `json:"access_level,omitempty"`
+	ReplyPreference ReplyPreference `json:"reply_preference,omitempty"`
+	CreatedAt       RFC2822Time     `json:"created_at,omitempty"`
+	MembersCount    int             `json:"members_count,omitempty"`
 }
 
 type listsResponse struct {
@@ -161,9 +173,10 @@ func (li *ListsIterator) fetch(ctx context.Context, url string) error {
 
 // CreateMailingList creates a new mailing list under your Mailgun account.
 // You need specify only the Address and Name members of the prototype;
-// Description, and AccessLevel are optional.
+// Description, AccessLevel and ReplyPreference are optional.
 // If unspecified, Description remains blank,
-// while AccessLevel defaults to Everyone.
+// while AccessLevel defaults to Everyone
+// and ReplyPreference defaults to List.
 func (mg *MailgunImpl) CreateMailingList(ctx context.Context, prototype MailingList) (MailingList, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint))
 	r.setClient(mg.Client())
@@ -180,6 +193,9 @@ func (mg *MailgunImpl) CreateMailingList(ctx context.Context, prototype MailingL
 	}
 	if prototype.AccessLevel != "" {
 		p.addValue("access_level", string(prototype.AccessLevel))
+	}
+	if prototype.ReplyPreference != "" {
+		p.addValue("reply_preference", string(prototype.ReplyPreference))
 	}
 	response, err := makePostRequest(ctx, r, p)
 	if err != nil {
@@ -217,7 +233,7 @@ func (mg *MailgunImpl) GetMailingList(ctx context.Context, addr string) (Mailing
 }
 
 // UpdateMailingList allows you to change various attributes of a list.
-// Address, Name, Description, and AccessLevel are all optional;
+// Address, Name, Description, AccessLevel and ReplyPreference are all optional;
 // only those fields which are set in the prototype will change.
 //
 // Be careful!  If changing the address of a mailing list,
@@ -239,6 +255,9 @@ func (mg *MailgunImpl) UpdateMailingList(ctx context.Context, addr string, proto
 	}
 	if prototype.AccessLevel != "" {
 		p.addValue("access_level", string(prototype.AccessLevel))
+	}
+	if prototype.ReplyPreference != "" {
+		p.addValue("reply_preference", string(prototype.ReplyPreference))
 	}
 	var l MailingList
 	response, err := makePutRequest(ctx, r, p)
