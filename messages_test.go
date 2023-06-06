@@ -103,6 +103,25 @@ func TestSendMGPlainAt(t *testing.T) {
 	})
 }
 
+func TestSendMGSTO(t *testing.T) {
+	if reason := mailgun.SkipNetworkTest(); reason != "" {
+		t.Skip(reason)
+	}
+
+	spendMoney(t, func() {
+		toUser := os.Getenv("MG_EMAIL_TO")
+		mg, err := mailgun.NewMailgunFromEnv()
+		ensure.Nil(t, err)
+
+		ctx := context.Background()
+		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m.SetSTOPeriod("24h")
+		msg, id, err := mg.Send(ctx, m)
+		ensure.Nil(t, err)
+		t.Log("TestSendMGSTO:MSG(" + msg + "),ID(" + id + ")")
+	})
+}
+
 func TestSendMGHtml(t *testing.T) {
 	if reason := mailgun.SkipNetworkTest(); reason != "" {
 		t.Skip(reason)

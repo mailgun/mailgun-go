@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -25,6 +26,7 @@ type Message struct {
 	campaigns         []string
 	dkim              bool
 	deliveryTime      time.Time
+	stoPeriod         string
 	attachments       []string
 	readerAttachments []ReaderAttachment
 	inlines           []string
@@ -169,8 +171,8 @@ type features interface {
 // Pass nil as the to parameter to skip adding the To: header at this stage.
 // You can do this explicitly, or implicitly, as follows:
 //
-//     // Note absence of To parameter(s)!
-//     m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//	// Note absence of To parameter(s)!
+//	m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
@@ -198,8 +200,8 @@ func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Mes
 // Pass nil as the to parameter to skip adding the To: header at this stage.
 // You can do this explicitly, or implicitly, as follows:
 //
-//     // Note absence of To parameter(s)!
-//     m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//	// Note absence of To parameter(s)!
+//	m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
@@ -414,6 +416,25 @@ func (m *Message) SetDeliveryTime(dt time.Time) {
 	m.deliveryTime = dt
 }
 
+// SetSTOPeriod toggles Send Time Optimization (STO) on a per-message basis.
+// String should be set to the number of hours in [0-9]+h format,
+// with the minimum being 24h and the maximum being 72h.
+// Refer to the Mailgun documentation for more information.
+func (m *Message) SetSTOPeriod(stoPeriod string) error {
+	validPattern := `^([2-6][4-9]|[3-6][0-9]|7[0-2])h$`
+	match, err := regexp.MatchString(validPattern, stoPeriod)
+	if err != nil {
+		return err
+	}
+
+	if !match {
+		return errors.New("STO period is invalid. Valid range is 24h to 72h")
+	}
+
+	m.stoPeriod = stoPeriod
+	return nil
+}
+
 // SetTracking sets the o:tracking message parameter to adjust, on a message-by-message basis,
 // whether or not Mailgun will rewrite URLs to facilitate event tracking.
 // Events tracked includes opens, clicks, unsubscribes, etc.
@@ -454,18 +475,18 @@ func (m *Message) SetSkipVerification(b bool) {
 	m.skipVerification = b
 }
 
-//SetTrackingOpens information is found in the Mailgun documentation.
+// SetTrackingOpens information is found in the Mailgun documentation.
 func (m *Message) SetTrackingOpens(trackingOpens bool) {
 	m.trackingOpens = trackingOpens
 	m.trackingOpensSet = true
 }
 
-//SetTemplateVersion information is found in the Mailgun documentation.
+// SetTemplateVersion information is found in the Mailgun documentation.
 func (m *Message) SetTemplateVersion(tag string) {
 	m.templateVersionTag = tag
 }
 
-//SetTemplateRenderText information is found in the Mailgun documentation.
+// SetTemplateRenderText information is found in the Mailgun documentation.
 func (m *Message) SetTemplateRenderText(render bool) {
 	m.templateRenderText = render
 }
@@ -527,10 +548,10 @@ var ErrInvalidMessage = errors.New("message not valid")
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
-// * A human-readable status message, typically "Queued. Thank you."
-// * A Message ID, which is the id used to track the queued message. The message id is useful
-//   when contacting support to report an issue with a specific message or to relate a
-//   delivered, accepted or failed event back to specific message.
+//   - A human-readable status message, typically "Queued. Thank you."
+//   - A Message ID, which is the id used to track the queued message. The message id is useful
+//     when contacting support to report an issue with a specific message or to relate a
+//     delivered, accepted or failed event back to specific message.
 //
 // The status and message ID are only returned if no error occurred.
 //
@@ -538,14 +559,14 @@ var ErrInvalidMessage = errors.New("message not valid")
 // golang errors like `url.Error`. The error can also be of type
 // mailgun.UnexpectedResponseError which contains the error returned by the mailgun API.
 //
-//  mailgun.UnexpectedResponseError {
-//    URL:      "https://api.mailgun.com/v3/messages",
-//    Expected: 200,
-//    Actual:   400,
-//    Data:     "Domain not found: example.com",
-//  }
+//	mailgun.UnexpectedResponseError {
+//	  URL:      "https://api.mailgun.com/v3/messages",
+//	  Expected: 200,
+//	  Actual:   400,
+//	  Data:     "Domain not found: example.com",
+//	}
 //
-//  See the public mailgun documentation for all possible return codes and error messages
+//	See the public mailgun documentation for all possible return codes and error messages
 func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
@@ -567,6 +588,11 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 		err = ErrInvalidMessage
 		return
 	}
+
+	if message.stoPeriod != "" && message.RecipientCount() > 1 {
+		err = errors.New("STO can only be used on a per-message basis")
+		return
+	}
 	payload := newFormDataPayload()
 
 	message.specific.addValues(payload)
@@ -584,6 +610,9 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 	}
 	if !message.deliveryTime.IsZero() {
 		payload.addValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
+	}
+	if message.stoPeriod != "" {
+		payload.addValue("o:deliverytime-optimize-period", message.stoPeriod)
 	}
 	if message.nativeSend {
 		payload.addValue("o:native-send", "yes")
