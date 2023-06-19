@@ -795,10 +795,6 @@ func isValid(m *Message) bool {
 }
 
 func (pm *plainMessage) isValid() bool {
-	if pm.from == "" {
-		return false
-	}
-
 	if !validateStringList(pm.cc, false) {
 		return false
 	}
@@ -810,6 +806,10 @@ func (pm *plainMessage) isValid() bool {
 	if pm.template != "" {
 		// pm.text or pm.html not needed if template is supplied
 		return true
+	}
+
+	if pm.from == "" {
+		return false
 	}
 
 	if pm.text == "" && pm.html == "" {
