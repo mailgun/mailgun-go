@@ -5,14 +5,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addTagsRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/tags", ms.listTags).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/tags/{tag}", ms.getTags).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/tags/{tag}", ms.deleteTags).Methods(http.MethodDelete)
-	r.HandleFunc("/{domain}/tags/{tag}", ms.createUpdateTags).Methods(http.MethodPut)
+func (ms *mockServer) addTagsRoutes(r chi.Router) {
+	r.Get("/{domain}/tags", ms.listTags)
+	r.Get("/{domain}/tags/{tag}", ms.getTags)
+	r.Delete("/{domain}/tags/{tag}", ms.deleteTags)
+	r.Put("/{domain}/tags/{tag}", ms.createUpdateTags)
 
 	tenMinutesBefore := time.Now().Add(-10 * time.Minute)
 	now := time.Now()
@@ -94,7 +94,7 @@ func (ms *mockServer) getTags(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	for _, tag := range ms.tags {
-		if tag.Value == mux.Vars(r)["tag"] {
+		if tag.Value == chi.URLParam(r, "tag") {
 			toJSON(w, tag)
 			return
 		}
@@ -113,7 +113,7 @@ func (ms *mockServer) createUpdateTags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tag := mux.Vars(r)["tag"]
+	tag := chi.URLParam(r, "tag")
 	description := r.FormValue("description")
 
 	var tagExists bool
@@ -138,7 +138,7 @@ func (ms *mockServer) deleteTags(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for i, existingTag := range ms.tags {
-		if existingTag.Value == mux.Vars(r)["tag"] {
+		if existingTag.Value == chi.URLParam(r, "tag") {
 			ms.tags = append(ms.tags[:i], ms.tags[i+1:len(ms.tags)]...)
 		}
 	}

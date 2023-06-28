@@ -6,16 +6,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/mailgun/mailgun-go/v4/events"
 )
 
-func (ms *mockServer) addMessagesRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/messages", ms.createMessages).Methods(http.MethodPost)
+func (ms *mockServer) addMessagesRoutes(r chi.Router) {
+	r.Post("/{domain}/messages", ms.createMessages)
 
 	// This path is made up; it could be anything as the storage url could change over time
-	r.HandleFunc("/se.storage.url/messages/{id}", ms.getStoredMessages).Methods(http.MethodGet)
-	r.HandleFunc("/se.storage.url/messages/{id}", ms.sendStoredMessages).Methods(http.MethodPost)
+	r.Get("/se.storage.url/messages/{id}", ms.getStoredMessages)
+	r.Post("/se.storage.url/messages/{id}", ms.sendStoredMessages)
 }
 
 // TODO: This implementation doesn't support multiple recipients
@@ -102,7 +102,7 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
+	id := chi.URLParam(r, "id")
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -134,7 +134,7 @@ func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ms *mockServer) sendStoredMessages(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
+	id := chi.URLParam(r, "id")
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

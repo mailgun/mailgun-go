@@ -7,17 +7,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addTemplateRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/templates", ms.listTemplates).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/templates/{name}", ms.getTemplate).Methods(http.MethodGet)
+func (ms *mockServer) addTemplateRoutes(r chi.Router) {
+	r.Get("/{domain}/templates", ms.listTemplates)
+	r.Get("/{domain}/templates/{name}", ms.getTemplate)
 
-	r.HandleFunc("/{domain}/templates", ms.createTemplate).Methods(http.MethodPost)
-	r.HandleFunc("/{domain}/templates/{name}", ms.updateTemplate).Methods(http.MethodPut)
-	r.HandleFunc("/{domain}/templates/{name}", ms.deleteTemplate).Methods(http.MethodDelete)
-	r.HandleFunc("/{domain}/templates/{name}", ms.deleteAllTemplates).Methods(http.MethodDelete)
+	r.Post("/{domain}/templates", ms.createTemplate)
+	r.Put("/{domain}/templates/{name}", ms.updateTemplate)
+	r.Delete("/{domain}/templates/{name}", ms.deleteTemplate)
+	r.Delete("/{domain}/templates/{name}", ms.deleteAllTemplates)
 
 	ms.templates = append(ms.templates, Template{
 		Name:        "template1",
@@ -135,7 +135,7 @@ func (ms *mockServer) getTemplate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	templateName := mux.Vars(r)["name"]
+	templateName := chi.URLParam(r, "name")
 	templateName = strings.ToLower(templateName)
 
 	err := r.ParseForm()
@@ -233,7 +233,7 @@ func (ms *mockServer) updateTemplate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	name := mux.Vars(r)["name"]
+	name := chi.URLParam(r, "name")
 	if len(name) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("{\"message\": \"Missing mandatory parameter: name\"}"))
@@ -272,7 +272,7 @@ func (ms *mockServer) deleteTemplate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	templateName := mux.Vars(r)["name"]
+	templateName := chi.URLParam(r, "name")
 
 	for i, template := range ms.templates {
 		if template.Name == templateName {

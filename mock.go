@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 type MockServer interface {
@@ -110,9 +110,9 @@ func NewMockServer() MockServer {
 	ms := mockServer{}
 
 	// Add all our handlers
-	r := mux.NewRouter()
+	r := chi.NewRouter()
 
-	func(r *mux.Router) {
+	r.Route("/v3", func(r chi.Router) {
 		ms.addIPRoutes(r)
 		ms.addExportRoutes(r)
 		ms.addDomainRoutes(r)
@@ -129,7 +129,7 @@ func NewMockServer() MockServer {
 		ms.addCredentialsRoutes(r)
 		ms.addStatsRoutes(r)
 		ms.addTagsRoutes(r)
-	}(r.PathPrefix("/v3").Subrouter())
+	})
 	ms.addValidationRoutes(r)
 
 	// Start the server
