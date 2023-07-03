@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addStatsRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/stats", ms.getStats).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/stats/total", ms.getStatsTotal).Methods(http.MethodGet)
+func (ms *mockServer) addStatsRoutes(r chi.Router) {
+	r.Get("/{domain}/stats", ms.getStats)
+	r.Get("/{domain}/stats/total", ms.getStatsTotal)
 
 	ms.stats = append(ms.stats, Stats{
 		Time:         "",

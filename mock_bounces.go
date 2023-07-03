@@ -8,15 +8,15 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addBouncesRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/bounces", ms.listBounces).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/bounces/{address}", ms.getBounce).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/bounces/{address}", ms.deleteBounce).Methods(http.MethodDelete)
-	r.HandleFunc("/{domain}/bounces", ms.deleteBouncesList).Methods(http.MethodDelete)
-	r.HandleFunc("/{domain}/bounces", ms.createBounce).Methods(http.MethodPost)
+func (ms *mockServer) addBouncesRoutes(r chi.Router) {
+	r.Get("/{domain}/bounces", ms.listBounces)
+	r.Get("/{domain}/bounces/{address}", ms.getBounce)
+	r.Delete("/{domain}/bounces/{address}", ms.deleteBounce)
+	r.Delete("/{domain}/bounces", ms.deleteBouncesList)
+	r.Post("/{domain}/bounces", ms.createBounce)
 
 	ms.bounces = append(ms.bounces, Bounce{
 		CreatedAt: RFC2822Time(time.Now()),
@@ -97,7 +97,7 @@ func (ms *mockServer) getBounce(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for _, bounce := range ms.bounces {
-		if bounce.Address == mux.Vars(r)["address"] {
+		if bounce.Address == chi.URLParam(r, "address") {
 			toJSON(w, bounce)
 			return
 		}
@@ -169,7 +169,7 @@ func (ms *mockServer) deleteBounce(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for i, bounce := range ms.bounces {
-		if bounce.Address == mux.Vars(r)["address"] {
+		if bounce.Address == chi.URLParam(r, "address") {
 			ms.bounces = append(ms.bounces[:i], ms.bounces[i+1:len(ms.bounces)]...)
 
 			toJSON(w, map[string]interface{}{

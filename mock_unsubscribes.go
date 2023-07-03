@@ -8,14 +8,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
-func (ms *mockServer) addUnsubscribesRoutes(r *mux.Router) {
-	r.HandleFunc("/{domain}/unsubscribes", ms.listUnsubscribes).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/unsubscribes/{address}", ms.getUnsubscribe).Methods(http.MethodGet)
-	r.HandleFunc("/{domain}/unsubscribes/{address}", ms.deleteUnsubscribe).Methods(http.MethodDelete)
-	r.HandleFunc("/{domain}/unsubscribes", ms.createUnsubscribe).Methods(http.MethodPost)
+func (ms *mockServer) addUnsubscribesRoutes(r chi.Router) {
+	r.Get("/{domain}/unsubscribes", ms.listUnsubscribes)
+	r.Get("/{domain}/unsubscribes/{address}", ms.getUnsubscribe)
+	r.Delete("/{domain}/unsubscribes/{address}", ms.deleteUnsubscribe)
+	r.Post("/{domain}/unsubscribes", ms.createUnsubscribe)
 
 	ms.unsubscribes = append(ms.unsubscribes, Unsubscribe{
 		CreatedAt: RFC2822Time(time.Now()),
@@ -96,7 +96,7 @@ func (ms *mockServer) getUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for _, unsubscribe := range ms.unsubscribes {
-		if unsubscribe.Address == mux.Vars(r)["address"] {
+		if unsubscribe.Address == chi.URLParam(r, "address") {
 			toJSON(w, unsubscribe)
 			return
 		}
@@ -175,7 +175,7 @@ func (ms *mockServer) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) 
 
 	var addressExist bool
 	for _, unsubscribe := range ms.unsubscribes {
-		if unsubscribe.Address == mux.Vars(r)["address"] {
+		if unsubscribe.Address == chi.URLParam(r, "address") {
 			addressExist = true
 		}
 	}
@@ -190,7 +190,7 @@ func (ms *mockServer) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) 
 	tag := r.FormValue("tag")
 	if len(tag) == 0 {
 		for i, unsubscribe := range ms.unsubscribes {
-			if unsubscribe.Address != mux.Vars(r)["address"] {
+			if unsubscribe.Address != chi.URLParam(r, "address") {
 				continue
 			}
 			ms.unsubscribes = append(ms.unsubscribes[:i], ms.unsubscribes[i+1:len(ms.unsubscribes)]...)
@@ -203,7 +203,7 @@ func (ms *mockServer) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) 
 	}
 
 	for i, unsubscribe := range ms.unsubscribes {
-		if unsubscribe.Address != mux.Vars(r)["address"] {
+		if unsubscribe.Address != chi.URLParam(r, "address") {
 			continue
 		}
 		for j, t := range ms.unsubscribes[i].Tags {
