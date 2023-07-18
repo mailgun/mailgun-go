@@ -2,7 +2,6 @@ package mailgun_test
 
 import (
 	"context"
-	"log"
 	"testing"
 	"time"
 
@@ -40,7 +39,6 @@ func TestTags(t *testing.T) {
 	var page []mailgun.Tag
 	for it.Next(ctx, &page) {
 		ensure.True(t, len(page) != 0)
-		log.Printf("Tags: %+v\n", page)
 	}
 	ensure.Nil(t, it.Err())
 
@@ -50,7 +48,6 @@ func TestTags(t *testing.T) {
 	var tags []mailgun.Tag
 	for cursor.Next(ctx, &tags) {
 		ensure.DeepEqual(t, len(tags), 1)
-		log.Printf("Tags: %+v\n", tags)
 	}
 	ensure.Nil(t, cursor.Err())
 

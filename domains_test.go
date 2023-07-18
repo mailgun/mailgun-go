@@ -69,14 +69,19 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
-func TestAddDeleteDomain(t *testing.T) {
+func TestAddUpdateDeleteDomain(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	// First, we need to add the domain.
 	_, err := mg.CreateDomain(ctx, "mx.mailgun.test",
-		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag, Password: "supersecret", WebScheme: "https"})
+		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag, Password: "supersecret", WebScheme: "http"})
+	ensure.Nil(t, err)
+
+	// Then, we update it.
+	err = mg.UpdateDomain(ctx, "mx.mailgun.test",
+		&mailgun.UpdateDomainOptions{WebScheme: "https"})
 	ensure.Nil(t, err)
 
 	// Next, we delete it.
