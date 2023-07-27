@@ -27,6 +27,7 @@ func (ms *mockServer) addDomainRoutes(r chi.Router) {
 			Wildcard:     true,
 			SpamAction:   SpamActionDisabled,
 			State:        "active",
+			WebScheme:    "http",
 		},
 		Connection: &DomainConnection{
 			RequireTLS:       true,
@@ -84,6 +85,7 @@ func (ms *mockServer) addDomainRoutes(r chi.Router) {
 	r.Get("/domains", ms.listDomains)
 	r.Post("/domains", ms.createDomain)
 	r.Get("/domains/{domain}", ms.getDomain)
+	r.Put("/domains/{domain}", ms.updateDomain)
 	r.Put("/domains/{domain}/verify", ms.getDomain)
 	r.Delete("/domains/{domain}", ms.deleteDomain)
 	//r.Get("/domains/{domain}/credentials", ms.getCredentials)
@@ -168,9 +170,23 @@ func (ms *mockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 			Wildcard:     stringToBool(r.FormValue("wildcard")),
 			SpamAction:   SpamAction(r.FormValue("spam_action")),
 			State:        "active",
+			WebScheme:    "http",
 		},
 	})
 	toJSON(w, okResp{Message: "Domain has been created"})
+}
+
+func (ms *mockServer) updateDomain(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	for _, domain := range ms.domainList {
+		if domain.Domain.Name == chi.URLParam(r, "domain") {
+			domain.Domain.WebScheme = r.FormValue("web_scheme")
+		}
+	}
+
+	toJSON(w, okResp{Message: "Domain has been updated"})
 }
 
 func (ms *mockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {

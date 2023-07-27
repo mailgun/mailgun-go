@@ -27,6 +27,7 @@ type Domain struct {
 	Wildcard     bool        `json:"wildcard"`
 	SpamAction   SpamAction  `json:"spam_action"`
 	State        string      `json:"state"`
+	WebScheme    string      `json:"web_scheme"`
 }
 
 // DNSRecord structures describe intended records to properly configure your domain for use with Mailgun.
@@ -416,6 +417,31 @@ func (mg *MailgunImpl) UpdateDomainTrackingWebPrefix(ctx context.Context, domain
 	payload := newUrlEncodedPayload()
 	payload.addValue("web_prefix", webPrefix)
 	_, err := makePutRequest(ctx, r, payload)
+	return err
+}
+
+// UpdateDomainOptions options for updating a domain
+type UpdateDomainOptions struct {
+	WebScheme string
+}
+
+// UpdateDomain updates a domain's attributes.
+// Currently only the web_scheme update is supported, spam_action and wildcard are to be added.
+func (mg *MailgunImpl) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + name)
+	r.setClient(mg.Client())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+
+	if opts != nil {
+		if opts.WebScheme != "" {
+			payload.addValue("web_scheme", string(opts.WebScheme))
+		}
+	}
+
+	_, err := makePutRequest(ctx, r, payload)
+
 	return err
 }
 
