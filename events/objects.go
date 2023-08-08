@@ -71,9 +71,15 @@ type Campaign struct {
 }
 
 type DeliveryStatus struct {
-	Code           int     `json:"code"`
-	AttemptNo      int     `json:"attempt-no"`
-	Description    string  `json:"description"`
-	Message        string  `json:"message"`
-	SessionSeconds float64 `json:"session-seconds"`
+	Code                int     `json:"code"`
+	AttemptNo           int     `json:"attempt-no"`
+	Description         string  `json:"description,omitempty"`
+	Message             string  `json:"message"`
+	SessionSeconds      float64 `json:"session-seconds"`
+	EnhancedCode        string  `json:"enhanced-code,omitempty"`
+	MxHost              string  `json:"mx-host,omitempty"`
+	RetrySeconds        int     `json:"retry-seconds,omitempty"`
+	CertificateVerified *bool   `json:"certificate-verified,omitempty"`
+	TLS                 *bool   `json:"tls,omitempty"`
+	Utf8                *bool   `json:"utf8,omitempty"`
 }
