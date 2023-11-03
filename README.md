@@ -1,5 +1,7 @@
 # Mailgun with Go
 
+**This repository is not actively maintained, please consider this before starting your project.**
+
 [![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go)
 [![Build Status](https://img.shields.io/travis/mailgun/mailgun-go/master.svg)](https://travis-ci.org/mailgun/mailgun-go)
 
