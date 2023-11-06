@@ -277,12 +277,12 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 		ep.it.Paging.Next = currentPage
 
 		// Sleep the rest of our duration
-		tick := time.NewTicker(ep.opts.PollInterval)
+		timer := time.NewTimer(ep.opts.PollInterval)
 		select {
 		case <-ctx.Done():
+			timer.Stop()
 			return false
-		case <-tick.C:
-			tick.Stop()
+		case <-timer.C:
 		}
 	}
 
