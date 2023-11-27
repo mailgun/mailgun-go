@@ -52,7 +52,7 @@ type listsResponse struct {
 }
 
 type mailingListResponse struct {
-	MailingList MailingList `json:"member"`
+	MailingList MailingList `json:"list"`
 }
 
 type ListsIterator struct {
