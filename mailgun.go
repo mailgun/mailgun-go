@@ -255,6 +255,9 @@ type Mailgun interface {
 	SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error)
 	EnableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
 	DisableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+
+	SetOnBehalfOfSubaccount(subaccountId string)
+	RemoveOnBehalfOfSubaccount()
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
