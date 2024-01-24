@@ -18,7 +18,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var validURL = regexp.MustCompile(`/v[2-4].*`)
+var validURL = regexp.MustCompile(`/v[2-5].*`)
 
 type httpRequest struct {
 	URL                string
@@ -364,7 +364,7 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 		parts = append(parts, fmt.Sprintf("-H \"Host: %s\"", req.Host))
 	}
 
-	//parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
+	// parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
 
 	if p != nil {
 		if p.getContentType() == "application/json" {

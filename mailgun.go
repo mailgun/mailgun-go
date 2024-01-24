@@ -116,6 +116,9 @@ const (
 	listsEndpoint        = "lists"
 	basicAuthUser        = "api"
 	templatesEndpoint    = "templates"
+	accountsEndpoint     = "accounts"
+	subaccountsEndpoint  = "subaccounts"
+	OnBehalfOfHeader     = "X-Mailgun-On-Behalf-Of"
 )
 
 // Mailgun defines the supported subset of the Mailgun API.
@@ -246,6 +249,15 @@ type Mailgun interface {
 	UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
 	DeleteTemplateVersion(ctx context.Context, templateName, tag string) error
 	ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator
+
+	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
+	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
+	SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+	EnableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+	DisableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+
+	SetOnBehalfOfSubaccount(subaccountId string)
+	RemoveOnBehalfOfSubaccount()
 }
 
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
@@ -315,6 +327,17 @@ func (mg *MailgunImpl) Client() *http.Client {
 // SetClient updates the HTTP client for this client.
 func (mg *MailgunImpl) SetClient(c *http.Client) {
 	mg.client = c
+}
+
+// SetOnBehalfOfSubaccount sets X-Mailgun-On-Behalf-Of header to SUBACCOUNT_ACCOUNT_ID in order to perform API request
+// on behalf of subaccount.
+func (mg *MailgunImpl) SetOnBehalfOfSubaccount(subaccountId string) {
+	mg.AddOverrideHeader(OnBehalfOfHeader, subaccountId)
+}
+
+// RemoveOnBehalfOfSubaccount remove X-Mailgun-On-Behalf-Of header for primary usage.
+func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
+	delete(mg.overrideHeaders, OnBehalfOfHeader)
 }
 
 // SetAPIBase updates the API Base URL for this client.
@@ -400,6 +423,10 @@ func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
 func generatePublicApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s", m.APIBase(), endpoint)
+}
+
+func generateSubaccountsApiUrl(m Mailgun) string {
+	return fmt.Sprintf("%s/%s/%s", m.APIBase(), accountsEndpoint, subaccountsEndpoint)
 }
 
 // generateParameterizedUrl works as generateApiUrl, but supports query parameters.

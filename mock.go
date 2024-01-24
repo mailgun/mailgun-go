@@ -27,6 +27,7 @@ type MockServer interface {
 	Events() []Event
 	Webhooks() WebHooksListResponse
 	Templates() []Template
+	SubaccountList() []Subaccount
 }
 
 // A mailgun api mock suitable for testing
@@ -47,6 +48,7 @@ type mockServer struct {
 	credentials      []Credential
 	stats            []Stats
 	tags             []Tag
+	subaccountList   []Subaccount
 	webhooks         WebHooksListResponse
 	mutex            sync.Mutex
 }
@@ -105,6 +107,12 @@ func (ms *mockServer) Unsubscribes() []Unsubscribe {
 	return ms.unsubscribes
 }
 
+func (ms *mockServer) SubaccountList() []Subaccount {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+	return ms.subaccountList
+}
+
 // Create a new instance of the mailgun API mock server
 func NewMockServer() MockServer {
 	ms := mockServer{}
@@ -129,6 +137,7 @@ func NewMockServer() MockServer {
 		ms.addCredentialsRoutes(r)
 		ms.addStatsRoutes(r)
 		ms.addTagsRoutes(r)
+		ms.addSubaccountRoutes(r)
 	})
 	ms.addValidationRoutes(r)
 
