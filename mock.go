@@ -34,23 +34,25 @@ type MockServer interface {
 type mockServer struct {
 	srv *httptest.Server
 
-	domainIPS        []string
-	domainList       []DomainContainer
-	exportList       []Export
-	mailingList      []MailingListContainer
-	routeList        []Route
-	events           []Event
-	templates        []Template
-	templateVersions map[string][]TemplateVersion
-	unsubscribes     []Unsubscribe
-	complaints       []Complaint
-	bounces          []Bounce
-	credentials      []Credential
-	stats            []Stats
-	tags             []Tag
-	subaccountList   []Subaccount
-	webhooks         WebHooksListResponse
-	mutex            sync.Mutex
+	domainIPS         []string
+	domainList        []DomainContainer
+	exportList        []Export
+	mailingList       []MailingListContainer
+	routeList         []Route
+	events            []Event
+	storedMessageHtml map[string]string
+	storedMessageText map[string]string
+	templates         []Template
+	templateVersions  map[string][]TemplateVersion
+	unsubscribes      []Unsubscribe
+	complaints        []Complaint
+	bounces           []Bounce
+	credentials       []Credential
+	stats             []Stats
+	tags              []Tag
+	subaccountList    []Subaccount
+	webhooks          WebHooksListResponse
+	mutex             sync.Mutex
 }
 
 func (ms *mockServer) DomainIPS() []string {
