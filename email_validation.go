@@ -104,7 +104,7 @@ func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 	}
 
 	return &EmailValidatorImpl{
-		// TODO(vtopc): Don’t http.DefaultClient - https://medium.com/@nate510/don-t-use-go-s-default-http-client-4804cb19f779
+		// TODO(vtopc): Don’t use http.DefaultClient - https://medium.com/@nate510/don-t-use-go-s-default-http-client-4804cb19f779
 		client:      http.DefaultClient,
 		isPublicKey: isPublicKey,
 		apiBase:     "https://api.mailgun.net/v4",
