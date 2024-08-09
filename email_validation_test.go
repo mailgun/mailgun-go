@@ -51,6 +51,9 @@ func TestEmailValidationV4(t *testing.T) {
 	ensure.DeepEqual(t, ev.Reasons[0], "no-reason")
 	ensure.DeepEqual(t, ev.Risk, "unknown")
 	ensure.DeepEqual(t, ev.Result, "deliverable")
+	ensure.DeepEqual(t, ev.Engagement.Behavior, "disengaged")
+	ensure.DeepEqual(t, ev.Engagement.Engaging, false)
+	ensure.False(t, ev.Engagement.IsBot)
 }
 
 func TestParseAddresses(t *testing.T) {
