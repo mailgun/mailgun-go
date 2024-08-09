@@ -165,17 +165,12 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
-// If your plan does not include email validations but you have an account,
-// use your Public Validation api key. If your plan does include email validations,
-// use your Private API key. You can find both the Private and
-// Public Validation API Keys in your Account Menu, under "Settings":
-// (https://app.mailgun.com/app/account/security)
+// Your plan should include email validations.
+// Use your Mailgun API key. You can find the Mailgun API keys in your Account Menu, under "Settings":
+// (https://app.mailgun.com/settings/api_security)
 var apiKey string = "your-api-key"
 
 func main() {
-	// To use the /v4 version of validations define MG_URL in the environment
-	// as `https://api.mailgun.net/v4` or set `v.SetAPIBase("https://api.mailgun.net/v4")`
-
 	// Create an instance of the Validator
 	v := mailgun.NewEmailValidator(apiKey)
 
