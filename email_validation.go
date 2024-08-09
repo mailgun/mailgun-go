@@ -51,7 +51,8 @@ type EmailVerification struct {
 	// Engagement results are a macro-level view that explain an email recipient’s propensity to engage.
 	// https://documentation.mailgun.com/docs/inboxready/mailgun-validate/validate_engagement/
 	//
-	// Only for v4(use `SetAPIBase()` or `MG_URL` env var to switch to v4).
+	// Only for v4. To use the /v4 version of validations define MG_URL in the environment
+	// as `https://api.mailgun.net/v4` or set `v.SetAPIBase("https://api.mailgun.net/v4")`
 	Engagement *EngagementData `json:"engagement,omitempty"`
 }
 
