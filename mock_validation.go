@@ -34,6 +34,11 @@ func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 	results.Reason = []string{"no-reason"}
 	results.Risk = "unknown"
 	results.Result = "deliverable"
+	results.Engagement = &EngagementData{
+		Engaging: false,
+		Behavior: "disengaged",
+		IsBot:    false,
+	}
 	toJSON(w, results)
 }
 

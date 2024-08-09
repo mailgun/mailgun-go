@@ -22,7 +22,6 @@ type EmailVerificationParts struct {
 
 // EmailVerification records basic facts about a validated e-mail address.
 // See the ValidateEmail method and example for more details.
-//
 type EmailVerification struct {
 	// Indicates whether an email address conforms to IETF RFC standards.
 	IsValid bool `json:"is_valid"`
@@ -49,6 +48,18 @@ type EmailVerification struct {
 	Risk string `json:"risk"`
 	// Result
 	Result string `json:"result"`
+	// Engagement results are a macro-level view that explain an email recipient’s propensity to engage.
+	// https://documentation.mailgun.com/docs/inboxready/mailgun-validate/validate_engagement/
+	//
+	// Only for v4. To use the /v4 version of validations define MG_URL in the environment variable
+	// as `https://api.mailgun.net/v4` or set `v.SetAPIBase("https://api.mailgun.net/v4")`
+	Engagement *EngagementData `json:"engagement,omitempty"`
+}
+
+type EngagementData struct {
+	Engaging bool   `json:"engaging"`
+	Behavior string `json:"behavior,omitempty"`
+	IsBot    bool   `json:"is_bot"`
 }
 
 type v4EmailValidationResp struct {
@@ -62,6 +73,7 @@ type v4EmailValidationResp struct {
 	Reason              []string               `json:"reason"`
 	Risk                string                 `json:"risk"`
 	Result              string                 `json:"result"`
+	Engagement          *EngagementData        `json:"engagement,omitempty"`
 }
 
 type addressParseResult struct {
@@ -202,7 +214,9 @@ func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailB
 		IsRoleAddress:       res.IsRoleAddress,
 		Reasons:             res.Reason,
 		Result:              res.Result,
-		Risk:                res.Risk}, nil
+		Risk:                res.Risk,
+		Engagement:          res.Engagement,
+	}, nil
 }
 
 // ParseAddresses takes a list of addresses and sorts them into valid and invalid address categories.
