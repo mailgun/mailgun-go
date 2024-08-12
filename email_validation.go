@@ -177,7 +177,7 @@ func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, ma
 		return m.validateV4(ctx, email, mailBoxVerify)
 	}
 
-	return EmailVerification{}, errors.New("ValidateEmail: v3 is not supported anymore, use v4")
+	return EmailVerification{}, errors.New("ValidateEmail: only v4 is supported")
 }
 
 func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
