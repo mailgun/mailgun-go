@@ -20,6 +20,7 @@ godoc:
 	echo -e "open http://localhost:6060/pkg/${PACKAGE}\n"
 	GOROOT=/tmp/tmpgoroot/ GOPATH=/tmp/tmpgopath/ godoc -http=localhost:6060
 
+# TODO(vtopc): fix mocks and enable nilaway for them too?
 .PHONY: nilaway
 nilaway: $(NILAWAY)
 	$(NILAWAY) -include-pkgs="$(PACKAGE)" -test=false -exclude-errors-in-files=mock_ ./...
