@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := all
 
 PACKAGE := github.com/mailgun/mailgun-go
+GOPATH=$(shell go env GOPATH)
 
 NILAWAY = $(GOPATH)/bin/nilaway
 $(NILAWAY):
