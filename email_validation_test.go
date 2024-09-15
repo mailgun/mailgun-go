@@ -9,27 +9,6 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
-func TestEmailValidationV3(t *testing.T) {
-	v := mailgun.NewEmailValidator(testKey)
-	// API Base is set to `http://server/v3`
-	v.SetAPIBase(server.URL())
-	ctx := context.Background()
-
-	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
-	ensure.Nil(t, err)
-
-	ensure.True(t, ev.IsValid)
-	ensure.DeepEqual(t, ev.MailboxVerification, "")
-	ensure.False(t, ev.IsDisposableAddress)
-	ensure.False(t, ev.IsRoleAddress)
-	ensure.True(t, ev.Parts.DisplayName == "")
-	ensure.DeepEqual(t, ev.Parts.LocalPart, "foo")
-	ensure.DeepEqual(t, ev.Parts.Domain, "mailgun.com")
-	ensure.DeepEqual(t, ev.Reason, "no-reason")
-	ensure.True(t, len(ev.Reasons) == 0)
-	ensure.DeepEqual(t, ev.Risk, "unknown")
-}
-
 func TestEmailValidationV4(t *testing.T) {
 	v := mailgun.NewEmailValidator(testKey)
 	// API Base is set to `http://server/v4`
@@ -51,6 +30,9 @@ func TestEmailValidationV4(t *testing.T) {
 	ensure.DeepEqual(t, ev.Reasons[0], "no-reason")
 	ensure.DeepEqual(t, ev.Risk, "unknown")
 	ensure.DeepEqual(t, ev.Result, "deliverable")
+	ensure.DeepEqual(t, ev.Engagement.Behavior, "disengaged")
+	ensure.DeepEqual(t, ev.Engagement.Engaging, false)
+	ensure.False(t, ev.Engagement.IsBot)
 }
 
 func TestParseAddresses(t *testing.T) {

@@ -22,7 +22,6 @@ type EmailVerificationParts struct {
 
 // EmailVerification records basic facts about a validated e-mail address.
 // See the ValidateEmail method and example for more details.
-//
 type EmailVerification struct {
 	// Indicates whether an email address conforms to IETF RFC standards.
 	IsValid bool `json:"is_valid"`
@@ -49,6 +48,15 @@ type EmailVerification struct {
 	Risk string `json:"risk"`
 	// Result
 	Result string `json:"result"`
+	// Engagement results are a macro-level view that explain an email recipient’s propensity to engage.
+	// https://documentation.mailgun.com/docs/inboxready/mailgun-validate/validate_engagement/
+	Engagement *EngagementData `json:"engagement,omitempty"`
+}
+
+type EngagementData struct {
+	Engaging bool   `json:"engaging"`
+	Behavior string `json:"behavior,omitempty"`
+	IsBot    bool   `json:"is_bot"`
 }
 
 type v4EmailValidationResp struct {
@@ -62,6 +70,7 @@ type v4EmailValidationResp struct {
 	Reason              []string               `json:"reason"`
 	Risk                string                 `json:"risk"`
 	Result              string                 `json:"result"`
+	Engagement          *EngagementData        `json:"engagement,omitempty"`
 }
 
 type addressParseResult struct {
@@ -81,9 +90,11 @@ type EmailValidatorImpl struct {
 	apiKey      string
 }
 
-// Creates a new validation instance.
-// * If a public key is provided, uses the public validation endpoints
-// * If a private key is provided, uses the private validation endpoints
+// NewEmailValidator creates a new validation instance.
+//
+// * For ValidateEmail use private key
+//
+// * For ParseAddresses use public key
 func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 	isPublicKey := false
 
@@ -93,16 +104,19 @@ func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 	}
 
 	return &EmailValidatorImpl{
+		// TODO(vtopc): Don’t use http.DefaultClient - https://medium.com/@nate510/don-t-use-go-s-default-http-client-4804cb19f779
 		client:      http.DefaultClient,
 		isPublicKey: isPublicKey,
-		apiBase:     APIBase,
+		apiBase:     "https://api.mailgun.net/v4",
 		apiKey:      apiKey,
 	}
 }
 
 // NewEmailValidatorFromEnv returns a new EmailValidator using environment variables
-// If MG_PUBLIC_API_KEY is set, assume using the free validation subject to daily usage limits
-// If only MG_API_KEY is set, assume using the /private validation routes with no daily usage limits
+//
+// * For ValidateEmail set MG_API_KEY
+//
+// * For ParseAddresses set MG_PUBLIC_API_KEY
 func NewEmailValidatorFromEnv() (*EmailValidatorImpl, error) {
 	apiKey := os.Getenv("MG_PUBLIC_API_KEY")
 	if apiKey == "" {
@@ -155,27 +169,15 @@ func (m *EmailValidatorImpl) getAddressURL(endpoint string) string {
 // ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.
 // It may also be used to break an email address into its sub-components. If user has set the
 func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
+	if m.isPublicKey {
+		return EmailVerification{}, errors.New("ValidateEmail: public key is not supported anymore, use private key")
+	}
+
 	if strings.HasSuffix(m.APIBase(), "/v4") {
 		return m.validateV4(ctx, email, mailBoxVerify)
 	}
-	return m.validateV3(ctx, email, mailBoxVerify)
-}
 
-func (m *EmailValidatorImpl) validateV3(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
-	r := newHTTPRequest(m.getAddressURL("validate"))
-	r.setClient(m.Client())
-	r.addParameter("address", email)
-	if mailBoxVerify {
-		r.addParameter("mailbox_verification", "true")
-	}
-	r.setBasicAuth(basicAuthUser, m.APIKey())
-
-	var res EmailVerification
-	err := getResponseFromJSON(ctx, r, &res)
-	if err != nil {
-		return EmailVerification{}, err
-	}
-	return res, nil
+	return EmailVerification{}, errors.New("ValidateEmail: only v4 is supported")
 }
 
 func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
@@ -202,11 +204,18 @@ func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailB
 		IsRoleAddress:       res.IsRoleAddress,
 		Reasons:             res.Reason,
 		Result:              res.Result,
-		Risk:                res.Risk}, nil
+		Risk:                res.Risk,
+		Engagement:          res.Engagement,
+	}, nil
 }
 
 // ParseAddresses takes a list of addresses and sorts them into valid and invalid address categories.
 // NOTE: Use of this function requires a proper public API key.  The private API key will not work.
+//
+// NOTE: Only for v3. To use the /v3 version of validations define MG_URL in the environment variable
+// as `https://api.mailgun.net/v3` or set `v.SetAPIBase("https://api.mailgun.net/v3")`
+//
+// Deprecated: /v3/address/parse is deprecated use ValidateEmail instead.
 func (m *EmailValidatorImpl) ParseAddresses(ctx context.Context, addresses ...string) ([]string, []string, error) {
 	r := newHTTPRequest(m.getAddressURL("parse"))
 	r.setClient(m.Client())
