@@ -2,6 +2,10 @@
 
 PACKAGE := github.com/mailgun/mailgun-go
 
+NILAWAY = $(GOPATH)/bin/nilaway
+$(NILAWAY):
+	go install go.uber.org/nilaway/cmd/nilaway@latest
+
 .PHONY: all
 all:
 	export GO111MODULE=on; go test . -v
@@ -15,10 +19,6 @@ godoc:
 	echo -e "open http://localhost:6060/pkg/${PACKAGE}\n"
 	GOROOT=/tmp/tmpgoroot/ GOPATH=/tmp/tmpgopath/ godoc -http=localhost:6060
 
-NILAWAY = $(GOPATH)/bin/nilaway
-$(NILAWAY):
-	go install go.uber.org/nilaway/cmd/nilaway@latest
-
 .PHONY: nilaway
 nilaway: $(NILAWAY)
-	$(NILAWAY) -include-pkgs="github.com/mailgun/maverick-score" -test=false ./...
+	$(NILAWAY) -include-pkgs="$(PACKAGE)" -test=false -exclude-errors-in-files=mock_ ./...
