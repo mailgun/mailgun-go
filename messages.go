@@ -914,6 +914,9 @@ func (mg *MailgunImpl) GetStoredAttachment(ctx context.Context, url string) ([]b
 	r.addHeader("Accept", "message/rfc2822")
 
 	response, err := makeGetRequest(ctx, r)
+	if err != nil {
+		return nil, err
+	}
 
 	return response.Data, err
 }
