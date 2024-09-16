@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ master, main ]
   push:
-    branches: [master, main ]
+    branches: [ master, main ]
 
 jobs:
   test:
@@ -12,9 +12,8 @@ jobs:
     strategy:
       matrix:
         go-version:
-          - 1.18.x
-          - 1.19.x
-          - 1.20.x
+          - 1.22.x
+          - 1.23.x
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -22,22 +21,18 @@ jobs:
         uses: actions/checkout@master
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
+          cache: true # caching and restoring go modules and build outputs
 
       - run: go env
 
-      - name: Cache deps
-        uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Install deps
         run: go mod download
+
+      - name: nilaway
+        run: make nilaway
 
       - name: Test
         run: go test -v -race -p=1 -count=1
