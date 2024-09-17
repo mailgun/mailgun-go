@@ -39,7 +39,7 @@ func TestUnmarshalRFC2822Time(t *testing.T) {
 			var req Req
 			err := json.Unmarshal([]byte(tt.s), &req)
 			if (err != nil) != tt.wantErr {
-				t.Errorf(" error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
 			}
 
 			ensure.True(t, time.Time(tt.want.CreatedAt).Equal(time.Time(req.CreatedAt)),
