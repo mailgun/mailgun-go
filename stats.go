@@ -67,16 +67,6 @@ type statsTotalResponse struct {
 	Stats      []Stats `json:"stats"`
 }
 
-// Used by GetStats() to specify the resolution stats are for
-type Resolution string
-
-// Indicate which resolution a stat response for request is for
-const (
-	ResolutionHour  = Resolution("hour")
-	ResolutionDay   = Resolution("day")
-	ResolutionMonth = Resolution("month")
-)
-
 // Options for GetStats()
 type GetStatOptions struct {
 	Resolution Resolution
@@ -85,7 +75,8 @@ type GetStatOptions struct {
 	End        time.Time
 }
 
-// GetStats returns total stats for a given domain for the specified time period
+// GetStats returns total stats for a given domain for the specified time period.
+// Deprecated: Use ListMetrics instead.
 func (mg *MailgunImpl) GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error) {
 	r := newHTTPRequest(generateApiUrl(mg, statsTotalEndpoint))
 
