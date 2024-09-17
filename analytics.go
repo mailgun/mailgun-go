@@ -16,11 +16,14 @@ import (
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
 func (c *Client) ListMetrics(ctx context.Context, opts MetricsOptions) (*MetricsResponse, error) {
 	url := fmt.Sprintf("%s", metricsEndpoint)
-	mRequest, err := json.Marshal(opts)
+
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(opts)
 	if err != nil {
 		return nil, errors.Wrap(err, "while marshalling analytics metrics request")
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(mRequest))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &buf)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating analytics metrics request")
 	}
