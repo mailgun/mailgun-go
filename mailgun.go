@@ -105,6 +105,7 @@ const (
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
 	statsTotalEndpoint   = "stats/total"
+	metricsEndpoint      = "analytics/metrics"
 	domainsEndpoint      = "domains"
 	tagsEndpoint         = "tags"
 	eventsEndpoint       = "events"
@@ -369,6 +370,14 @@ func (mg *MailgunImpl) GetCurlOutput() string {
 	return mg.capturedCurlOutput
 }
 
+type Resolution string
+
+const (
+	ResolutionHour  = Resolution("hour")
+	ResolutionDay   = Resolution("day")
+	ResolutionMonth = Resolution("month")
+)
+
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
 func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", m.APIBase(), m.Domain(), endpoint)
@@ -423,10 +432,6 @@ func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
 func generatePublicApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s", m.APIBase(), endpoint)
-}
-
-func generateSubaccountsApiUrl(m Mailgun) string {
-	return fmt.Sprintf("%s/%s/%s", m.APIBase(), accountsEndpoint, subaccountsEndpoint)
 }
 
 // generateParameterizedUrl works as generateApiUrl, but supports query parameters.
