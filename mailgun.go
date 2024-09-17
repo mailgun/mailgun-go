@@ -370,14 +370,6 @@ func (mg *MailgunImpl) GetCurlOutput() string {
 	return mg.capturedCurlOutput
 }
 
-type Resolution string
-
-const (
-	ResolutionHour  = Resolution("hour")
-	ResolutionDay   = Resolution("day")
-	ResolutionMonth = Resolution("month")
-)
-
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
 func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s/%s", m.APIBase(), m.Domain(), endpoint)
