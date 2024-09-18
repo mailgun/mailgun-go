@@ -18,6 +18,8 @@ func (mg *MailgunImpl) ListMetrics(ctx context.Context, opts MetricsOptions) (*M
 		return nil, errors.New("only v1 is supported")
 	}
 
+	// TODO: set mg.domain?
+
 	payload := newJSONEncodedPayload(opts)
 	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
 	req.setClient(mg.Client())
