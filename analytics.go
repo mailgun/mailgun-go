@@ -1,12 +1,7 @@
 package mailgun
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/pkg/errors"
 )
@@ -17,34 +12,21 @@ import (
 // as `https://api.mailgun.net/v1` or set `v.SetAPIBase("https://api.mailgun.net/v1")`
 //
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
-func (c *Client) ListMetrics(ctx context.Context, opts MetricsOptions) (*MetricsResponse, error) {
-	url := fmt.Sprintf("%s", metricsEndpoint)
+func (mg *MailgunImpl) ListMetrics(ctx context.Context, opts MetricsOptions) (*MetricsResponse, error) {
+	payload := newJSONEncodedPayload(opts)
+	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
+	req.setClient(mg.Client())
+	req.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var buf bytes.Buffer
-	err := json.NewEncoder(&buf).Encode(opts)
+	resp, err := makePostRequest(ctx, req, payload)
 	if err != nil {
-		return nil, errors.Wrap(err, "while marshalling analytics metrics request")
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &buf)
-	if err != nil {
-		return nil, errors.Wrap(err, "while creating analytics metrics request")
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "while making analytics metrics request")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, errors.Errorf("POST on '%s' returned %s", url, string(body))
+		return nil, errors.Errorf("POST %s failed: %s", metricsEndpoint, err)
 	}
 
 	var ret MetricsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-		return nil, errors.Wrap(err, "while decoding analytics metrics response")
+	err = resp.parseFromJSON(&ret)
+	if err != nil {
+		return nil, errors.Wrap(err, "decoding response")
 	}
 
 	return &ret, nil
