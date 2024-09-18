@@ -10,7 +10,7 @@ import (
 // ListMetrics returns domain/account metrics.
 //
 // NOTE: Only for v1 API. To use the /v1 version define MG_URL in the environment variable
-// as `https://api.mailgun.net/v1` or set `v.SetAPIBase("https://api.mailgun.net/v1")`
+// as `https://api.mailgun.net/v1` or set `mg.SetAPIBase("https://api.mailgun.net/v1")`
 //
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
 func (mg *MailgunImpl) ListMetrics(ctx context.Context, opts MetricsOptions) (*MetricsResponse, error) {
