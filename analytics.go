@@ -29,10 +29,11 @@ func (mg *MailgunImpl) ListMetrics(ctx context.Context, opts MetricsOptions) (*M
 		opts.Filter.BoolGroupAnd = append(opts.Filter.BoolGroupAnd, domainFilter)
 	}
 
-	payload := newJSONEncodedPayload(opts)
 	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
 	req.setClient(mg.Client())
 	req.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newJSONEncodedPayload(opts)
 
 	resp, err := makePostRequest(ctx, req, payload)
 	if err != nil {
