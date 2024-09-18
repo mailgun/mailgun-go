@@ -106,7 +106,7 @@ func (mg *MailgunImpl) GetStats(ctx context.Context, events []string, opts *GetS
 	err := getResponseFromJSON(ctx, r, &res)
 	if err != nil {
 		return nil, err
-	} else {
-		return res.Stats, nil
 	}
+
+	return res.Stats, nil
 }
