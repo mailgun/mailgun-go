@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -13,6 +14,10 @@ import (
 //
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
 func (mg *MailgunImpl) ListMetrics(ctx context.Context, opts MetricsOptions) (*MetricsResponse, error) {
+	if !strings.HasSuffix(mg.APIBase(), "/v1") {
+		return nil, errors.New("only v1 is supported")
+	}
+
 	payload := newJSONEncodedPayload(opts)
 	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
 	req.setClient(mg.Client())
