@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ListMetrics returns account metrics.
+// ListMetrics returns domain/account metrics.
 //
 // NOTE: Only for v1 API. To use the /v1 version define MG_URL in the environment variable
 // as `https://api.mailgun.net/v1` or set `v.SetAPIBase("https://api.mailgun.net/v1")`
@@ -15,10 +15,19 @@ import (
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
 func (mg *MailgunImpl) ListMetrics(ctx context.Context, opts MetricsOptions) (*MetricsResponse, error) {
 	if !strings.HasSuffix(mg.APIBase(), "/v1") {
-		return nil, errors.New("only v1 is supported")
+		return nil, errors.New("only v1 API is supported")
 	}
 
-	// TODO: set mg.domain?
+	domain := mg.Domain()
+	if domain != "" {
+		domainFilter := MetricsFilterPredicate{
+			Attribute:     "domain",
+			Comparator:    "=",
+			LabeledValues: []MetricsLabeledValue{{Label: domain, Value: domain}},
+		}
+
+		opts.Filter.BoolGroupAnd = append(opts.Filter.BoolGroupAnd, domainFilter)
+	}
 
 	payload := newJSONEncodedPayload(opts)
 	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
