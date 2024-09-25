@@ -73,6 +73,7 @@ func TestEventPoller(t *testing.T) {
 
 	eventChan := make(chan mailgun.Event, 1)
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	go func() {
 		// Poll until our email event arrives
 		var page []mailgun.Event

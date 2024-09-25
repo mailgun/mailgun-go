@@ -487,7 +487,6 @@ func TestSendEOFError(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		panic("")
-		return
 	}))
 	defer srv.Close()
 
