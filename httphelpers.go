@@ -15,7 +15,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/mailgun/errors"
 )
 
 var validURL = regexp.MustCompile(`/v[2-5].*`)
