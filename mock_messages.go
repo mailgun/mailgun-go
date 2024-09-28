@@ -16,6 +16,9 @@ func (ms *mockServer) addMessagesRoutes(r chi.Router) {
 	// This path is made up; it could be anything as the storage url could change over time
 	r.Get("/se.storage.url/messages/{id}", ms.getStoredMessages)
 	r.Post("/se.storage.url/messages/{id}", ms.sendStoredMessages)
+
+	ms.storedMessageHtml = make(map[string]string)
+	ms.storedMessageText = make(map[string]string)
 }
 
 // TODO: This implementation doesn't support multiple recipients
@@ -49,6 +52,10 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		stored.Flags = events.Flags{
 			IsTestMode: false,
 		}
+
+		ms.storedMessageHtml[id] = r.FormValue("html")
+		ms.storedMessageText[id] = r.FormValue("text")
+
 		ms.mutex.Lock()
 		ms.events = append(ms.events, stored)
 		ms.mutex.Unlock()
@@ -124,6 +131,8 @@ func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) 
 		Sender:     stored.Message.Headers.From,
 		Subject:    stored.Message.Headers.Subject,
 		From:       stored.Message.Headers.From,
+		BodyHtml:   ms.storedMessageHtml[id],
+		BodyPlain:  ms.storedMessageText[id],
 		MessageHeaders: [][]string{
 			{"Sender", stored.Message.Headers.From},
 			{"To", stored.Message.Headers.To},
