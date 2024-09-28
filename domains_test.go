@@ -6,12 +6,14 @@ import (
 	"testing"
 
 	"github.com/facebookgo/ensure"
+
 	"github.com/mailgun/mailgun-go/v4"
 )
 
 const (
-	testDomain = "mailgun.test"
-	testKey    = "api-fake-key"
+	testDomain            = "mailgun.test"
+	testKey               = "api-fake-key"
+	testWebhookSigningKey = "webhook-signing-key"
 )
 
 func TestListDomains(t *testing.T) {

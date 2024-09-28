@@ -266,6 +266,7 @@ type MailgunImpl struct {
 	apiBase            string
 	domain             string
 	apiKey             string
+	webhookSigningKey  string
 	client             *http.Client
 	baseURL            string
 	overrideHeaders    map[string]string
@@ -273,12 +274,18 @@ type MailgunImpl struct {
 }
 
 // NewMailGun creates a new client instance.
-func NewMailgun(domain, apiKey string) *MailgunImpl {
+// If you need to verify whether a Webhook originates from Mailgun, the webhookSigningKey is required.
+func NewMailgun(domain, apiKey string, webhookSigningKey ...string) *MailgunImpl {
+	webhookSigningKeyStr := ""
+	if len(webhookSigningKey) > 0 {
+		webhookSigningKeyStr = webhookSigningKey[0]
+	}
 	return &MailgunImpl{
-		apiBase: APIBase,
-		domain:  domain,
-		apiKey:  apiKey,
-		client:  http.DefaultClient,
+		apiBase:           APIBase,
+		domain:            domain,
+		apiKey:            apiKey,
+		webhookSigningKey: webhookSigningKeyStr,
+		client:            http.DefaultClient,
 	}
 }
 
@@ -294,7 +301,9 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 		return nil, errors.New("required environment variable MG_DOMAIN not defined")
 	}
 
-	mg := NewMailgun(domain, apiKey)
+	webhookSigningKey := os.Getenv("MG_WEBHOOK_SIGNING_KEY")
+
+	mg := NewMailgun(domain, apiKey, webhookSigningKey)
 
 	url := os.Getenv("MG_URL")
 	if url != "" {
@@ -317,6 +326,11 @@ func (mg *MailgunImpl) Domain() string {
 // ApiKey returns the API key configured for this client.
 func (mg *MailgunImpl) APIKey() string {
 	return mg.apiKey
+}
+
+// WebhookSigningKey returns the webhook signing key configured for this client.
+func (mg *MailgunImpl) WebhookSigningKey() string {
+	return mg.webhookSigningKey
 }
 
 // Client returns the HTTP client configured for this client.

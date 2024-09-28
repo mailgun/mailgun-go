@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/facebookgo/ensure"
+
 	"github.com/mailgun/mailgun-go/v4"
 )
 
@@ -78,10 +79,10 @@ var signedTests = []bool{
 }
 
 func TestVerifyWebhookSignature(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testDomain, testKey, testWebhookSigningKey)
 
 	for _, v := range signedTests {
-		fields := getSignatureFields(mg.APIKey(), v)
+		fields := getSignatureFields(mg.WebhookSigningKey(), v)
 		sig := mailgun.Signature{
 			TimeStamp: fields["timestamp"],
 			Token:     fields["token"],
@@ -98,10 +99,10 @@ func TestVerifyWebhookSignature(t *testing.T) {
 }
 
 func TestVerifyWebhookRequest_Form(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testDomain, testKey, testWebhookSigningKey)
 
 	for _, v := range signedTests {
-		fields := getSignatureFields(mg.APIKey(), v)
+		fields := getSignatureFields(mg.WebhookSigningKey(), v)
 		req := buildFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
@@ -114,10 +115,10 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 }
 
 func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testDomain, testKey, testWebhookSigningKey)
 
 	for _, v := range signedTests {
-		fields := getSignatureFields(mg.APIKey(), v)
+		fields := getSignatureFields(mg.WebhookSigningKey(), v)
 		req := buildMultipartFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)

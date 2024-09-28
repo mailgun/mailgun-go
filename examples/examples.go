@@ -3,10 +3,11 @@ package examples
 import (
 	"context"
 	"fmt"
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
 	"os"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/events"
 )
 
 func AddBounce(domain, apiKey string) error {
@@ -848,7 +849,7 @@ func SendTemplateMessage(domain, apiKey string) (string, error) {
 		"Hey %recipient.first%",
 		"If you wish to unsubscribe, click http://mailgun/unsubscribe/%recipient.id%",
 	) // IMPORTANT: No To:-field recipients!
-	
+
 	// Set template to be applied to this message.
 	m.SetTemplate("my-template")
 
@@ -903,8 +904,8 @@ func UpdateWebhook(domain, apiKey string) error {
 	return mg.UpdateWebhook(ctx, "clicked", []string{"https://your_domain.com/clicked"})
 }
 
-func VerifyWebhookSignature(domain, apiKey, timestamp, token, signature string) (bool, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func VerifyWebhookSignature(domain, apiKey, webhookSigningKey, timestamp, token, signature string) (bool, error) {
+	mg := mailgun.NewMailgun(domain, apiKey, webhookSigningKey)
 
 	return mg.VerifyWebhookSignature(mailgun.Signature{
 		TimeStamp: timestamp,
