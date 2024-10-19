@@ -415,31 +415,9 @@ func generateCredentialsUrl(m Mailgun, login string) string {
 	// return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
 }
 
-// generateStoredMessageUrl generates the URL needed to acquire a copy of a stored message.
-func generateStoredMessageUrl(m Mailgun, endpoint, id string) string {
-	return generateDomainApiUrl(m, fmt.Sprintf("%s/%s", endpoint, id))
-	// return fmt.Sprintf("%s/domains/%s/%s/%s", apiBase, m.Domain(), endpoint, id)
-}
-
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
 func generatePublicApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s", m.APIBase(), endpoint)
-}
-
-// generateParameterizedUrl works as generateApiUrl, but supports query parameters.
-func generateParameterizedUrl(m Mailgun, endpoint string, payload payload) (string, error) {
-	paramBuffer, err := payload.getPayloadBuffer()
-	if err != nil {
-		return "", err
-	}
-	params := string(paramBuffer.Bytes())
-	return fmt.Sprintf("%s?%s", generateApiUrl(m, eventsEndpoint), params), nil
-}
-
-// parseMailgunTime translates a timestamp as returned by Mailgun into a Go standard timestamp.
-func parseMailgunTime(ts string) (t time.Time, err error) {
-	t, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", ts)
-	return
 }
 
 // formatMailgunTime translates a timestamp into a human-readable form.
