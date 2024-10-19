@@ -200,6 +200,7 @@ func ExampleMailgunImpl_ListMetrics() {
 
 	opts := mailgun.MetricsOptions{
 		Start: mailgun.RFC2822Time(time.Now().UTC().Add(-time.Hour * 24 * 30)),
+		End:   mailgun.RFC2822Time(time.Now().UTC()),
 		Pagination: mailgun.MetricsPagination{
 			Limit: 10,
 		},
@@ -221,7 +222,7 @@ func ExampleMailgunImpl_ListMetrics() {
 				log.Fatal(iter.Err())
 			}
 
-			b, _ := json.Marshal(resp)
+			b, _ := json.Marshal(resp.Items)
 			log.Printf("%s", b)
 
 			if !more {
