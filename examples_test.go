@@ -192,7 +192,7 @@ func ExampleMailgunImpl_VerifyWebhookSignature() {
 	}
 }
 
-func ExmplMailgunImpl_ListMetrics() {
+func ExampleMailgunImpl_ListMetrics() {
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {
 		log.Fatal(err)
@@ -222,7 +222,8 @@ func ExmplMailgunImpl_ListMetrics() {
 				log.Fatal(iter.Err())
 			}
 
-			fmt.Printf("Page %d:\n", i+1)
+			fmt.Printf("Page %d: Start: %s; End: %s; Pagination: %+v\n",
+				i+1, resp.Start, resp.End, resp.Pagination)
 			for _, item := range resp.Items {
 				b, _ := json.Marshal(item)
 				fmt.Printf("%s\n", b)

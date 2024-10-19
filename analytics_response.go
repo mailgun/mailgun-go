@@ -1,8 +1,8 @@
 package mailgun
 
 type MetricsResponse struct {
-	Start      string            `json:"start"`
-	End        string            `json:"end"`
+	Start      RFC2822Time       `json:"start"`
+	End        RFC2822Time       `json:"end"`
 	Resolution Resolution        `json:"resolution"`
 	Duration   string            `json:"duration"`
 	Dimensions []string          `json:"dimensions"`
