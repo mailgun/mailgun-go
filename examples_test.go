@@ -192,7 +192,7 @@ func ExampleMailgunImpl_VerifyWebhookSignature() {
 	}
 }
 
-func ExampleMailgunImpl_ListMetrics() {
+func ExmplMailgunImpl_ListMetrics() {
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {
 		log.Fatal(err)
