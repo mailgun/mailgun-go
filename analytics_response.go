@@ -6,9 +6,9 @@ type MetricsResponse struct {
 	Resolution Resolution        `json:"resolution"`
 	Duration   string            `json:"duration"`
 	Dimensions []string          `json:"dimensions"`
-	Pagination MetricsPagination `json:"pagination"`
-	Items      []MetricsItem     `json:"items"`
 	Aggregates MetricsAggregates `json:"aggregates"`
+	Items      []MetricsItem     `json:"items"`
+	Pagination MetricsPagination `json:"pagination"`
 }
 
 type MetricsItem struct {
