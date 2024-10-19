@@ -7,8 +7,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RFC2822Time Mailgun uses RFC2822 format for timestamps everywhere ('Thu, 13 Oct 2011 18:02:00 GMT'), but
+// RFC2822Time Mailgun uses RFC2822 format for timestamps everywhere ('Thu, 13 Oct 2011 18:02:00 +0000'), but
 // by default Go's JSON package uses another format when decoding/encoding timestamps.
+// https://documentation.mailgun.com/docs/mailgun/user-manual/get-started/#date-format
 type RFC2822Time time.Time
 
 func NewRFC2822Time(str string) (RFC2822Time, error) {
