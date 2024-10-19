@@ -2,9 +2,9 @@ package mailgun
 
 type MetricsOptions struct {
 	// A start date (default: 7 days before current time).
-	Start RFC2822Time `json:"start"`
+	Start RFC2822Time `json:"start,omitempty"`
 	// An end date (default: current time).
-	End RFC2822Time `json:"end"`
+	End RFC2822Time `json:"end,omitempty"`
 	// A resolution in the format of 'day' 'hour' 'month'. Default is day.
 	Resolution Resolution `json:"resolution,omitempty"`
 	// A duration in the format of '1d' '2h' '2m'.
