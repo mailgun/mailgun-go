@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/mailgun/errors"
 )
 
 // ListMetrics returns domain/account metrics.
