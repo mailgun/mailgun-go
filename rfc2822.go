@@ -28,7 +28,7 @@ func (t RFC2822Time) IsZero() bool {
 }
 
 func (t RFC2822Time) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.Quote(time.Time(t).Format(time.RFC1123))), nil
+	return []byte(strconv.Quote(time.Time(t).Format(time.RFC1123Z))), nil
 }
 
 func (t *RFC2822Time) UnmarshalJSON(s []byte) error {
