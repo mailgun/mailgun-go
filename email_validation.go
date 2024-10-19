@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/mailgun/errors"
 )
 
 // The EmailVerificationParts structure breaks out the basic elements of an email address.

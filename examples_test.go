@@ -15,7 +15,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/events"
 )
 
-func ExampleMailgunImpl_ValidateEmail() {
+func ExampleEmailValidatorImpl_ValidateEmail() {
 	v := mailgun.NewEmailValidator("my_public_validation_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -35,7 +35,7 @@ func ExampleMailgunImpl_ValidateEmail() {
 	}
 }
 
-func ExampleMailgunImpl_ParseAddresses() {
+func ExampleEmailValidatorImpl_ParseAddresses() {
 	v := mailgun.NewEmailValidator("my_public_validation_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -59,7 +59,7 @@ func ExampleMailgunImpl_ParseAddresses() {
 	}
 }
 
-func ExampleMailgunImpl_UpdateList() {
+func ExampleMailgunImpl_UpdateMailingList() {
 	mg := mailgun.NewMailgun("example.com", "my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -120,7 +120,7 @@ Testing some Mailgun MIME awesomeness!
 	log.Printf("Message id=%s", id)
 }
 
-func ExampleMailgunImpl_GetRoutes() {
+func ExampleMailgunImpl_ListRoutes() {
 	mg := mailgun.NewMailgun("example.com", "my_api_key")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
