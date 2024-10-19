@@ -92,7 +92,7 @@ func (iter *MetricsIterator) fetch(ctx context.Context) error {
 
 	httpResp, err := makePostRequest(ctx, iter.req, payload)
 	if err != nil {
-		return errors.Errorf("POST %s failed: %s", metricsEndpoint, err)
+		return err
 	}
 
 	var resp MetricsResponse
