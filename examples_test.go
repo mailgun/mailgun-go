@@ -222,8 +222,11 @@ func ExampleMailgunImpl_ListMetrics() {
 				log.Fatal(iter.Err())
 			}
 
-			b, _ := json.Marshal(resp.Items)
-			log.Printf("%s", b)
+			fmt.Printf("Page %d:\n", i+1)
+			for _, item := range resp.Items {
+				b, _ := json.Marshal(item)
+				fmt.Printf("%s\n", b)
+			}
 
 			if !more {
 				log.Print("no more pages")
@@ -231,5 +234,4 @@ func ExampleMailgunImpl_ListMetrics() {
 			}
 		}()
 	}
-	// Output:
 }
