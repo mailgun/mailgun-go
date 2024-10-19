@@ -2,7 +2,6 @@ package mailgun
 
 type MetricsOptions struct {
 	// A start date (default: 7 days before current time).
-	// TODO: 400: {"message":"Invalid format for parameter start: Thu, 19 Sep 2024 18:32:12 EEST"}
 	Start RFC2822Time `json:"start"`
 	// An end date (default: current time).
 	End RFC2822Time `json:"end"`
