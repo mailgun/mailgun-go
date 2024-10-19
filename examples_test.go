@@ -199,8 +199,8 @@ func ExampleMailgunImpl_ListMetrics() {
 	}
 
 	opts := mailgun.MetricsOptions{
-		Start: mailgun.RFC2822Time(time.Now().UTC().Add(-time.Hour * 24 * 30)),
-		End:   mailgun.RFC2822Time(time.Now().UTC()),
+		End:      mailgun.RFC2822Time(time.Now().UTC()),
+		Duration: "30d",
 		Pagination: mailgun.MetricsPagination{
 			Limit: 10,
 		},
@@ -234,4 +234,5 @@ func ExampleMailgunImpl_ListMetrics() {
 			}
 		}()
 	}
+	// Output:
 }
