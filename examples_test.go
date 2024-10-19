@@ -191,3 +191,44 @@ func ExampleMailgunImpl_VerifyWebhookSignature() {
 		os.Exit(1)
 	}
 }
+
+func ExampleMailgunImpl_ListMetrics() {
+	mg, err := mailgun.NewMailgunFromEnv()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	opts := mailgun.MetricsOptions{
+		Start: mailgun.RFC2822Time(time.Now().Add(-time.Hour * 24 * 30)),
+		Pagination: mailgun.MetricsPagination{
+			Limit: 10,
+		},
+	}
+
+	iter, err := mg.ListMetrics(opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i := 0; i < 2; i++ {
+		func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+
+			resp := mailgun.MetricsResponse{}
+			more := iter.Next(ctx, &resp)
+			if iter.Err() != nil {
+				log.Fatal(iter.Err())
+			}
+
+			b, _ := json.Marshal(resp)
+			log.Printf("%s", b)
+
+			if !more {
+				log.Print("no more pages")
+				os.Exit(0)
+			}
+		}()
+	}
+	// Output:
+}
