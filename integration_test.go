@@ -5,7 +5,6 @@ package mailgun_test
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -56,7 +55,7 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 			}
 
 			if !more {
-				log.Print("no more pages")
+				t.Log("no more pages")
 				os.Exit(0)
 			}
 		}()
