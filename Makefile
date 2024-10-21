@@ -8,7 +8,10 @@ $(NILAWAY):
 	go install go.uber.org/nilaway/cmd/nilaway@latest
 
 .PHONY: all
-all:
+all: test
+
+.PHONY: test
+test:
 	export GO111MODULE=on; go test . -v
 
 .PHONY: godoc
