@@ -95,7 +95,9 @@ func (iter *MetricsIterator) fetch(ctx context.Context) error {
 		return err
 	}
 
-	var resp MetricsResponse
+	resp := MetricsResponse{
+		Items: make([]MetricsItem, 0, iter.opts.Pagination.Limit),
+	}
 	err = httpResp.parseFromJSON(&resp)
 	if err != nil {
 		return errors.Wrap(err, "decoding response")
