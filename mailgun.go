@@ -427,3 +427,7 @@ func generatePublicApiUrl(m Mailgun, endpoint string) string {
 func formatMailgunTime(t time.Time) string {
 	return t.Format("Mon, 2 Jan 2006 15:04:05 -0700")
 }
+
+func ptr[T any](v T) *T {
+	return &v
+}
