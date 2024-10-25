@@ -47,11 +47,11 @@ type MetricsPagination struct {
 	// Colon-separated value indicating column name and sort direction e.g. 'domain:asc'.
 	Sort string `json:"sort"`
 	// The number of items to skip over when satisfying the request. To get the first page of data set skip to zero. Then increment the skip by the limit for subsequent calls.
-	Skip int64 `json:"skip"`
+	Skip int `json:"skip"`
 	// The maximum number of items returned in the response.
-	Limit int64 `json:"limit"`
+	Limit int `json:"limit"`
 	// The total number of items in the query result set.
-	Total int64 `json:"total"`
+	Total int `json:"total"`
 }
 
 type MetricsIterator struct {
@@ -68,7 +68,7 @@ func (iter *MetricsIterator) Err() error {
 // Next retrieves the next page of items from the api. Returns false when there are
 // no more pages to retrieve or if there was an error.
 // Use `.Err()` to retrieve the error
-func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) bool {
+func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) (more bool) {
 	if iter.err != nil {
 		return false
 	}
@@ -79,10 +79,11 @@ func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) bo
 	}
 
 	*resp = iter.resp
-	if len(iter.resp.Items) == 0 {
+	iter.opts.Pagination.Skip = iter.opts.Pagination.Skip + iter.opts.Pagination.Limit
+
+	if len(iter.resp.Items) < iter.opts.Pagination.Limit {
 		return false
 	}
-	iter.opts.Pagination.Skip = iter.opts.Pagination.Skip + iter.opts.Pagination.Limit
 
 	return true
 }

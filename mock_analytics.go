@@ -7,7 +7,7 @@ import (
 )
 
 func (ms *mockServer) addAnalyticsRoutes(r chi.Router) {
-	r.Get("/v1/"+metricsEndpoint, ms.listMetrics)
+	r.Post("/v1/"+metricsEndpoint, ms.listMetrics)
 }
 
 func (ms *mockServer) listMetrics(w http.ResponseWriter, _ *http.Request) {
