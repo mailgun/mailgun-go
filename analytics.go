@@ -79,11 +79,7 @@ func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) (m
 
 	iter.opts.Pagination.Skip = iter.opts.Pagination.Skip + iter.opts.Pagination.Limit
 
-	if len(resp.Items) < iter.opts.Pagination.Limit {
-		return false
-	}
-
-	return true
+	return len(resp.Items) == iter.opts.Pagination.Limit
 }
 
 func (iter *MetricsIterator) fetch(ctx context.Context, resp *MetricsResponse) error {
