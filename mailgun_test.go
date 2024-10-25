@@ -60,3 +60,7 @@ func TestValidBaseAPI(t *testing.T) {
 		ensure.Nil(t, err)
 	}
 }
+
+func ptr[T any](v T) *T {
+	return &v
+}
