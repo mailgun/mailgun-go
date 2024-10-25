@@ -87,6 +87,10 @@ func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) (m
 }
 
 func (iter *MetricsIterator) fetch(ctx context.Context, resp *MetricsResponse) error {
+	if resp == nil {
+		return errors.New("resp cannot be nil")
+	}
+
 	payload := newJSONEncodedPayload(iter.opts)
 
 	httpResp, err := makePostRequest(ctx, iter.req, payload)
