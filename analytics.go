@@ -57,7 +57,6 @@ type MetricsPagination struct {
 type MetricsIterator struct {
 	opts MetricsOptions
 	req  *httpRequest
-	resp MetricsResponse
 	err  error
 }
 
@@ -73,22 +72,21 @@ func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) (m
 		return false
 	}
 
-	iter.err = iter.fetch(ctx)
+	iter.err = iter.fetch(ctx, resp)
 	if iter.err != nil {
 		return false
 	}
 
-	*resp = iter.resp
 	iter.opts.Pagination.Skip = iter.opts.Pagination.Skip + iter.opts.Pagination.Limit
 
-	if len(iter.resp.Items) < iter.opts.Pagination.Limit {
+	if len(resp.Items) < iter.opts.Pagination.Limit {
 		return false
 	}
 
 	return true
 }
 
-func (iter *MetricsIterator) fetch(ctx context.Context) error {
+func (iter *MetricsIterator) fetch(ctx context.Context, resp *MetricsResponse) error {
 	payload := newJSONEncodedPayload(iter.opts)
 
 	httpResp, err := makePostRequest(ctx, iter.req, payload)
@@ -96,15 +94,13 @@ func (iter *MetricsIterator) fetch(ctx context.Context) error {
 		return err
 	}
 
-	resp := MetricsResponse{
-		Items: make([]MetricsItem, 0, iter.opts.Pagination.Limit),
-	}
-	err = httpResp.parseFromJSON(&resp)
+	// preallocate
+	resp.Items = make([]MetricsItem, 0, iter.opts.Pagination.Limit)
+
+	err = httpResp.parseFromJSON(resp)
 	if err != nil {
 		return errors.Wrap(err, "decoding response")
 	}
-
-	iter.resp = resp
 
 	return nil
 }
