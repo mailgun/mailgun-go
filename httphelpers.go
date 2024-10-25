@@ -18,7 +18,7 @@ import (
 	"github.com/mailgun/errors"
 )
 
-var validURL = regexp.MustCompile(`/v[2-5].*`)
+var validURL = regexp.MustCompile(`/v[1-5].*`)
 
 type httpRequest struct {
 	URL                string
@@ -332,7 +332,7 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	}
 
 	if !validURL.MatchString(url.Path) {
-		return "", errors.New(`BaseAPI must end with a /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
+		return "", errors.New(`BaseAPI must end with a /v1, /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
 	}
 
 	q := url.Query()

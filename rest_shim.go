@@ -3,6 +3,7 @@ package mailgun
 import (
 	"context"
 	"fmt"
+	"net/http"
 )
 
 // The MailgunGoUserAgent identifies the client to the server, for logging purposes.
@@ -16,6 +17,7 @@ const MailgunGoUserAgent = "mailgun-go/" + Version
 type UnexpectedResponseError struct {
 	Expected []int
 	Actual   int
+	Method   string
 	URL      string
 	Data     []byte
 }
@@ -23,7 +25,8 @@ type UnexpectedResponseError struct {
 // String() converts the error into a human-readable, logfmt-compliant string.
 // See http://godoc.org/github.com/kr/logfmt for details on logfmt formatting.
 func (e *UnexpectedResponseError) String() string {
-	return fmt.Sprintf("UnexpectedResponseError URL=%s ExpectedOneOf=%#v Got=%d Error: %s", e.URL, e.Expected, e.Actual, string(e.Data))
+	return fmt.Sprintf("UnexpectedResponseError Method=%s URL=%s ExpectedOneOf=%#v Got=%d Error: %s",
+		e.Method, e.URL, e.Expected, e.Actual, string(e.Data))
 }
 
 // Error() performs as String().
@@ -32,7 +35,7 @@ func (e *UnexpectedResponseError) Error() string {
 }
 
 // newError creates a new error condition to be returned.
-func newError(url string, expected []int, got *httpResponse) error {
+func newError(method, url string, expected []int, got *httpResponse) error {
 	return &UnexpectedResponseError{
 		URL:      url,
 		Expected: expected,
@@ -62,7 +65,7 @@ func makeRequest(ctx context.Context, r *httpRequest, method string, p payload) 
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makeRequest(ctx, method, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp)
+		return rsp, newError(method, r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -76,7 +79,7 @@ func getResponseFromJSON(ctx context.Context, r *httpRequest, v interface{}) err
 		return err
 	}
 	if notGood(response.Code, expected) {
-		return newError(r.URL, expected, response)
+		return newError(http.MethodGet, r.URL, expected, response)
 	}
 	return response.parseFromJSON(v)
 }
@@ -90,7 +93,7 @@ func postResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v inte
 		return err
 	}
 	if notGood(response.Code, expected) {
-		return newError(r.URL, expected, response)
+		return newError(http.MethodPost, r.URL, expected, response)
 	}
 	return response.parseFromJSON(v)
 }
@@ -104,7 +107,7 @@ func putResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v inter
 		return err
 	}
 	if notGood(response.Code, expected) {
-		return newError(r.URL, expected, response)
+		return newError(http.MethodPut, r.URL, expected, response)
 	}
 	return response.parseFromJSON(v)
 }
@@ -115,7 +118,7 @@ func makeGetRequest(ctx context.Context, r *httpRequest) (*httpResponse, error) 
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makeGetRequest(ctx)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp)
+		return rsp, newError(http.MethodGet, r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -126,7 +129,7 @@ func makePostRequest(ctx context.Context, r *httpRequest, p payload) (*httpRespo
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makePostRequest(ctx, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp)
+		return rsp, newError(http.MethodPost, r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -137,7 +140,7 @@ func makePutRequest(ctx context.Context, r *httpRequest, p payload) (*httpRespon
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makePutRequest(ctx, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp)
+		return rsp, newError(http.MethodPut, r.URL, expected, rsp)
 	}
 	return rsp, err
 }
@@ -148,7 +151,7 @@ func makeDeleteRequest(ctx context.Context, r *httpRequest) (*httpResponse, erro
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	rsp, err := r.makeDeleteRequest(ctx)
 	if (err == nil) && notGood(rsp.Code, expected) {
-		return rsp, newError(r.URL, expected, rsp)
+		return rsp, newError(http.MethodDelete, r.URL, expected, rsp)
 	}
 	return rsp, err
 }

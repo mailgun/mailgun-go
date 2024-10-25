@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 )
 
@@ -243,4 +244,8 @@ func (mg *MailgunImpl) DisableSubaccount(ctx context.Context, subaccountId strin
 	resp := SubaccountResponse{}
 	err := postResponseFromJSON(ctx, r, nil, &resp)
 	return resp, err
+}
+
+func generateSubaccountsApiUrl(m Mailgun) string {
+	return fmt.Sprintf("%s/%s/%s", m.APIBase(), accountsEndpoint, subaccountsEndpoint)
 }

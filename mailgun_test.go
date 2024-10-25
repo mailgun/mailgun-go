@@ -34,7 +34,7 @@ func TestInvalidBaseAPI(t *testing.T) {
 	ctx := context.Background()
 	_, err := mg.GetDomain(ctx, "unknown.domain")
 	ensure.NotNil(t, err)
-	ensure.DeepEqual(t, err.Error(), `BaseAPI must end with a /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
+	ensure.DeepEqual(t, err.Error(), `BaseAPI must end with a /v1, /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
 }
 
 func TestValidBaseAPI(t *testing.T) {
@@ -59,4 +59,8 @@ func TestValidBaseAPI(t *testing.T) {
 		_, err := mg.GetDomain(ctx, "unknown.domain")
 		ensure.Nil(t, err)
 	}
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }

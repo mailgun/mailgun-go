@@ -17,6 +17,7 @@ import (
 
 type MockServer interface {
 	Stop()
+	URL1() string
 	URL4() string
 	URL() string
 	DomainIPS() []string
@@ -140,6 +141,7 @@ func NewMockServer() MockServer {
 		ms.addSubaccountRoutes(r)
 	})
 	ms.addValidationRoutes(r)
+	ms.addAnalyticsRoutes(r)
 
 	// Start the server
 	ms.srv = httptest.NewServer(r)
@@ -149,6 +151,10 @@ func NewMockServer() MockServer {
 // Stop the server
 func (ms *mockServer) Stop() {
 	ms.srv.Close()
+}
+
+func (ms *mockServer) URL1() string {
+	return ms.srv.URL + "/v1"
 }
 
 func (ms *mockServer) URL4() string {

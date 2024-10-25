@@ -127,7 +127,7 @@ func TestAddDelBounceList(t *testing.T) {
 		return false
 	}
 
-	createdAt, err := mailgun.NewRFC2822Time("Thu, 13 Oct 2011 18:02:00 UTC")
+	createdAt, err := mailgun.NewRFC2822Time("Thu, 13 Oct 2011 18:02:00 +0000")
 	if err != nil {
 		t.Fatalf("invalid time")
 	}
@@ -162,7 +162,7 @@ func TestAddDelBounceList(t *testing.T) {
 			t.Fatalf("Expected at least one bounce for %s", expect.Address)
 		}
 		t.Logf("Bounce Created At: %s", bounce.CreatedAt)
-		if !expect.CreatedAt.IsZero() && bounce.CreatedAt != expect.CreatedAt {
+		if !expect.CreatedAt.IsZero() && !time.Time(bounce.CreatedAt).Equal(time.Time(expect.CreatedAt)) {
 			t.Fatalf("Expected bounce createdAt to be %s, got %s", expect.CreatedAt, bounce.CreatedAt)
 		}
 	}
