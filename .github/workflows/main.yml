@@ -18,10 +18,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # for golangci-lint's -new-from-rev
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
           cache: true # caching and restoring go modules and build outputs
@@ -33,6 +35,9 @@ jobs:
 
       - name: nilaway
         run: make nilaway
+
+      - name: lint
+        run: make lint-new
 
       - name: Test
         run: go test -v -race -p=1 -count=1
