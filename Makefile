@@ -33,6 +33,10 @@ GOLINT = $(GOPATH)/bin/golangci-lint
 $(GOLINT):
 	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.61.0
 
+.PHONY: lint-new
+lint-new: $(GOLINT)
+	$(GOLINT) run -new-from-rev=master
+
 .PHONY: lint
 lint: $(GOLINT)
-	$(GOLINT) run -new-from-rev=master
+	$(GOLINT) run
