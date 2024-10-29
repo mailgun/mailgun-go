@@ -284,6 +284,7 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 		}
 		req.Header.Add(header, value)
 	}
+
 	return req, nil
 }
 
