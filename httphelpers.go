@@ -130,6 +130,7 @@ func (f *urlEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	for _, keyVal := range f.Values {
 		data.Add(keyVal.key, keyVal.value)
 	}
+
 	return bytes.NewBufferString(data.Encode()), nil
 }
 
@@ -229,6 +230,7 @@ func (f *formDataPayload) getContentType() string {
 		// TODO(DE-1139): handle error:
 		f.getPayloadBuffer()
 	}
+
 	return f.contentType
 }
 
@@ -335,6 +337,7 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	}
 
 	response.Data = responseBody
+
 	return &response, nil
 }
 
@@ -392,5 +395,6 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 			}
 		}
 	}
+
 	return strings.Join(parts, " ")
 }
