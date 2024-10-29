@@ -12,7 +12,7 @@ all: test
 
 .PHONY: test
 test:
-	export GO111MODULE=on; go test . -v
+	export GO111MODULE=on; go test . -race -count=1
 
 .PHONY: godoc
 godoc:

@@ -10,6 +10,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 const domain = "valid-mailgun-domain"
@@ -33,8 +34,7 @@ func TestInvalidBaseAPI(t *testing.T) {
 
 	ctx := context.Background()
 	_, err := mg.GetDomain(ctx, "unknown.domain")
-	ensure.NotNil(t, err)
-	ensure.DeepEqual(t, err.Error(), `BaseAPI must end with a /v1, /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
+	assert.EqualError(t, err, `APIBase must end with a /v1, /v2, /v3 or /v4; SetAPIBase("https://host/v3")`)
 }
 
 func TestValidBaseAPI(t *testing.T) {
