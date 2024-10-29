@@ -185,6 +185,8 @@ func NewMessage(from, subject, text string, to ...string) *Message {
 }
 
 // Deprecated: use func NewMessage instead of method.
+//
+// TODO(v5): remove this method
 func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
 	return NewMessage(from, subject, text, to...)
 }
@@ -214,6 +216,8 @@ func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 }
 
 // Deprecated: use func NewMIMEMessage instead of method.
+//
+// TODO(v5): remove this method
 func (*MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return NewMIMEMessage(body, to...)
 }
