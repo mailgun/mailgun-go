@@ -34,7 +34,6 @@ func TestInvalidBaseAPI(t *testing.T) {
 
 	ctx := context.Background()
 	_, err := mg.GetDomain(ctx, "unknown.domain")
-	ensure.NotNil(t, err)
 	assert.EqualError(t, err, `APIBase must end with a /v1, /v2, /v3 or /v4; SetAPIBase("https://host/v3")`)
 }
 
