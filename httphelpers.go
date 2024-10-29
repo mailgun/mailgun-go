@@ -249,7 +249,7 @@ func (r *httpRequest) makeDeleteRequest(ctx context.Context) (*httpResponse, err
 }
 
 func (r *httpRequest) NewRequest(ctx context.Context, method string, payload payload) (*http.Request, error) {
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,8 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 	} else {
 		body = nil
 	}
-	req, err := http.NewRequest(method, url, body)
+
+	req, err := http.NewRequest(method, uri, body)
 	if err != nil {
 		return nil, err
 	}
