@@ -233,19 +233,19 @@ func (r *httpRequest) addHeader(name, value string) {
 }
 
 func (r *httpRequest) makeGetRequest(ctx context.Context) (*httpResponse, error) {
-	return r.makeRequest(ctx, "GET", nil)
+	return r.makeRequest(ctx, http.MethodGet, nil)
 }
 
 func (r *httpRequest) makePostRequest(ctx context.Context, payload payload) (*httpResponse, error) {
-	return r.makeRequest(ctx, "POST", payload)
+	return r.makeRequest(ctx, http.MethodPost, payload)
 }
 
 func (r *httpRequest) makePutRequest(ctx context.Context, payload payload) (*httpResponse, error) {
-	return r.makeRequest(ctx, "PUT", payload)
+	return r.makeRequest(ctx, http.MethodPut, payload)
 }
 
 func (r *httpRequest) makeDeleteRequest(ctx context.Context) (*httpResponse, error) {
-	return r.makeRequest(ctx, "DELETE", nil)
+	return r.makeRequest(ctx, http.MethodDelete, nil)
 }
 
 func (r *httpRequest) NewRequest(ctx context.Context, method string, payload payload) (*http.Request, error) {
