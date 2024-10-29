@@ -54,7 +54,6 @@ type Message struct {
 	skipVerification  bool
 
 	specific features
-	mg       Mailgun
 }
 
 type ReaderAttachment struct {
@@ -163,20 +162,18 @@ type features interface {
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
 //
-// Unlike the global function,
-// this method supports arbitrary-sized recipient lists by
+// Supports arbitrary-sized recipient lists by
 // automatically sending mail in batches of up to MaxNumberOfRecipients.
 //
-// To support batch sending, you don't want to provide a fixed To: header at this point.
-// Pass nil as the to parameter to skip adding the To: header at this stage.
+// To support batch sending, do not provide `to` at this point.
 // You can do this explicitly, or implicitly, as follows:
 //
-//	// Note absence of To parameter(s)!
-//	m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//	// Note absence of `to` parameter(s)!
+//	m := NewMessage("me@example.com", "Help save our planet", "Hello world!")
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
+func NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
 		specific: &plainMessage{
 			from:    from,
@@ -184,35 +181,41 @@ func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Mes
 			text:    text,
 		},
 		to: to,
-		mg: mg,
 	}
 }
 
-// NewMIMEMessage creates a new MIME message.  These messages are largely canned;
+// Deprecated: use func NewMessage instead of method.
+func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
+	return NewMessage(from, subject, text, to...)
+}
+
+// NewMIMEMessage creates a new MIME message. These messages are largely canned;
 // you do not need to invoke setters to set message-related headers.
 // However, you do still need to call setters for Mailgun-specific settings.
 //
-// Unlike the global function,
-// this method supports arbitrary-sized recipient lists by
+// Supports arbitrary-sized recipient lists by
 // automatically sending mail in batches of up to MaxNumberOfRecipients.
 //
-// To support batch sending, you don't want to provide a fixed To: header at this point.
-// Pass nil as the to parameter to skip adding the To: header at this stage.
+// To support batch sending, do not provide `to` at this point.
 // You can do this explicitly, or implicitly, as follows:
 //
-//	// Note absence of To parameter(s)!
-//	m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//	// Note absence of `to` parameter(s)!
+//	m := NewMIMEMessage(body)
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-func (mg *MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
 		specific: &mimeMessage{
 			body: body,
 		},
 		to: to,
-		mg: mg,
 	}
+}
+
+// Deprecated: use func NewMIMEMessage instead of method.
+func (mg *MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+	return NewMIMEMessage(body, to...)
 }
 
 // AddReaderAttachment arranges to send a file along with the e-mail message.
