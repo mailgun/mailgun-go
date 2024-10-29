@@ -307,11 +307,13 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 
 	resp, err := r.Client.Do(req)
 	if err != nil {
-		if urlErr, ok := err.(*url.Error); ok {
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) {
 			if urlErr.Err == io.EOF {
 				return nil, errors.Wrap(err, "remote server prematurely closed connection")
 			}
 		}
+
 		return nil, errors.Wrap(err, "while making http request")
 	}
 
