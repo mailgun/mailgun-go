@@ -334,8 +334,14 @@ func (pm *plainMessage) addBCC(r string) {
 
 func (mm *mimeMessage) addBCC(_ string) {}
 
-// SetHtml is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
+// SetHTML is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
 // an HTML representation of your message in addition to your plain-text body.
+func (m *Message) SetHTML(html string) {
+	m.specific.setHtml(html)
+}
+
+// Deprecated: use SetHTML instead.
+// TODO(v5): remove this method
 func (m *Message) SetHtml(html string) {
 	m.specific.setHtml(html)
 }
@@ -346,7 +352,7 @@ func (pm *plainMessage) setHtml(h string) {
 
 func (mm *mimeMessage) setHtml(_ string) {}
 
-// SetAMP is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
+// SetAMPHtml is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
 // an AMP-For-Email representation of your message in addition to your html & plain-text content.
 func (m *Message) SetAMPHtml(html string) {
 	m.specific.setAMPHtml(html)

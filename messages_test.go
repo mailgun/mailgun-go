@@ -134,7 +134,7 @@ func TestSendMGHtml(t *testing.T) {
 
 		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		m.SetHtml(exampleHtml)
+		m.SetHTML(exampleHtml)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
@@ -153,7 +153,7 @@ func TestSendMGAMPHtml(t *testing.T) {
 
 		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		m.SetHtml(exampleHtml)
+		m.SetHTML(exampleHtml)
 		m.SetAMPHtml(exampleAMPHtml)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
@@ -192,7 +192,7 @@ func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
 
 		ctx := context.Background()
 		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		m.SetHtml(exampleHtml)
+		m.SetHTML(exampleHtml)
 		options := mailgun.TrackingOptions{
 			Tracking:       true,
 			TrackingClicks: "htmlonly",

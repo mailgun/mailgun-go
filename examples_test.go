@@ -89,7 +89,7 @@ func ExampleMailgunImpl_Send_constructed() {
 	)
 	m.SetTracking(true)
 	m.SetDeliveryTime(time.Now().Add(24 * time.Hour))
-	m.SetHtml("<html><body><h1>Testing some Mailgun Awesomeness!!</h1></body></html>")
+	m.SetHTML("<html><body><h1>Testing some Mailgun Awesomeness!!</h1></body></html>")
 	_, id, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)

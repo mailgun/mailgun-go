@@ -3,10 +3,11 @@ package examples
 import (
 	"context"
 	"fmt"
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
 	"os"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/events"
 )
 
 func AddBounce(domain, apiKey string) error {
@@ -704,7 +705,7 @@ func SendComplexMessage(domain, apiKey string) (string, error) {
 	)
 	m.AddCC("baz@example.com")
 	m.AddBCC("bar@example.com")
-	m.SetHtml("<html>HTML version of the body</html>")
+	m.SetHTML("<html>HTML version of the body</html>")
 	m.AddAttachment("files/test.jpg")
 	m.AddAttachment("files/test.txt")
 
@@ -744,7 +745,7 @@ func SendInlineImage(domain, apiKey string) (string, error) {
 	)
 	m.AddCC("baz@example.com")
 	m.AddBCC("bar@example.com")
-	m.SetHtml(`<html>Inline image here: <img alt="image" src="cid:test.jpg"/></html>`)
+	m.SetHTML(`<html>Inline image here: <img alt="image" src="cid:test.jpg"/></html>`)
 	m.AddInline("files/test.jpg")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -848,7 +849,7 @@ func SendTemplateMessage(domain, apiKey string) (string, error) {
 		"Hey %recipient.first%",
 		"If you wish to unsubscribe, click http://mailgun/unsubscribe/%recipient.id%",
 	) // IMPORTANT: No To:-field recipients!
-	
+
 	// Set template to be applied to this message.
 	m.SetTemplate("my-template")
 
