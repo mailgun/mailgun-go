@@ -305,12 +305,7 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 		}
 	}
 
-	response := httpResponse{}
-
 	resp, err := r.Client.Do(req)
-	if resp != nil {
-		response.Code = resp.StatusCode
-	}
 	if err != nil {
 		if urlErr, ok := err.(*url.Error); ok {
 			if urlErr.Err == io.EOF {
@@ -318,6 +313,10 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 			}
 		}
 		return nil, errors.Wrap(err, "while making http request")
+	}
+
+	response := httpResponse{
+		Code: resp.StatusCode,
 	}
 
 	defer resp.Body.Close()
