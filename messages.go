@@ -19,7 +19,7 @@ const MaxNumberOfRecipients = 1000
 // MaxNumberOfTags represents the maximum number of tags that can be added for a message
 const MaxNumberOfTags = 3
 
-// Message structures contain both the message text and the envelop for an e-mail message.
+// Message structures contain both the message text and the envelope for an e-mail message.
 type Message struct {
 	to                []string
 	tags              []string
@@ -305,10 +305,6 @@ func (pm *plainMessage) recipientCount() int {
 
 func (mm *mimeMessage) recipientCount() int {
 	return 10
-}
-
-func (m *Message) send(ctx context.Context) (string, string, error) {
-	return m.mg.Send(ctx, m)
 }
 
 // SetReplyTo sets the receiver who should receive replies
