@@ -214,7 +214,7 @@ func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 }
 
 // Deprecated: use func NewMIMEMessage instead of method.
-func (mg *MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+func (*MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return NewMIMEMessage(body, to...)
 }
 
