@@ -141,7 +141,7 @@ type Mailgun interface {
 	AddOverrideHeader(k string, v string)
 	GetCurlOutput() string
 
-	Send(ctx context.Context, m *Message) (string, string, error)
+	Send(ctx context.Context, m *Message) (mes string, id string, err error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
 	NewMessage(from, subject, text string, to ...string) *Message
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
