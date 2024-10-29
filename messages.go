@@ -341,6 +341,7 @@ func (m *Message) SetHTML(html string) {
 }
 
 // Deprecated: use SetHTML instead.
+//
 // TODO(v5): remove this method
 func (m *Message) SetHtml(html string) {
 	m.specific.setHtml(html)
