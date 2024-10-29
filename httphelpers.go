@@ -316,11 +316,12 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 		return nil, errors.Wrap(err, "while making http request")
 	}
 
+	defer resp.Body.Close()
+
 	response := httpResponse{
 		Code: resp.StatusCode,
 	}
 
-	defer resp.Body.Close()
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "while reading response body")
