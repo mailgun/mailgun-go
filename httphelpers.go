@@ -338,7 +338,7 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	}
 
 	if !validURL.MatchString(uri.Path) {
-		return "", errors.New(`BaseAPI must end with a /v1, /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
+		return "", errors.New(`APIBase() must end with a /v1, /v2, /v3 or /v4; SetAPIBase("https://host/v3")`)
 	}
 
 	q := uri.Query()
