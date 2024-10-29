@@ -317,7 +317,7 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	if err != nil {
 		var urlErr *url.Error
 		if errors.As(err, &urlErr) {
-			if errors.Is(urlErr.Err, io.EOF) {
+			if urlErr != nil && errors.Is(urlErr.Err, io.EOF) {
 				return nil, errors.Wrap(err, "remote server prematurely closed connection")
 			}
 		}
