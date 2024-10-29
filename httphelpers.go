@@ -263,12 +263,10 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 		body = nil
 	}
 
-	req, err := http.NewRequest(method, uri, body)
+	req, err := http.NewRequestWithContext(ctx, method, uri, body)
 	if err != nil {
 		return nil, err
 	}
-
-	req = req.WithContext(ctx)
 
 	if payload != nil && payload.getContentType() != "" {
 		req.Header.Add("Content-Type", payload.getContentType())
