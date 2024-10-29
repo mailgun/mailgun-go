@@ -187,6 +187,7 @@ func NewMessage(from, subject, text string, to ...string) *Message {
 // Deprecated: use func NewMessage instead of method.
 //
 // TODO(v5): remove this method
+// TODO: remove from tests and examples.
 func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
 	return NewMessage(from, subject, text, to...)
 }
