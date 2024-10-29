@@ -330,16 +330,16 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 }
 
 func (r *httpRequest) generateUrlWithParameters() (string, error) {
-	url, err := url.Parse(r.URL)
+	uri, err := url.Parse(r.URL)
 	if err != nil {
 		return "", err
 	}
 
-	if !validURL.MatchString(url.Path) {
+	if !validURL.MatchString(uri.Path) {
 		return "", errors.New(`BaseAPI must end with a /v1, /v2, /v3 or /v4; setBaseAPI("https://host/v3")`)
 	}
 
-	q := url.Query()
+	q := uri.Query()
 	if r.Parameters != nil && len(r.Parameters) > 0 {
 		for name, values := range r.Parameters {
 			for _, value := range values {
@@ -347,9 +347,9 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 			}
 		}
 	}
-	url.RawQuery = q.Encode()
+	uri.RawQuery = q.Encode()
 
-	return url.String(), nil
+	return uri.String(), nil
 }
 
 func (r *httpRequest) curlString(req *http.Request, p payload) string {
