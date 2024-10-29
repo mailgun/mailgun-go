@@ -3,7 +3,7 @@ package mailgun_test
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -237,7 +237,7 @@ func TestSendMGMIME(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), toUser)
+		m := mailgun.NewMIMEMessage(io.NopCloser(strings.NewReader(exampleMime)), toUser)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")

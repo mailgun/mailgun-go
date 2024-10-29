@@ -779,7 +779,7 @@ func SendMimeMessage(domain, apiKey string) (string, error) {
 		return "", err
 	}
 
-	m := mg.NewMIMEMessage(mimeMsgReader, "bar@example.com")
+	m := mailgun.NewMIMEMessage(mimeMsgReader, "bar@example.com")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
