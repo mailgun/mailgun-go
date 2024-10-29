@@ -220,6 +220,7 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 
 func (f *formDataPayload) getContentType() string {
 	if f.contentType == "" {
+		// TODO(vtopc): handle error:
 		f.getPayloadBuffer()
 	}
 	return f.contentType
