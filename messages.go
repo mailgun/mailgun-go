@@ -713,7 +713,11 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 		id = response.Id
 	}
 
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	if r.capturedCurlOutput != "" {
+		mg.mu.Lock()
+		defer mg.mu.Unlock()
 		mg.capturedCurlOutput = r.capturedCurlOutput
 	}
 

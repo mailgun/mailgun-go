@@ -82,6 +82,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -267,12 +268,14 @@ type Mailgun interface {
 // MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
 // Colloquially, we refer to instances of this structure as "clients."
 type MailgunImpl struct {
-	apiBase            string
-	domain             string
-	apiKey             string
-	client             *http.Client
-	baseURL            string
-	overrideHeaders    map[string]string
+	apiBase         string
+	domain          string
+	apiKey          string
+	client          *http.Client
+	baseURL         string
+	overrideHeaders map[string]string
+
+	mu                 sync.RWMutex
 	capturedCurlOutput string
 }
 
@@ -370,6 +373,9 @@ func (mg *MailgunImpl) AddOverrideHeader(k string, v string) {
 // mailgun.CaptureCurlOutput must be set to true
 // This is mostly useful for testing the Mailgun API hosted at a different endpoint.
 func (mg *MailgunImpl) GetCurlOutput() string {
+	mg.mu.RLock()
+	defer mg.mu.RUnlock()
+
 	return mg.capturedCurlOutput
 }
 

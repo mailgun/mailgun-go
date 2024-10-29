@@ -14,6 +14,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/mailgun/errors"
 )
@@ -21,12 +22,14 @@ import (
 var validURL = regexp.MustCompile(`/v[1-5].*`)
 
 type httpRequest struct {
-	URL                string
-	Parameters         map[string][]string
-	Headers            map[string]string
-	BasicAuthUser      string
-	BasicAuthPassword  string
-	Client             *http.Client
+	URL               string
+	Parameters        map[string][]string
+	Headers           map[string]string
+	BasicAuthUser     string
+	BasicAuthPassword string
+	Client            *http.Client
+
+	mu                 sync.RWMutex
 	capturedCurlOutput string
 }
 
@@ -294,7 +297,9 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 
 	if Debug {
 		if CaptureCurlOutput {
+			r.mu.Lock()
 			r.capturedCurlOutput = r.curlString(req, payload)
+			r.mu.Unlock()
 		} else {
 			fmt.Println(r.curlString(req, payload))
 		}
