@@ -39,12 +39,12 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mg.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(sender, subject, body, recipient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	// Send the message with a 10 second timeout
+	// Send the message with a 10-second timeout
 	resp, id, err := mg.Send(ctx, message)
 
 	if err != nil {
@@ -281,7 +281,7 @@ func main() {
 	subject := "HTML email!"
 	recipient := "recipient@example.com"
 
-	message := mg.NewMessage(sender, subject, "", recipient)
+	message := mailgun.NewMessage(sender, subject, "", recipient)
 	body := `
 <html>
 <body>
@@ -292,7 +292,7 @@ func main() {
 </html>
 `
 
-	message.SetHtml(body)
+	message.SetHTML(body)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -342,7 +342,7 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mg.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(sender, subject, body, recipient)
 	message.SetTemplate("passwordReset")
 	err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
 	if err != nil {
@@ -352,7 +352,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	// Send the message with a 10 second timeout
+	// Send the message with a 10-second timeout
 	resp, id, err := mg.Send(ctx, message)
 
 	if err != nil {
