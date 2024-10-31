@@ -143,11 +143,13 @@ type TrackingOptions struct {
 }
 
 // features abstracts the common characteristics between regular and MIME messages.
-// addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the package-global AddCC, AddBCC,
-// RecipientCount, SetHtml and SetAMPHtml calls, as these functions are ignored for MIME messages.
+// addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the AddCC, AddBCC,
+// RecipientCount, SetHTML and SetAMPHtml calls, as these functions are ignored for MIME messages.
 // Send() invokes addValues to add message-type-specific MIME headers for the API call
-// to Mailgun.  isValid yeilds true if and only if the message is valid enough for sending
-// through the API.  Finally, endpoint() tells Send() which endpoint to use to submit the API call.
+// to Mailgun.
+// isValid yields true if and only if the message is valid enough for sending
+// through the API.
+// Finally, endpoint() tells Send() which endpoint to use to submit the API call.
 type features interface {
 	addCC(string)
 	addBCC(string)
@@ -433,6 +435,8 @@ func (m *Message) SetDeliveryTime(dt time.Time) {
 // Refer to the Mailgun documentation for more information.
 func (m *Message) SetSTOPeriod(stoPeriod string) error {
 	validPattern := `^([2-6][4-9]|[3-6][0-9]|7[0-2])h$`
+	// TODO(vtopc): regexp.Compile, which is called by regexp.MatchString, is a heave operation, move into global variable
+	// or just parse using time.ParseDuration().
 	match, err := regexp.MatchString(validPattern, stoPeriod)
 	if err != nil {
 		return err

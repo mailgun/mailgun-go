@@ -354,7 +354,6 @@ func main() {
 
 	// Send the message with a 10-second timeout
 	resp, id, err := mg.Send(ctx, message)
-
 	if err != nil {
 		log.Fatal(err)
 	}

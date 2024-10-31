@@ -86,7 +86,7 @@ func TestEventPoller(t *testing.T) {
 	}()
 
 	// Send an email
-	m := mg.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
+	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
 	ensure.Nil(t, err)
 
@@ -126,7 +126,7 @@ func ExampleMailgunImpl_ListEvents() {
 	for it.Next(ctx, &page) {
 		for _, e := range page {
 			// You can access some fields via the interface
-			//fmt.Printf("Event: '%s' TimeStamp: '%s'\n", e.GetName(), e.GetTimestamp())
+			// fmt.Printf("Event: '%s' TimeStamp: '%s'\n", e.GetName(), e.GetTimestamp())
 
 			// and you can act upon each event by type
 			switch event := e.(type) {

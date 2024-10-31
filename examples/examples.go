@@ -697,7 +697,7 @@ func ResendMessage(domain, apiKey string) (string, string, error) {
 
 func SendComplexMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -718,7 +718,7 @@ func SendComplexMessage(domain, apiKey string) (string, error) {
 
 func SendWithConnectionOptions(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -737,7 +737,7 @@ func SendWithConnectionOptions(domain, apiKey string) (string, error) {
 
 func SendInlineImage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -757,7 +757,7 @@ func SendInlineImage(domain, apiKey string) (string, error) {
 
 func SendMessageNoTracking(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -790,7 +790,7 @@ func SendMimeMessage(domain, apiKey string) (string, error) {
 
 func SendScheduledMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -807,7 +807,7 @@ func SendScheduledMessage(domain, apiKey string) (string, error) {
 
 func SendSimpleMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <mailgun@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -823,7 +823,7 @@ func SendSimpleMessage(domain, apiKey string) (string, error) {
 
 func SendTaggedMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -844,7 +844,7 @@ func SendTaggedMessage(domain, apiKey string) (string, error) {
 
 func SendTemplateMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hey %recipient.first%",
 		"If you wish to unsubscribe, click http://mailgun/unsubscribe/%recipient.id%",
@@ -938,7 +938,7 @@ func SendMessageWithTemplate(domain, apiKey string) error {
 	time.Sleep(time.Second * 1)
 
 	// Create a new message with template
-	m := mg.NewMessage("Excited User <excited@example.com>", "Template example", "")
+	m := mailgun.NewMessage("Excited User <excited@example.com>", "Template example", "")
 	m.SetTemplate("my-template")
 
 	// Add recipients

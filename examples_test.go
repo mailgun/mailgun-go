@@ -80,7 +80,7 @@ func ExampleMailgunImpl_Send_constructed() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <me@example.com>",
 		"Hello World",
 		"Testing some Mailgun Awesomeness!",

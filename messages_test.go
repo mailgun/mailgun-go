@@ -58,7 +58,7 @@ func TestSendMGPlain(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
 		t.Log("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
@@ -76,7 +76,7 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
@@ -95,7 +95,7 @@ func TestSendMGPlainAt(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
@@ -114,7 +114,7 @@ func TestSendMGSTO(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetSTOPeriod("24h")
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
@@ -133,7 +133,7 @@ func TestSendMGHtml(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
@@ -152,7 +152,7 @@ func TestSendMGAMPHtml(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
 		m.SetAMPHtml(exampleAMPHtml)
 		msg, id, err := mg.Send(ctx, m)
@@ -172,7 +172,7 @@ func TestSendMGTracking(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
 		msg, id, err := mg.Send(ctx, m)
 		ensure.Nil(t, err)
@@ -191,7 +191,7 @@ func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
 		options := mailgun.TrackingOptions{
 			Tracking:       true,
@@ -216,7 +216,7 @@ func TestSendMGTag(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
 		m.AddTag("FooTag")
 		m.AddTag("BarTag")
 		m.AddTag("BlortTag")
@@ -251,14 +251,12 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
-		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
 
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText+"Batch\n")
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Batch\n")
 		for i := 0; i < mailgun.MaxNumberOfRecipients; i++ {
 			m.AddRecipient("") // We expect this to indicate a failure at the API
 		}
-		err = m.AddRecipientAndVariables(toUser, nil)
+		err := m.AddRecipientAndVariables(toUser, nil)
 		// In case of error the SDK didn't send the message,
 		// OR the API didn't check for empty To: headers.
 		ensure.NotNil(t, err)
@@ -276,7 +274,7 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 		ensure.Nil(t, err)
 
 		ctx := context.Background()
-		m := mg.NewMessage(fromUser, exampleSubject, templateText)
+		m := mailgun.NewMessage(fromUser, exampleSubject, templateText)
 		err = m.AddRecipientAndVariables(toUser, map[string]interface{}{
 			"name":  "Joe Cool Example",
 			"table": 42,
@@ -311,7 +309,7 @@ func TestSendMGOffline(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
@@ -344,7 +342,7 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	ctx := context.Background()
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	m.AddDomain(signingDomain)
 
 	msg, id, err := mg.Send(ctx, m)
@@ -397,7 +395,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	m.AddVariable(exampleStrVarKey, exampleStrVarVal)
 	m.AddVariable(exampleBoolVarKey, false)
 	m.AddVariable(exampleMapVarKey, exampleMapVarVal)
@@ -410,9 +408,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 }
 
 func TestAddRecipientsError(t *testing.T) {
-
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
@@ -427,8 +423,7 @@ func TestAddRecipientsError(t *testing.T) {
 func TestAddRecipientAndVariablesError(t *testing.T) {
 	var err error
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
@@ -467,7 +462,7 @@ func TestSendDomainError(t *testing.T) {
 		ctx := context.Background()
 		mg := mailgun.NewMailgun(c.domain, exampleAPIKey)
 		mg.SetAPIBase(srv.URL + "/v3")
-		m := mg.NewMessage(fromUser, exampleSubject, exampleText, "test@test.com")
+		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, "test@test.com")
 
 		_, _, err := mg.Send(ctx, m)
 		if c.isValid {
@@ -493,7 +488,7 @@ func TestSendEOFError(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	_, _, err := mg.Send(context.Background(), m)
 	ensure.NotNil(t, err)
 	ensure.StringContains(t, err.Error(), "remote server prematurely closed connection: Post ")
@@ -518,19 +513,19 @@ func TestHasRecipient(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	// No recipient
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 	_, _, err := mg.Send(context.Background(), m)
 	ensure.NotNil(t, err)
 	ensure.DeepEqual(t, err.Error(), "message not valid")
 
 	// Provided Bcc
-	m = mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m = mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 	m.AddBCC(recipient)
 	_, _, err = mg.Send(context.Background(), m)
 	ensure.Nil(t, err)
 
 	// Provided cc
-	m = mg.NewMessage(fromUser, exampleSubject, exampleText)
+	m = mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 	m.AddCC(recipient)
 	_, _, err = mg.Send(context.Background(), m)
 	ensure.Nil(t, err)
@@ -592,7 +587,7 @@ func TestAddOverrideHeader(t *testing.T) {
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
 	ctx := context.Background()
 
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -631,7 +626,7 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	mg.SetOnBehalfOfSubaccount("mailgun.subaccount")
 	ctx := context.Background()
 
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -663,7 +658,7 @@ func TestCaptureCurlOutput(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	ensure.Nil(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
@@ -699,7 +694,7 @@ func TestSendTLSOptions(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mg.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -729,7 +724,7 @@ func TestSendTemplate(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mg.NewMessage(fromUser, exampleSubject, "", toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, "", toUser)
 	m.SetTemplate(templateName)
 
 	msg, id, err := mg.Send(ctx, m)
@@ -762,7 +757,7 @@ func TestSendTemplateOptions(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mg.NewMessage(fromUser, exampleSubject, "", toUser)
+	m := mailgun.NewMessage(fromUser, exampleSubject, "", toUser)
 	m.SetTemplate(templateName)
 	m.SetTemplateRenderText(true)
 	m.SetTemplateVersion(templateVersionTag)

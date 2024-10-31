@@ -30,7 +30,7 @@ func TestMultipleAttachments(t *testing.T) {
 
 	var ctx = context.Background()
 
-	m := mg.NewMessage("root@"+testDomain, "Subject", "Text Body", "attachment@"+testDomain)
+	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "attachment@"+testDomain)
 
 	// Add 2 attachments
 	m.AddAttachment(createAttachment(t))
