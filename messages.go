@@ -19,7 +19,7 @@ const MaxNumberOfRecipients = 1000
 // MaxNumberOfTags represents the maximum number of tags that can be added for a message
 const MaxNumberOfTags = 3
 
-// Message structures contain both the message text and the envelop for an e-mail message.
+// Message structures contain both the message text and the envelope for an e-mail message.
 type Message struct {
 	to                []string
 	tags              []string
@@ -54,7 +54,6 @@ type Message struct {
 	skipVerification  bool
 
 	specific features
-	mg       Mailgun
 }
 
 type ReaderAttachment struct {
@@ -144,11 +143,13 @@ type TrackingOptions struct {
 }
 
 // features abstracts the common characteristics between regular and MIME messages.
-// addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the package-global AddCC, AddBCC,
-// RecipientCount, SetHtml and SetAMPHtml calls, as these functions are ignored for MIME messages.
+// addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the AddCC, AddBCC,
+// RecipientCount, SetHTML and SetAMPHtml calls, as these functions are ignored for MIME messages.
 // Send() invokes addValues to add message-type-specific MIME headers for the API call
-// to Mailgun.  isValid yeilds true if and only if the message is valid enough for sending
-// through the API.  Finally, endpoint() tells Send() which endpoint to use to submit the API call.
+// to Mailgun.
+// isValid yields true if and only if the message is valid enough for sending
+// through the API.
+// Finally, endpoint() tells Send() which endpoint to use to submit the API call.
 type features interface {
 	addCC(string)
 	addBCC(string)
@@ -163,20 +164,18 @@ type features interface {
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
 //
-// Unlike the global function,
-// this method supports arbitrary-sized recipient lists by
+// Supports arbitrary-sized recipient lists by
 // automatically sending mail in batches of up to MaxNumberOfRecipients.
 //
-// To support batch sending, you don't want to provide a fixed To: header at this point.
-// Pass nil as the to parameter to skip adding the To: header at this stage.
+// To support batch sending, do not provide `to` at this point.
 // You can do this explicitly, or implicitly, as follows:
 //
-//	// Note absence of To parameter(s)!
-//	m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//	// Note absence of `to` parameter(s)!
+//	m := NewMessage("me@example.com", "Help save our planet", "Hello world!")
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
+func NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
 		specific: &plainMessage{
 			from:    from,
@@ -184,35 +183,45 @@ func (mg *MailgunImpl) NewMessage(from, subject, text string, to ...string) *Mes
 			text:    text,
 		},
 		to: to,
-		mg: mg,
 	}
 }
 
-// NewMIMEMessage creates a new MIME message.  These messages are largely canned;
+// Deprecated: use func NewMessage instead of method.
+//
+// TODO(v5): remove this method
+func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
+	return NewMessage(from, subject, text, to...)
+}
+
+// NewMIMEMessage creates a new MIME message. These messages are largely canned;
 // you do not need to invoke setters to set message-related headers.
 // However, you do still need to call setters for Mailgun-specific settings.
 //
-// Unlike the global function,
-// this method supports arbitrary-sized recipient lists by
+// Supports arbitrary-sized recipient lists by
 // automatically sending mail in batches of up to MaxNumberOfRecipients.
 //
-// To support batch sending, you don't want to provide a fixed To: header at this point.
-// Pass nil as the to parameter to skip adding the To: header at this stage.
+// To support batch sending, do not provide `to` at this point.
 // You can do this explicitly, or implicitly, as follows:
 //
-//	// Note absence of To parameter(s)!
-//	m := mg.NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//	// Note absence of `to` parameter(s)!
+//	m := NewMIMEMessage(body)
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-func (mg *MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
 		specific: &mimeMessage{
 			body: body,
 		},
 		to: to,
-		mg: mg,
 	}
+}
+
+// Deprecated: use func NewMIMEMessage instead of method.
+//
+// TODO(v5): remove this method
+func (*MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
+	return NewMIMEMessage(body, to...)
 }
 
 // AddReaderAttachment arranges to send a file along with the e-mail message.
@@ -307,10 +316,6 @@ func (mm *mimeMessage) recipientCount() int {
 	return 10
 }
 
-func (m *Message) send(ctx context.Context) (string, string, error) {
-	return m.mg.Send(ctx, m)
-}
-
 // SetReplyTo sets the receiver who should receive replies
 func (m *Message) SetReplyTo(recipient string) {
 	m.AddHeader("Reply-To", recipient)
@@ -338,8 +343,15 @@ func (pm *plainMessage) addBCC(r string) {
 
 func (mm *mimeMessage) addBCC(_ string) {}
 
-// SetHtml is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
+// SetHTML is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
 // an HTML representation of your message in addition to your plain-text body.
+func (m *Message) SetHTML(html string) {
+	m.specific.setHtml(html)
+}
+
+// Deprecated: use SetHTML instead.
+//
+// TODO(v5): remove this method
 func (m *Message) SetHtml(html string) {
 	m.specific.setHtml(html)
 }
@@ -350,7 +362,7 @@ func (pm *plainMessage) setHtml(h string) {
 
 func (mm *mimeMessage) setHtml(_ string) {}
 
-// SetAMP is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
+// SetAMPHtml is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
 // an AMP-For-Email representation of your message in addition to your html & plain-text content.
 func (m *Message) SetAMPHtml(html string) {
 	m.specific.setAMPHtml(html)
@@ -422,6 +434,8 @@ func (m *Message) SetDeliveryTime(dt time.Time) {
 // Refer to the Mailgun documentation for more information.
 func (m *Message) SetSTOPeriod(stoPeriod string) error {
 	validPattern := `^([2-6][4-9]|[3-6][0-9]|7[0-2])h$`
+	// TODO(vtopc): regexp.Compile, which is called by regexp.MatchString, is a heave operation, move into global variable
+	// or just parse using time.ParseDuration().
 	match, err := regexp.MatchString(validPattern, stoPeriod)
 	if err != nil {
 		return err

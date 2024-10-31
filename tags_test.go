@@ -19,7 +19,7 @@ const (
 func TestTags(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
-	msg := mg.NewMessage(fromUser, exampleSubject, exampleText, "test@example.com")
+	msg := mailgun.NewMessage(fromUser, exampleSubject, exampleText, "test@example.com")
 	ensure.Nil(t, msg.AddTag("newsletter"))
 	ensure.Nil(t, msg.AddTag("homer"))
 	ensure.Nil(t, msg.AddTag("bart"))

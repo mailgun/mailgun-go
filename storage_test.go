@@ -3,11 +3,12 @@ package mailgun_test
 import (
 	"context"
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
-	"strings"
-	"testing"
 )
 
 func TestStorage(t *testing.T) {
@@ -16,7 +17,7 @@ func TestStorage(t *testing.T) {
 
 	var ctx = context.Background()
 
-	m := mg.NewMessage("root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
+	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
 	ensure.Nil(t, err)
 

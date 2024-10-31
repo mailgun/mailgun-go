@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -80,7 +80,7 @@ func ExampleMailgunImpl_Send_constructed() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	m := mg.NewMessage(
+	m := mailgun.NewMessage(
 		"Excited User <me@example.com>",
 		"Hello World",
 		"Testing some Mailgun Awesomeness!",
@@ -89,7 +89,7 @@ func ExampleMailgunImpl_Send_constructed() {
 	)
 	m.SetTracking(true)
 	m.SetDeliveryTime(time.Now().Add(24 * time.Hour))
-	m.SetHtml("<html><body><h1>Testing some Mailgun Awesomeness!!</h1></body></html>")
+	m.SetHTML("<html><body><h1>Testing some Mailgun Awesomeness!!</h1></body></html>")
 	_, id, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)
@@ -112,7 +112,7 @@ Testing some Mailgun MIME awesomeness!
 	defer cancel()
 
 	mg := mailgun.NewMailgun("example.com", "my_api_key")
-	m := mg.NewMIMEMessage(ioutil.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
+	m := mailgun.NewMIMEMessage(io.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
 	_, id, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)
