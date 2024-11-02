@@ -375,7 +375,7 @@ mg.SetAPIBase(mailgun.APIBaseEU)
 ```
 ## Installation
 
-If you are using [golang modules](https://github.com/golang/go/wiki/Modules) make sure you
+If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
 include the `/v4` at the end of your import paths
 ```bash
 $ go get github.com/mailgun/mailgun-go/v4
