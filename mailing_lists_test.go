@@ -186,6 +186,6 @@ func TestListMailingListRegression(t *testing.T) {
 			}
 		}
 	}
+	require.NoError(t, it.Err())
 	require.Equal(t, 1, found)
-	require.NoError(t, err)
 }
