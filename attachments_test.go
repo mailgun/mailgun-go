@@ -51,7 +51,7 @@ func TestMultipleAttachments(t *testing.T) {
 	assert.Len(t, e.Message.Attachments, 2)
 	for _, f := range e.Message.Attachments {
 		t.Logf("attachment: %v\n", f)
-		require.Equal(t, 100, f.Size)
+		assert.Equal(t, 100, f.Size)
 	}
 }
 
