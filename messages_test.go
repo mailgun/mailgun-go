@@ -529,7 +529,7 @@ func TestHasRecipient(t *testing.T) {
 	m = mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 	m.AddCC(recipient)
 	_, _, err = mg.Send(context.Background(), m)
-	require.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestResendStored(t *testing.T) {
