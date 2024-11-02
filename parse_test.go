@@ -24,6 +24,7 @@ func TestParseErrors(t *testing.T) {
 		"event": "accepted",
 		"timestamp": "1420255392.850187"
 	}`))
+	require.NotNil(t, err)
 	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
 	require.Contains(t, err.Error(), "failed to parse event 'accepted'")
 }
