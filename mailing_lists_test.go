@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -187,5 +188,5 @@ func TestListMailingListRegression(t *testing.T) {
 		}
 	}
 	require.NoError(t, it.Err())
-	require.Equal(t, 1, found)
+	assert.Equal(t, 1, found)
 }
