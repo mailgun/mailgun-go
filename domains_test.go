@@ -29,7 +29,7 @@ func TestListDomains(t *testing.T) {
 	}
 	t.Logf("TestListDomains: %d domains retrieved\n", it.TotalCount)
 	require.NoError(t, it.Err())
-	ensure.True(t, it.TotalCount != 0)
+	require.True(t, it.TotalCount != 0)
 }
 
 func TestGetSingleDomain(t *testing.T) {
@@ -39,7 +39,7 @@ func TestGetSingleDomain(t *testing.T) {
 
 	it := mg.ListDomains(nil)
 	var page []mailgun.Domain
-	ensure.True(t, it.Next(ctx, &page))
+	require.True(t, it.Next(ctx, &page))
 	require.NoError(t, it.Err())
 
 	dr, err := mg.GetDomain(ctx, page[0].Name)
@@ -65,8 +65,8 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
-	ure, ok := err.(*mailgun.UnexpectedResponseError)
-	ensure.True(t, ok)
+	var ure *mailgun.UnexpectedResponseError
+	require.ErrorAs(t, err, &ure)
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 

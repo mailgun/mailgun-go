@@ -34,7 +34,7 @@ func TestRouteCRUD(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	ensure.True(t, newRoute.Id != "")
+	require.NotEqual(t, "", newRoute.Id)
 
 	defer func() {
 		require.NoError(t, mg.DeleteRoute(ctx, newRoute.Id))
@@ -68,41 +68,41 @@ func TestRoutesIterator(t *testing.T) {
 
 	// Calling Last() is invalid unless you first use First() or Next()
 	ensure.False(t, it.Last(ctx, &lastPage))
-	ensure.True(t, len(lastPage) == 0)
+	require.Len(t, lastPage, 0)
 
 	// Get our first page
-	ensure.True(t, it.Next(ctx, &firstPage))
+	require.True(t, it.Next(ctx, &firstPage))
 	require.NoError(t, it.Err())
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, len(firstPage) != 0)
 	firstIterator := *it
 
 	// Get our second page
-	ensure.True(t, it.Next(ctx, &secondPage))
+	require.True(t, it.Next(ctx, &secondPage))
 	require.NoError(t, it.Err())
-	ensure.True(t, len(secondPage) != 0)
+	require.True(t, len(secondPage) != 0)
 
 	// Pages should be different
 	ensure.NotDeepEqual(t, firstPage, secondPage)
-	ensure.True(t, firstIterator.TotalCount != 0)
+	require.True(t, firstIterator.TotalCount != 0)
 
 	// Previous()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, it.Next(ctx, &secondPage))
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, it.Next(ctx, &secondPage))
 
-	ensure.True(t, it.Previous(ctx, &previousPage))
-	ensure.True(t, len(previousPage) != 0)
+	require.True(t, it.Previous(ctx, &previousPage))
+	require.True(t, len(previousPage) != 0)
 	ensure.DeepEqual(t, previousPage[0].Id, firstPage[0].Id)
 
 	// First()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 
 	// Calling first resets the iterator to the first page
-	ensure.True(t, it.Next(ctx, &secondPage))
+	require.True(t, it.Next(ctx, &secondPage))
 	ensure.NotDeepEqual(t, firstPage, secondPage)
 
 	// Last()
-	ensure.True(t, it.Last(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.Last(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 
 }

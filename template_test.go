@@ -52,7 +52,7 @@ func TestTemplateCRUD(t *testing.T) {
 	require.NoError(t, waitForTemplate(mg, tmpl.Name))
 
 	// Ensure the template is in the list
-	ensure.True(t, findTemplate(tmpl.Name))
+	require.True(t, findTemplate(tmpl.Name))
 
 	// Update the description
 	tmpl.Description = UpdatedDesc

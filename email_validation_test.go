@@ -19,15 +19,15 @@ func TestEmailValidationV4(t *testing.T) {
 	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
 	require.NoError(t, err)
 
-	ensure.True(t, ev.IsValid)
+	require.True(t, ev.IsValid)
 	ensure.DeepEqual(t, ev.MailboxVerification, "")
 	ensure.False(t, ev.IsDisposableAddress)
 	ensure.False(t, ev.IsRoleAddress)
-	ensure.True(t, ev.Parts.DisplayName == "")
+	require.Equal(t, "", ev.Parts.DisplayName)
 	ensure.DeepEqual(t, ev.Parts.LocalPart, "foo")
 	ensure.DeepEqual(t, ev.Parts.Domain, "mailgun.com")
 	ensure.DeepEqual(t, ev.Reason, "")
-	ensure.True(t, len(ev.Reasons) != 0)
+	require.True(t, len(ev.Reasons) != 0)
 	ensure.DeepEqual(t, ev.Reasons[0], "no-reason")
 	ensure.DeepEqual(t, ev.Risk, "unknown")
 	ensure.DeepEqual(t, ev.Result, "deliverable")
@@ -51,9 +51,9 @@ func TestParseAddresses(t *testing.T) {
 		"bob@example.com":           true,
 	}
 	for _, a := range addressesThatParsed {
-		ensure.True(t, hittest[a])
+		require.True(t, hittest[a])
 	}
-	ensure.True(t, len(unparsableAddresses) == 1)
+	require.Len(t, unparsableAddresses, 1)
 }
 
 func TestUnmarshallResponse(t *testing.T) {
@@ -76,11 +76,11 @@ func TestUnmarshallResponse(t *testing.T) {
 	err := json.Unmarshal(payload, &ev)
 	require.NoError(t, err)
 
-	ensure.True(t, ev.IsValid)
+	require.True(t, ev.IsValid)
 	ensure.DeepEqual(t, ev.MailboxVerification, "unknown")
 	ensure.False(t, ev.IsDisposableAddress)
 	ensure.False(t, ev.IsRoleAddress)
-	ensure.True(t, ev.Parts.DisplayName == "")
+	require.Equal(t, "", ev.Parts.DisplayName)
 	ensure.DeepEqual(t, ev.Parts.LocalPart, "some_email")
 	ensure.DeepEqual(t, ev.Parts.Domain, "aol.com")
 	ensure.DeepEqual(t, ev.Reason, "no-reason")

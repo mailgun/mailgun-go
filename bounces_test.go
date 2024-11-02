@@ -41,8 +41,8 @@ func TestGetSingleBounce(t *testing.T) {
 	_, err := mg.GetBounce(ctx, exampleEmail)
 	ensure.NotNil(t, err)
 
-	ure, ok := err.(*mailgun.UnexpectedResponseError)
-	ensure.True(t, ok)
+	var ure *mailgun.UnexpectedResponseError
+	require.ErrorAs(t, err, &ure)
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
@@ -55,7 +55,7 @@ func TestAddDelBounces(t *testing.T) {
 		it := mg.ListBounces(nil)
 		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
-			ensure.True(t, len(page) != 0)
+			require.True(t, len(page) != 0)
 			for _, bounce := range page {
 				t.Logf("Bounce Address: %s\n", bounce.Address)
 				if bounce.Address == address {
@@ -114,7 +114,7 @@ func TestAddDelBounceList(t *testing.T) {
 		it := mg.ListBounces(nil)
 		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
-			ensure.True(t, len(page) != 0)
+			require.True(t, len(page) != 0)
 			for _, bounce := range page {
 				t.Logf("Bounce Address: %s\n", bounce.Address)
 				if bounce.Address == address {

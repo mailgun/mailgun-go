@@ -54,7 +54,7 @@ func TestMailingListMembers(t *testing.T) {
 	ensure.DeepEqual(t, theMember.Address, protoJoe.Address)
 	ensure.DeepEqual(t, theMember.Name, protoJoe.Name)
 	ensure.DeepEqual(t, theMember.Subscribed, protoJoe.Subscribed)
-	ensure.True(t, len(theMember.Vars) == 0)
+	require.Len(t, theMember.Vars, 0)
 
 	_, err = mg.UpdateMember(ctx, "joe@example.com", address, mailgun.Member{
 		Name: "Joe Cool",
@@ -91,7 +91,7 @@ func TestMailingListMembers(t *testing.T) {
 	require.NoError(t, err)
 	ensure.DeepEqual(t, theMember.Name, "Joe's Cool Account")
 	ensure.NotNil(t, theMember.Subscribed)
-	ensure.True(t, *theMember.Subscribed)
+	require.True(t, *theMember.Subscribed)
 }
 
 func TestMailingLists(t *testing.T) {

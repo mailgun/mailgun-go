@@ -33,8 +33,8 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	_, err := mg.GetComplaint(ctx, randomString(64, "")+"@example.com")
 	ensure.NotNil(t, err)
 
-	ure, ok := err.(*mailgun.UnexpectedResponseError)
-	ensure.True(t, ok)
+	var ure *mailgun.UnexpectedResponseError
+	require.ErrorAs(t, err, &ure)
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
@@ -64,7 +64,7 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	ensure.False(t, hasComplaint(randomMail))
 
 	require.NoError(t, mg.CreateComplaint(ctx, randomMail))
-	ensure.True(t, hasComplaint(randomMail))
+	require.True(t, hasComplaint(randomMail))
 	require.NoError(t, mg.DeleteComplaint(ctx, randomMail))
 	ensure.False(t, hasComplaint(randomMail))
 }
@@ -100,7 +100,7 @@ func TestCreateDeleteComplaintList(t *testing.T) {
 	require.NoError(t, mg.CreateComplaints(ctx, addresses))
 
 	for _, address := range addresses {
-		ensure.True(t, hasComplaint(address))
+		require.True(t, hasComplaint(address))
 		require.NoError(t, mg.DeleteComplaint(ctx, address))
 		ensure.False(t, hasComplaint(address))
 	}

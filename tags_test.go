@@ -39,7 +39,7 @@ func TestTags(t *testing.T) {
 	it := mg.ListTags(nil)
 	var page []mailgun.Tag
 	for it.Next(ctx, &page) {
-		ensure.True(t, len(page) != 0)
+		require.True(t, len(page) != 0)
 	}
 	require.NoError(t, it.Err())
 

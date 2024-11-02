@@ -21,44 +21,44 @@ func TestEventIteratorGetNext(t *testing.T) {
 	var firstPage, secondPage, previousPage []mailgun.Event
 	var ctx = context.Background()
 
-	ensure.True(t, it.Next(ctx, &firstPage))
-	ensure.True(t, it.Paging.Next != "")
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.Next(ctx, &firstPage))
+	require.NotEqual(t, "", it.Paging.Next)
+	require.True(t, len(firstPage) != 0)
 	firstIterator := *it
 
-	ensure.True(t, it.Next(ctx, &secondPage))
-	ensure.True(t, len(secondPage) != 0)
+	require.True(t, it.Next(ctx, &secondPage))
+	require.True(t, len(secondPage) != 0)
 
 	// Pages should be different
 	ensure.NotDeepEqual(t, firstPage, secondPage)
-	ensure.True(t, firstIterator.Paging.Next != it.Paging.Next)
-	ensure.True(t, firstIterator.Paging.Previous != it.Paging.Previous)
+	require.NotEqual(t, firstIterator.Paging.Next, it.Paging.Next)
+	require.NotEqual(t, firstIterator.Paging.Previous, it.Paging.Previous)
 	require.NoError(t, it.Err())
 
 	// Previous()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, it.Next(ctx, &secondPage))
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, it.Next(ctx, &secondPage))
 
-	ensure.True(t, it.Previous(ctx, &previousPage))
-	ensure.True(t, len(previousPage) != 0)
+	require.True(t, it.Previous(ctx, &previousPage))
+	require.True(t, len(previousPage) != 0)
 	ensure.DeepEqual(t, previousPage[0].GetID(), firstPage[0].GetID())
 
 	// First()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 
 	// Calling first resets the iterator to the first page
-	ensure.True(t, it.Next(ctx, &secondPage))
+	require.True(t, it.Next(ctx, &secondPage))
 	ensure.NotDeepEqual(t, firstPage, secondPage)
 
 	// Last()
 	var lastPage []mailgun.Event
-	ensure.True(t, it.Next(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.Next(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 
 	// Calling Last() is invalid unless you first use First() or Next()
-	ensure.True(t, it.Last(ctx, &lastPage))
-	ensure.True(t, len(lastPage) != 0)
+	require.True(t, it.Last(ctx, &lastPage))
+	require.True(t, len(lastPage) != 0)
 }
 
 func TestEventPoller(t *testing.T) {
@@ -107,7 +107,7 @@ func TestEventPoller(t *testing.T) {
 	}
 	// Ensure we found our email
 	ensure.NotNil(t, it.Err())
-	ensure.True(t, accepted != nil)
+	require.NotNil(t, accepted)
 	ensure.DeepEqual(t, accepted.Recipient, "user@"+testDomain)
 }
 

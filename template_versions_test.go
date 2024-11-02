@@ -58,7 +58,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	ensure.DeepEqual(t, version.Engine, mailgun.TemplateEngineGo)
 
 	// Ensure the version is in the list
-	ensure.True(t, findVersion(tmpl.Name, version.Tag))
+	require.True(t, findVersion(tmpl.Name, version.Tag))
 
 	// Update the Comment
 	version.Comment = UpdatedComment
@@ -83,7 +83,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	require.NoError(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version2))
 
 	// Ensure the version is in the list
-	ensure.True(t, findVersion(tmpl.Name, version2.Tag))
+	require.True(t, findVersion(tmpl.Name, version2.Tag))
 
 	// Delete the first version
 	require.NoError(t, mg.DeleteTemplateVersion(ctx, tmpl.Name, version.Tag))

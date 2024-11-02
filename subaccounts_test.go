@@ -33,7 +33,7 @@ func TestListSubaccounts(t *testing.T) {
 	}
 	t.Logf("TestListSubaccounts: %d subaccounts retrieved\n", iterator.Total)
 	require.NoError(t, iterator.Err())
-	ensure.True(t, iterator.Total != 0)
+	require.True(t, iterator.Total != 0)
 }
 
 func TestSubaccountDetails(t *testing.T) {
@@ -46,7 +46,7 @@ func TestSubaccountDetails(t *testing.T) {
 	ensure.NotNil(t, iterator)
 
 	page := []mailgun.Subaccount{}
-	ensure.True(t, iterator.Next(context.Background(), &page))
+	require.True(t, iterator.Next(context.Background(), &page))
 	require.NoError(t, iterator.Err())
 
 	resp, err := mg.SubaccountDetails(ctx, page[0].Id)
@@ -64,8 +64,8 @@ func TestSubaccountDetailsStatusNotFound(t *testing.T) {
 	if err == nil {
 		t.Fatal("Did not expect a subaccount to exist")
 	}
-	ure, ok := err.(*mailgun.UnexpectedResponseError)
-	ensure.True(t, ok)
+	var ure *mailgun.UnexpectedResponseError
+	require.ErrorAs(t, err, &ure)
 	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
 }
 
