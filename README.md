@@ -28,11 +28,11 @@ import (
 
 // Your available domain names can be found here:
 // (https://app.mailgun.com/app/domains)
-var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
 // (https://app.mailgun.com/app/account/security)
-var privateAPIKey string = "your-private-key"
+var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
@@ -275,11 +275,11 @@ import (
 
 // Your available domain names can be found here:
 // (https://app.mailgun.com/app/domains)
-var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
 // (https://app.mailgun.com/app/account/security)
-var privateAPIKey string = "your-private-key"
+var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
@@ -334,11 +334,11 @@ import (
 
 // Your available domain names can be found here:
 // (https://app.mailgun.com/app/domains)
-var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
 // (https://app.mailgun.com/app/account/security)
-var privateAPIKey string = "your-private-key"
+var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
