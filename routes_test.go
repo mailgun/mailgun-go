@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,14 +47,14 @@ func TestRouteCRUD(t *testing.T) {
 
 	theRoute, err := mg.GetRoute(ctx, newRoute.Id)
 	require.NoError(t, err)
-	require.Equal(t, newRoute, theRoute)
+	assert.Equal(t, newRoute, theRoute)
 
 	changedRoute, err := mg.UpdateRoute(ctx, newRoute.Id, mailgun.Route{
 		Priority: 2,
 	})
 	require.NoError(t, err)
-	require.Equal(t, 2, changedRoute.Priority)
-	require.Len(t, changedRoute.Actions, 2)
+	assert.Equal(t, 2, changedRoute.Priority)
+	assert.Len(t, changedRoute.Actions, 2)
 }
 
 func TestRoutesIterator(t *testing.T) {

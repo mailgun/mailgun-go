@@ -19,13 +19,13 @@ const apiKey = "valid-mailgun-api-key"
 func TestMailgun(t *testing.T) {
 	m := mailgun.NewMailgun(domain, apiKey)
 
-	require.Equal(t, domain, m.Domain())
-	require.Equal(t, apiKey, m.APIKey())
-	require.Equal(t, http.DefaultClient, m.Client())
+	assert.Equal(t, domain, m.Domain())
+	assert.Equal(t, apiKey, m.APIKey())
+	assert.Equal(t, http.DefaultClient, m.Client())
 
 	client := new(http.Client)
 	m.SetClient(client)
-	require.Equal(t, m.Client(), client)
+	assert.Equal(t, m.Client(), client)
 }
 
 func TestInvalidBaseAPI(t *testing.T) {

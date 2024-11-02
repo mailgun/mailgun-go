@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,7 +30,7 @@ func TestGetWebhook(t *testing.T) {
 	urls, err := mg.GetWebhook(ctx, "new-webhook")
 	require.NoError(t, err)
 
-	require.Equal(t, []string{"http://example.com/new"}, urls)
+	assert.Equal(t, []string{"http://example.com/new"}, urls)
 }
 
 func TestWebhookCRUD(t *testing.T) {

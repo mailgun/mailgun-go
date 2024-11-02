@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -97,7 +98,7 @@ func TestEnableSubaccount(t *testing.T) {
 
 	resp, err := mg.EnableSubaccount(ctx, testDisabledSubaccountId)
 	require.NoError(t, err)
-	require.Equal(t, "enabled", resp.Item.Status)
+	assert.Equal(t, "enabled", resp.Item.Status)
 }
 
 func TestDisableSubaccount(t *testing.T) {
@@ -108,7 +109,7 @@ func TestDisableSubaccount(t *testing.T) {
 
 	resp, err := mg.DisableSubaccount(ctx, testEnabledSubaccountId)
 	require.NoError(t, err)
-	require.Equal(t, "disabled", resp.Item.Status)
+	assert.Equal(t, "disabled", resp.Item.Status)
 }
 
 func TestDisableSubaccountAlreadyDisabled(t *testing.T) {

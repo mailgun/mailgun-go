@@ -8,6 +8,7 @@ import (
 
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -107,7 +108,7 @@ func TestEventPoller(t *testing.T) {
 	// Ensure we found our email
 	require.NotNil(t, it.Err())
 	require.NotNil(t, accepted)
-	require.Equal(t, "user@"+testDomain, accepted.Recipient)
+	assert.Equal(t, "user@"+testDomain, accepted.Recipient)
 }
 
 func ExampleMailgunImpl_ListEvents() {

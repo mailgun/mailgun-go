@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,21 +19,21 @@ func TestEmailValidationV4(t *testing.T) {
 	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
 	require.NoError(t, err)
 
-	require.True(t, ev.IsValid)
-	require.Equal(t, "", ev.MailboxVerification)
-	require.False(t, ev.IsDisposableAddress)
-	require.False(t, ev.IsRoleAddress)
-	require.Equal(t, "", ev.Parts.DisplayName)
-	require.Equal(t, "foo", ev.Parts.LocalPart)
-	require.Equal(t, "mailgun.com", ev.Parts.Domain)
-	require.Equal(t, "", ev.Reason)
-	require.True(t, len(ev.Reasons) != 0)
-	require.Equal(t, "no-reason", ev.Reasons[0])
-	require.Equal(t, "unknown", ev.Risk)
-	require.Equal(t, "deliverable", ev.Result)
-	require.Equal(t, "disengaged", ev.Engagement.Behavior)
-	require.False(t, ev.Engagement.Engaging)
-	require.False(t, ev.Engagement.IsBot)
+	assert.True(t, ev.IsValid)
+	assert.Equal(t, "", ev.MailboxVerification)
+	assert.False(t, ev.IsDisposableAddress)
+	assert.False(t, ev.IsRoleAddress)
+	assert.Equal(t, "", ev.Parts.DisplayName)
+	assert.Equal(t, "foo", ev.Parts.LocalPart)
+	assert.Equal(t, "mailgun.com", ev.Parts.Domain)
+	assert.Equal(t, "", ev.Reason)
+	assert.True(t, len(ev.Reasons) != 0)
+	assert.Equal(t, "no-reason", ev.Reasons[0])
+	assert.Equal(t, "unknown", ev.Risk)
+	assert.Equal(t, "deliverable", ev.Result)
+	assert.Equal(t, "disengaged", ev.Engagement.Behavior)
+	assert.False(t, ev.Engagement.Engaging)
+	assert.False(t, ev.Engagement.IsBot)
 }
 
 func TestParseAddresses(t *testing.T) {
@@ -75,12 +76,12 @@ func TestUnmarshallResponse(t *testing.T) {
 	err := json.Unmarshal(payload, &ev)
 	require.NoError(t, err)
 
-	require.True(t, ev.IsValid)
-	require.Equal(t, "unknown", ev.MailboxVerification)
-	require.False(t, ev.IsDisposableAddress)
-	require.False(t, ev.IsRoleAddress)
-	require.Equal(t, "", ev.Parts.DisplayName)
-	require.Equal(t, "some_email", ev.Parts.LocalPart)
-	require.Equal(t, "aol.com", ev.Parts.Domain)
-	require.Equal(t, "no-reason", ev.Reason)
+	assert.True(t, ev.IsValid)
+	assert.Equal(t, "unknown", ev.MailboxVerification)
+	assert.False(t, ev.IsDisposableAddress)
+	assert.False(t, ev.IsRoleAddress)
+	assert.Equal(t, "", ev.Parts.DisplayName)
+	assert.Equal(t, "some_email", ev.Parts.LocalPart)
+	assert.Equal(t, "aol.com", ev.Parts.Domain)
+	assert.Equal(t, "no-reason", ev.Reason)
 }

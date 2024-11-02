@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,9 +31,9 @@ func TestListIPS(t *testing.T) {
 	ip, err := mg.GetIP(ctx, list[0].IP)
 	require.NoError(t, err)
 
-	require.Equal(t, list[0].IP, ip.IP)
-	require.True(t, ip.Dedicated)
-	require.Equal(t, "luna.mailgun.net", ip.RDNS)
+	assert.Equal(t, list[0].IP, ip.IP)
+	assert.True(t, ip.Dedicated)
+	assert.Equal(t, "luna.mailgun.net", ip.RDNS)
 }
 
 func TestDomainIPS(t *testing.T) {

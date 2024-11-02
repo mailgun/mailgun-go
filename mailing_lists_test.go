@@ -51,10 +51,10 @@ func TestMailingListMembers(t *testing.T) {
 
 	theMember, err := mg.GetMember(ctx, "joe@example.com", address)
 	require.NoError(t, err)
-	require.Equal(t, protoJoe.Address, theMember.Address)
-	require.Equal(t, protoJoe.Name, theMember.Name)
-	require.Equal(t, protoJoe.Subscribed, theMember.Subscribed)
-	require.Len(t, theMember.Vars, 0)
+	assert.Equal(t, protoJoe.Address, theMember.Address)
+	assert.Equal(t, protoJoe.Name, theMember.Name)
+	assert.Equal(t, protoJoe.Subscribed, theMember.Subscribed)
+	assert.Len(t, theMember.Vars, 0)
 
 	_, err = mg.UpdateMember(ctx, "joe@example.com", address, mailgun.Member{
 		Name: "Joe Cool",
@@ -63,9 +63,9 @@ func TestMailingListMembers(t *testing.T) {
 
 	theMember, err = mg.GetMember(ctx, "joe@example.com", address)
 	require.NoError(t, err)
-	require.Equal(t, "Joe Cool", theMember.Name)
+	assert.Equal(t, "Joe Cool", theMember.Name)
 	require.NoError(t, mg.DeleteMember(ctx, "joe@example.com", address))
-	require.Equal(t, startCount, countMembers())
+	assert.Equal(t, startCount, countMembers())
 
 	err = mg.CreateMemberList(ctx, nil, address, []interface{}{
 		mailgun.Member{
@@ -89,9 +89,9 @@ func TestMailingListMembers(t *testing.T) {
 
 	theMember, err = mg.GetMember(ctx, "joe.user2@example.com", address)
 	require.NoError(t, err)
-	require.Equal(t, "Joe's Cool Account", theMember.Name)
+	assert.Equal(t, "Joe's Cool Account", theMember.Name)
 	require.NotNil(t, theMember.Subscribed)
-	require.True(t, *theMember.Subscribed)
+	assert.True(t, *theMember.Subscribed)
 }
 
 func TestMailingLists(t *testing.T) {
@@ -135,7 +135,7 @@ func TestMailingLists(t *testing.T) {
 	require.NoError(t, err)
 
 	protoList.CreatedAt = theList.CreatedAt // ignore this field when comparing.
-	require.Equal(t, theList, protoList)
+	assert.Equal(t, theList, protoList)
 
 	_, err = mg.UpdateMailingList(ctx, address, mailgun.MailingList{
 		Description: "A list whose description changed",
@@ -147,7 +147,7 @@ func TestMailingLists(t *testing.T) {
 
 	newList := protoList
 	newList.Description = "A list whose description changed"
-	require.Equal(t, theList, newList)
+	assert.Equal(t, theList, newList)
 }
 
 func TestListMailingListRegression(t *testing.T) {

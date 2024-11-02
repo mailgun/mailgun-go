@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -82,8 +83,8 @@ func TestParseSuccess(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, reflect.TypeOf(event).String(), "*events.Accepted")
 	subject := event.(*events.Accepted).Message.Headers.Subject
-	require.Equal(t, "Test message going through the bus.", subject)
-	require.Equal(t, "AgEASDSGFB8y4--TSDGxvccvmQB==", event.(*events.Accepted).Storage.Key)
+	assert.Equal(t, "Test message going through the bus.", subject)
+	assert.Equal(t, "AgEASDSGFB8y4--TSDGxvccvmQB==", event.(*events.Accepted).Storage.Key)
 
 	// Make sure the next event parsing attempt will zero the fields.
 	event2, err := ParseEvent([]byte(`{
@@ -93,16 +94,16 @@ func TestParseSuccess(t *testing.T) {
 	}`))
 	require.NoError(t, err)
 
-	require.Equal(t, time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC), event2.GetTimestamp())
-	require.Equal(t, "", event2.(*events.Accepted).Message.Headers.Subject)
+	assert.Equal(t, time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC), event2.GetTimestamp())
+	assert.Equal(t, "", event2.(*events.Accepted).Message.Headers.Subject)
 	// Make sure the second attempt of Parse doesn't overwrite the first event struct.
-	require.Equal(t, "dude@example.com", event.(*events.Accepted).Recipient)
+	assert.Equal(t, "dude@example.com", event.(*events.Accepted).Recipient)
 
-	require.Equal(t, "value", event.(*events.Accepted).UserVariables.(map[string]interface{})["custom"])
+	assert.Equal(t, "value", event.(*events.Accepted).UserVariables.(map[string]interface{})["custom"])
 	child := event.(*events.Accepted).UserVariables.(map[string]interface{})["parent"].(map[string]interface{})["child"]
-	require.Equal(t, "user defined variable", child)
+	assert.Equal(t, "user defined variable", child)
 	aList := event.(*events.Accepted).UserVariables.(map[string]interface{})["a-list"].([]interface{})
-	require.Equal(t, []interface{}{1.0, 2.0, 3.0, 4.0, 5.0}, aList)
+	assert.Equal(t, []interface{}{1.0, 2.0, 3.0, 4.0, 5.0}, aList)
 }
 
 func TestParseSuccessInvalidUserVariables(t *testing.T) {
@@ -113,7 +114,7 @@ func TestParseSuccessInvalidUserVariables(t *testing.T) {
 	}`))
 	require.NoError(t, err)
 	require.Equal(t, "*events.Accepted", reflect.TypeOf(event).String())
-	require.Equal(t, "Could not load user-variables. They were either truncated or invalid JSON",
+	assert.Equal(t, "Could not load user-variables. They were either truncated or invalid JSON",
 		event.(*events.Accepted).UserVariables)
 }
 
@@ -141,28 +142,28 @@ func TestParseResponse(t *testing.T) {
 	}`))
 	require.NoError(t, err)
 
-	require.Equal(t, "accepted", evnts[0].GetName())
-	require.Equal(t, "someone@example.com", evnts[0].(*events.Accepted).Recipient)
+	assert.Equal(t, "accepted", evnts[0].GetName())
+	assert.Equal(t, "someone@example.com", evnts[0].(*events.Accepted).Recipient)
 
-	require.Equal(t, "delivered", evnts[1].GetName())
-	require.Equal(t, "test@mailgun.test", evnts[1].(*events.Delivered).Recipient)
+	assert.Equal(t, "delivered", evnts[1].GetName())
+	assert.Equal(t, "test@mailgun.test", evnts[1].(*events.Delivered).Recipient)
 }
 
 func TestTimeStamp(t *testing.T) {
 	var event events.Generic
 	ts := time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC)
 	event.SetTimestamp(ts)
-	require.Equal(t, ts, event.GetTimestamp())
+	assert.Equal(t, ts, event.GetTimestamp())
 
 	event.Timestamp = 1546899001.019501
-	require.Equal(t, time.Date(2019, 1, 7, 22, 10, 01, 19501056, time.UTC), event.GetTimestamp())
+	assert.Equal(t, time.Date(2019, 1, 7, 22, 10, 01, 19501056, time.UTC), event.GetTimestamp())
 }
 
 func TestEventNames(t *testing.T) {
 	for name := range EventNames {
 		event, err := ParseEvent([]byte(fmt.Sprintf(`{"event": "%s"}`, name)))
 		require.NoError(t, err)
-		require.Equal(t, name, event.GetName())
+		assert.Equal(t, name, event.GetName())
 	}
 }
 
@@ -181,7 +182,7 @@ func TestEventMessageWithAttachment(t *testing.T) {
                 "size": 142698}}`)
 	event, err := ParseEvent(body)
 	require.NoError(t, err)
-	require.Equal(t, "doc.pdf", event.(*events.Delivered).Message.Attachments[0].FileName)
+	assert.Equal(t, "doc.pdf", event.(*events.Delivered).Message.Attachments[0].FileName)
 }
 
 func TestStored(t *testing.T) {
@@ -195,6 +196,6 @@ func TestStored(t *testing.T) {
         }}`, key, url))
 	event, err := ParseEvent(body)
 	require.NoError(t, err)
-	require.Equal(t, key, event.(*events.Stored).Storage.Key)
-	require.Equal(t, url, event.(*events.Stored).Storage.URL)
+	assert.Equal(t, key, event.(*events.Stored).Storage.Key)
+	assert.Equal(t, url, event.(*events.Stored).Storage.URL)
 }

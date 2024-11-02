@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -145,9 +146,9 @@ func TestDomainTracking(t *testing.T) {
 
 	info, err = mg.GetDomainTracking(ctx, testDomain)
 	require.NoError(t, err)
-	require.True(t, info.Unsubscribe.Active, true)
-	require.Equal(t, "<h2>Hi</h2>", info.Unsubscribe.HTMLFooter)
-	require.Equal(t, "Hi", info.Unsubscribe.TextFooter)
+	assert.True(t, info.Unsubscribe.Active)
+	assert.Equal(t, "<h2>Hi</h2>", info.Unsubscribe.HTMLFooter)
+	assert.Equal(t, "Hi", info.Unsubscribe.TextFooter)
 }
 
 func TestDomainVerify(t *testing.T) {

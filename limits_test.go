@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,6 +17,6 @@ func TestLimits(t *testing.T) {
 	limits, err := mg.GetTagLimits(ctx, testDomain)
 	require.NoError(t, err)
 
-	require.Equal(t, 50000, limits.Limit)
-	require.Equal(t, 5000, limits.Count)
+	assert.Equal(t, 50000, limits.Limit)
+	assert.Equal(t, 5000, limits.Count)
 }

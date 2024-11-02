@@ -433,7 +433,7 @@ func TestAddRecipientAndVariablesError(t *testing.T) {
 	}
 
 	err = m.AddRecipientAndVariables("recipient_1001@example.com", map[string]interface{}{"id": 1001})
-	require.Equal(t, err.Error(), "recipient limit exceeded (max 1000)")
+	require.EqualError(t, err, "recipient limit exceeded (max 1000)")
 }
 
 func TestSendDomainError(t *testing.T) {
@@ -555,7 +555,7 @@ func TestResendStored(t *testing.T) {
 
 	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
 	require.NotNil(t, err)
-	require.Equal(t, err.Error(), "must provide at least one recipient")
+	require.EqualError(t, err, "must provide at least one recipient")
 
 	msg, id, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
 	require.NoError(t, err)

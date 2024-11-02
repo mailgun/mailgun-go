@@ -9,6 +9,7 @@ import (
 
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,8 +47,8 @@ func TestMultipleAttachments(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, e)
 
-	require.Equal(t, e.ID, id)
-	require.Len(t, e.Message.Attachments, 2)
+	assert.Equal(t, e.ID, id)
+	assert.Len(t, e.Message.Attachments, 2)
 	for _, f := range e.Message.Attachments {
 		t.Logf("attachment: %v\n", f)
 		require.Equal(t, 100, f.Size)
