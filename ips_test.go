@@ -47,7 +47,7 @@ func TestDomainIPS(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, list, 1)
-	require.Equal(t, list[0].IP, "192.172.1.1")
+	require.Equal(t, "192.172.1.1", list[0].IP)
 
 	err = mg.DeleteDomainIP(ctx, "192.172.1.1")
 	require.NoError(t, err)
