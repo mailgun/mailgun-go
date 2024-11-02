@@ -7,8 +7,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
-
-	"github.com/facebookgo/ensure"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetCredentials(t *testing.T) {
@@ -25,7 +24,7 @@ func TestGetCredentials(t *testing.T) {
 			t.Logf("%s\t%s\t\n", c.Login, c.CreatedAt)
 		}
 	}
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 }
 
 func TestCreateDeleteCredentials(t *testing.T) {
@@ -37,7 +36,7 @@ func TestCreateDeleteCredentials(t *testing.T) {
 	randomLogin := fmt.Sprintf("%s@%s", randomID, testDomain)
 
 	ctx := context.Background()
-	ensure.Nil(t, mg.CreateCredential(ctx, randomLogin, randomPassword))
-	ensure.Nil(t, mg.ChangeCredentialPassword(ctx, randomID, randomString(16, "pw2")))
-	ensure.Nil(t, mg.DeleteCredential(ctx, randomID))
+	require.NoError(t, mg.CreateCredential(ctx, randomLogin, randomPassword))
+	require.NoError(t, mg.ChangeCredentialPassword(ctx, randomID, randomString(16, "pw2")))
+	require.NoError(t, mg.DeleteCredential(ctx, randomID))
 }

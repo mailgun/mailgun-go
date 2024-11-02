@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExports(t *testing.T) {
@@ -14,25 +15,25 @@ func TestExports(t *testing.T) {
 
 	ctx := context.Background()
 	list, err := mg.ListExports(ctx, "")
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(list), 0)
+	require.NoError(t, err)
+	require.Len(t, list, 0)
 
 	err = mg.CreateExport(ctx, "/domains")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	list, err = mg.ListExports(ctx, "")
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(list), 1)
+	require.NoError(t, err)
+	require.Len(t, list, 1)
 
-	ensure.DeepEqual(t, list[0].ID, "0")
-	ensure.DeepEqual(t, list[0].URL, "/domains")
-	ensure.DeepEqual(t, list[0].Status, "complete")
+	assert.Equal(t, "0", list[0].ID)
+	assert.Equal(t, "/domains", list[0].URL)
+	assert.Equal(t, "complete", list[0].Status)
 
 	export, err := mg.GetExport(ctx, "0")
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, export.ID, "0")
-	ensure.DeepEqual(t, export.URL, "/domains")
-	ensure.DeepEqual(t, export.Status, "complete")
+	require.NoError(t, err)
+	assert.Equal(t, "0", export.ID)
+	assert.Equal(t, "/domains", export.URL)
+	assert.Equal(t, "complete", export.Status)
 }
 
 func TestExportsLink(t *testing.T) {
@@ -41,6 +42,6 @@ func TestExportsLink(t *testing.T) {
 
 	ctx := context.Background()
 	url, err := mg.GetExportLink(ctx, "12")
-	ensure.Nil(t, err)
-	ensure.StringContains(t, url, "/some/s3/url")
+	require.NoError(t, err)
+	require.Contains(t, url, "/some/s3/url")
 }

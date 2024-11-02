@@ -13,8 +13,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetWebhook(t *testing.T) {
@@ -23,13 +24,13 @@ func TestGetWebhook(t *testing.T) {
 
 	ctx := context.Background()
 	list, err := mg.ListWebhooks(ctx)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(list), 2)
+	require.NoError(t, err)
+	require.Len(t, list, 2)
 
 	urls, err := mg.GetWebhook(ctx, "new-webhook")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, urls, []string{"http://example.com/new"})
+	assert.Equal(t, []string{"http://example.com/new"}, urls)
 }
 
 func TestWebhookCRUD(t *testing.T) {
@@ -38,38 +39,38 @@ func TestWebhookCRUD(t *testing.T) {
 
 	ctx := context.Background()
 	list, err := mg.ListWebhooks(ctx)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(list), 2)
+	require.NoError(t, err)
+	require.Len(t, list, 2)
 
 	var countHooks = func() int {
 		hooks, err := mg.ListWebhooks(ctx)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		return len(hooks)
 	}
 	hookCount := countHooks()
 
 	webHookURLs := []string{"http://api.mailgun.net/webhook"}
-	ensure.Nil(t, mg.CreateWebhook(ctx, "deliver", webHookURLs))
+	require.NoError(t, mg.CreateWebhook(ctx, "deliver", webHookURLs))
 
 	defer func() {
-		ensure.Nil(t, mg.DeleteWebhook(ctx, "deliver"))
+		require.NoError(t, mg.DeleteWebhook(ctx, "deliver"))
 		newCount := countHooks()
-		ensure.DeepEqual(t, newCount, hookCount)
+		require.Equal(t, hookCount, newCount)
 	}()
 
 	newCount := countHooks()
-	ensure.False(t, newCount <= hookCount)
+	require.False(t, newCount <= hookCount)
 
 	urls, err := mg.GetWebhook(ctx, "deliver")
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, urls, webHookURLs)
+	require.NoError(t, err)
+	require.Equal(t, webHookURLs, urls)
 
 	updatedWebHookURL := []string{"http://api.mailgun.net/messages"}
-	ensure.Nil(t, mg.UpdateWebhook(ctx, "deliver", updatedWebHookURL))
+	require.NoError(t, mg.UpdateWebhook(ctx, "deliver", updatedWebHookURL))
 
 	hooks, err := mg.ListWebhooks(ctx)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, hooks["deliver"], updatedWebHookURL)
+	require.NoError(t, err)
+	require.Equal(t, updatedWebHookURL, hooks["deliver"])
 }
 
 var signedTests = []bool{
@@ -89,7 +90,7 @@ func TestVerifyWebhookSignature(t *testing.T) {
 		}
 
 		verified, err := mg.VerifyWebhookSignature(sig)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		if v != verified {
 			t.Errorf("VerifyWebhookSignature should return '%v' but got '%v'", v, verified)
@@ -105,7 +106,7 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 		req := buildFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		if v != verified {
 			t.Errorf("VerifyWebhookRequest should return '%v' but got '%v'", v, verified)
@@ -121,7 +122,7 @@ func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
 		req := buildMultipartFormRequest(fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		if v != verified {
 			t.Errorf("VerifyWebhookRequest should return '%v' but got '%v'", v, verified)

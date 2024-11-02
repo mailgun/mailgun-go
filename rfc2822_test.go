@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnmarshalRFC2822Time(t *testing.T) {
@@ -42,7 +42,7 @@ func TestUnmarshalRFC2822Time(t *testing.T) {
 				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			ensure.True(t, time.Time(tt.want.CreatedAt).Equal(time.Time(req.CreatedAt)),
+			require.True(t, time.Time(tt.want.CreatedAt).Equal(time.Time(req.CreatedAt)),
 				fmt.Sprintf("want: %s; got: %s", tt.want.CreatedAt, req.CreatedAt))
 		})
 	}

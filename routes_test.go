@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRouteCRUD(t *testing.T) {
@@ -17,7 +18,7 @@ func TestRouteCRUD(t *testing.T) {
 		it := mg.ListRoutes(nil)
 		var page []mailgun.Route
 		it.Next(ctx, &page)
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 		return it.TotalCount
 	}
 
@@ -32,28 +33,28 @@ func TestRouteCRUD(t *testing.T) {
 			"stop()",
 		},
 	})
-	ensure.Nil(t, err)
-	ensure.True(t, newRoute.Id != "")
+	require.NoError(t, err)
+	require.NotEqual(t, "", newRoute.Id)
 
 	defer func() {
-		ensure.Nil(t, mg.DeleteRoute(ctx, newRoute.Id))
+		require.NoError(t, mg.DeleteRoute(ctx, newRoute.Id))
 		_, err = mg.GetRoute(ctx, newRoute.Id)
-		ensure.NotNil(t, err)
+		require.NotNil(t, err)
 	}()
 
 	newCount := countRoutes()
-	ensure.False(t, newCount <= routeCount)
+	require.False(t, newCount <= routeCount)
 
 	theRoute, err := mg.GetRoute(ctx, newRoute.Id)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, newRoute, theRoute)
+	require.NoError(t, err)
+	assert.Equal(t, newRoute, theRoute)
 
 	changedRoute, err := mg.UpdateRoute(ctx, newRoute.Id, mailgun.Route{
 		Priority: 2,
 	})
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, changedRoute.Priority, 2)
-	ensure.DeepEqual(t, len(changedRoute.Actions), 2)
+	require.NoError(t, err)
+	assert.Equal(t, 2, changedRoute.Priority)
+	assert.Len(t, changedRoute.Actions, 2)
 }
 
 func TestRoutesIterator(t *testing.T) {
@@ -66,42 +67,41 @@ func TestRoutesIterator(t *testing.T) {
 	var ctx = context.Background()
 
 	// Calling Last() is invalid unless you first use First() or Next()
-	ensure.False(t, it.Last(ctx, &lastPage))
-	ensure.True(t, len(lastPage) == 0)
+	require.False(t, it.Last(ctx, &lastPage))
+	require.Len(t, lastPage, 0)
 
 	// Get our first page
-	ensure.True(t, it.Next(ctx, &firstPage))
-	ensure.Nil(t, it.Err())
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.Next(ctx, &firstPage))
+	require.NoError(t, it.Err())
+	require.True(t, len(firstPage) != 0)
 	firstIterator := *it
 
 	// Get our second page
-	ensure.True(t, it.Next(ctx, &secondPage))
-	ensure.Nil(t, it.Err())
-	ensure.True(t, len(secondPage) != 0)
+	require.True(t, it.Next(ctx, &secondPage))
+	require.NoError(t, it.Err())
+	require.True(t, len(secondPage) != 0)
 
 	// Pages should be different
-	ensure.NotDeepEqual(t, firstPage, secondPage)
-	ensure.True(t, firstIterator.TotalCount != 0)
+	require.NotEqual(t, firstPage, secondPage)
+	require.True(t, firstIterator.TotalCount != 0)
 
 	// Previous()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, it.Next(ctx, &secondPage))
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, it.Next(ctx, &secondPage))
 
-	ensure.True(t, it.Previous(ctx, &previousPage))
-	ensure.True(t, len(previousPage) != 0)
-	ensure.DeepEqual(t, previousPage[0].Id, firstPage[0].Id)
+	require.True(t, it.Previous(ctx, &previousPage))
+	require.True(t, len(previousPage) != 0)
+	require.Equal(t, previousPage[0].Id, firstPage[0].Id)
 
 	// First()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 
 	// Calling first resets the iterator to the first page
-	ensure.True(t, it.Next(ctx, &secondPage))
-	ensure.NotDeepEqual(t, firstPage, secondPage)
+	require.True(t, it.Next(ctx, &secondPage))
+	require.NotEqual(t, firstPage, secondPage)
 
 	// Last()
-	ensure.True(t, it.Last(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
-
+	require.True(t, it.Last(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 }

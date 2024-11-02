@@ -10,8 +10,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
-
-	"github.com/facebookgo/ensure"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetBounces(t *testing.T) {
@@ -27,7 +26,7 @@ func TestGetBounces(t *testing.T) {
 			t.Logf("Bounce: %+v\n", bounce)
 		}
 	}
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 }
 
 func TestGetSingleBounce(t *testing.T) {
@@ -38,11 +37,11 @@ func TestGetSingleBounce(t *testing.T) {
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")),
 		os.Getenv("MG_DOMAIN"))
 	_, err := mg.GetBounce(ctx, exampleEmail)
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 
-	ure, ok := err.(*mailgun.UnexpectedResponseError)
-	ensure.True(t, ok)
-	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
+	var ure *mailgun.UnexpectedResponseError
+	require.ErrorAs(t, err, &ure)
+	require.Equal(t, http.StatusNotFound, ure.Actual)
 }
 
 func TestAddDelBounces(t *testing.T) {
@@ -54,7 +53,7 @@ func TestAddDelBounces(t *testing.T) {
 		it := mg.ListBounces(nil)
 		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
-			ensure.True(t, len(page) != 0)
+			require.True(t, len(page) != 0)
 			for _, bounce := range page {
 				t.Logf("Bounce Address: %s\n", bounce.Address)
 				if bounce.Address == address {
@@ -73,7 +72,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Add the bounce for our address.
 	err := mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	// Give API some time to refresh cache
 	time.Sleep(time.Second)
@@ -84,7 +83,7 @@ func TestAddDelBounces(t *testing.T) {
 	}
 
 	bounce, err := mg.GetBounce(ctx, exampleEmail)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	if bounce.Address != exampleEmail {
 		t.Fatalf("Expected at least one bounce for %s", exampleEmail)
 	}
@@ -92,7 +91,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Delete it.  This should put us back the way we were.
 	err = mg.DeleteBounce(ctx, exampleEmail)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	// Make sure we're back to the way we were.
 	if findBounce(exampleEmail) {
@@ -100,7 +99,7 @@ func TestAddDelBounces(t *testing.T) {
 	}
 
 	_, err = mg.GetBounce(ctx, exampleEmail)
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 func TestAddDelBounceList(t *testing.T) {
@@ -113,7 +112,7 @@ func TestAddDelBounceList(t *testing.T) {
 		it := mg.ListBounces(nil)
 		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
-			ensure.True(t, len(page) != 0)
+			require.True(t, len(page) != 0)
 			for _, bounce := range page {
 				t.Logf("Bounce Address: %s\n", bounce.Address)
 				if bounce.Address == address {
@@ -149,7 +148,7 @@ func TestAddDelBounceList(t *testing.T) {
 
 	// Add the bounce for our address.
 	err = mg.AddBounces(ctx, bounces)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	for _, expect := range bounces {
 		if !findBounce(expect.Address) {
@@ -157,7 +156,7 @@ func TestAddDelBounceList(t *testing.T) {
 		}
 
 		bounce, err := mg.GetBounce(ctx, expect.Address)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		if bounce.Address != expect.Address {
 			t.Fatalf("Expected at least one bounce for %s", expect.Address)
 		}
@@ -169,7 +168,7 @@ func TestAddDelBounceList(t *testing.T) {
 
 	// Delete the bounce list.  This should put us back the way we were.
 	err = mg.DeleteBounceList(ctx)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	it := mg.ListBounces(nil)
 	var page []mailgun.Bounce

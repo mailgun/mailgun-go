@@ -5,8 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var server mailgun.MockServer
@@ -24,15 +25,15 @@ func TestListIPS(t *testing.T) {
 
 	ctx := context.Background()
 	list, err := mg.ListIPS(ctx, false)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, len(list), 2)
+	require.NoError(t, err)
+	require.Len(t, list, 2)
 
 	ip, err := mg.GetIP(ctx, list[0].IP)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, ip.IP, list[0].IP)
-	ensure.DeepEqual(t, ip.Dedicated, true)
-	ensure.DeepEqual(t, ip.RDNS, "luna.mailgun.net")
+	assert.Equal(t, list[0].IP, ip.IP)
+	assert.True(t, ip.Dedicated)
+	assert.Equal(t, "luna.mailgun.net", ip.RDNS)
 }
 
 func TestDomainIPS(t *testing.T) {
@@ -41,19 +42,19 @@ func TestDomainIPS(t *testing.T) {
 
 	ctx := context.Background()
 	err := mg.AddDomainIP(ctx, "192.172.1.1")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	list, err := mg.ListDomainIPS(ctx)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, len(list), 1)
-	ensure.DeepEqual(t, list[0].IP, "192.172.1.1")
+	require.Len(t, list, 1)
+	require.Equal(t, "192.172.1.1", list[0].IP)
 
 	err = mg.DeleteDomainIP(ctx, "192.172.1.1")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	list, err = mg.ListDomainIPS(ctx)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, len(list), 0)
+	require.Len(t, list, 0)
 }

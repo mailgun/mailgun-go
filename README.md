@@ -5,6 +5,14 @@
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/en/latest/api_reference.html).
 
+## Installation
+
+If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
+include the `/v4` at the end of your import paths
+```bash
+$ go get github.com/mailgun/mailgun-go/v4
+```
+
 ## Usage
 ```go
 package main
@@ -20,11 +28,11 @@ import (
 
 // Your available domain names can be found here:
 // (https://app.mailgun.com/app/domains)
-var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
 // (https://app.mailgun.com/app/account/security)
-var privateAPIKey string = "your-private-key"
+var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
@@ -267,11 +275,11 @@ import (
 
 // Your available domain names can be found here:
 // (https://app.mailgun.com/app/domains)
-var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
 // (https://app.mailgun.com/app/account/security)
-var privateAPIKey string = "your-private-key"
+var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
@@ -326,11 +334,11 @@ import (
 
 // Your available domain names can be found here:
 // (https://app.mailgun.com/app/domains)
-var yourDomain string = "your-domain-name" // e.g. mg.yourcompany.com
+var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
 // (https://app.mailgun.com/app/account/security)
-var privateAPIKey string = "your-private-key"
+var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
@@ -373,30 +381,6 @@ European customers will need to change the default API Base to access your domai
 mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
 mg.SetAPIBase(mailgun.APIBaseEU)
 ```
-## Installation
-
-If you are using [golang modules](https://github.com/golang/go/wiki/Modules) make sure you
-include the `/v4` at the end of your import paths
-```bash
-$ go get github.com/mailgun/mailgun-go/v4
-```
-
-If you are **not** using golang modules, you can drop the `/v4` at the end of the import path.
-As long as you are using the latest 1.10 or 1.11 golang release, import paths that end in `/v4`
-in your code should work fine even if you do not have golang modules enabled for your project.
-```bash
-$ go get github.com/mailgun/mailgun-go
-```
-
-**NOTE for go dep users**
-
-Using version 3 of the mailgun-go library with go dep currently results in the following error
-```
-"github.com/mailgun/mailgun-go/v4/events", which contains malformed code: no package exists at ...
-```
-This is a known bug in go dep. You can follow the PR to fix this bug [here](https://github.com/golang/dep/pull/1963)
-Until this bug is fixed, the best way to use version 3 of the mailgun-go library is to use the golang community
-supported [golang modules](https://github.com/golang/go/wiki/Modules).
 
 ## Testing
 

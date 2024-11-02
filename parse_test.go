@@ -6,22 +6,27 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseErrors(t *testing.T) {
 	_, err := ParseEvent([]byte(""))
-	ensure.StringContains(t, err.Error(), "failed to recognize event")
+	require.NotNil(t, err)
+	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
+	require.Contains(t, err.Error(), "failed to recognize event")
 
 	_, err = ParseEvent([]byte(`{"event": "unknown_event"}`))
-	ensure.DeepEqual(t, err.Error(), "unsupported event: 'unknown_event'")
+	require.EqualError(t, err, "unsupported event: 'unknown_event'")
 
 	_, err = ParseEvent([]byte(`{
 		"event": "accepted",
 		"timestamp": "1420255392.850187"
 	}`))
-	ensure.StringContains(t, err.Error(), "failed to parse event 'accepted'")
+	require.NotNil(t, err)
+	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
+	require.Contains(t, err.Error(), "failed to parse event 'accepted'")
 }
 
 func TestParseSuccess(t *testing.T) {
@@ -76,11 +81,11 @@ func TestParseSuccess(t *testing.T) {
 		  "is-routed": null
 		}
 	}`))
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, reflect.TypeOf(event).String(), "*events.Accepted")
+	require.NoError(t, err)
+	require.Equal(t, reflect.TypeOf(event).String(), "*events.Accepted")
 	subject := event.(*events.Accepted).Message.Headers.Subject
-	ensure.DeepEqual(t, subject, "Test message going through the bus.")
-	ensure.DeepEqual(t, event.(*events.Accepted).Storage.Key, "AgEASDSGFB8y4--TSDGxvccvmQB==")
+	assert.Equal(t, "Test message going through the bus.", subject)
+	assert.Equal(t, "AgEASDSGFB8y4--TSDGxvccvmQB==", event.(*events.Accepted).Storage.Key)
 
 	// Make sure the next event parsing attempt will zero the fields.
 	event2, err := ParseEvent([]byte(`{
@@ -88,19 +93,18 @@ func TestParseSuccess(t *testing.T) {
 		"timestamp": 1533922516.538978,
 		"recipient": "someone@example.com"
 	}`))
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, event2.GetTimestamp(),
-		time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC))
-	ensure.DeepEqual(t, event2.(*events.Accepted).Message.Headers.Subject, "")
+	assert.Equal(t, time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC), event2.GetTimestamp())
+	assert.Equal(t, "", event2.(*events.Accepted).Message.Headers.Subject)
 	// Make sure the second attempt of Parse doesn't overwrite the first event struct.
-	ensure.DeepEqual(t, event.(*events.Accepted).Recipient, "dude@example.com")
+	assert.Equal(t, "dude@example.com", event.(*events.Accepted).Recipient)
 
-	ensure.DeepEqual(t, event.(*events.Accepted).UserVariables.(map[string]interface{})["custom"], "value")
+	assert.Equal(t, "value", event.(*events.Accepted).UserVariables.(map[string]interface{})["custom"])
 	child := event.(*events.Accepted).UserVariables.(map[string]interface{})["parent"].(map[string]interface{})["child"]
-	ensure.DeepEqual(t, child, "user defined variable")
+	assert.Equal(t, "user defined variable", child)
 	aList := event.(*events.Accepted).UserVariables.(map[string]interface{})["a-list"].([]interface{})
-	ensure.DeepEqual(t, aList, []interface{}{1.0, 2.0, 3.0, 4.0, 5.0})
+	assert.Equal(t, []interface{}{1.0, 2.0, 3.0, 4.0, 5.0}, aList)
 }
 
 func TestParseSuccessInvalidUserVariables(t *testing.T) {
@@ -109,9 +113,10 @@ func TestParseSuccessInvalidUserVariables(t *testing.T) {
 		"timestamp": 1420255392.850187,
 		"user-variables": "Could not load user-variables. They were either truncated or invalid JSON"
 	}`))
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, reflect.TypeOf(event).String(), "*events.Accepted")
-	ensure.DeepEqual(t, event.(*events.Accepted).UserVariables, "Could not load user-variables. They were either truncated or invalid JSON")
+	require.NoError(t, err)
+	require.Equal(t, "*events.Accepted", reflect.TypeOf(event).String())
+	assert.Equal(t, "Could not load user-variables. They were either truncated or invalid JSON",
+		event.(*events.Accepted).UserVariables)
 }
 
 func TestParseResponse(t *testing.T) {
@@ -136,31 +141,30 @@ func TestParseResponse(t *testing.T) {
 			"previous": "https://prev"
 		}
 	}`))
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, evnts[0].GetName(), "accepted")
-	ensure.DeepEqual(t, evnts[0].(*events.Accepted).Recipient, "someone@example.com")
+	assert.Equal(t, "accepted", evnts[0].GetName())
+	assert.Equal(t, "someone@example.com", evnts[0].(*events.Accepted).Recipient)
 
-	ensure.DeepEqual(t, evnts[1].GetName(), "delivered")
-	ensure.DeepEqual(t, evnts[1].(*events.Delivered).Recipient, "test@mailgun.test")
+	assert.Equal(t, "delivered", evnts[1].GetName())
+	assert.Equal(t, "test@mailgun.test", evnts[1].(*events.Delivered).Recipient)
 }
 
 func TestTimeStamp(t *testing.T) {
 	var event events.Generic
 	ts := time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC)
 	event.SetTimestamp(ts)
-	ensure.DeepEqual(t, event.GetTimestamp(), ts)
+	assert.Equal(t, ts, event.GetTimestamp())
 
 	event.Timestamp = 1546899001.019501
-	ensure.DeepEqual(t, event.GetTimestamp(),
-		time.Date(2019, 1, 7, 22, 10, 01, 19501056, time.UTC))
+	assert.Equal(t, time.Date(2019, 1, 7, 22, 10, 01, 19501056, time.UTC), event.GetTimestamp())
 }
 
 func TestEventNames(t *testing.T) {
 	for name := range EventNames {
 		event, err := ParseEvent([]byte(fmt.Sprintf(`{"event": "%s"}`, name)))
-		ensure.Nil(t, err)
-		ensure.DeepEqual(t, event.GetName(), name)
+		require.NoError(t, err)
+		assert.Equal(t, name, event.GetName())
 	}
 }
 
@@ -178,8 +182,8 @@ func TestEventMessageWithAttachment(t *testing.T) {
                                  "size": 139214}],
                 "size": 142698}}`)
 	event, err := ParseEvent(body)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, event.(*events.Delivered).Message.Attachments[0].FileName, "doc.pdf")
+	require.NoError(t, err)
+	assert.Equal(t, "doc.pdf", event.(*events.Delivered).Message.Attachments[0].FileName)
 }
 
 func TestStored(t *testing.T) {
@@ -192,7 +196,7 @@ func TestStored(t *testing.T) {
             "url": "%s"
         }}`, key, url))
 	event, err := ParseEvent(body)
-	ensure.Nil(t, err)
-	ensure.DeepEqual(t, event.(*events.Stored).Storage.Key, key)
-	ensure.DeepEqual(t, event.(*events.Stored).Storage.URL, url)
+	require.NoError(t, err)
+	assert.Equal(t, key, event.(*events.Stored).Storage.Key)
+	assert.Equal(t, url, event.(*events.Stored).Storage.URL)
 }

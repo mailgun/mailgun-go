@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEventIteratorGetNext(t *testing.T) {
@@ -20,44 +21,44 @@ func TestEventIteratorGetNext(t *testing.T) {
 	var firstPage, secondPage, previousPage []mailgun.Event
 	var ctx = context.Background()
 
-	ensure.True(t, it.Next(ctx, &firstPage))
-	ensure.True(t, it.Paging.Next != "")
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.Next(ctx, &firstPage))
+	require.NotEqual(t, "", it.Paging.Next)
+	require.True(t, len(firstPage) != 0)
 	firstIterator := *it
 
-	ensure.True(t, it.Next(ctx, &secondPage))
-	ensure.True(t, len(secondPage) != 0)
+	require.True(t, it.Next(ctx, &secondPage))
+	require.True(t, len(secondPage) != 0)
 
 	// Pages should be different
-	ensure.NotDeepEqual(t, firstPage, secondPage)
-	ensure.True(t, firstIterator.Paging.Next != it.Paging.Next)
-	ensure.True(t, firstIterator.Paging.Previous != it.Paging.Previous)
-	ensure.Nil(t, it.Err())
+	require.NotEqual(t, firstPage, secondPage)
+	require.NotEqual(t, firstIterator.Paging.Next, it.Paging.Next)
+	require.NotEqual(t, firstIterator.Paging.Previous, it.Paging.Previous)
+	require.NoError(t, it.Err())
 
 	// Previous()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, it.Next(ctx, &secondPage))
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, it.Next(ctx, &secondPage))
 
-	ensure.True(t, it.Previous(ctx, &previousPage))
-	ensure.True(t, len(previousPage) != 0)
-	ensure.DeepEqual(t, previousPage[0].GetID(), firstPage[0].GetID())
+	require.True(t, it.Previous(ctx, &previousPage))
+	require.True(t, len(previousPage) != 0)
+	require.Equal(t, previousPage[0].GetID(), firstPage[0].GetID())
 
 	// First()
-	ensure.True(t, it.First(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.First(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 
 	// Calling first resets the iterator to the first page
-	ensure.True(t, it.Next(ctx, &secondPage))
-	ensure.NotDeepEqual(t, firstPage, secondPage)
+	require.True(t, it.Next(ctx, &secondPage))
+	require.NotEqual(t, firstPage, secondPage)
 
 	// Last()
 	var lastPage []mailgun.Event
-	ensure.True(t, it.Next(ctx, &firstPage))
-	ensure.True(t, len(firstPage) != 0)
+	require.True(t, it.Next(ctx, &firstPage))
+	require.True(t, len(firstPage) != 0)
 
 	// Calling Last() is invalid unless you first use First() or Next()
-	ensure.True(t, it.Last(ctx, &lastPage))
-	ensure.True(t, len(lastPage) != 0)
+	require.True(t, it.Last(ctx, &lastPage))
+	require.True(t, len(lastPage) != 0)
 }
 
 func TestEventPoller(t *testing.T) {
@@ -88,7 +89,7 @@ func TestEventPoller(t *testing.T) {
 	// Send an email
 	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	t.Logf("New Email: %s Id: %s\n", msg, id)
 
@@ -105,9 +106,9 @@ func TestEventPoller(t *testing.T) {
 		}
 	}
 	// Ensure we found our email
-	ensure.NotNil(t, it.Err())
-	ensure.True(t, accepted != nil)
-	ensure.DeepEqual(t, accepted.Recipient, "user@"+testDomain)
+	require.NotNil(t, it.Err())
+	require.NotNil(t, accepted)
+	assert.Equal(t, "user@"+testDomain, accepted.Recipient)
 }
 
 func ExampleMailgunImpl_ListEvents() {

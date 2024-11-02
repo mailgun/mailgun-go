@@ -6,9 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStorage(t *testing.T) {
@@ -19,21 +20,21 @@ func TestStorage(t *testing.T) {
 
 	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	t.Logf("New Email: %s Id: %s\n", msg, id)
 
 	url, err := findStoredMessageURL(mg, strings.Trim(id, "<>"))
 
 	resp, err := mg.GetStoredMessage(ctx, url)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, "Subject", resp.Subject)
-	ensure.DeepEqual(t, "root@"+testDomain, resp.From)
-	ensure.DeepEqual(t, "stored@"+testDomain, resp.Recipients)
+	assert.Equal(t, "Subject", resp.Subject)
+	assert.Equal(t, "root@"+testDomain, resp.From)
+	assert.Equal(t, "stored@"+testDomain, resp.Recipients)
 
 	_, _, err = mg.ReSend(ctx, url, "resend@"+testDomain)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 }
 
 // Tries to locate the first stored event type, returning the associated stored message key.

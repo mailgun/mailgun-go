@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLimits(t *testing.T) {
@@ -14,8 +15,8 @@ func TestLimits(t *testing.T) {
 
 	ctx := context.Background()
 	limits, err := mg.GetTagLimits(ctx, testDomain)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, limits.Limit, 50000)
-	ensure.DeepEqual(t, limits.Count, 5000)
+	assert.Equal(t, 50000, limits.Limit)
+	assert.Equal(t, 5000, limits.Count)
 }

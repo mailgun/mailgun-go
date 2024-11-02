@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTemplateCRUD(t *testing.T) {
@@ -27,7 +28,7 @@ func TestTemplateCRUD(t *testing.T) {
 				}
 			}
 		}
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 		return false
 	}
 
@@ -43,28 +44,28 @@ func TestTemplateCRUD(t *testing.T) {
 	}
 
 	// Create a template
-	ensure.Nil(t, mg.CreateTemplate(ctx, &tmpl))
-	ensure.DeepEqual(t, tmpl.Name, strings.ToLower(Name))
-	ensure.DeepEqual(t, tmpl.Description, Description)
+	require.NoError(t, mg.CreateTemplate(ctx, &tmpl))
+	assert.Equal(t, strings.ToLower(Name), tmpl.Name)
+	assert.Equal(t, Description, tmpl.Description)
 
 	// Wait the template to show up
-	ensure.Nil(t, waitForTemplate(mg, tmpl.Name))
+	require.NoError(t, waitForTemplate(mg, tmpl.Name))
 
 	// Ensure the template is in the list
-	ensure.True(t, findTemplate(tmpl.Name))
+	require.True(t, findTemplate(tmpl.Name))
 
 	// Update the description
 	tmpl.Description = UpdatedDesc
-	ensure.Nil(t, mg.UpdateTemplate(ctx, &tmpl))
+	require.NoError(t, mg.UpdateTemplate(ctx, &tmpl))
 
 	// Ensure update took
 	updated, err := mg.GetTemplate(ctx, tmpl.Name)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
-	ensure.DeepEqual(t, updated.Description, UpdatedDesc)
+	assert.Equal(t, UpdatedDesc, updated.Description)
 
 	// Delete the template
-	ensure.Nil(t, mg.DeleteTemplate(ctx, tmpl.Name))
+	require.NoError(t, mg.DeleteTemplate(ctx, tmpl.Name))
 }
 
 func waitForTemplate(mg mailgun.Mailgun, id string) error {

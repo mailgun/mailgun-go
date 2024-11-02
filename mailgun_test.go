@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const domain = "valid-mailgun-domain"
@@ -19,13 +19,13 @@ const apiKey = "valid-mailgun-api-key"
 func TestMailgun(t *testing.T) {
 	m := mailgun.NewMailgun(domain, apiKey)
 
-	ensure.DeepEqual(t, m.Domain(), domain)
-	ensure.DeepEqual(t, m.APIKey(), apiKey)
-	ensure.DeepEqual(t, m.Client(), http.DefaultClient)
+	assert.Equal(t, domain, m.Domain())
+	assert.Equal(t, apiKey, m.APIKey())
+	assert.Equal(t, http.DefaultClient, m.Client())
 
 	client := new(http.Client)
 	m.SetClient(client)
-	ensure.DeepEqual(t, client, m.Client())
+	assert.Equal(t, m.Client(), client)
 }
 
 func TestInvalidBaseAPI(t *testing.T) {
@@ -41,7 +41,7 @@ func TestValidBaseAPI(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var resp mailgun.DomainResponse
 		b, err := json.Marshal(resp)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		w.Write(b)
 	}))
@@ -57,7 +57,7 @@ func TestValidBaseAPI(t *testing.T) {
 
 		ctx := context.Background()
 		_, err := mg.GetDomain(ctx, "unknown.domain")
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 	}
 }
 
