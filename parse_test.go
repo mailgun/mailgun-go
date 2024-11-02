@@ -6,14 +6,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParseErrors(t *testing.T) {
 	_, err := ParseEvent([]byte(""))
-	ensure.StringContains(t, err.Error(), "failed to recognize event")
+	require.NotNil(t, err)
+	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
+	require.Contains(t, err.Error(), "failed to recognize event")
 
 	_, err = ParseEvent([]byte(`{"event": "unknown_event"}`))
 	require.EqualError(t, err, "unsupported event: 'unknown_event'")
@@ -22,7 +23,8 @@ func TestParseErrors(t *testing.T) {
 		"event": "accepted",
 		"timestamp": "1420255392.850187"
 	}`))
-	ensure.StringContains(t, err.Error(), "failed to parse event 'accepted'")
+	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
+	require.Contains(t, err.Error(), "failed to parse event 'accepted'")
 }
 
 func TestParseSuccess(t *testing.T) {

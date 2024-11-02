@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -492,8 +491,9 @@ func TestSendEOFError(t *testing.T) {
 	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	_, _, err := mg.Send(context.Background(), m)
 	require.NotNil(t, err)
-	ensure.StringContains(t, err.Error(), "remote server prematurely closed connection: Post ")
-	ensure.StringContains(t, err.Error(), "EOF")
+	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
+	require.Contains(t, err.Error(), "remote server prematurely closed connection: Post ")
+	require.ErrorIs(t, err, io.EOF)
 }
 
 func TestHasRecipient(t *testing.T) {
@@ -596,7 +596,7 @@ func TestAddOverrideHeader(t *testing.T) {
 	require.Equal(t, exampleMessage, msg)
 	require.Equal(t, exampleID, id)
 
-	ensure.StringContains(t, mg.GetCurlOutput(), "Host:")
+	require.Contains(t, mg.GetCurlOutput(), "Host:")
 }
 
 func TestOnBehalfOfSubaccount(t *testing.T) {
@@ -635,7 +635,7 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	require.Equal(t, exampleMessage, msg)
 	require.Equal(t, exampleID, id)
 
-	ensure.StringContains(t, mg.GetCurlOutput(), "Host:")
+	require.Contains(t, mg.GetCurlOutput(), "Host:")
 }
 
 func TestCaptureCurlOutput(t *testing.T) {
@@ -664,7 +664,7 @@ func TestCaptureCurlOutput(t *testing.T) {
 	require.Equal(t, exampleMessage, msg)
 	require.Equal(t, exampleID, id)
 
-	ensure.StringContains(t, mg.GetCurlOutput(), "curl")
+	require.Contains(t, mg.GetCurlOutput(), "curl")
 	t.Logf("%s", mg.GetCurlOutput())
 }
 

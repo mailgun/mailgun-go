@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -43,5 +42,5 @@ func TestExportsLink(t *testing.T) {
 	ctx := context.Background()
 	url, err := mg.GetExportLink(ctx, "12")
 	require.NoError(t, err)
-	ensure.StringContains(t, url, "/some/s3/url")
+	require.Contains(t, url, "/some/s3/url")
 }
