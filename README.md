@@ -5,6 +5,14 @@
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/en/latest/api_reference.html).
 
+## Installation
+
+If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
+include the `/v4` at the end of your import paths
+```bash
+$ go get github.com/mailgun/mailgun-go/v4
+```
+
 ## Usage
 ```go
 package main
@@ -372,20 +380,6 @@ European customers will need to change the default API Base to access your domai
 ```go
 mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
 mg.SetAPIBase(mailgun.APIBaseEU)
-```
-## Installation
-
-If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
-include the `/v4` at the end of your import paths
-```bash
-$ go get github.com/mailgun/mailgun-go/v4
-```
-
-If you are **not** using Go Modules, you can drop the `/v4` at the end of the import path.
-As long as you are using the latest 1.10 or 1.11 golang release, import paths that end in `/v4`
-in your code should work fine even if you do not have golang modules enabled for your project.
-```bash
-$ go get github.com/mailgun/mailgun-go
 ```
 
 ## Testing
