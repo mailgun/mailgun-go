@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -89,7 +88,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	require.NoError(t, mg.DeleteTemplateVersion(ctx, tmpl.Name, version.Tag))
 
 	// Ensure version was deleted
-	ensure.False(t, findVersion(tmpl.Name, version.Tag))
+	require.False(t, findVersion(tmpl.Name, version.Tag))
 
 	// Delete the template
 	require.NoError(t, mg.DeleteTemplate(ctx, tmpl.Name))

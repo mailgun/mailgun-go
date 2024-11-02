@@ -61,12 +61,12 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	}
 
 	randomMail := strings.ToLower(randomString(64, "")) + "@example.com"
-	ensure.False(t, hasComplaint(randomMail))
+	require.False(t, hasComplaint(randomMail))
 
 	require.NoError(t, mg.CreateComplaint(ctx, randomMail))
 	require.True(t, hasComplaint(randomMail))
 	require.NoError(t, mg.DeleteComplaint(ctx, randomMail))
-	ensure.False(t, hasComplaint(randomMail))
+	require.False(t, hasComplaint(randomMail))
 }
 
 func TestCreateDeleteComplaintList(t *testing.T) {
@@ -102,7 +102,7 @@ func TestCreateDeleteComplaintList(t *testing.T) {
 	for _, address := range addresses {
 		require.True(t, hasComplaint(address))
 		require.NoError(t, mg.DeleteComplaint(ctx, address))
-		ensure.False(t, hasComplaint(address))
+		require.False(t, hasComplaint(address))
 	}
 
 }

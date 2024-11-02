@@ -43,7 +43,7 @@ func TestRouteCRUD(t *testing.T) {
 	}()
 
 	newCount := countRoutes()
-	ensure.False(t, newCount <= routeCount)
+	require.False(t, newCount <= routeCount)
 
 	theRoute, err := mg.GetRoute(ctx, newRoute.Id)
 	require.NoError(t, err)
@@ -67,7 +67,7 @@ func TestRoutesIterator(t *testing.T) {
 	var ctx = context.Background()
 
 	// Calling Last() is invalid unless you first use First() or Next()
-	ensure.False(t, it.Last(ctx, &lastPage))
+	require.False(t, it.Last(ctx, &lastPage))
 	require.Len(t, lastPage, 0)
 
 	// Get our first page

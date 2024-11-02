@@ -13,7 +13,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -59,7 +58,7 @@ func TestWebhookCRUD(t *testing.T) {
 	}()
 
 	newCount := countHooks()
-	ensure.False(t, newCount <= hookCount)
+	require.False(t, newCount <= hookCount)
 
 	urls, err := mg.GetWebhook(ctx, "deliver")
 	require.NoError(t, err)

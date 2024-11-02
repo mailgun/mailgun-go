@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -21,8 +20,8 @@ func TestEmailValidationV4(t *testing.T) {
 
 	require.True(t, ev.IsValid)
 	require.Equal(t, "", ev.MailboxVerification)
-	ensure.False(t, ev.IsDisposableAddress)
-	ensure.False(t, ev.IsRoleAddress)
+	require.False(t, ev.IsDisposableAddress)
+	require.False(t, ev.IsRoleAddress)
 	require.Equal(t, "", ev.Parts.DisplayName)
 	require.Equal(t, "foo", ev.Parts.LocalPart)
 	require.Equal(t, "mailgun.com", ev.Parts.Domain)
@@ -33,7 +32,7 @@ func TestEmailValidationV4(t *testing.T) {
 	require.Equal(t, "deliverable", ev.Result)
 	require.Equal(t, "disengaged", ev.Engagement.Behavior)
 	require.False(t, ev.Engagement.Engaging)
-	ensure.False(t, ev.Engagement.IsBot)
+	require.False(t, ev.Engagement.IsBot)
 }
 
 func TestParseAddresses(t *testing.T) {
@@ -78,8 +77,8 @@ func TestUnmarshallResponse(t *testing.T) {
 
 	require.True(t, ev.IsValid)
 	require.Equal(t, "unknown", ev.MailboxVerification)
-	ensure.False(t, ev.IsDisposableAddress)
-	ensure.False(t, ev.IsRoleAddress)
+	require.False(t, ev.IsDisposableAddress)
+	require.False(t, ev.IsRoleAddress)
 	require.Equal(t, "", ev.Parts.DisplayName)
 	require.Equal(t, "some_email", ev.Parts.LocalPart)
 	require.Equal(t, "aol.com", ev.Parts.Domain)

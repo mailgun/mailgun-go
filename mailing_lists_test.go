@@ -47,7 +47,7 @@ func TestMailingListMembers(t *testing.T) {
 	}
 	require.NoError(t, mg.CreateMember(ctx, true, address, protoJoe))
 	newCount := countMembers()
-	ensure.False(t, newCount <= startCount)
+	require.False(t, newCount <= startCount)
 
 	theMember, err := mg.GetMember(ctx, "joe@example.com", address)
 	require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestMailingLists(t *testing.T) {
 	}()
 
 	actualCount := countLists()
-	ensure.False(t, actualCount < 1)
+	require.False(t, actualCount < 1)
 
 	theList, err := mg.GetMailingList(ctx, address)
 	require.NoError(t, err)
