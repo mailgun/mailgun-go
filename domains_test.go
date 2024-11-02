@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -67,7 +66,7 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	}
 	var ure *mailgun.UnexpectedResponseError
 	require.ErrorAs(t, err, &ure)
-	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
+	require.Equal(t, http.StatusNotFound, ure.Actual)
 }
 
 func TestAddUpdateDeleteDomain(t *testing.T) {
@@ -97,8 +96,8 @@ func TestDomainConnection(t *testing.T) {
 	info, err := mg.GetDomainConnection(ctx, testDomain)
 	require.NoError(t, err)
 
-	ensure.DeepEqual(t, info.RequireTLS, true)
-	ensure.DeepEqual(t, info.SkipVerification, true)
+	require.True(t, info.RequireTLS)
+	require.True(t, info.SkipVerification)
 
 	info.RequireTLS = false
 	err = mg.UpdateDomainConnection(ctx, testDomain, info)
@@ -106,8 +105,8 @@ func TestDomainConnection(t *testing.T) {
 
 	info, err = mg.GetDomainConnection(ctx, testDomain)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, info.RequireTLS, false)
-	ensure.DeepEqual(t, info.SkipVerification, true)
+	require.False(t, info.RequireTLS)
+	require.True(t, info.SkipVerification)
 }
 
 func TestDomainTracking(t *testing.T) {
@@ -118,11 +117,11 @@ func TestDomainTracking(t *testing.T) {
 	info, err := mg.GetDomainTracking(ctx, testDomain)
 	require.NoError(t, err)
 
-	ensure.DeepEqual(t, info.Unsubscribe.Active, false)
+	require.False(t, info.Unsubscribe.Active)
 	require.True(t, len(info.Unsubscribe.HTMLFooter) != 0)
 	require.True(t, len(info.Unsubscribe.TextFooter) != 0)
-	ensure.DeepEqual(t, info.Click.Active, true)
-	ensure.DeepEqual(t, info.Open.Active, true)
+	require.True(t, info.Click.Active)
+	require.True(t, info.Open.Active)
 
 	// Click Tracking
 	err = mg.UpdateClickTracking(ctx, testDomain, "no")
@@ -130,7 +129,7 @@ func TestDomainTracking(t *testing.T) {
 
 	info, err = mg.GetDomainTracking(ctx, testDomain)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, info.Click.Active, false)
+	require.False(t, info.Click.Active)
 
 	// Open Tracking
 	err = mg.UpdateOpenTracking(ctx, testDomain, "no")
@@ -138,7 +137,7 @@ func TestDomainTracking(t *testing.T) {
 
 	info, err = mg.GetDomainTracking(ctx, testDomain)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, info.Open.Active, false)
+	require.False(t, info.Open.Active)
 
 	// Unsubscribe
 	err = mg.UpdateUnsubscribeTracking(ctx, testDomain, "yes", "<h2>Hi</h2>", "Hi")
@@ -146,9 +145,9 @@ func TestDomainTracking(t *testing.T) {
 
 	info, err = mg.GetDomainTracking(ctx, testDomain)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, info.Unsubscribe.Active, true)
-	ensure.DeepEqual(t, info.Unsubscribe.HTMLFooter, "<h2>Hi</h2>")
-	ensure.DeepEqual(t, info.Unsubscribe.TextFooter, "Hi")
+	require.True(t, info.Unsubscribe.Active, true)
+	require.Equal(t, "<h2>Hi</h2>", info.Unsubscribe.HTMLFooter)
+	require.Equal(t, "Hi", info.Unsubscribe.TextFooter)
 }
 
 func TestDomainVerify(t *testing.T) {

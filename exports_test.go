@@ -25,15 +25,15 @@ func TestExports(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, list, 1)
 
-	ensure.DeepEqual(t, list[0].ID, "0")
-	ensure.DeepEqual(t, list[0].URL, "/domains")
-	ensure.DeepEqual(t, list[0].Status, "complete")
+	require.Equal(t, "0", list[0].ID)
+	require.Equal(t, "/domains", list[0].URL)
+	require.Equal(t, "complete", list[0].Status)
 
 	export, err := mg.GetExport(ctx, "0")
 	require.NoError(t, err)
-	ensure.DeepEqual(t, export.ID, "0")
-	ensure.DeepEqual(t, export.URL, "/domains")
-	ensure.DeepEqual(t, export.Status, "complete")
+	require.Equal(t, "0", export.ID)
+	require.Equal(t, "/domains", export.URL)
+	require.Equal(t, "complete", export.Status)
 }
 
 func TestExportsLink(t *testing.T) {

@@ -57,11 +57,11 @@ func TestTags(t *testing.T) {
 
 	tag, err := mg.GetTag(ctx, "homer")
 	require.NoError(t, err)
-	ensure.DeepEqual(t, tag.Value, "homer")
+	require.Equal(t, "homer", tag.Value)
 
 	_, err = mg.GetTag(ctx, "i-dont-exist")
 	ensure.NotNil(t, err)
-	ensure.DeepEqual(t, mailgun.GetStatusFromErr(err), 404)
+	require.Equal(t, 404, mailgun.GetStatusFromErr(err))
 }
 
 func waitForTag(mg mailgun.Mailgun, tag string) error {

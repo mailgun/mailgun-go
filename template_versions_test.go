@@ -53,9 +53,9 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 
 	// Add a version version
 	require.NoError(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version))
-	ensure.DeepEqual(t, version.Tag, Tag)
-	ensure.DeepEqual(t, version.Comment, Comment)
-	ensure.DeepEqual(t, version.Engine, mailgun.TemplateEngineGo)
+	require.Equal(t, Tag, version.Tag)
+	require.Equal(t, Comment, version.Comment)
+	require.Equal(t, mailgun.TemplateEngineGo, version.Engine)
 
 	// Ensure the version is in the list
 	require.True(t, findVersion(tmpl.Name, version.Tag))
@@ -69,8 +69,8 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	updated, err := mg.GetTemplateVersion(ctx, tmpl.Name, version.Tag)
 
 	require.NoError(t, err)
-	ensure.DeepEqual(t, updated.Comment, UpdatedComment)
-	ensure.DeepEqual(t, updated.Template, Template+"updated")
+	require.Equal(t, UpdatedComment, updated.Comment)
+	require.Equal(t, Template+"updated", updated.Template)
 
 	// Add a new active Version
 	version2 := mailgun.TemplateVersion{

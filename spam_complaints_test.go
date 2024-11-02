@@ -35,7 +35,7 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 
 	var ure *mailgun.UnexpectedResponseError
 	require.ErrorAs(t, err, &ure)
-	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
+	require.Equal(t, http.StatusNotFound, ure.Actual)
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {

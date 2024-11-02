@@ -41,7 +41,7 @@ func TestEventIteratorGetNext(t *testing.T) {
 
 	require.True(t, it.Previous(ctx, &previousPage))
 	require.True(t, len(previousPage) != 0)
-	ensure.DeepEqual(t, previousPage[0].GetID(), firstPage[0].GetID())
+	require.Equal(t, previousPage[0].GetID(), firstPage[0].GetID())
 
 	// First()
 	require.True(t, it.First(ctx, &firstPage))
@@ -108,7 +108,7 @@ func TestEventPoller(t *testing.T) {
 	// Ensure we found our email
 	ensure.NotNil(t, it.Err())
 	require.NotNil(t, accepted)
-	ensure.DeepEqual(t, accepted.Recipient, "user@"+testDomain)
+	require.Equal(t, "user@"+testDomain, accepted.Recipient)
 }
 
 func ExampleMailgunImpl_ListEvents() {

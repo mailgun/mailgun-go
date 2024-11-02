@@ -66,7 +66,7 @@ func TestSubaccountDetailsStatusNotFound(t *testing.T) {
 	}
 	var ure *mailgun.UnexpectedResponseError
 	require.ErrorAs(t, err, &ure)
-	ensure.DeepEqual(t, ure.Actual, http.StatusNotFound)
+	require.Equal(t, http.StatusNotFound, ure.Actual)
 }
 
 func TestCreateSubaccount(t *testing.T) {
@@ -98,7 +98,7 @@ func TestEnableSubaccount(t *testing.T) {
 
 	resp, err := mg.EnableSubaccount(ctx, testDisabledSubaccountId)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, resp.Item.Status, "enabled")
+	require.Equal(t, "enabled", resp.Item.Status)
 }
 
 func TestDisableSubaccount(t *testing.T) {
@@ -109,7 +109,7 @@ func TestDisableSubaccount(t *testing.T) {
 
 	resp, err := mg.DisableSubaccount(ctx, testEnabledSubaccountId)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, resp.Item.Status, "disabled")
+	require.Equal(t, "disabled", resp.Item.Status)
 }
 
 func TestDisableSubaccountAlreadyDisabled(t *testing.T) {

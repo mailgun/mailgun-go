@@ -47,13 +47,13 @@ func TestRouteCRUD(t *testing.T) {
 
 	theRoute, err := mg.GetRoute(ctx, newRoute.Id)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, newRoute, theRoute)
+	require.Equal(t, newRoute, theRoute)
 
 	changedRoute, err := mg.UpdateRoute(ctx, newRoute.Id, mailgun.Route{
 		Priority: 2,
 	})
 	require.NoError(t, err)
-	ensure.DeepEqual(t, changedRoute.Priority, 2)
+	require.Equal(t, 2, changedRoute.Priority)
 	require.Len(t, changedRoute.Actions, 2)
 }
 
@@ -91,7 +91,7 @@ func TestRoutesIterator(t *testing.T) {
 
 	require.True(t, it.Previous(ctx, &previousPage))
 	require.True(t, len(previousPage) != 0)
-	ensure.DeepEqual(t, previousPage[0].Id, firstPage[0].Id)
+	require.Equal(t, previousPage[0].Id, firstPage[0].Id)
 
 	// First()
 	require.True(t, it.First(ctx, &firstPage))
@@ -104,5 +104,4 @@ func TestRoutesIterator(t *testing.T) {
 	// Last()
 	require.True(t, it.Last(ctx, &firstPage))
 	require.True(t, len(firstPage) != 0)
-
 }

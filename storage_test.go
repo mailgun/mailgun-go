@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/stretchr/testify/require"
@@ -29,9 +28,9 @@ func TestStorage(t *testing.T) {
 	resp, err := mg.GetStoredMessage(ctx, url)
 	require.NoError(t, err)
 
-	ensure.DeepEqual(t, "Subject", resp.Subject)
-	ensure.DeepEqual(t, "root@"+testDomain, resp.From)
-	ensure.DeepEqual(t, "stored@"+testDomain, resp.Recipients)
+	require.Equal(t, "Subject", resp.Subject)
+	require.Equal(t, "root@"+testDomain, resp.From)
+	require.Equal(t, "stored@"+testDomain, resp.Recipients)
 
 	_, _, err = mg.ReSend(ctx, url, "resend@"+testDomain)
 	require.NoError(t, err)

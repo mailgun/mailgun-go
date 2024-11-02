@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -31,9 +30,9 @@ func TestListIPS(t *testing.T) {
 	ip, err := mg.GetIP(ctx, list[0].IP)
 	require.NoError(t, err)
 
-	ensure.DeepEqual(t, ip.IP, list[0].IP)
-	ensure.DeepEqual(t, ip.Dedicated, true)
-	ensure.DeepEqual(t, ip.RDNS, "luna.mailgun.net")
+	require.Equal(t, list[0].IP, ip.IP)
+	require.True(t, ip.Dedicated)
+	require.Equal(t, "luna.mailgun.net", ip.RDNS)
 }
 
 func TestDomainIPS(t *testing.T) {
@@ -48,7 +47,7 @@ func TestDomainIPS(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, list, 1)
-	ensure.DeepEqual(t, list[0].IP, "192.172.1.1")
+	require.Equal(t, list[0].IP, "192.172.1.1")
 
 	err = mg.DeleteDomainIP(ctx, "192.172.1.1")
 	require.NoError(t, err)

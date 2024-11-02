@@ -30,7 +30,7 @@ func TestGetWebhook(t *testing.T) {
 	urls, err := mg.GetWebhook(ctx, "new-webhook")
 	require.NoError(t, err)
 
-	ensure.DeepEqual(t, urls, []string{"http://example.com/new"})
+	require.Equal(t, []string{"http://example.com/new"}, urls)
 }
 
 func TestWebhookCRUD(t *testing.T) {
@@ -55,7 +55,7 @@ func TestWebhookCRUD(t *testing.T) {
 	defer func() {
 		require.NoError(t, mg.DeleteWebhook(ctx, "deliver"))
 		newCount := countHooks()
-		ensure.DeepEqual(t, newCount, hookCount)
+		require.Equal(t, hookCount, newCount)
 	}()
 
 	newCount := countHooks()
@@ -63,14 +63,14 @@ func TestWebhookCRUD(t *testing.T) {
 
 	urls, err := mg.GetWebhook(ctx, "deliver")
 	require.NoError(t, err)
-	ensure.DeepEqual(t, urls, webHookURLs)
+	require.Equal(t, webHookURLs, urls)
 
 	updatedWebHookURL := []string{"http://api.mailgun.net/messages"}
 	require.NoError(t, mg.UpdateWebhook(ctx, "deliver", updatedWebHookURL))
 
 	hooks, err := mg.ListWebhooks(ctx)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, hooks["deliver"], updatedWebHookURL)
+	require.Equal(t, updatedWebHookURL, hooks["deliver"])
 }
 
 var signedTests = []bool{

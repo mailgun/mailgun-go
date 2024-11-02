@@ -46,11 +46,11 @@ func TestMultipleAttachments(t *testing.T) {
 	e, err := findAcceptedMessage(mg, id)
 	ensure.NotNil(t, e)
 
-	ensure.DeepEqual(t, e.ID, id)
+	require.Equal(t, e.ID, id)
 	require.Len(t, e.Message.Attachments, 2)
 	for _, f := range e.Message.Attachments {
 		t.Logf("attachment: %v\n", f)
-		ensure.DeepEqual(t, f.Size, 100)
+		require.Equal(t, 100, f.Size)
 	}
 }
 

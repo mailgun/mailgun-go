@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,13 +19,13 @@ const apiKey = "valid-mailgun-api-key"
 func TestMailgun(t *testing.T) {
 	m := mailgun.NewMailgun(domain, apiKey)
 
-	ensure.DeepEqual(t, m.Domain(), domain)
-	ensure.DeepEqual(t, m.APIKey(), apiKey)
-	ensure.DeepEqual(t, m.Client(), http.DefaultClient)
+	require.Equal(t, domain, m.Domain())
+	require.Equal(t, apiKey, m.APIKey())
+	require.Equal(t, http.DefaultClient, m.Client())
 
 	client := new(http.Client)
 	m.SetClient(client)
-	ensure.DeepEqual(t, client, m.Client())
+	require.Equal(t, client, m.Client())
 }
 
 func TestInvalidBaseAPI(t *testing.T) {
