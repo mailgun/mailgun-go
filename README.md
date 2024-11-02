@@ -381,7 +381,7 @@ include the `/v4` at the end of your import paths
 $ go get github.com/mailgun/mailgun-go/v4
 ```
 
-If you are **not** using golang modules, you can drop the `/v4` at the end of the import path.
+If you are **not** using Go Modules, you can drop the `/v4` at the end of the import path.
 As long as you are using the latest 1.10 or 1.11 golang release, import paths that end in `/v4`
 in your code should work fine even if you do not have golang modules enabled for your project.
 ```bash
