@@ -7,6 +7,7 @@ import (
 
 	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,11 +57,11 @@ func TestTags(t *testing.T) {
 
 	tag, err := mg.GetTag(ctx, "homer")
 	require.NoError(t, err)
-	require.Equal(t, "homer", tag.Value)
+	assert.Equal(t, "homer", tag.Value)
 
 	_, err = mg.GetTag(ctx, "i-dont-exist")
 	require.NotNil(t, err)
-	require.Equal(t, 404, mailgun.GetStatusFromErr(err))
+	assert.Equal(t, 404, mailgun.GetStatusFromErr(err))
 }
 
 func waitForTag(mg mailgun.Mailgun, tag string) error {
