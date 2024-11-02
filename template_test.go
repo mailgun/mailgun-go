@@ -8,6 +8,7 @@ import (
 
 	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,8 +45,8 @@ func TestTemplateCRUD(t *testing.T) {
 
 	// Create a template
 	require.NoError(t, mg.CreateTemplate(ctx, &tmpl))
-	require.Equal(t, strings.ToLower(Name), tmpl.Name)
-	require.Equal(t, Description, tmpl.Description)
+	assert.Equal(t, strings.ToLower(Name), tmpl.Name)
+	assert.Equal(t, Description, tmpl.Description)
 
 	// Wait the template to show up
 	require.NoError(t, waitForTemplate(mg, tmpl.Name))
@@ -61,7 +62,7 @@ func TestTemplateCRUD(t *testing.T) {
 	updated, err := mg.GetTemplate(ctx, tmpl.Name)
 	require.NoError(t, err)
 
-	require.Equal(t, UpdatedDesc, updated.Description)
+	assert.Equal(t, UpdatedDesc, updated.Description)
 
 	// Delete the template
 	require.NoError(t, mg.DeleteTemplate(ctx, tmpl.Name))
