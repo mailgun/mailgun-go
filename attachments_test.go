@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/stretchr/testify/require"
@@ -44,7 +43,7 @@ func TestMultipleAttachments(t *testing.T) {
 	t.Logf("New Email: %s Id: %s\n", msg, id)
 
 	e, err := findAcceptedMessage(mg, id)
-	ensure.NotNil(t, e)
+	require.NotNil(t, e)
 
 	require.Equal(t, e.ID, id)
 	require.Len(t, e.Message.Attachments, 2)

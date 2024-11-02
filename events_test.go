@@ -106,7 +106,7 @@ func TestEventPoller(t *testing.T) {
 		}
 	}
 	// Ensure we found our email
-	ensure.NotNil(t, it.Err())
+	require.NotNil(t, it.Err())
 	require.NotNil(t, accepted)
 	require.Equal(t, "user@"+testDomain, accepted.Recipient)
 }

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +20,7 @@ func TestListSubaccounts(t *testing.T) {
 	mg.SetAPIBase(server.URL())
 
 	iterator := mg.ListSubaccounts(nil)
-	ensure.NotNil(t, iterator)
+	require.NotNil(t, iterator)
 
 	ctx := context.Background()
 
@@ -43,7 +42,7 @@ func TestSubaccountDetails(t *testing.T) {
 	ctx := context.Background()
 
 	iterator := mg.ListSubaccounts(nil)
-	ensure.NotNil(t, iterator)
+	require.NotNil(t, iterator)
 
 	page := []mailgun.Subaccount{}
 	require.True(t, iterator.Next(context.Background(), &page))
@@ -51,7 +50,7 @@ func TestSubaccountDetails(t *testing.T) {
 
 	resp, err := mg.SubaccountDetails(ctx, page[0].Id)
 	require.NoError(t, err)
-	ensure.NotNil(t, resp)
+	require.NotNil(t, resp)
 }
 
 func TestSubaccountDetailsStatusNotFound(t *testing.T) {
@@ -77,7 +76,7 @@ func TestCreateSubaccount(t *testing.T) {
 
 	resp, err := mg.CreateSubaccount(ctx, testSubaccountName)
 	require.NoError(t, err)
-	ensure.NotNil(t, resp)
+	require.NotNil(t, resp)
 }
 
 func TestEnableSubaccountAlreadyEnabled(t *testing.T) {

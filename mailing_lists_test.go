@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -90,7 +89,7 @@ func TestMailingListMembers(t *testing.T) {
 	theMember, err = mg.GetMember(ctx, "joe.user2@example.com", address)
 	require.NoError(t, err)
 	require.Equal(t, "Joe's Cool Account", theMember.Name)
-	ensure.NotNil(t, theMember.Subscribed)
+	require.NotNil(t, theMember.Subscribed)
 	require.True(t, *theMember.Subscribed)
 }
 
@@ -125,7 +124,7 @@ func TestMailingLists(t *testing.T) {
 		require.NoError(t, mg.DeleteMailingList(ctx, address))
 
 		_, err := mg.GetMailingList(ctx, address)
-		ensure.NotNil(t, err)
+		require.NotNil(t, err)
 	}()
 
 	actualCount := countLists()

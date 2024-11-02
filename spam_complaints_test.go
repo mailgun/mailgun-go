@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -31,7 +30,7 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := mg.GetComplaint(ctx, randomString(64, "")+"@example.com")
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 
 	var ure *mailgun.UnexpectedResponseError
 	require.ErrorAs(t, err, &ure)

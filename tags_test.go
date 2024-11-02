@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
@@ -24,8 +23,8 @@ func TestTags(t *testing.T) {
 	require.NoError(t, msg.AddTag("newsletter"))
 	require.NoError(t, msg.AddTag("homer"))
 	require.NoError(t, msg.AddTag("bart"))
-	ensure.NotNil(t, msg.AddTag("disco-steve"))
-	ensure.NotNil(t, msg.AddTag("newsletter"))
+	require.NotNil(t, msg.AddTag("disco-steve"))
+	require.NotNil(t, msg.AddTag("newsletter"))
 
 	ctx := context.Background()
 	// Create an email with some tags attached
@@ -60,7 +59,7 @@ func TestTags(t *testing.T) {
 	require.Equal(t, "homer", tag.Value)
 
 	_, err = mg.GetTag(ctx, "i-dont-exist")
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 	require.Equal(t, 404, mailgun.GetStatusFromErr(err))
 }
 

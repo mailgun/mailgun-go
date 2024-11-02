@@ -260,7 +260,7 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 		err := m.AddRecipientAndVariables(toUser, nil)
 		// In case of error the SDK didn't send the message,
 		// OR the API didn't check for empty To: headers.
-		ensure.NotNil(t, err)
+		require.NotNil(t, err)
 	})
 }
 
@@ -417,7 +417,7 @@ func TestAddRecipientsError(t *testing.T) {
 	}
 
 	err := m.AddRecipient("recipient_1001@example.com")
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 	require.EqualError(t, err, "recipient limit exceeded (max 1000)")
 }
 
@@ -491,7 +491,7 @@ func TestSendEOFError(t *testing.T) {
 
 	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	_, _, err := mg.Send(context.Background(), m)
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 	ensure.StringContains(t, err.Error(), "remote server prematurely closed connection: Post ")
 	ensure.StringContains(t, err.Error(), "EOF")
 }
@@ -553,7 +553,7 @@ func TestResendStored(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 	require.Equal(t, err.Error(), "must provide at least one recipient")
 
 	msg, id, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)

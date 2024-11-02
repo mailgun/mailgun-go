@@ -11,8 +11,6 @@ import (
 
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
-
-	"github.com/facebookgo/ensure"
 )
 
 func TestGetBounces(t *testing.T) {
@@ -39,7 +37,7 @@ func TestGetSingleBounce(t *testing.T) {
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")),
 		os.Getenv("MG_DOMAIN"))
 	_, err := mg.GetBounce(ctx, exampleEmail)
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 
 	var ure *mailgun.UnexpectedResponseError
 	require.ErrorAs(t, err, &ure)

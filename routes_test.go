@@ -39,7 +39,7 @@ func TestRouteCRUD(t *testing.T) {
 	defer func() {
 		require.NoError(t, mg.DeleteRoute(ctx, newRoute.Id))
 		_, err = mg.GetRoute(ctx, newRoute.Id)
-		ensure.NotNil(t, err)
+		require.NotNil(t, err)
 	}()
 
 	newCount := countRoutes()
