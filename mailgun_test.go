@@ -25,7 +25,7 @@ func TestMailgun(t *testing.T) {
 
 	client := new(http.Client)
 	m.SetClient(client)
-	require.Equal(t, client, m.Client())
+	require.Equal(t, m.Client(), client)
 }
 
 func TestInvalidBaseAPI(t *testing.T) {
