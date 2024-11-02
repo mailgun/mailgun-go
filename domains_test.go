@@ -29,7 +29,7 @@ func TestListDomains(t *testing.T) {
 	}
 	t.Logf("TestListDomains: %d domains retrieved\n", it.TotalCount)
 	require.NoError(t, it.Err())
-	require.True(t, it.TotalCount != 0)
+	assert.True(t, it.TotalCount != 0)
 }
 
 func TestGetSingleDomain(t *testing.T) {
