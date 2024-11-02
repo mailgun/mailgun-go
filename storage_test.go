@@ -8,6 +8,7 @@ import (
 
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,9 +29,9 @@ func TestStorage(t *testing.T) {
 	resp, err := mg.GetStoredMessage(ctx, url)
 	require.NoError(t, err)
 
-	require.Equal(t, "Subject", resp.Subject)
-	require.Equal(t, "root@"+testDomain, resp.From)
-	require.Equal(t, "stored@"+testDomain, resp.Recipients)
+	assert.Equal(t, "Subject", resp.Subject)
+	assert.Equal(t, "root@"+testDomain, resp.From)
+	assert.Equal(t, "stored@"+testDomain, resp.Recipients)
 
 	_, _, err = mg.ReSend(ctx, url, "resend@"+testDomain)
 	require.NoError(t, err)
