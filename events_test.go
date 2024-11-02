@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/stretchr/testify/require"
@@ -30,7 +29,7 @@ func TestEventIteratorGetNext(t *testing.T) {
 	require.True(t, len(secondPage) != 0)
 
 	// Pages should be different
-	ensure.NotDeepEqual(t, firstPage, secondPage)
+	require.NotEqual(t, firstPage, secondPage)
 	require.NotEqual(t, firstIterator.Paging.Next, it.Paging.Next)
 	require.NotEqual(t, firstIterator.Paging.Previous, it.Paging.Previous)
 	require.NoError(t, it.Err())
@@ -49,7 +48,7 @@ func TestEventIteratorGetNext(t *testing.T) {
 
 	// Calling first resets the iterator to the first page
 	require.True(t, it.Next(ctx, &secondPage))
-	ensure.NotDeepEqual(t, firstPage, secondPage)
+	require.NotEqual(t, firstPage, secondPage)
 
 	// Last()
 	var lastPage []mailgun.Event

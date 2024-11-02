@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -82,7 +81,7 @@ func TestRoutesIterator(t *testing.T) {
 	require.True(t, len(secondPage) != 0)
 
 	// Pages should be different
-	ensure.NotDeepEqual(t, firstPage, secondPage)
+	require.NotEqual(t, firstPage, secondPage)
 	require.True(t, firstIterator.TotalCount != 0)
 
 	// Previous()
@@ -99,7 +98,7 @@ func TestRoutesIterator(t *testing.T) {
 
 	// Calling first resets the iterator to the first page
 	require.True(t, it.Next(ctx, &secondPage))
-	ensure.NotDeepEqual(t, firstPage, secondPage)
+	require.NotEqual(t, firstPage, secondPage)
 
 	// Last()
 	require.True(t, it.Last(ctx, &firstPage))
