@@ -16,7 +16,7 @@ func TestParseErrors(t *testing.T) {
 	ensure.StringContains(t, err.Error(), "failed to recognize event")
 
 	_, err = ParseEvent([]byte(`{"event": "unknown_event"}`))
-	ensure.DeepEqual(t, err.Error(), "unsupported event: 'unknown_event'")
+	require.EqualError(t, err, "unsupported event: 'unknown_event'")
 
 	_, err = ParseEvent([]byte(`{
 		"event": "accepted",

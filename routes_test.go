@@ -54,7 +54,7 @@ func TestRouteCRUD(t *testing.T) {
 	})
 	require.NoError(t, err)
 	ensure.DeepEqual(t, changedRoute.Priority, 2)
-	ensure.DeepEqual(t, len(changedRoute.Actions), 2)
+	require.Len(t, changedRoute.Actions, 2)
 }
 
 func TestRoutesIterator(t *testing.T) {

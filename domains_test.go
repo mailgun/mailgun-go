@@ -44,8 +44,8 @@ func TestGetSingleDomain(t *testing.T) {
 
 	dr, err := mg.GetDomain(ctx, page[0].Name)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, len(dr.ReceivingDNSRecords) != 0, true)
-	ensure.DeepEqual(t, len(dr.SendingDNSRecords) != 0, true)
+	require.True(t, len(dr.ReceivingDNSRecords) != 0)
+	require.True(t, len(dr.SendingDNSRecords) != 0)
 
 	t.Logf("TestGetSingleDomain: %#v\n", dr)
 	for _, rxd := range dr.ReceivingDNSRecords {
@@ -119,8 +119,8 @@ func TestDomainTracking(t *testing.T) {
 	require.NoError(t, err)
 
 	ensure.DeepEqual(t, info.Unsubscribe.Active, false)
-	ensure.DeepEqual(t, len(info.Unsubscribe.HTMLFooter) != 0, true)
-	ensure.DeepEqual(t, len(info.Unsubscribe.TextFooter) != 0, true)
+	require.True(t, len(info.Unsubscribe.HTMLFooter) != 0)
+	require.True(t, len(info.Unsubscribe.TextFooter) != 0)
 	ensure.DeepEqual(t, info.Click.Active, true)
 	ensure.DeepEqual(t, info.Open.Active, true)
 

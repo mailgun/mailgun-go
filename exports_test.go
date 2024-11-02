@@ -16,14 +16,14 @@ func TestExports(t *testing.T) {
 	ctx := context.Background()
 	list, err := mg.ListExports(ctx, "")
 	require.NoError(t, err)
-	ensure.DeepEqual(t, len(list), 0)
+	require.Len(t, list, 0)
 
 	err = mg.CreateExport(ctx, "/domains")
 	require.NoError(t, err)
 
 	list, err = mg.ListExports(ctx, "")
 	require.NoError(t, err)
-	ensure.DeepEqual(t, len(list), 1)
+	require.Len(t, list, 1)
 
 	ensure.DeepEqual(t, list[0].ID, "0")
 	ensure.DeepEqual(t, list[0].URL, "/domains")

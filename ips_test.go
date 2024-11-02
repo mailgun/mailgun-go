@@ -26,7 +26,7 @@ func TestListIPS(t *testing.T) {
 	ctx := context.Background()
 	list, err := mg.ListIPS(ctx, false)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, len(list), 2)
+	require.Len(t, list, 2)
 
 	ip, err := mg.GetIP(ctx, list[0].IP)
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestDomainIPS(t *testing.T) {
 	list, err := mg.ListDomainIPS(ctx)
 	require.NoError(t, err)
 
-	ensure.DeepEqual(t, len(list), 1)
+	require.Len(t, list, 1)
 	ensure.DeepEqual(t, list[0].IP, "192.172.1.1")
 
 	err = mg.DeleteDomainIP(ctx, "192.172.1.1")
@@ -56,5 +56,5 @@ func TestDomainIPS(t *testing.T) {
 	list, err = mg.ListDomainIPS(ctx)
 	require.NoError(t, err)
 
-	ensure.DeepEqual(t, len(list), 0)
+	require.Len(t, list, 0)
 }

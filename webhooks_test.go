@@ -25,7 +25,7 @@ func TestGetWebhook(t *testing.T) {
 	ctx := context.Background()
 	list, err := mg.ListWebhooks(ctx)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, len(list), 2)
+	require.Len(t, list, 2)
 
 	urls, err := mg.GetWebhook(ctx, "new-webhook")
 	require.NoError(t, err)
@@ -40,7 +40,7 @@ func TestWebhookCRUD(t *testing.T) {
 	ctx := context.Background()
 	list, err := mg.ListWebhooks(ctx)
 	require.NoError(t, err)
-	ensure.DeepEqual(t, len(list), 2)
+	require.Len(t, list, 2)
 
 	var countHooks = func() int {
 		hooks, err := mg.ListWebhooks(ctx)

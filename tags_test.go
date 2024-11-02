@@ -48,7 +48,7 @@ func TestTags(t *testing.T) {
 
 	var tags []mailgun.Tag
 	for cursor.Next(ctx, &tags) {
-		ensure.DeepEqual(t, len(tags), 1)
+		require.Len(t, tags, 1)
 	}
 	require.NoError(t, cursor.Err())
 
