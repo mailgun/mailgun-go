@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,9 +53,9 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 
 	// Add a version version
 	require.NoError(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version))
-	require.Equal(t, Tag, version.Tag)
-	require.Equal(t, Comment, version.Comment)
-	require.Equal(t, mailgun.TemplateEngineGo, version.Engine)
+	assert.Equal(t, Tag, version.Tag)
+	assert.Equal(t, Comment, version.Comment)
+	assert.Equal(t, mailgun.TemplateEngineGo, version.Engine)
 
 	// Ensure the version is in the list
 	require.True(t, findVersion(tmpl.Name, version.Tag))
@@ -68,8 +69,8 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	updated, err := mg.GetTemplateVersion(ctx, tmpl.Name, version.Tag)
 
 	require.NoError(t, err)
-	require.Equal(t, UpdatedComment, updated.Comment)
-	require.Equal(t, Template+"updated", updated.Template)
+	assert.Equal(t, UpdatedComment, updated.Comment)
+	assert.Equal(t, Template+"updated", updated.Template)
 
 	// Add a new active Version
 	version2 := mailgun.TemplateVersion{
