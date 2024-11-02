@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -294,12 +295,12 @@ func TestSendMGOffline(t *testing.T) {
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
-		require.Equal(t, fromUser, req.FormValue("from"))
-		require.Equal(t, exampleSubject, req.FormValue("subject"))
-		require.Equal(t, exampleText, req.FormValue("text"))
-		require.Equal(t, toUser, req.FormValue("to"))
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
+		assert.Equal(t, fromUser, req.FormValue("from"))
+		assert.Equal(t, exampleSubject, req.FormValue("subject"))
+		assert.Equal(t, exampleText, req.FormValue("text"))
+		assert.Equal(t, toUser, req.FormValue("to"))
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -312,8 +313,8 @@ func TestSendMGOffline(t *testing.T) {
 	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 }
 
 func TestSendMGSeparateDomain(t *testing.T) {
@@ -327,12 +328,12 @@ func TestSendMGSeparateDomain(t *testing.T) {
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", signingDomain), req.URL.Path)
-		require.Equal(t, fromUser, req.FormValue("from"))
-		require.Equal(t, exampleSubject, req.FormValue("subject"))
-		require.Equal(t, exampleText, req.FormValue("text"))
-		require.Equal(t, toUser, req.FormValue("to"))
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", signingDomain), req.URL.Path)
+		assert.Equal(t, fromUser, req.FormValue("from"))
+		assert.Equal(t, exampleSubject, req.FormValue("subject"))
+		assert.Equal(t, exampleText, req.FormValue("text"))
+		assert.Equal(t, toUser, req.FormValue("to"))
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -347,8 +348,8 @@ func TestSendMGSeparateDomain(t *testing.T) {
 
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 }
 
 func TestSendMGMessageVariables(t *testing.T) {
@@ -376,17 +377,17 @@ func TestSendMGMessageVariables(t *testing.T) {
 		}
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
 
-		require.Equal(t, fromUser, req.FormValue("from"))
-		require.Equal(t, exampleSubject, req.FormValue("subject"))
-		require.Equal(t, exampleText, req.FormValue("text"))
-		require.Equal(t, toUser, req.FormValue("to"))
-		require.Equal(t, exampleMapVarStrVal, req.FormValue("v:"+exampleMapVarKey))
-		require.Equal(t, exampleBoolVarVal, req.FormValue("v:"+exampleBoolVarKey))
-		require.Equal(t, exampleStrVarVal, req.FormValue("v:"+exampleStrVarKey))
-		require.Equal(t, exampleTemplateStrVal, req.FormValue("h:X-Mailgun-Variables"))
+		assert.Equal(t, fromUser, req.FormValue("from"))
+		assert.Equal(t, exampleSubject, req.FormValue("subject"))
+		assert.Equal(t, exampleText, req.FormValue("text"))
+		assert.Equal(t, toUser, req.FormValue("to"))
+		assert.Equal(t, exampleMapVarStrVal, req.FormValue("v:"+exampleMapVarKey))
+		assert.Equal(t, exampleBoolVarVal, req.FormValue("v:"+exampleBoolVarKey))
+		assert.Equal(t, exampleStrVarVal, req.FormValue("v:"+exampleStrVarKey))
+		assert.Equal(t, exampleTemplateStrVal, req.FormValue("h:X-Mailgun-Variables"))
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -403,8 +404,8 @@ func TestSendMGMessageVariables(t *testing.T) {
 
 	msg, id, err := mg.Send(context.Background(), m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 }
 
 func TestAddRecipientsError(t *testing.T) {
@@ -504,8 +505,8 @@ func TestHasRecipient(t *testing.T) {
 	)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
 		fmt.Fprint(w, `{"message":"Queued, Thank you", "id":"<20111114174239.25659.5820@samples.mailgun.org>"}`)
 	}))
 	defer srv.Close()
@@ -540,9 +541,9 @@ func TestResendStored(t *testing.T) {
 		exampleID      = "<20111114174239.25659.5820@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, "/v3/some-url", req.URL.Path)
-		require.Equal(t, toUser, req.FormValue("to"))
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, "/v3/some-url", req.URL.Path)
+		assert.Equal(t, toUser, req.FormValue("to"))
 
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
@@ -558,8 +559,8 @@ func TestResendStored(t *testing.T) {
 
 	msg, id, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 }
 
 func TestAddOverrideHeader(t *testing.T) {
@@ -571,10 +572,10 @@ func TestAddOverrideHeader(t *testing.T) {
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
-		require.Equal(t, "custom-value", req.Header.Get("CustomHeader"))
-		require.Equal(t, "example.com", req.Host)
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
+		assert.Equal(t, "custom-value", req.Header.Get("CustomHeader"))
+		assert.Equal(t, "example.com", req.Host)
 
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
@@ -593,8 +594,8 @@ func TestAddOverrideHeader(t *testing.T) {
 
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 
 	require.Contains(t, mg.GetCurlOutput(), "Host:")
 }
@@ -608,11 +609,11 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
-		require.Equal(t, "custom-value", req.Header.Get("CustomHeader"))
-		require.Equal(t, "example.com", req.Host)
-		require.Equal(t, "mailgun.subaccount", req.Header.Get(mailgun.OnBehalfOfHeader))
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
+		assert.Equal(t, "custom-value", req.Header.Get("CustomHeader"))
+		assert.Equal(t, "example.com", req.Host)
+		assert.Equal(t, "mailgun.subaccount", req.Header.Get(mailgun.OnBehalfOfHeader))
 
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
@@ -632,8 +633,8 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 
 	require.Contains(t, mg.GetCurlOutput(), "Host:")
 }
@@ -647,8 +648,8 @@ func TestCaptureCurlOutput(t *testing.T) {
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -661,8 +662,8 @@ func TestCaptureCurlOutput(t *testing.T) {
 	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 
 	require.Contains(t, mg.GetCurlOutput(), "curl")
 	t.Logf("%s", mg.GetCurlOutput())
@@ -677,14 +678,14 @@ func TestSendTLSOptions(t *testing.T) {
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, http.MethodPost, req.Method)
-		require.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
-		require.Equal(t, fromUser, req.FormValue("from"))
-		require.Equal(t, exampleSubject, req.FormValue("subject"))
-		require.Equal(t, exampleText, req.FormValue("text"))
-		require.Equal(t, toUser, req.FormValue("to"))
-		require.Equal(t, "true", req.FormValue("o:require-tls"))
-		require.Equal(t, "true", req.FormValue("o:skip-verification"))
+		assert.Equal(t, http.MethodPost, req.Method)
+		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
+		assert.Equal(t, fromUser, req.FormValue("from"))
+		assert.Equal(t, exampleSubject, req.FormValue("subject"))
+		assert.Equal(t, exampleText, req.FormValue("text"))
+		assert.Equal(t, toUser, req.FormValue("to"))
+		assert.Equal(t, "true", req.FormValue("o:require-tls"))
+		assert.Equal(t, "true", req.FormValue("o:skip-verification"))
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -700,8 +701,8 @@ func TestSendTLSOptions(t *testing.T) {
 
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 }
 
 func TestSendTemplate(t *testing.T) {
@@ -714,7 +715,7 @@ func TestSendTemplate(t *testing.T) {
 		templateName   = "my-template"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, templateName, req.FormValue("template"))
+		assert.Equal(t, templateName, req.FormValue("template"))
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -729,8 +730,8 @@ func TestSendTemplate(t *testing.T) {
 
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 }
 
 func TestSendTemplateOptions(t *testing.T) {
@@ -745,9 +746,9 @@ func TestSendTemplateOptions(t *testing.T) {
 		templateRenderText = "yes"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		require.Equal(t, templateName, req.FormValue("template"))
-		require.Equal(t, templateVersionTag, req.FormValue("t:version"))
-		require.Equal(t, templateRenderText, req.FormValue("t:text"))
+		assert.Equal(t, templateName, req.FormValue("template"))
+		assert.Equal(t, templateVersionTag, req.FormValue("t:version"))
+		assert.Equal(t, templateRenderText, req.FormValue("t:text"))
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
 		fmt.Fprint(w, rsp)
 	}))
@@ -764,6 +765,6 @@ func TestSendTemplateOptions(t *testing.T) {
 
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	require.Equal(t, exampleMessage, msg)
-	require.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, msg)
+	assert.Equal(t, exampleID, id)
 }
