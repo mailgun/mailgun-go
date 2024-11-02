@@ -7,6 +7,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMailingListMembers(t *testing.T) {
@@ -21,9 +22,9 @@ func TestMailingListMembers(t *testing.T) {
 		Description: "TestMailingListMembers-related mailing list",
 		AccessLevel: mailgun.AccessLevelMembers,
 	})
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	defer func() {
-		ensure.Nil(t, mg.DeleteMailingList(ctx, address))
+		require.NoError(t, mg.DeleteMailingList(ctx, address))
 	}()
 
 	var countMembers = func() int {
@@ -34,7 +35,7 @@ func TestMailingListMembers(t *testing.T) {
 		for it.Next(ctx, &page) {
 			count += len(page)
 		}
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 		return count
 	}
 
@@ -44,12 +45,12 @@ func TestMailingListMembers(t *testing.T) {
 		Name:       "Joe Example",
 		Subscribed: mailgun.Subscribed,
 	}
-	ensure.Nil(t, mg.CreateMember(ctx, true, address, protoJoe))
+	require.NoError(t, mg.CreateMember(ctx, true, address, protoJoe))
 	newCount := countMembers()
 	ensure.False(t, newCount <= startCount)
 
 	theMember, err := mg.GetMember(ctx, "joe@example.com", address)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, theMember.Address, protoJoe.Address)
 	ensure.DeepEqual(t, theMember.Name, protoJoe.Name)
 	ensure.DeepEqual(t, theMember.Subscribed, protoJoe.Subscribed)
@@ -58,12 +59,12 @@ func TestMailingListMembers(t *testing.T) {
 	_, err = mg.UpdateMember(ctx, "joe@example.com", address, mailgun.Member{
 		Name: "Joe Cool",
 	})
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	theMember, err = mg.GetMember(ctx, "joe@example.com", address)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, theMember.Name, "Joe Cool")
-	ensure.Nil(t, mg.DeleteMember(ctx, "joe@example.com", address))
+	require.NoError(t, mg.DeleteMember(ctx, "joe@example.com", address))
 	ensure.DeepEqual(t, countMembers(), startCount)
 
 	err = mg.CreateMemberList(ctx, nil, address, []interface{}{
@@ -84,10 +85,10 @@ func TestMailingListMembers(t *testing.T) {
 			},
 		},
 	})
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	theMember, err = mg.GetMember(ctx, "joe.user2@example.com", address)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, theMember.Name, "Joe's Cool Account")
 	ensure.NotNil(t, theMember.Subscribed)
 	ensure.True(t, *theMember.Subscribed)
@@ -114,14 +115,14 @@ func TestMailingLists(t *testing.T) {
 		for it.Next(ctx, &page) {
 			count += len(page)
 		}
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 		return count
 	}
 
 	_, err := mg.CreateMailingList(ctx, protoList)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	defer func() {
-		ensure.Nil(t, mg.DeleteMailingList(ctx, address))
+		require.NoError(t, mg.DeleteMailingList(ctx, address))
 
 		_, err := mg.GetMailingList(ctx, address)
 		ensure.NotNil(t, err)
@@ -131,7 +132,7 @@ func TestMailingLists(t *testing.T) {
 	ensure.False(t, actualCount < 1)
 
 	theList, err := mg.GetMailingList(ctx, address)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	protoList.CreatedAt = theList.CreatedAt // ignore this field when comparing.
 	ensure.DeepEqual(t, theList, protoList)
@@ -139,10 +140,10 @@ func TestMailingLists(t *testing.T) {
 	_, err = mg.UpdateMailingList(ctx, address, mailgun.MailingList{
 		Description: "A list whose description changed",
 	})
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	theList, err = mg.GetMailingList(ctx, address)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	newList := protoList
 	newList.Description = "A list whose description changed"
@@ -160,7 +161,7 @@ func TestListMailingListRegression(t *testing.T) {
 		Name:        "paging",
 		Description: "Test paging",
 	})
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	for i := 0; i < 200; i++ {
 		var vars map[string]interface{}
@@ -172,7 +173,7 @@ func TestListMailingListRegression(t *testing.T) {
 			Address: fmt.Sprintf("%03d@example.com", i),
 			Vars:    vars,
 		})
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 	}
 
 	it := mg.ListMembers(address, nil)
@@ -184,9 +185,8 @@ func TestListMailingListRegression(t *testing.T) {
 			if m.Vars != nil {
 				found++
 			}
-			//t.Logf("%v %v", m.Address, m.Vars)
 		}
 	}
 	ensure.DeepEqual(t, found, 1)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 }

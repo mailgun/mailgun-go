@@ -7,6 +7,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEmailValidationV4(t *testing.T) {
@@ -16,7 +17,7 @@ func TestEmailValidationV4(t *testing.T) {
 	ctx := context.Background()
 
 	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	ensure.True(t, ev.IsValid)
 	ensure.DeepEqual(t, ev.MailboxVerification, "")
@@ -44,7 +45,7 @@ func TestParseAddresses(t *testing.T) {
 		"Alice <alice@example.com>",
 		"bob@example.com",
 		"example.com")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	hittest := map[string]bool{
 		"Alice <alice@example.com>": true,
 		"bob@example.com":           true,
@@ -73,7 +74,7 @@ func TestUnmarshallResponse(t *testing.T) {
 	}`)
 	var ev mailgun.EmailVerification
 	err := json.Unmarshal(payload, &ev)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	ensure.True(t, ev.IsValid)
 	ensure.DeepEqual(t, ev.MailboxVerification, "unknown")

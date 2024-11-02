@@ -6,6 +6,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExports(t *testing.T) {
@@ -14,14 +15,14 @@ func TestExports(t *testing.T) {
 
 	ctx := context.Background()
 	list, err := mg.ListExports(ctx, "")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, len(list), 0)
 
 	err = mg.CreateExport(ctx, "/domains")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	list, err = mg.ListExports(ctx, "")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, len(list), 1)
 
 	ensure.DeepEqual(t, list[0].ID, "0")
@@ -29,7 +30,7 @@ func TestExports(t *testing.T) {
 	ensure.DeepEqual(t, list[0].Status, "complete")
 
 	export, err := mg.GetExport(ctx, "0")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, export.ID, "0")
 	ensure.DeepEqual(t, export.URL, "/domains")
 	ensure.DeepEqual(t, export.Status, "complete")
@@ -41,6 +42,6 @@ func TestExportsLink(t *testing.T) {
 
 	ctx := context.Background()
 	url, err := mg.GetExportLink(ctx, "12")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.StringContains(t, url, "/some/s3/url")
 }

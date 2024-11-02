@@ -7,6 +7,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -31,7 +32,7 @@ func TestListSubaccounts(t *testing.T) {
 		}
 	}
 	t.Logf("TestListSubaccounts: %d subaccounts retrieved\n", iterator.Total)
-	ensure.Nil(t, iterator.Err())
+	require.NoError(t, iterator.Err())
 	ensure.True(t, iterator.Total != 0)
 }
 
@@ -46,10 +47,10 @@ func TestSubaccountDetails(t *testing.T) {
 
 	page := []mailgun.Subaccount{}
 	ensure.True(t, iterator.Next(context.Background(), &page))
-	ensure.Nil(t, iterator.Err())
+	require.NoError(t, iterator.Err())
 
 	resp, err := mg.SubaccountDetails(ctx, page[0].Id)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.NotNil(t, resp)
 }
 
@@ -75,7 +76,7 @@ func TestCreateSubaccount(t *testing.T) {
 	ctx := context.Background()
 
 	resp, err := mg.CreateSubaccount(ctx, testSubaccountName)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.NotNil(t, resp)
 }
 
@@ -86,7 +87,7 @@ func TestEnableSubaccountAlreadyEnabled(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := mg.EnableSubaccount(ctx, testEnabledSubaccountId)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestEnableSubaccount(t *testing.T) {
@@ -96,7 +97,7 @@ func TestEnableSubaccount(t *testing.T) {
 	ctx := context.Background()
 
 	resp, err := mg.EnableSubaccount(ctx, testDisabledSubaccountId)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, resp.Item.Status, "enabled")
 }
 
@@ -107,7 +108,7 @@ func TestDisableSubaccount(t *testing.T) {
 	ctx := context.Background()
 
 	resp, err := mg.DisableSubaccount(ctx, testEnabledSubaccountId)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, resp.Item.Status, "disabled")
 }
 
@@ -118,5 +119,5 @@ func TestDisableSubaccountAlreadyDisabled(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := mg.DisableSubaccount(ctx, testDisabledSubaccountId)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 }

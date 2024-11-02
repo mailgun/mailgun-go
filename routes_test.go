@@ -6,6 +6,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRouteCRUD(t *testing.T) {
@@ -17,7 +18,7 @@ func TestRouteCRUD(t *testing.T) {
 		it := mg.ListRoutes(nil)
 		var page []mailgun.Route
 		it.Next(ctx, &page)
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 		return it.TotalCount
 	}
 
@@ -32,11 +33,11 @@ func TestRouteCRUD(t *testing.T) {
 			"stop()",
 		},
 	})
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.True(t, newRoute.Id != "")
 
 	defer func() {
-		ensure.Nil(t, mg.DeleteRoute(ctx, newRoute.Id))
+		require.NoError(t, mg.DeleteRoute(ctx, newRoute.Id))
 		_, err = mg.GetRoute(ctx, newRoute.Id)
 		ensure.NotNil(t, err)
 	}()
@@ -45,13 +46,13 @@ func TestRouteCRUD(t *testing.T) {
 	ensure.False(t, newCount <= routeCount)
 
 	theRoute, err := mg.GetRoute(ctx, newRoute.Id)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, newRoute, theRoute)
 
 	changedRoute, err := mg.UpdateRoute(ctx, newRoute.Id, mailgun.Route{
 		Priority: 2,
 	})
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, changedRoute.Priority, 2)
 	ensure.DeepEqual(t, len(changedRoute.Actions), 2)
 }
@@ -71,13 +72,13 @@ func TestRoutesIterator(t *testing.T) {
 
 	// Get our first page
 	ensure.True(t, it.Next(ctx, &firstPage))
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 	ensure.True(t, len(firstPage) != 0)
 	firstIterator := *it
 
 	// Get our second page
 	ensure.True(t, it.Next(ctx, &secondPage))
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 	ensure.True(t, len(secondPage) != 0)
 
 	// Pages should be different

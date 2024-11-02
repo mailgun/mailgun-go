@@ -10,17 +10,18 @@ import (
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/require"
 )
 
 func createAttachment(t *testing.T) string {
 	t.Helper()
 	name := "/tmp/" + randomString(10, "attachment-")
 	f, err := os.Create(name)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	_, err = f.Write([]byte(randomString(100, "")))
-	ensure.Nil(t, err)
-	ensure.Nil(t, f.Close())
+	require.NoError(t, err)
+	require.Nil(t, f.Close())
 	return name
 }
 
@@ -37,7 +38,7 @@ func TestMultipleAttachments(t *testing.T) {
 	m.AddAttachment(createAttachment(t))
 
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	id = strings.Trim(id, "<>")
 	t.Logf("New Email: %s Id: %s\n", msg, id)

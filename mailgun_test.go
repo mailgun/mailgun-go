@@ -11,6 +11,7 @@ import (
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const domain = "valid-mailgun-domain"
@@ -41,7 +42,7 @@ func TestValidBaseAPI(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var resp mailgun.DomainResponse
 		b, err := json.Marshal(resp)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		w.Write(b)
 	}))
@@ -57,7 +58,7 @@ func TestValidBaseAPI(t *testing.T) {
 
 		ctx := context.Background()
 		_, err := mg.GetDomain(ctx, "unknown.domain")
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 	}
 }
 

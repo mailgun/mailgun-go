@@ -6,6 +6,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTemplateVersionsCRUD(t *testing.T) {
@@ -24,7 +25,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 				}
 			}
 		}
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 		return false
 	}
 
@@ -40,7 +41,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	}
 
 	// Create a template
-	ensure.Nil(t, mg.CreateTemplate(ctx, &tmpl))
+	require.NoError(t, mg.CreateTemplate(ctx, &tmpl))
 
 	version := mailgun.TemplateVersion{
 		Tag:      Tag,
@@ -51,7 +52,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	}
 
 	// Add a version version
-	ensure.Nil(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version))
+	require.NoError(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version))
 	ensure.DeepEqual(t, version.Tag, Tag)
 	ensure.DeepEqual(t, version.Comment, Comment)
 	ensure.DeepEqual(t, version.Engine, mailgun.TemplateEngineGo)
@@ -62,12 +63,12 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	// Update the Comment
 	version.Comment = UpdatedComment
 	version.Template = Template + "updated"
-	ensure.Nil(t, mg.UpdateTemplateVersion(ctx, tmpl.Name, &version))
+	require.NoError(t, mg.UpdateTemplateVersion(ctx, tmpl.Name, &version))
 
 	// Ensure update took
 	updated, err := mg.GetTemplateVersion(ctx, tmpl.Name, version.Tag)
 
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, updated.Comment, UpdatedComment)
 	ensure.DeepEqual(t, updated.Template, Template+"updated")
 
@@ -79,17 +80,17 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 		Active:   true,
 		Engine:   mailgun.TemplateEngineGo,
 	}
-	ensure.Nil(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version2))
+	require.NoError(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version2))
 
 	// Ensure the version is in the list
 	ensure.True(t, findVersion(tmpl.Name, version2.Tag))
 
 	// Delete the first version
-	ensure.Nil(t, mg.DeleteTemplateVersion(ctx, tmpl.Name, version.Tag))
+	require.NoError(t, mg.DeleteTemplateVersion(ctx, tmpl.Name, version.Tag))
 
 	// Ensure version was deleted
 	ensure.False(t, findVersion(tmpl.Name, version.Tag))
 
 	// Delete the template
-	ensure.Nil(t, mg.DeleteTemplate(ctx, tmpl.Name))
+	require.NoError(t, mg.DeleteTemplate(ctx, tmpl.Name))
 }

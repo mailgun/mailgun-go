@@ -8,6 +8,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseErrors(t *testing.T) {
@@ -76,7 +77,7 @@ func TestParseSuccess(t *testing.T) {
 		  "is-routed": null
 		}
 	}`))
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, reflect.TypeOf(event).String(), "*events.Accepted")
 	subject := event.(*events.Accepted).Message.Headers.Subject
 	ensure.DeepEqual(t, subject, "Test message going through the bus.")
@@ -88,7 +89,7 @@ func TestParseSuccess(t *testing.T) {
 		"timestamp": 1533922516.538978,
 		"recipient": "someone@example.com"
 	}`))
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	ensure.DeepEqual(t, event2.GetTimestamp(),
 		time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC))
@@ -109,7 +110,7 @@ func TestParseSuccessInvalidUserVariables(t *testing.T) {
 		"timestamp": 1420255392.850187,
 		"user-variables": "Could not load user-variables. They were either truncated or invalid JSON"
 	}`))
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, reflect.TypeOf(event).String(), "*events.Accepted")
 	ensure.DeepEqual(t, event.(*events.Accepted).UserVariables, "Could not load user-variables. They were either truncated or invalid JSON")
 }
@@ -136,7 +137,7 @@ func TestParseResponse(t *testing.T) {
 			"previous": "https://prev"
 		}
 	}`))
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	ensure.DeepEqual(t, evnts[0].GetName(), "accepted")
 	ensure.DeepEqual(t, evnts[0].(*events.Accepted).Recipient, "someone@example.com")
@@ -159,7 +160,7 @@ func TestTimeStamp(t *testing.T) {
 func TestEventNames(t *testing.T) {
 	for name := range EventNames {
 		event, err := ParseEvent([]byte(fmt.Sprintf(`{"event": "%s"}`, name)))
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		ensure.DeepEqual(t, event.GetName(), name)
 	}
 }
@@ -178,7 +179,7 @@ func TestEventMessageWithAttachment(t *testing.T) {
                                  "size": 139214}],
                 "size": 142698}}`)
 	event, err := ParseEvent(body)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, event.(*events.Delivered).Message.Attachments[0].FileName, "doc.pdf")
 }
 
@@ -192,7 +193,7 @@ func TestStored(t *testing.T) {
             "url": "%s"
         }}`, key, url))
 	event, err := ParseEvent(body)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, event.(*events.Stored).Storage.Key, key)
 	ensure.DeepEqual(t, event.(*events.Stored).Storage.URL, url)
 }

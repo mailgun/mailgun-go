@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateUnsubscriber(t *testing.T) {
@@ -17,7 +17,7 @@ func TestCreateUnsubscriber(t *testing.T) {
 	ctx := context.Background()
 
 	// Create unsubscription record
-	ensure.Nil(t, mg.CreateUnsubscribe(ctx, email, "*"))
+	require.NoError(t, mg.CreateUnsubscribe(ctx, email, "*"))
 }
 
 func TestCreateUnsubscribes(t *testing.T) {
@@ -35,7 +35,7 @@ func TestCreateUnsubscribes(t *testing.T) {
 	ctx := context.Background()
 
 	// Create unsubscription records
-	ensure.Nil(t, mg.CreateUnsubscribes(ctx, unsubscribes))
+	require.NoError(t, mg.CreateUnsubscribes(ctx, unsubscribes))
 }
 
 func TestListUnsubscribes(t *testing.T) {
@@ -54,7 +54,7 @@ func TestListUnsubscribes(t *testing.T) {
 			}
 		}
 	}
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 }
 
 func TestGetUnsubscribe(t *testing.T) {
@@ -66,14 +66,14 @@ func TestGetUnsubscribe(t *testing.T) {
 	ctx := context.Background()
 
 	// Create unsubscription record
-	ensure.Nil(t, mg.CreateUnsubscribe(ctx, email, "*"))
+	require.NoError(t, mg.CreateUnsubscribe(ctx, email, "*"))
 
 	u, err := mg.GetUnsubscribe(ctx, email)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
 
 	// Destroy the unsubscription record
-	ensure.Nil(t, mg.DeleteUnsubscribe(ctx, email))
+	require.NoError(t, mg.DeleteUnsubscribe(ctx, email))
 }
 
 func TestCreateDestroyUnsubscription(t *testing.T) {
@@ -85,12 +85,12 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 	ctx := context.Background()
 
 	// Create unsubscription record
-	ensure.Nil(t, mg.CreateUnsubscribe(ctx, email, "*"))
+	require.NoError(t, mg.CreateUnsubscribe(ctx, email, "*"))
 
 	_, err := mg.GetUnsubscribe(ctx, email)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	/*t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)*/
 
 	// Destroy the unsubscription record
-	ensure.Nil(t, mg.DeleteUnsubscribe(ctx, email))
+	require.NoError(t, mg.DeleteUnsubscribe(ctx, email))
 }

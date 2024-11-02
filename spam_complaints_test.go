@@ -8,6 +8,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetComplaints(t *testing.T) {
@@ -19,9 +20,9 @@ func TestGetComplaints(t *testing.T) {
 	it := mg.ListComplaints(nil)
 	var page []mailgun.Complaint
 	for it.Next(ctx, &page) {
-		//spew.Dump(page)
+		// spew.Dump(page)
 	}
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 }
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
@@ -45,7 +46,7 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
 		it := mg.ListComplaints(nil)
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 
 		var page []mailgun.Complaint
 		for it.Next(ctx, &page) {
@@ -62,9 +63,9 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	randomMail := strings.ToLower(randomString(64, "")) + "@example.com"
 	ensure.False(t, hasComplaint(randomMail))
 
-	ensure.Nil(t, mg.CreateComplaint(ctx, randomMail))
+	require.NoError(t, mg.CreateComplaint(ctx, randomMail))
 	ensure.True(t, hasComplaint(randomMail))
-	ensure.Nil(t, mg.DeleteComplaint(ctx, randomMail))
+	require.NoError(t, mg.DeleteComplaint(ctx, randomMail))
 	ensure.False(t, hasComplaint(randomMail))
 }
 
@@ -76,7 +77,7 @@ func TestCreateDeleteComplaintList(t *testing.T) {
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
 		it := mg.ListComplaints(nil)
-		ensure.Nil(t, it.Err())
+		require.NoError(t, it.Err())
 
 		var page []mailgun.Complaint
 		for it.Next(ctx, &page) {
@@ -96,11 +97,11 @@ func TestCreateDeleteComplaintList(t *testing.T) {
 		strings.ToLower(randomString(64, "")) + "@example3.com",
 	}
 
-	ensure.Nil(t, mg.CreateComplaints(ctx, addresses))
+	require.NoError(t, mg.CreateComplaints(ctx, addresses))
 
 	for _, address := range addresses {
 		ensure.True(t, hasComplaint(address))
-		ensure.Nil(t, mg.DeleteComplaint(ctx, address))
+		require.NoError(t, mg.DeleteComplaint(ctx, address))
 		ensure.False(t, hasComplaint(address))
 	}
 

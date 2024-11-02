@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
-
-	"github.com/facebookgo/ensure"
+	"github.com/stretchr/testify/require"
 )
 
 func TestListStats(t *testing.T) {
@@ -15,7 +14,7 @@ func TestListStats(t *testing.T) {
 	ctx := context.Background()
 
 	stats, err := mg.GetStats(ctx, []string{"accepted", "delivered"}, nil)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	if len(stats) > 0 {
 		firstStatsTotal := stats[0]

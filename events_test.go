@@ -9,6 +9,7 @@ import (
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEventIteratorGetNext(t *testing.T) {
@@ -32,7 +33,7 @@ func TestEventIteratorGetNext(t *testing.T) {
 	ensure.NotDeepEqual(t, firstPage, secondPage)
 	ensure.True(t, firstIterator.Paging.Next != it.Paging.Next)
 	ensure.True(t, firstIterator.Paging.Previous != it.Paging.Previous)
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 
 	// Previous()
 	ensure.True(t, it.First(ctx, &firstPage))
@@ -88,7 +89,7 @@ func TestEventPoller(t *testing.T) {
 	// Send an email
 	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	t.Logf("New Email: %s Id: %s\n", msg, id)
 

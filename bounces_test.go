@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 
 	"github.com/facebookgo/ensure"
 )
@@ -27,7 +28,7 @@ func TestGetBounces(t *testing.T) {
 			t.Logf("Bounce: %+v\n", bounce)
 		}
 	}
-	ensure.Nil(t, it.Err())
+	require.NoError(t, it.Err())
 }
 
 func TestGetSingleBounce(t *testing.T) {
@@ -73,7 +74,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Add the bounce for our address.
 	err := mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	// Give API some time to refresh cache
 	time.Sleep(time.Second)
@@ -84,7 +85,7 @@ func TestAddDelBounces(t *testing.T) {
 	}
 
 	bounce, err := mg.GetBounce(ctx, exampleEmail)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	if bounce.Address != exampleEmail {
 		t.Fatalf("Expected at least one bounce for %s", exampleEmail)
 	}
@@ -92,7 +93,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	// Delete it.  This should put us back the way we were.
 	err = mg.DeleteBounce(ctx, exampleEmail)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	// Make sure we're back to the way we were.
 	if findBounce(exampleEmail) {
@@ -100,7 +101,7 @@ func TestAddDelBounces(t *testing.T) {
 	}
 
 	_, err = mg.GetBounce(ctx, exampleEmail)
-	ensure.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 func TestAddDelBounceList(t *testing.T) {
@@ -149,7 +150,7 @@ func TestAddDelBounceList(t *testing.T) {
 
 	// Add the bounce for our address.
 	err = mg.AddBounces(ctx, bounces)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	for _, expect := range bounces {
 		if !findBounce(expect.Address) {
@@ -157,7 +158,7 @@ func TestAddDelBounceList(t *testing.T) {
 		}
 
 		bounce, err := mg.GetBounce(ctx, expect.Address)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		if bounce.Address != expect.Address {
 			t.Fatalf("Expected at least one bounce for %s", expect.Address)
 		}
@@ -169,7 +170,7 @@ func TestAddDelBounceList(t *testing.T) {
 
 	// Delete the bounce list.  This should put us back the way we were.
 	err = mg.DeleteBounceList(ctx)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	it := mg.ListBounces(nil)
 	var page []mailgun.Bounce

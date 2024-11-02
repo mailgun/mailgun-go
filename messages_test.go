@@ -13,6 +13,7 @@ import (
 
 	"github.com/facebookgo/ensure"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -55,12 +56,12 @@ func TestSendMGPlain(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -73,13 +74,13 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendPlainWithTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -92,13 +93,13 @@ func TestSendMGPlainAt(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendPlainAt:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -111,13 +112,13 @@ func TestSendMGSTO(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetSTOPeriod("24h")
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendMGSTO:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -130,13 +131,13 @@ func TestSendMGHtml(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -149,14 +150,14 @@ func TestSendMGAMPHtml(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
 		m.SetAMPHtml(exampleAMPHtml)
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -169,13 +170,13 @@ func TestSendMGTracking(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendTracking:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -188,7 +189,7 @@ func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
@@ -200,7 +201,7 @@ func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
 		}
 		m.SetTrackingOptions(&options)
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -213,7 +214,7 @@ func TestSendMGTag(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
@@ -221,7 +222,7 @@ func TestSendMGTag(t *testing.T) {
 		m.AddTag("BarTag")
 		m.AddTag("BlortTag")
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -234,12 +235,12 @@ func TestSendMGMIME(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMIMEMessage(io.NopCloser(strings.NewReader(exampleMime)), toUser)
 		msg, id, err := mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
 	})
 }
@@ -271,7 +272,7 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 		mg, err := mailgun.NewMailgunFromEnv()
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, templateText)
@@ -279,9 +280,9 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 			"name":  "Joe Cool Example",
 			"table": 42,
 		})
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 		_, _, err = mg.Send(ctx, m)
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 	})
 }
 
@@ -311,7 +312,7 @@ func TestSendMGOffline(t *testing.T) {
 
 	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
@@ -346,7 +347,7 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	m.AddDomain(signingDomain)
 
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
@@ -402,7 +403,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	m.AddTemplateVariable("templateVariable", exampleTemplateVariable)
 
 	msg, id, err := mg.Send(context.Background(), m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
@@ -412,7 +413,7 @@ func TestAddRecipientsError(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
-		ensure.Nil(t, m.AddRecipient(recipient))
+		require.NoError(t, m.AddRecipient(recipient))
 	}
 
 	err := m.AddRecipient("recipient_1001@example.com")
@@ -428,7 +429,7 @@ func TestAddRecipientAndVariablesError(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
 		err = m.AddRecipientAndVariables(recipient, map[string]interface{}{"id": i})
-		ensure.Nil(t, err)
+		require.NoError(t, err)
 	}
 
 	err = m.AddRecipientAndVariables("recipient_1001@example.com", map[string]interface{}{"id": 1001})
@@ -466,7 +467,7 @@ func TestSendDomainError(t *testing.T) {
 
 		_, _, err := mg.Send(ctx, m)
 		if c.isValid {
-			ensure.Nil(t, err)
+			require.NoError(t, err)
 		} else {
 			ensure.DeepEqual(t, err.Error(), "you called Send() with a domain that contains invalid characters")
 		}
@@ -522,13 +523,13 @@ func TestHasRecipient(t *testing.T) {
 	m = mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 	m.AddBCC(recipient)
 	_, _, err = mg.Send(context.Background(), m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 
 	// Provided cc
 	m = mailgun.NewMessage(fromUser, exampleSubject, exampleText)
 	m.AddCC(recipient)
 	_, _, err = mg.Send(context.Background(), m)
-	ensure.Nil(t, err)
+	require.Nil(t, err)
 }
 
 func TestResendStored(t *testing.T) {
@@ -557,7 +558,7 @@ func TestResendStored(t *testing.T) {
 	ensure.DeepEqual(t, err.Error(), "must provide at least one recipient")
 
 	msg, id, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
@@ -592,7 +593,7 @@ func TestAddOverrideHeader(t *testing.T) {
 	m.SetSkipVerification(true)
 
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 
@@ -631,7 +632,7 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	m.SetSkipVerification(true)
 
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 
@@ -660,7 +661,7 @@ func TestCaptureCurlOutput(t *testing.T) {
 
 	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 
@@ -699,7 +700,7 @@ func TestSendTLSOptions(t *testing.T) {
 	m.SetSkipVerification(true)
 
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
@@ -728,7 +729,7 @@ func TestSendTemplate(t *testing.T) {
 	m.SetTemplate(templateName)
 
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
@@ -763,7 +764,7 @@ func TestSendTemplateOptions(t *testing.T) {
 	m.SetTemplateVersion(templateVersionTag)
 
 	msg, id, err := mg.Send(ctx, m)
-	ensure.Nil(t, err)
+	require.NoError(t, err)
 	ensure.DeepEqual(t, msg, exampleMessage)
 	ensure.DeepEqual(t, id, exampleID)
 }
