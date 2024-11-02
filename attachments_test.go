@@ -43,6 +43,7 @@ func TestMultipleAttachments(t *testing.T) {
 	t.Logf("New Email: %s Id: %s\n", msg, id)
 
 	e, err := findAcceptedMessage(mg, id)
+	require.NoError(t, err)
 	require.NotNil(t, e)
 
 	require.Equal(t, e.ID, id)
