@@ -52,6 +52,7 @@ func (mg *MailgunImpl) ListWebhooks(ctx context.Context) (map[string][]string, e
 }
 
 // CreateWebhook installs a new webhook for your domain.
+// List of kinds - https://documentation.mailgun.com/docs/mailgun/user-manual/events/#event-types
 func (mg *MailgunImpl) CreateWebhook(ctx context.Context, kind string, urls []string) error {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.setClient(mg.Client())
