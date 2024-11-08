@@ -1,7 +1,7 @@
 # Mailgun with Go
 
 [![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go/v4)
-[![Build Status](https://github.com/mailgun/mailgun-go/workflows/CI/badge.svg)](https://github.com/mailgun/mailgun-go/actions/workflows/main.yml)
+[![Build Status](https://github.com/mailgun/mailgun-go/workflows/CI/badge.svg)](https://github.com/mailgun/mailgun-go/actions/workflows/main.yml?query=branch%3Amaster)
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/en/latest/api_reference.html).
 
