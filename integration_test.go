@@ -5,6 +5,7 @@ package mailgun_test
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"testing"
 	"time"
 
@@ -56,4 +57,42 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 			break
 		}
 	}
+}
+
+func TestIntegrationWebhooksCRUD(t *testing.T) {
+	// Arrange
+
+	mg, err := mailgun.NewMailgunFromEnv()
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	const name = "permanent_fail"
+	ctx := context.Background()
+
+	err = mg.DeleteWebhook(ctx, name)
+	if err != nil {
+		// 200 or 404 is expected
+		status := mailgun.GetStatusFromErr(err)
+		require.Equal(t, http.StatusNotFound, status, err)
+	}
+	time.Sleep(time.Second)
+
+	defer func() {
+		// Cleanup
+		_ = mg.DeleteWebhook(ctx, name)
+	}()
+
+	// Act
+
+	err = mg.CreateWebhook(ctx, name, []string{"https://example.com/1", "https://example.com/2"})
+	require.NoError(t, err)
+	time.Sleep(time.Second)
+
+	// Assert
+
+	urls, err := mg.GetWebhook(ctx, name)
+	require.NoError(t, err)
+	t.Logf("Webhooks: %v", urls)
+	assert.Len(t, urls, 2)
 }
