@@ -1,5 +1,7 @@
 package mailgun
 
+// https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Webhooks/#tag/Webhooks
+
 import (
 	"context"
 	"crypto/hmac"
@@ -52,7 +54,6 @@ func (mg *MailgunImpl) ListWebhooks(ctx context.Context) (map[string][]string, e
 }
 
 // CreateWebhook installs a new webhook for your domain.
-// List of ids - https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Webhooks/#tag/Webhooks
 func (mg *MailgunImpl) CreateWebhook(ctx context.Context, id string, urls []string) error {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.setClient(mg.Client())
@@ -67,8 +68,8 @@ func (mg *MailgunImpl) CreateWebhook(ctx context.Context, id string, urls []stri
 }
 
 // DeleteWebhook removes the specified webhook from your domain's configuration.
-func (mg *MailgunImpl) DeleteWebhook(ctx context.Context, kind string) error {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + kind)
+func (mg *MailgunImpl) DeleteWebhook(ctx context.Context, name string) error {
+	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + name)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -76,8 +77,8 @@ func (mg *MailgunImpl) DeleteWebhook(ctx context.Context, kind string) error {
 }
 
 // GetWebhook retrieves the currently assigned webhook URL associated with the provided type of webhook.
-func (mg *MailgunImpl) GetWebhook(ctx context.Context, kind string) ([]string, error) {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + kind)
+func (mg *MailgunImpl) GetWebhook(ctx context.Context, name string) ([]string, error) {
+	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + name)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var body WebHookResponse
@@ -91,12 +92,12 @@ func (mg *MailgunImpl) GetWebhook(ctx context.Context, kind string) ([]string, e
 	if len(body.Webhook.Urls) != 0 {
 		return body.Webhook.Urls, nil
 	}
-	return nil, fmt.Errorf("webhook '%s' returned no urls", kind)
+	return nil, fmt.Errorf("webhook '%s' returned no urls", name)
 }
 
 // UpdateWebhook replaces one webhook setting for another.
-func (mg *MailgunImpl) UpdateWebhook(ctx context.Context, kind string, urls []string) error {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + kind)
+func (mg *MailgunImpl) UpdateWebhook(ctx context.Context, name string, urls []string) error {
+	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + name)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
