@@ -52,12 +52,13 @@ func (mg *MailgunImpl) ListWebhooks(ctx context.Context) (map[string][]string, e
 }
 
 // CreateWebhook installs a new webhook for your domain.
-func (mg *MailgunImpl) CreateWebhook(ctx context.Context, kind string, urls []string) error {
+// List of ids - https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Webhooks/#tag/Webhooks
+func (mg *MailgunImpl) CreateWebhook(ctx context.Context, id string, urls []string) error {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
-	p.addValue("id", kind)
+	p.addValue("id", id)
 	for _, url := range urls {
 		p.addValue("url", url)
 	}

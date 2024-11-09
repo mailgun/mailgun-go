@@ -99,6 +99,8 @@ type Delivered struct {
 	UserVariables  interface{}    `json:"user-variables"`
 }
 
+// Failed - Mailgun could not deliver the email to the recipient email server.
+// Use for permanent_fail and temporary_fail webhooks.
 type Failed struct {
 	Generic
 
@@ -114,9 +116,15 @@ type Failed struct {
 	Storage         Storage    `json:"storage"`
 
 	DeliveryStatus DeliveryStatus `json:"delivery-status"`
-	Severity       string         `json:"severity"`
-	Reason         string         `json:"reason"`
-	UserVariables  interface{}    `json:"user-variables"`
+
+	// Severity:
+	//
+	// - permanent when a message is not delivered;
+	//
+	// - temporary when a message is temporarily rejected by an ESP.
+	Severity      string      `json:"severity"`
+	Reason        string      `json:"reason"`
+	UserVariables interface{} `json:"user-variables"`
 }
 
 type Stored struct {
