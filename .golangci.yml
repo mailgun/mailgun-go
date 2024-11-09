@@ -7,14 +7,14 @@ linters:
     - errcheck # Mandatory. Do not disable.
     - ineffassign # Mandatory. Do not disable.
     - staticcheck # Mandatory. Do not disable.
+    - bodyclose # https://github.com/timakin/bodyclose
     - gomodguard
     - nolintlint
 
 # TODO:
-#    - bodyclose # https://github.com/timakin/bodyclose
+#    - gosec
 #    - gocritic
 #    - goimports
-#    - gosec
 #    - gosimple
 #    - govet
 #    - noctx
