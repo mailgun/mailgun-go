@@ -177,8 +177,10 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 
 	for _, keyVal := range f.Values {
 		if tmp, err := writer.CreateFormField(keyVal.key); err == nil {
-			// TODO(DE-1139): handle error:
-			tmp.Write([]byte(keyVal.value))
+			_, err := tmp.Write([]byte(keyVal.value))
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, err
 		}
@@ -189,8 +191,11 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 			if fp, err := os.Open(file.value); err == nil {
 				// TODO(DE-1139): defer in a loop:
 				defer fp.Close()
-				// TODO(DE-1139): handle error:
-				io.Copy(tmp, fp)
+
+				_, err := io.Copy(tmp, fp)
+				if err != nil {
+					return nil, err
+				}
 			} else {
 				return nil, err
 			}
@@ -203,8 +208,11 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 		if tmp, err := writer.CreateFormFile(file.key, file.name); err == nil {
 			// TODO(DE-1139): defer in a loop:
 			defer file.value.Close()
-			// TODO(DE-1139): handle error:
-			io.Copy(tmp, file.value)
+
+			_, err := io.Copy(tmp, file.value)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, err
 		}
