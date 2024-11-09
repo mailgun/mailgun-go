@@ -93,7 +93,7 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 
 	resp, err := r.Client.Do(req)
 	if err != nil {
-		if resp != nil { // TODO(vtopc): nil err and not nil resp, is that possible at all?
+		if resp != nil { // TODO(vtopc): not nil err and resp at the same time, is that possible at all?
 			defer resp.Body.Close()
 
 			if resp.StatusCode == http.StatusFound {
