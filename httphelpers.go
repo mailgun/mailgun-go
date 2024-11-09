@@ -187,19 +187,21 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	}
 
 	for _, file := range f.Files {
-		if tmp, err := writer.CreateFormFile(file.key, path.Base(file.value)); err == nil {
-			if fp, err := os.Open(file.value); err == nil {
-				// TODO(DE-1139): defer in a loop:
-				defer fp.Close()
+		tmp, err := writer.CreateFormFile(file.key, path.Base(file.value))
+		if err != nil {
+			return nil, err
+		}
 
-				_, err := io.Copy(tmp, fp)
-				if err != nil {
-					return nil, err
-				}
-			} else {
-				return nil, err
-			}
-		} else {
+		fp, err := os.Open(file.value)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO(DE-1139): defer in a loop:
+		defer fp.Close()
+
+		_, err = io.Copy(tmp, fp)
+		if err != nil {
 			return nil, err
 		}
 	}
