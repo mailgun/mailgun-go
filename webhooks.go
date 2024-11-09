@@ -124,8 +124,15 @@ type WebhookPayload struct {
 // Use this method to parse the webhook signature given as JSON in the webhook response
 func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err error) {
 	h := hmac.New(sha256.New, []byte(mg.APIKey()))
-	io.WriteString(h, sig.TimeStamp)
-	io.WriteString(h, sig.Token)
+
+	_, err = io.WriteString(h, sig.TimeStamp)
+	if err != nil {
+		return false, err
+	}
+	_, err = io.WriteString(h, sig.Token)
+	if err != nil {
+		return false, err
+	}
 
 	calculatedSignature := h.Sum(nil)
 	signature, err := hex.DecodeString(sig.Signature)
@@ -143,8 +150,16 @@ func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err
 // version of WebHooks from mailgun
 func (mg *MailgunImpl) VerifyWebhookRequest(req *http.Request) (verified bool, err error) {
 	h := hmac.New(sha256.New, []byte(mg.APIKey()))
-	io.WriteString(h, req.FormValue("timestamp"))
-	io.WriteString(h, req.FormValue("token"))
+
+	_, err = io.WriteString(h, req.FormValue("timestamp"))
+	if err != nil {
+		return false, err
+	}
+
+	_, err = io.WriteString(h, req.FormValue("token"))
+	if err != nil {
+		return false, err
+	}
 
 	calculatedSignature := h.Sum(nil)
 	signature, err := hex.DecodeString(req.FormValue("signature"))

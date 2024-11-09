@@ -221,8 +221,11 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	for _, buff := range f.Buffers {
 		if tmp, err := writer.CreateFormFile(buff.key, buff.name); err == nil {
 			r := bytes.NewReader(buff.value)
-			// TODO(DE-1139): handle error:
-			io.Copy(tmp, r)
+
+			_, err := io.Copy(tmp, r)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, err
 		}
