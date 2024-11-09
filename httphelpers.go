@@ -39,7 +39,7 @@ type httpResponse struct {
 
 type payload interface {
 	getPayloadBuffer() (*bytes.Buffer, error)
-	getContentType() string
+	getContentType() (string, error)
 	getValues() []keyValuePair
 }
 
@@ -109,8 +109,8 @@ func (j *jsonEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return bytes.NewBuffer(b), nil
 }
 
-func (j *jsonEncodedPayload) getContentType() string {
-	return "application/json"
+func (j *jsonEncodedPayload) getContentType() (string, error) {
+	return "application/json", nil
 }
 
 func (j *jsonEncodedPayload) getValues() []keyValuePair {
@@ -134,8 +134,8 @@ func (f *urlEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return bytes.NewBufferString(data.Encode()), nil
 }
 
-func (f *urlEncodedPayload) getContentType() string {
-	return "application/x-www-form-urlencoded"
+func (f *urlEncodedPayload) getContentType() (string, error) {
+	return "application/x-www-form-urlencoded", nil
 }
 
 func (f *urlEncodedPayload) getValues() []keyValuePair {
@@ -177,24 +177,31 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 
 	for _, keyVal := range f.Values {
 		if tmp, err := writer.CreateFormField(keyVal.key); err == nil {
-			// TODO(DE-1139): handle error:
-			tmp.Write([]byte(keyVal.value))
+			_, err := tmp.Write([]byte(keyVal.value))
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, err
 		}
 	}
 
 	for _, file := range f.Files {
-		if tmp, err := writer.CreateFormFile(file.key, path.Base(file.value)); err == nil {
-			if fp, err := os.Open(file.value); err == nil {
-				// TODO(DE-1139): defer in a loop:
-				defer fp.Close()
-				// TODO(DE-1139): handle error:
-				io.Copy(tmp, fp)
-			} else {
-				return nil, err
-			}
-		} else {
+		tmp, err := writer.CreateFormFile(file.key, path.Base(file.value))
+		if err != nil {
+			return nil, err
+		}
+
+		fp, err := os.Open(file.value)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO(DE-1139): defer in a loop:
+		defer fp.Close()
+
+		_, err = io.Copy(tmp, fp)
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -203,8 +210,11 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 		if tmp, err := writer.CreateFormFile(file.key, file.name); err == nil {
 			// TODO(DE-1139): defer in a loop:
 			defer file.value.Close()
-			// TODO(DE-1139): handle error:
-			io.Copy(tmp, file.value)
+
+			_, err := io.Copy(tmp, file.value)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, err
 		}
@@ -213,25 +223,31 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	for _, buff := range f.Buffers {
 		if tmp, err := writer.CreateFormFile(buff.key, buff.name); err == nil {
 			r := bytes.NewReader(buff.value)
-			// TODO(DE-1139): handle error:
-			io.Copy(tmp, r)
+
+			_, err := io.Copy(tmp, r)
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			return nil, err
 		}
 	}
 
+	// TODO(vtopc): getPayloadBuffer is not just a getter, it also sets the content type
 	f.contentType = writer.FormDataContentType()
 
 	return data, nil
 }
 
-func (f *formDataPayload) getContentType() string {
+func (f *formDataPayload) getContentType() (string, error) {
 	if f.contentType == "" {
-		// TODO(DE-1139): handle error:
-		f.getPayloadBuffer()
+		_, err := f.getPayloadBuffer()
+		if err != nil {
+			return "", err
+		}
 	}
 
-	return f.contentType
+	return f.contentType, nil
 }
 
 func (r *httpRequest) addHeader(name, value string) {
@@ -277,8 +293,13 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 		return nil, err
 	}
 
-	if payload != nil && payload.getContentType() != "" {
-		req.Header.Add("Content-Type", payload.getContentType())
+	if payload != nil {
+		contentType, err := payload.getContentType()
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Add("Content-Type", contentType)
 	}
 
 	if r.BasicAuthUser != "" && r.BasicAuthPassword != "" {
@@ -381,7 +402,8 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 	// parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
 
 	if p != nil {
-		if p.getContentType() == "application/json" {
+		contentType, _ := p.getContentType()
+		if contentType == "application/json" {
 			b, err := p.getPayloadBuffer()
 			if err != nil {
 				return "Unable to get payload buffer: " + err.Error()

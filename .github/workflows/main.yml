@@ -37,7 +37,7 @@ jobs:
         run: make nilaway
 
       - name: lint
-        run: make lint-new
+        run: make lint
 
       - name: Test
         run: go test -v -race -p=1 -count=1

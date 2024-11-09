@@ -267,7 +267,6 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 		// If we have events to return
 		if len(results) != 0 {
 			*events = results
-			results = nil
 			return true
 		}
 
