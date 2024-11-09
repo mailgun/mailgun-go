@@ -11,7 +11,7 @@ import (
 // this user agent allows them to identify the client from human-generated activity.
 const MailgunGoUserAgent = "mailgun-go/" + Version
 
-// This error will be returned whenever a Mailgun API returns an error response.
+// UnexpectedResponseError this error will be returned whenever a Mailgun API returns an error response.
 // Your application can check the Actual field to see the actual HTTP response code returned.
 // URL contains the base URL accessed, sans any query parameters.
 type UnexpectedResponseError struct {
