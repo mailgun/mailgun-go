@@ -1,5 +1,7 @@
 package mailgun
 
+// https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Webhooks/#tag/Webhooks
+
 import (
 	"context"
 	"crypto/hmac"
@@ -52,7 +54,6 @@ func (mg *MailgunImpl) ListWebhooks(ctx context.Context) (map[string][]string, e
 }
 
 // CreateWebhook installs a new webhook for your domain.
-// List of ids - https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Webhooks/#tag/Webhooks
 func (mg *MailgunImpl) CreateWebhook(ctx context.Context, id string, urls []string) error {
 	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
 	r.setClient(mg.Client())
