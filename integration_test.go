@@ -69,6 +69,7 @@ func TestIntegrationWebhooksCRUD(t *testing.T) {
 
 	const name = "permanent_fail"
 	ctx := context.Background()
+	urls := []string{"https://example.com/1", "https://example.com/2"}
 
 	err = mg.DeleteWebhook(ctx, name)
 	if err != nil {
@@ -76,7 +77,7 @@ func TestIntegrationWebhooksCRUD(t *testing.T) {
 		status := mailgun.GetStatusFromErr(err)
 		require.Equal(t, http.StatusNotFound, status, err)
 	}
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 
 	defer func() {
 		// Cleanup
@@ -85,14 +86,14 @@ func TestIntegrationWebhooksCRUD(t *testing.T) {
 
 	// Act
 
-	err = mg.CreateWebhook(ctx, name, []string{"https://example.com/1", "https://example.com/2"})
+	err = mg.CreateWebhook(ctx, name, urls)
 	require.NoError(t, err)
-	time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 
 	// Assert
 
-	urls, err := mg.GetWebhook(ctx, name)
+	gotUrls, err := mg.GetWebhook(ctx, name)
 	require.NoError(t, err)
 	t.Logf("Webhooks: %v", urls)
-	assert.Len(t, urls, 2)
+	assert.ElementsMatch(t, urls, gotUrls)
 }
