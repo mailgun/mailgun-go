@@ -93,14 +93,23 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 
 	resp, err := r.Client.Do(req)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusFound {
-			url, err := resp.Location()
-			if err != nil {
-				return "", fmt.Errorf("while parsing 302 redirect url: %s", err)
+		if resp != nil { // TODO(vtopc): not nil err and resp at the same time, is that possible at all?
+			defer resp.Body.Close()
+
+			if resp.StatusCode == http.StatusFound {
+				url, err := resp.Location()
+				if err != nil {
+					return "", fmt.Errorf("while parsing 302 redirect url: %s", err)
+				}
+
+				return url.String(), nil
 			}
-			return url.String(), nil
 		}
+
 		return "", err
 	}
+
+	defer resp.Body.Close()
+
 	return "", fmt.Errorf("expected a 302 response, API returned a '%d' instead", resp.StatusCode)
 }
