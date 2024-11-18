@@ -116,7 +116,8 @@ func TestSendMGSTO(t *testing.T) {
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		m.SetSTOPeriod("24h")
+		err = m.SetSTOPeriod("24h")
+		require.NoError(t, err)
 		msg, id, err := mg.Send(ctx, m)
 		require.NoError(t, err)
 		t.Log("TestSendMGSTO:MSG(" + msg + "),ID(" + id + ")")
@@ -218,9 +219,12 @@ func TestSendMGTag(t *testing.T) {
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Tags Galore!\n", toUser)
-		m.AddTag("FooTag")
-		m.AddTag("BarTag")
-		m.AddTag("BlortTag")
+		err = m.AddTag("FooTag")
+		require.NoError(t, err)
+		err = m.AddTag("BarTag")
+		require.NoError(t, err)
+		err = m.AddTag("BlortTag")
+		require.NoError(t, err)
 		msg, id, err := mg.Send(ctx, m)
 		require.NoError(t, err)
 		t.Log("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
@@ -255,7 +259,8 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Batch\n")
 		for i := 0; i < mailgun.MaxNumberOfRecipients; i++ {
-			m.AddRecipient("") // We expect this to indicate a failure at the API
+			err := m.AddRecipient("") // We expect this to indicate a failure at the API
+			require.NoError(t, err)
 		}
 		err := m.AddRecipientAndVariables(toUser, nil)
 		// In case of error the SDK didn't send the message,
@@ -397,10 +402,14 @@ func TestSendMGMessageVariables(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-	m.AddVariable(exampleStrVarKey, exampleStrVarVal)
-	m.AddVariable(exampleBoolVarKey, false)
-	m.AddVariable(exampleMapVarKey, exampleMapVarVal)
-	m.AddTemplateVariable("templateVariable", exampleTemplateVariable)
+	err := m.AddVariable(exampleStrVarKey, exampleStrVarVal)
+	require.NoError(t, err)
+	err = m.AddVariable(exampleBoolVarKey, false)
+	require.NoError(t, err)
+	err = m.AddVariable(exampleMapVarKey, exampleMapVarVal)
+	require.NoError(t, err)
+	err = m.AddTemplateVariable("templateVariable", exampleTemplateVariable)
+	require.NoError(t, err)
 
 	msg, id, err := mg.Send(context.Background(), m)
 	require.NoError(t, err)
@@ -553,11 +562,11 @@ func TestResendStored(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
+	_, _, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
 	require.NotNil(t, err)
 	require.EqualError(t, err, "must provide at least one recipient")
 
-	msg, id, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
+	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
 	assert.Equal(t, exampleID, id)

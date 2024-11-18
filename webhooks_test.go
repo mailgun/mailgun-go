@@ -149,7 +149,7 @@ func buildMultipartFormRequest(fields map[string]string) *http.Request {
 	writer := multipart.NewWriter(buf)
 
 	for k, v := range fields {
-		writer.WriteField(k, v)
+		_ = writer.WriteField(k, v)
 	}
 
 	writer.Close()
@@ -171,8 +171,8 @@ func getSignatureFields(key string, signed bool) map[string]string {
 
 	if signed {
 		h := hmac.New(sha256.New, []byte(key))
-		io.WriteString(h, fields["timestamp"])
-		io.WriteString(h, fields["token"])
+		_, _ = io.WriteString(h, fields["timestamp"])
+		_, _ = io.WriteString(h, fields["token"])
 		hash := h.Sum(nil)
 
 		fields["signature"] = hex.EncodeToString(hash)

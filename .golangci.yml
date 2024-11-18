@@ -38,6 +38,14 @@ linters-settings:
       - (io.Closer).Close
       - (io.ReadCloser).Close
 
+  gosec:
+    # To specify a set of rules to explicitly exclude.
+    # Available rules: https://github.com/securego/gosec#available-rules
+    # Default: []
+    excludes:
+      # Not critical for the http client
+      - G114 # Use of net/http serve function that has no support for setting timeouts
+
   govet:
     enable-all: true
     disable:
@@ -76,8 +84,7 @@ issues:
 
 run:
   # include test files or not, default is true
-  # TODO(DE-1139): Enable
-  tests: false
+  tests: true
 
   # Timeout for analysis, e.g. 30s, 5m.
   # Default: 1m

@@ -14,7 +14,7 @@ import (
 )
 
 const domain = "valid-mailgun-domain"
-const apiKey = "valid-mailgun-api-key"
+const apiKey = "valid-mailgun-api-key" //nolint:gosec // This is a test
 
 func TestMailgun(t *testing.T) {
 	m := mailgun.NewMailgun(domain, apiKey)
@@ -43,7 +43,8 @@ func TestValidBaseAPI(t *testing.T) {
 		b, err := json.Marshal(resp)
 		require.NoError(t, err)
 
-		w.Write(b)
+		_, err = w.Write(b)
+		require.NoError(t, err)
 	}))
 
 	apiBases := []string{
