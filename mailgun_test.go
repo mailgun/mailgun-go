@@ -14,7 +14,7 @@ import (
 )
 
 const domain = "valid-mailgun-domain"
-const apiKey = "valid-mailgun-api-key"
+const apiKey = "valid-mailgun-api-key" //nolint:gosec // This is a test
 
 func TestMailgun(t *testing.T) {
 	m := mailgun.NewMailgun(domain, apiKey)
