@@ -43,7 +43,8 @@ func TestValidBaseAPI(t *testing.T) {
 		b, err := json.Marshal(resp)
 		require.NoError(t, err)
 
-		w.Write(b)
+		_, err = w.Write(b)
+		require.NoError(t, err)
 	}))
 
 	apiBases := []string{

@@ -13,7 +13,11 @@ import (
 func randomString(n int, prefix string) string {
 	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	var bytes = make([]byte, n)
-	rand.Read(bytes)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		panic(fmt.Sprintf("rand.Read: %v", err))
+	}
+
 	for i, b := range bytes {
 		bytes[i] = alphanum[b%byte(len(alphanum))]
 	}
