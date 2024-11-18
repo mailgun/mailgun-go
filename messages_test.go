@@ -553,11 +553,11 @@ func TestResendStored(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
+	_, _, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
 	require.NotNil(t, err)
 	require.EqualError(t, err, "must provide at least one recipient")
 
-	msg, id, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
+	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
 	assert.Equal(t, exampleID, id)
