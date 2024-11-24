@@ -211,10 +211,8 @@ func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
 	cpy := make([]Domain, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ri.Items) != 0
 }
 
 func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {

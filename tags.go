@@ -95,10 +95,8 @@ func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
 		return false
 	}
 	*items = ti.Items
-	if len(ti.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ti.Items) != 0
 }
 
 // Previous returns the previous page in the list of tags
@@ -120,10 +118,8 @@ func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
 		return false
 	}
 	*items = ti.Items
-	if len(ti.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ti.Items) != 0
 }
 
 // First returns the first page in the list of tags

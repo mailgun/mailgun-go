@@ -76,10 +76,8 @@ func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
 	cpy := make([]Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -134,10 +132,8 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
 	cpy := make([]Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {

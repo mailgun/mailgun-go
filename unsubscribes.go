@@ -60,10 +60,8 @@ func (ci *UnsubscribesIterator) Next(ctx context.Context, items *[]Unsubscribe) 
 	cpy := make([]Unsubscribe, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -118,10 +116,8 @@ func (ci *UnsubscribesIterator) Previous(ctx context.Context, items *[]Unsubscri
 	cpy := make([]Unsubscribe, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 func (ci *UnsubscribesIterator) fetch(ctx context.Context, url string) error {

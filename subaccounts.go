@@ -175,10 +175,8 @@ func (ri *SubaccountsIterator) Previous(ctx context.Context, items *[]Subaccount
 	cpy := make([]Subaccount, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ri.Items) != 0
 }
 
 func (ri *SubaccountsIterator) fetch(ctx context.Context, skip, limit int) error {

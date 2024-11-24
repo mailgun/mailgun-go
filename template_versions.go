@@ -144,10 +144,8 @@ func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]TemplateV
 	cpy := make([]TemplateVersion, len(li.Template.Versions))
 	copy(cpy, li.Template.Versions)
 	*items = cpy
-	if len(li.Template.Versions) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Template.Versions) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -202,10 +200,8 @@ func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]Templ
 	cpy := make([]TemplateVersion, len(li.Template.Versions))
 	copy(cpy, li.Template.Versions)
 	*items = cpy
-	if len(li.Template.Versions) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Template.Versions) != 0
 }
 
 func (li *TemplateVersionsIterator) fetch(ctx context.Context, url string) error {
