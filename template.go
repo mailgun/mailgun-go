@@ -169,10 +169,8 @@ func (ti *TemplatesIterator) Next(ctx context.Context, items *[]Template) bool {
 	cpy := make([]Template, len(ti.Items))
 	copy(cpy, ti.Items)
 	*items = cpy
-	if len(ti.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ti.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -227,10 +225,8 @@ func (ti *TemplatesIterator) Previous(ctx context.Context, items *[]Template) bo
 	cpy := make([]Template, len(ti.Items))
 	copy(cpy, ti.Items)
 	*items = cpy
-	if len(ti.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ti.Items) != 0
 }
 
 func (ti *TemplatesIterator) fetch(ctx context.Context, url string) error {

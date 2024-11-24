@@ -56,7 +56,7 @@ type ForwardedMessage struct {
 //	}
 //	forwardRoute := mailgun.ExtractForwardedMessage(r.PostForm)
 //	fmt.Printf("Forwarded message: %#v", forwardRoute)
-//}
+// }
 func ExtractForwardedMessage(formValues url.Values) ForwardedMessage {
 	forwardedMessage := ForwardedMessage{}
 	forwardedMessage.BodyPlain = formValues.Get("body-plain")
@@ -236,10 +236,8 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 	cpy := make([]Route, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ri.Items) != 0
 }
 
 func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {

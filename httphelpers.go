@@ -371,7 +371,7 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	}
 
 	q := uri.Query()
-	if r.Parameters != nil && len(r.Parameters) > 0 {
+	if len(r.Parameters) > 0 {
 		for name, values := range r.Parameters {
 			for _, value := range values {
 				q.Add(name, value)

@@ -153,10 +153,8 @@ func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
 		return false
 	}
 	*events, ei.err = ParseEvents(ei.Items)
-	if len(ei.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ei.Items) != 0
 }
 
 func (ei *EventIterator) fetch(ctx context.Context, url string) error {
@@ -248,7 +246,7 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 
 		// Attempt to get a page of events
 		var page []Event
-		if ep.it.Next(ctx, &page) == false {
+		if !ep.it.Next(ctx, &page) {
 			if ep.it.Err() == nil && len(page) == 0 {
 				// No events, sleep for our poll interval
 				goto SLEEP

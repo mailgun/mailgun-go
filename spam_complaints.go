@@ -67,10 +67,8 @@ func (ci *ComplaintsIterator) Next(ctx context.Context, items *[]Complaint) bool
 	cpy := make([]Complaint, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -125,10 +123,8 @@ func (ci *ComplaintsIterator) Previous(ctx context.Context, items *[]Complaint) 
 	cpy := make([]Complaint, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
-	if len(ci.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(ci.Items) != 0
 }
 
 func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {

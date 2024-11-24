@@ -89,10 +89,8 @@ func (li *MemberListIterator) Next(ctx context.Context, items *[]Member) bool {
 		return false
 	}
 	*items = li.Lists
-	if len(li.Lists) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Lists) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -141,10 +139,8 @@ func (li *MemberListIterator) Previous(ctx context.Context, items *[]Member) boo
 		return false
 	}
 	*items = li.Lists
-	if len(li.Lists) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Lists) != 0
 }
 
 func (li *MemberListIterator) fetch(ctx context.Context, url string) error {

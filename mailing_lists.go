@@ -98,10 +98,8 @@ func (li *ListsIterator) Next(ctx context.Context, items *[]MailingList) bool {
 	cpy := make([]MailingList, len(li.Items))
 	copy(cpy, li.Items)
 	*items = cpy
-	if len(li.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -156,10 +154,8 @@ func (li *ListsIterator) Previous(ctx context.Context, items *[]MailingList) boo
 	cpy := make([]MailingList, len(li.Items))
 	copy(cpy, li.Items)
 	*items = cpy
-	if len(li.Items) == 0 {
-		return false
-	}
-	return true
+
+	return len(li.Items) != 0
 }
 
 func (li *ListsIterator) fetch(ctx context.Context, url string) error {
