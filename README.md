@@ -211,6 +211,7 @@ func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
 	// (https://app.mailgun.com/app/account/security)
 	mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
+	mg.SetWebhookSigningKey("webhook-signing-key")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
