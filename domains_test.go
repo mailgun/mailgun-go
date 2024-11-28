@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	testDomain = "mailgun.test"
-	testKey    = "api-fake-key"
+	testDomain            = "mailgun.test"
+	testKey               = "api-fake-key"
+	testWebhookSigningKey = "webhook-signing-key"
 )
 
 func TestListDomains(t *testing.T) {

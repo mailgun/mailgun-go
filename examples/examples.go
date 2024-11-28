@@ -904,8 +904,9 @@ func UpdateWebhook(domain, apiKey string) error {
 	return mg.UpdateWebhook(ctx, "clicked", []string{"https://your_domain.com/clicked"})
 }
 
-func VerifyWebhookSignature(domain, apiKey, timestamp, token, signature string) (bool, error) {
+func VerifyWebhookSignature(domain, apiKey, webhookSigningKey, timestamp, token, signature string) (bool, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
+	mg.SetWebhookSigningKey(webhookSigningKey)
 
 	return mg.VerifyWebhookSignature(mailgun.Signature{
 		TimeStamp: timestamp,
