@@ -345,7 +345,11 @@ func (mg *MailgunImpl) SetClient(c *http.Client) {
 
 // WebhookSigningKey returns the webhook signing key configured for this client
 func (mg *MailgunImpl) WebhookSigningKey() string {
-	return mg.webhookSigningKey
+	key := mg.webhookSigningKey
+	if key == "" {
+		return mg.APIKey()
+	}
+	return key
 }
 
 // SetWebhookSigningKey updates the webhook signing key for this client
