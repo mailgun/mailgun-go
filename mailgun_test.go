@@ -61,7 +61,3 @@ func TestValidBaseAPI(t *testing.T) {
 		require.NoError(t, err)
 	}
 }
-
-func ptr[T any](v T) *T {
-	return &v
-}
