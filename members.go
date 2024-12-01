@@ -13,8 +13,8 @@ import (
 // if nil, the relevant data type remains unspecified.
 // Otherwise, its value is either true or false.
 var (
-	yes bool = true
-	no  bool = false
+	yes = true
+	no  = false
 )
 
 // Mailing list members have an attribute that determines if they've subscribed to the mailing list or not.

@@ -24,7 +24,7 @@ type Message struct {
 	to                []string
 	tags              []string
 	campaigns         []string
-	dkim              bool
+	dkim              *bool
 	deliveryTime      time.Time
 	stoPeriod         string
 	attachments       []string
@@ -35,9 +35,9 @@ type Message struct {
 
 	nativeSend         bool
 	testMode           bool
-	tracking           bool
-	trackingClicks     string
-	trackingOpens      bool
+	tracking           *bool
+	trackingClicks     *string
+	trackingOpens      *bool
 	headers            map[string]string
 	variables          map[string]string
 	templateVariables  map[string]interface{}
@@ -46,12 +46,8 @@ type Message struct {
 	templateVersionTag string
 	templateRenderText bool
 
-	dkimSet           bool
-	trackingSet       bool
-	trackingClicksSet bool
-	trackingOpensSet  bool
-	requireTLS        bool
-	skipVerification  bool
+	requireTLS       bool
+	skipVerification bool
 
 	specific features
 }
@@ -64,50 +60,6 @@ type ReaderAttachment struct {
 type BufferAttachment struct {
 	Filename string
 	Buffer   []byte
-}
-
-// StoredMessage structures contain the (parsed) message content for an email
-// sent to a Mailgun account.
-//
-// The MessageHeaders field is special, in that it's formatted as a slice of pairs.
-// Each pair consists of a name [0] and value [1].  Array notation is used instead of a map
-// because that's how it's sent over the wire, and it's how encoding/json expects this field
-// to be.
-type StoredMessage struct {
-	Recipients        string             `json:"recipients"`
-	Sender            string             `json:"sender"`
-	From              string             `json:"from"`
-	Subject           string             `json:"subject"`
-	BodyPlain         string             `json:"body-plain"`
-	StrippedText      string             `json:"stripped-text"`
-	StrippedSignature string             `json:"stripped-signature"`
-	BodyHtml          string             `json:"body-html"`
-	StrippedHtml      string             `json:"stripped-html"`
-	Attachments       []StoredAttachment `json:"attachments"`
-	MessageUrl        string             `json:"message-url"`
-	ContentIDMap      map[string]struct {
-		Url         string `json:"url"`
-		ContentType string `json:"content-type"`
-		Name        string `json:"name"`
-		Size        int64  `json:"size"`
-	} `json:"content-id-map"`
-	MessageHeaders [][]string `json:"message-headers"`
-}
-
-// StoredAttachment structures contain information on an attachment associated with a stored message.
-type StoredAttachment struct {
-	Size        int    `json:"size"`
-	Url         string `json:"url"`
-	Name        string `json:"name"`
-	ContentType string `json:"content-type"`
-}
-
-type StoredMessageRaw struct {
-	Recipients string `json:"recipients"`
-	Sender     string `json:"sender"`
-	From       string `json:"from"`
-	Subject    string `json:"subject"`
-	BodyMime   string `json:"body-mime"`
 }
 
 // plainMessage contains fields relevant to plain API-synthesized messages.
@@ -405,8 +357,7 @@ func (m *Message) AddCampaign(campaign string) {
 // SetDKIM arranges to send the o:dkim header with the message, and sets its value accordingly.
 // Refer to the Mailgun documentation for more information.
 func (m *Message) SetDKIM(dkim bool) {
-	m.dkim = dkim
-	m.dkimSet = true
+	m.dkim = &dkim
 }
 
 // EnableNativeSend allows the return path to match the address in the Message.Headers.From:
@@ -457,26 +408,21 @@ func (m *Message) SetSTOPeriod(stoPeriod string) error {
 // Note that this header is not passed on to the final recipient(s).
 // Refer to the Mailgun documentation for more information.
 func (m *Message) SetTracking(tracking bool) {
-	m.tracking = tracking
-	m.trackingSet = true
+	m.tracking = &tracking
 }
 
 // SetTrackingClicks information is found in the Mailgun documentation.
 func (m *Message) SetTrackingClicks(trackingClicks bool) {
-	m.trackingClicks = yesNo(trackingClicks)
-	m.trackingClicksSet = true
+	m.trackingClicks = ptr(yesNo(trackingClicks))
 }
 
 // SetTrackingOptions sets the o:tracking, o:tracking-clicks and o:tracking-opens at once.
 func (m *Message) SetTrackingOptions(options *TrackingOptions) {
-	m.tracking = options.Tracking
-	m.trackingSet = true
+	m.tracking = &options.Tracking
 
-	m.trackingClicks = options.TrackingClicks
-	m.trackingClicksSet = true
+	m.trackingClicks = &options.TrackingClicks
 
-	m.trackingOpens = options.TrackingOpens
-	m.trackingOpensSet = true
+	m.trackingOpens = &options.TrackingOpens
 }
 
 // SetRequireTLS information is found in the Mailgun documentation.
@@ -491,8 +437,7 @@ func (m *Message) SetSkipVerification(b bool) {
 
 // SetTrackingOpens information is found in the Mailgun documentation.
 func (m *Message) SetTrackingOpens(trackingOpens bool) {
-	m.trackingOpens = trackingOpens
-	m.trackingOpensSet = true
+	m.trackingOpens = &trackingOpens
 }
 
 // SetTemplateVersion information is found in the Mailgun documentation.
@@ -581,7 +526,7 @@ var ErrInvalidMessage = errors.New("message not valid")
 //	}
 //
 //	See the public mailgun documentation for all possible return codes and error messages
-func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, id string, err error) {
+func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
 		return
@@ -598,121 +543,121 @@ func (mg *MailgunImpl) Send(ctx context.Context, message *Message) (mes string, 
 		return
 	}
 
-	if !isValid(message) {
+	if !isValid(m) {
 		err = ErrInvalidMessage
 		return
 	}
 
-	if message.stoPeriod != "" && message.RecipientCount() > 1 {
+	if m.stoPeriod != "" && m.RecipientCount() > 1 {
 		err = errors.New("STO can only be used on a per-message basis")
 		return
 	}
 	payload := newFormDataPayload()
 
-	message.specific.addValues(payload)
-	for _, to := range message.to {
+	m.specific.addValues(payload)
+	for _, to := range m.to {
 		payload.addValue("to", to)
 	}
-	for _, tag := range message.tags {
+	for _, tag := range m.tags {
 		payload.addValue("o:tag", tag)
 	}
-	for _, campaign := range message.campaigns {
+	for _, campaign := range m.campaigns {
 		payload.addValue("o:campaign", campaign)
 	}
-	if message.dkimSet {
-		payload.addValue("o:dkim", yesNo(message.dkim))
+	if m.dkim != nil {
+		payload.addValue("o:dkim", yesNo(*m.dkim))
 	}
-	if !message.deliveryTime.IsZero() {
-		payload.addValue("o:deliverytime", formatMailgunTime(message.deliveryTime))
+	if !m.deliveryTime.IsZero() {
+		payload.addValue("o:deliverytime", formatMailgunTime(m.deliveryTime))
 	}
-	if message.stoPeriod != "" {
-		payload.addValue("o:deliverytime-optimize-period", message.stoPeriod)
+	if m.stoPeriod != "" {
+		payload.addValue("o:deliverytime-optimize-period", m.stoPeriod)
 	}
-	if message.nativeSend {
+	if m.nativeSend {
 		payload.addValue("o:native-send", "yes")
 	}
-	if message.testMode {
+	if m.testMode {
 		payload.addValue("o:testmode", "yes")
 	}
-	if message.trackingSet {
-		payload.addValue("o:tracking", yesNo(message.tracking))
+	if m.tracking != nil {
+		payload.addValue("o:tracking", yesNo(*m.tracking))
 	}
-	if message.trackingClicksSet {
-		payload.addValue("o:tracking-clicks", message.trackingClicks)
+	if m.trackingClicks != nil {
+		payload.addValue("o:tracking-clicks", *m.trackingClicks)
 	}
-	if message.trackingOpensSet {
-		payload.addValue("o:tracking-opens", yesNo(message.trackingOpens))
+	if m.trackingOpens != nil {
+		payload.addValue("o:tracking-opens", yesNo(*m.trackingOpens))
 	}
-	if message.requireTLS {
-		payload.addValue("o:require-tls", trueFalse(message.requireTLS))
+	if m.requireTLS {
+		payload.addValue("o:require-tls", trueFalse(m.requireTLS))
 	}
-	if message.skipVerification {
-		payload.addValue("o:skip-verification", trueFalse(message.skipVerification))
+	if m.skipVerification {
+		payload.addValue("o:skip-verification", trueFalse(m.skipVerification))
 	}
-	if message.headers != nil {
-		for header, value := range message.headers {
+	if m.headers != nil {
+		for header, value := range m.headers {
 			payload.addValue("h:"+header, value)
 		}
 	}
-	if message.variables != nil {
-		for variable, value := range message.variables {
+	if m.variables != nil {
+		for variable, value := range m.variables {
 			payload.addValue("v:"+variable, value)
 		}
 	}
-	if message.templateVariables != nil {
-		variableString, err := json.Marshal(message.templateVariables)
+	if m.templateVariables != nil {
+		variableString, err := json.Marshal(m.templateVariables)
 		if err == nil {
 			// the map was marshalled as json so add it
 			payload.addValue("h:X-Mailgun-Variables", string(variableString))
 		}
 	}
-	if message.recipientVariables != nil {
-		j, err := json.Marshal(message.recipientVariables)
+	if m.recipientVariables != nil {
+		j, err := json.Marshal(m.recipientVariables)
 		if err != nil {
 			return "", "", err
 		}
 		payload.addValue("recipient-variables", string(j))
 	}
-	if message.attachments != nil {
-		for _, attachment := range message.attachments {
+	if m.attachments != nil {
+		for _, attachment := range m.attachments {
 			payload.addFile("attachment", attachment)
 		}
 	}
-	if message.readerAttachments != nil {
-		for _, readerAttachment := range message.readerAttachments {
+	if m.readerAttachments != nil {
+		for _, readerAttachment := range m.readerAttachments {
 			payload.addReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
 		}
 	}
-	if message.bufferAttachments != nil {
-		for _, bufferAttachment := range message.bufferAttachments {
+	if m.bufferAttachments != nil {
+		for _, bufferAttachment := range m.bufferAttachments {
 			payload.addBuffer("attachment", bufferAttachment.Filename, bufferAttachment.Buffer)
 		}
 	}
-	if message.inlines != nil {
-		for _, inline := range message.inlines {
+	if m.inlines != nil {
+		for _, inline := range m.inlines {
 			payload.addFile("inline", inline)
 		}
 	}
 
-	if message.readerInlines != nil {
-		for _, readerAttachment := range message.readerInlines {
+	if m.readerInlines != nil {
+		for _, readerAttachment := range m.readerInlines {
 			payload.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
 		}
 	}
 
-	if message.domain == "" {
-		message.domain = mg.Domain()
+	if m.domain == "" {
+		m.domain = mg.Domain()
 	}
 
-	if message.templateVersionTag != "" {
-		payload.addValue("t:version", message.templateVersionTag)
+	if m.templateVersionTag != "" {
+		payload.addValue("t:version", m.templateVersionTag)
 	}
 
-	if message.templateRenderText {
-		payload.addValue("t:text", yesNo(message.templateRenderText))
+	if m.templateRenderText {
+		payload.addValue("t:text", yesNo(m.templateRenderText))
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, message.specific.endpoint(), message.domain))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.specific.endpoint(), m.domain))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided
@@ -780,10 +725,7 @@ func yesNo(b bool) string {
 }
 
 func trueFalse(b bool) string {
-	if b {
-		return "true"
-	}
-	return "false"
+	return strconv.FormatBool(b)
 }
 
 // isValid returns true if, and only if,
@@ -855,86 +797,11 @@ func validateStringList(list []string, requireOne bool) bool {
 			if a == "" {
 				return false
 			} else {
+				// TODO(vtopc): hasOne is always true:
 				hasOne = hasOne || true
 			}
 		}
 	}
 
 	return hasOne
-}
-
-// GetStoredMessage retrieves information about a received e-mail message.
-// This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (StoredMessage, error) {
-	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-
-	var response StoredMessage
-	err := getResponseFromJSON(ctx, r, &response)
-	return response, err
-}
-
-// Given a storage id resend the stored message to the specified recipients
-func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...string) (string, string, error) {
-	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-
-	payload := newFormDataPayload()
-
-	if len(recipients) == 0 {
-		return "", "", errors.New("must provide at least one recipient")
-	}
-
-	for _, to := range recipients {
-		payload.addValue("to", to)
-	}
-
-	var resp sendMessageResponse
-	err := postResponseFromJSON(ctx, r, payload, &resp)
-	if err != nil {
-		return "", "", err
-	}
-	return resp.Message, resp.Id, nil
-
-}
-
-// GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
-// Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
-// thus delegates to the caller the required parsing.
-func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (StoredMessageRaw, error) {
-	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	r.addHeader("Accept", "message/rfc2822")
-
-	var response StoredMessageRaw
-	err := getResponseFromJSON(ctx, r, &response)
-	return response, err
-}
-
-// Deprecated: Use GetStoreMessage() instead
-func (mg *MailgunImpl) GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error) {
-	return mg.GetStoredMessage(ctx, url)
-}
-
-// Deprecated: Use GetStoreMessageRaw() instead
-func (mg *MailgunImpl) GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error) {
-	return mg.GetStoredMessageRaw(ctx, url)
-}
-
-// GetStoredAttachment retrieves the raw MIME body of a received e-mail message attachment.
-func (mg *MailgunImpl) GetStoredAttachment(ctx context.Context, url string) ([]byte, error) {
-	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
-	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	r.addHeader("Accept", "message/rfc2822")
-
-	response, err := makeGetRequest(ctx, r)
-	if err != nil {
-		return nil, err
-	}
-
-	return response.Data, err
 }
