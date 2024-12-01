@@ -11,7 +11,6 @@ type commonMessageV5 struct {
 	domain             string
 	to                 []string
 	tags               []string
-	campaigns          []string
 	dkim               *bool
 	deliveryTime       time.Time
 	stoPeriod          string
@@ -33,8 +32,6 @@ type commonMessageV5 struct {
 	templateRenderText bool
 	requireTLS         bool
 	skipVerification   bool
-
-	// specific featuresV5
 }
 
 // plainMessage contains fields relevant to plain API-synthesized messages.
@@ -62,29 +59,27 @@ type mimeMessageV5 struct {
 }
 
 // features abstracts the common characteristics between regular and MIME messages.
-// addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the AddCC, AddBCC,
-// RecipientCount, SetHTML and SetAMPHtml calls, as these functions are ignored for MIME messages.
-// Send() invokes addValues to add message-type-specific MIME headers for the API call
-// to Mailgun.
-// isValid yields true if and only if the message is valid enough for sending
-// through the API.
-// Finally, endpoint() tells Send() which endpoint to use to submit the API call.
-// TODO(v5): remove?
-type featuresV5 interface {
+type specificV5 interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
-	addCC(string)
+	AddCC(string)
 
-	addBCC(string)
+	// AddBCC appends a receiver to the blind-carbon-copy header of a message.
+	AddBCC(string)
 
-	setHtml(string)
+	// SetHTML If you're sending a message that isn't already MIME encoded, it will arrange to bundle
+	// an HTML representation of your message in addition to your plain-text body.
+	SetHTML(string)
 
-	setAMPHtml(string)
+	// SetAmpHTML If you're sending a message that isn't already MIME encoded, it will arrange to bundle
+	// an AMP-For-Email representation of your message in addition to your html & plain-text content.
+	SetAmpHTML(string)
 
-	addValues(*formDataPayload)
+	// AddValues invoked by Send() to add message-type-specific MIME headers for the API call
+	// to Mailgun.
+	AddValues(*formDataPayload)
 
-	isValid() bool
-
-	endpoint() string
+	// Endpoint tells Send() which endpoint to use to submit the API call.
+	Endpoint() string
 
 	// RecipientCount returns the total number of recipients for the message.
 	// This includes To:, Cc:, and Bcc: fields.
@@ -97,11 +92,22 @@ type featuresV5 interface {
 	// If your MIME messages have more than 10 non-To: field recipients,
 	// you may find that some recipients will not receive your e-mail.
 	// It's perfectly OK, of course, for a MIME message to not have any Cc: or Bcc: recipients.
-	recipientCount() int
+	RecipientCount() int
 
-	setTemplate(string)
+	// SetTemplate sets the name of a template stored via the template API.
+	// See https://documentation.mailgun.com/en/latest/user_manual.html#templating
+	SetTemplate(string)
+
+	// AddRecipient appends a receiver to the To: header of a message.
+	// It will return an error if the limit of recipients have been exceeded for this message
+	AddRecipient(recipient string)
+
+	// isValid yields true if and only if the message is valid enough for sending
+	// through the API.
+	isValid() bool
 }
 
+// TODO(v5): implement for plain and MIME messages
 type messageIfaceV5 interface {
 	Domain() string
 	To() []string
@@ -132,5 +138,5 @@ type messageIfaceV5 interface {
 	RecipientCount() int
 	AddValues(p *formDataPayload)
 
-	featuresV5
+	specificV5
 }

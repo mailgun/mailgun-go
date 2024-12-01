@@ -113,120 +113,6 @@ func (m *commonMessageV5) AddInline(inline string) {
 	m.inlines = append(m.inlines, inline)
 }
 
-// AddRecipient appends a receiver to the To: header of a message.
-// It will return an error if the limit of recipients have been exceeded for this message
-func (m *commonMessageV5) AddRecipient(recipient string) error {
-	return m.AddRecipientAndVariables(recipient, nil)
-}
-
-// AddRecipientAndVariables appends a receiver to the To: header of a message,
-// and as well attaches a set of variables relevant for this recipient.
-// It will return an error if the limit of recipients have been exceeded for this message
-func (m *commonMessageV5) AddRecipientAndVariables(r string, vars map[string]interface{}) error {
-	if m.RecipientCount() >= MaxNumberOfRecipients { // ??????????????????????????????????????????????
-		return fmt.Errorf("recipient limit exceeded (max %d)", MaxNumberOfRecipients)
-	}
-	m.to = append(m.to, r)
-	if vars != nil {
-		if m.recipientVariables == nil {
-			m.recipientVariables = make(map[string]map[string]interface{})
-		}
-		m.recipientVariables[r] = vars
-	}
-	return nil
-}
-
-func (m *plainMessageV5) RecipientCount() int {
-	return len(m.to) + len(m.bcc) + len(m.cc)
-}
-
-func (m *mimeMessageV5) recipientCount() int {
-	return 10
-}
-
-// SetReplyTo sets the receiver who should receive replies
-func (m *commonMessageV5) SetReplyTo(recipient string) {
-	m.AddHeader("Reply-To", recipient)
-}
-
-// AddCC appends a receiver to the carbon-copy header of a message.
-
-func (m *plainMessageV5) AddCC(r string) {
-	m.cc = append(m.cc, r)
-}
-
-func (m *mimeMessageV5) AddCC(_ string) {}
-
-// AddBCC appends a receiver to the blind-carbon-copy header of a message.
-func (m *commonMessageV5) AddBCC(recipient string) {
-	m.specific.addBCC(recipient)
-}
-
-func (m *plainMessageV5) addBCC(r string) {
-	m.bcc = append(m.bcc, r)
-}
-
-func (m *mimeMessageV5) addBCC(_ string) {}
-
-// SetHTML is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
-// an HTML representation of your message in addition to your plain-text body.
-func (m *commonMessageV5) SetHTML(html string) {
-	m.specific.setHtml(html)
-}
-
-// Deprecated: use SetHTML instead.
-//
-// TODO(v5): remove this method
-func (m *commonMessageV5) SetHtml(html string) {
-	m.specific.setHtml(html)
-}
-
-func (m *plainMessageV5) setHtml(h string) {
-	m.html = h
-}
-
-func (m *mimeMessageV5) setHtml(_ string) {}
-
-// SetAMPHtml is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
-// an AMP-For-Email representation of your message in addition to your html & plain-text content.
-func (m *commonMessageV5) SetAMPHtml(html string) {
-	m.specific.setAMPHtml(html)
-}
-
-func (m *plainMessageV5) setAMPHtml(h string) {
-	m.ampHtml = h
-}
-
-func (m *mimeMessageV5) setAMPHtml(_ string) {}
-
-// AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
-// Refer to the Mailgun documentation for further details.
-func (m *commonMessageV5) AddTag(tag ...string) error {
-	if len(m.tags) >= MaxNumberOfTags {
-		return fmt.Errorf("cannot add any new tags. Message tag limit (%d) reached", MaxNumberOfTags)
-	}
-
-	m.tags = append(m.tags, tag...)
-	return nil
-}
-
-// SetTemplate sets the name of a template stored via the template API.
-// See https://documentation.mailgun.com/en/latest/user_manual.html#templating
-func (m *commonMessageV5) SetTemplate(t string) {
-	m.specific.setTemplate(t)
-}
-
-func (m *plainMessageV5) setTemplate(t string) {
-	m.template = t
-}
-
-func (m *mimeMessageV5) setTemplate(t string) {}
-
-// AddCampaign is no longer supported and is deprecated for new software.
-func (m *commonMessageV5) AddCampaign(campaign string) {
-	m.campaigns = append(m.campaigns, campaign)
-}
-
 // SetDKIM arranges to send the o:dkim header with the message, and sets its value accordingly.
 // Refer to the Mailgun documentation for more information.
 func (m *commonMessageV5) SetDKIM(dkim bool) {
@@ -373,6 +259,126 @@ func (m *commonMessageV5) AddDomain(domain string) {
 // GetHeaders retrieves the http headers associated with this message
 func (m *commonMessageV5) GetHeaders() map[string]string {
 	return m.headers
+}
+
+// specific message methods
+
+func (m *plainMessageV5) AddRecipient(recipient string) error {
+	return m.AddRecipientAndVariables(recipient, nil)
+}
+
+// AddRecipientAndVariables appends a receiver to the To: header of a message,
+// and as well attaches a set of variables relevant for this recipient.
+// It will return an error if the limit of recipients have been exceeded for this message
+func (m *plainMessageV5) AddRecipientAndVariables(r string, vars map[string]interface{}) error {
+	if m.RecipientCount() >= MaxNumberOfRecipients {
+		return fmt.Errorf("recipient limit exceeded (max %d)", MaxNumberOfRecipients)
+	}
+	m.to = append(m.to, r)
+	if vars != nil {
+		if m.recipientVariables == nil {
+			m.recipientVariables = make(map[string]map[string]interface{})
+		}
+		m.recipientVariables[r] = vars
+	}
+
+	return nil
+}
+
+func (m *mimeMessageV5) AddRecipient(recipient string) error {
+	if m.RecipientCount() >= MaxNumberOfRecipients { // ??????????????????????????????????????????????
+		return fmt.Errorf("recipient limit exceeded (max %d)", MaxNumberOfRecipients)
+	}
+	m.to = append(m.to, recipient)
+
+	return nil
+}
+
+func (m *plainMessageV5) RecipientCount() int {
+	return len(m.to) + len(m.bcc) + len(m.cc)
+}
+
+func (m *mimeMessageV5) RecipientCount() int {
+	return len(m.to)
+}
+
+// SetReplyTo sets the receiver who should receive replies
+func (m *commonMessageV5) SetReplyTo(recipient string) {
+	m.AddHeader("Reply-To", recipient)
+}
+
+func (m *plainMessageV5) AddCC(r string) {
+	m.cc = append(m.cc, r)
+}
+
+func (m *mimeMessageV5) AddCC(_ string) {}
+
+func (m *plainMessageV5) AddBCC(r string) {
+	m.bcc = append(m.bcc, r)
+}
+
+func (m *mimeMessageV5) AddBCC(_ string) {}
+
+func (m *plainMessageV5) SetHTML(h string) {
+	m.html = h
+}
+
+func (m *mimeMessageV5) SetHTML(_ string) {}
+
+func (m *plainMessageV5) SetAmpHTML(h string) {
+	m.ampHtml = h
+}
+
+func (m *mimeMessageV5) SetAmpHTML(_ string) {}
+
+// AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
+// Refer to the Mailgun documentation for further details.
+func (m *commonMessageV5) AddTag(tag ...string) error {
+	if len(m.tags) >= MaxNumberOfTags {
+		return fmt.Errorf("cannot add any new tags. Message tag limit (%d) reached", MaxNumberOfTags)
+	}
+
+	m.tags = append(m.tags, tag...)
+	return nil
+}
+
+func (m *plainMessageV5) SetTemplate(t string) {
+	m.template = t
+}
+
+func (m *mimeMessageV5) SetTemplate(_ string) {}
+
+func (m *plainMessageV5) AddValues(p *formDataPayload) {
+	p.addValue("from", m.from)
+	p.addValue("subject", m.subject)
+	p.addValue("text", m.text)
+	for _, cc := range m.cc {
+		p.addValue("cc", cc)
+	}
+	for _, bcc := range m.bcc {
+		p.addValue("bcc", bcc)
+	}
+	if m.html != "" {
+		p.addValue("html", m.html)
+	}
+	if m.template != "" {
+		p.addValue("template", m.template)
+	}
+	if m.ampHtml != "" {
+		p.addValue("amp-html", m.ampHtml)
+	}
+}
+
+func (m *mimeMessageV5) AddValues(p *formDataPayload) {
+	p.addReadCloser("message", "message.mime", m.body)
+}
+
+func (m *plainMessageV5) Endpoint() string {
+	return messagesEndpoint
+}
+
+func (m *mimeMessageV5) Endpoint() string {
+	return mimeMessagesEndpoint
 }
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
@@ -524,7 +530,7 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m messageIfaceV5) (mes string
 		payload.addValue("t:text", yesNo(m.TemplateRenderText()))
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.endpoint(), m.Domain()))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Endpoint(), m.Domain()))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided
@@ -539,48 +545,7 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m messageIfaceV5) (mes string
 		id = response.Id
 	}
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	if r.capturedCurlOutput != "" {
-		mg.mu.Lock()
-		defer mg.mu.Unlock()
-		mg.capturedCurlOutput = r.capturedCurlOutput
-	}
-
 	return
-}
-
-func (m *plainMessageV5) addValues(p *formDataPayload) {
-	p.addValue("from", m.from)
-	p.addValue("subject", m.subject)
-	p.addValue("text", m.text)
-	for _, cc := range m.cc {
-		p.addValue("cc", cc)
-	}
-	for _, bcc := range m.bcc {
-		p.addValue("bcc", bcc)
-	}
-	if m.html != "" {
-		p.addValue("html", m.html)
-	}
-	if m.template != "" {
-		p.addValue("template", m.template)
-	}
-	if m.ampHtml != "" {
-		p.addValue("amp-html", m.ampHtml)
-	}
-}
-
-func (m *mimeMessageV5) addValues(p *formDataPayload) {
-	p.addReadCloser("message", "message.mime", m.body)
-}
-
-func (m *plainMessageV5) endpoint() string {
-	return messagesEndpoint
-}
-
-func (m *mimeMessageV5) endpoint() string {
-	return mimeMessagesEndpoint
 }
 
 // isValid returns true if, and only if,
