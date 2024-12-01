@@ -137,8 +137,5 @@ type messageIfaceV5 interface {
 	RequireTLS() bool
 	SkipVerification() bool
 
-	RecipientCount() int
-	AddValues(p *formDataPayload)
-
 	specificV5
 }
