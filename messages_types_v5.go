@@ -38,6 +38,7 @@ type commonMessageV5 struct {
 // You're expected to use various setters to set most of these attributes,
 // although from, subject, and text are set when the message is created with
 // NewMessage.
+// TODO(v5): rename to PlainMessage
 type plainMessageV5 struct {
 	commonMessageV5
 
@@ -52,6 +53,7 @@ type plainMessageV5 struct {
 }
 
 // mimeMessage contains fields relevant to pre-packaged MIME messages.
+// TODO(v5): rename to MimeMessage
 type mimeMessageV5 struct {
 	commonMessageV5
 
