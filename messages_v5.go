@@ -482,7 +482,7 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m messageIfaceV5) (mes string
 		}
 	}
 	if m.TemplateVariables() != nil {
-		variableString, err := json.Marshal(m.TemplateVariables)
+		variableString, err := json.Marshal(m.TemplateVariables())
 		if err == nil {
 			// the map was marshalled as json so add it
 			payload.addValue("h:X-Mailgun-Variables", string(variableString))
