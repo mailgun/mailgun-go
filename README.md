@@ -31,7 +31,7 @@ import (
 var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
-// (https://app.mailgun.com/app/account/security)
+// (https://app.mailgun.com/settings/api_security)
 var privateAPIKey = "your-private-key"
 
 func main() {
@@ -78,7 +78,7 @@ import (
 
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
-	// (https://app.mailgun.com/app/account/security)
+	// (https://app.mailgun.com/settings/api_security)
 	mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
 
 	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
@@ -134,7 +134,7 @@ import (
 
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
-	// (https://app.mailgun.com/app/account/security)
+	// (https://app.mailgun.com/settings/api_security)
 	mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
 
 	begin := time.Now().Add(time.Second * -3)
@@ -209,8 +209,9 @@ import (
 
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
-	// (https://app.mailgun.com/app/account/security)
+	// (https://app.mailgun.com/settings/api_security)
 	mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
+	mg.SetWebhookSigningKey("webhook-signing-key")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
@@ -278,7 +279,7 @@ import (
 var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
-// (https://app.mailgun.com/app/account/security)
+// (https://app.mailgun.com/settings/api_security)
 var privateAPIKey = "your-private-key"
 
 func main() {
@@ -337,7 +338,7 @@ import (
 var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
 // You can find the Private API Key in your Account Menu, under "Settings":
-// (https://app.mailgun.com/app/account/security)
+// (https://app.mailgun.com/settings/api_security)
 var privateAPIKey = "your-private-key"
 
 func main() {
@@ -371,7 +372,7 @@ func main() {
 ```
 
 The official mailgun documentation includes examples using this library. Go
-[here](https://documentation.mailgun.com/en/latest/api_reference.html#api-reference)
+[here](https://documentation.mailgun.com/docs/mailgun/api-reference/)
 and click on the "Go" button at the top of the page.
 
 ### EU Region
@@ -389,8 +390,8 @@ mg.SetAPIBase(mailgun.APIBaseEU)
 To run the tests various environment variables must be set. These are:
 
 * `MG_DOMAIN` is the domain name - this is a value registered in the Mailgun admin interface.
-* `MG_PUBLIC_API_KEY` is the Public Validation API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/app/account/security)
-* `MG_API_KEY` is the Private API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/app/account/security)
+* `MG_PUBLIC_API_KEY` is the Public Validation API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/settings/api_security)
+* `MG_API_KEY` is the Private API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/settings/api_security)
 * `MG_EMAIL_TO` is the email address used in various sending tests.
 
 and finally
