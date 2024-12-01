@@ -123,7 +123,7 @@ type WebhookPayload struct {
 
 // Use this method to parse the webhook signature given as JSON in the webhook response
 func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err error) {
-	h := hmac.New(sha256.New, []byte(mg.APIKey()))
+	h := hmac.New(sha256.New, []byte(mg.WebhookSigningKey()))
 
 	_, err = io.WriteString(h, sig.TimeStamp)
 	if err != nil {
@@ -149,7 +149,7 @@ func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err
 // Deprecated: Please use the VerifyWebhookSignature() to parse the latest
 // version of WebHooks from mailgun
 func (mg *MailgunImpl) VerifyWebhookRequest(req *http.Request) (verified bool, err error) {
-	h := hmac.New(sha256.New, []byte(mg.APIKey()))
+	h := hmac.New(sha256.New, []byte(mg.WebhookSigningKey()))
 
 	_, err = io.WriteString(h, req.FormValue("timestamp"))
 	if err != nil {
