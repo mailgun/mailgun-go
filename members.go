@@ -179,7 +179,7 @@ func (mg *MailgunImpl) CreateMember(ctx context.Context, merge bool, addr string
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
+	p := NewFormDataPayload()
 	p.addValue("upsert", yesNo(merge))
 	p.addValue("address", prototype.Address)
 	p.addValue("name", prototype.Name)
@@ -197,7 +197,7 @@ func (mg *MailgunImpl) UpdateMember(ctx context.Context, s, l string, prototype 
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
+	p := NewFormDataPayload()
 	if prototype.Address != "" {
 		p.addValue("address", prototype.Address)
 	}
@@ -247,7 +247,7 @@ func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr strin
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	p := newFormDataPayload()
+	p := NewFormDataPayload()
 	if u != nil {
 		p.addValue("upsert", yesNo(*u))
 	}

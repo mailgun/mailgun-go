@@ -156,7 +156,7 @@ func TestSendMGAMPHtml(t *testing.T) {
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
-		m.SetAMPHtml(exampleAMPHtml)
+		m.SetAmpHTML(exampleAMPHtml)
 		msg, id, err := mg.Send(ctx, m)
 		require.NoError(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
@@ -776,4 +776,10 @@ func TestSendTemplateOptions(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
 	assert.Equal(t, exampleID, id)
+}
+
+func TestSendableMessageIface(t *testing.T) {
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+
+	assert.Implements(t, (*mailgun.SendableMessage)(nil), m)
 }
