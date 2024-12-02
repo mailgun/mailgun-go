@@ -402,7 +402,7 @@ func (m *mimeMessageV5) Endpoint() string {
 //	}
 //
 //	See the public mailgun documentation for all possible return codes and error messages
-func (mg *MailgunImpl) sendV5(ctx context.Context, m messageIfaceV5) (mes string, id string, err error) {
+func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes string, id string, err error) {
 	invalidChars := ":&'@(),!?#;%+=<>"
 	if i := strings.ContainsAny(mg.domain, invalidChars); i {
 		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
@@ -414,11 +414,10 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m messageIfaceV5) (mes string
 		return
 	}
 
-	// TODO(v5): uncomment
-	// if !isValidIface(m) {
-	// 	err = ErrInvalidMessage
-	// 	return
-	// }
+	if !isValid(m) {
+		err = ErrInvalidMessage
+		return
+	}
 
 	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
 		err = errors.New("STO can only be used on a per-message basis")
@@ -541,32 +540,6 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m messageIfaceV5) (mes string
 	}
 
 	return
-}
-
-// isValid returns true if, and only if,
-// a Message instance is sufficiently initialized to send via the Mailgun interface.
-func isValidIface(m messageIfaceV5) bool {
-	if m == nil {
-		return false
-	}
-
-	if !m.isValid() {
-		return false
-	}
-
-	if m.RecipientCount() == 0 {
-		return false
-	}
-
-	if !validateStringList(m.Tags(), false) {
-		return false
-	}
-
-	if !validateStringList(m.Campaigns(), false) || len(m.Campaigns()) > 3 {
-		return false
-	}
-
-	return true
 }
 
 func (m *plainMessageV5) isValid() bool {

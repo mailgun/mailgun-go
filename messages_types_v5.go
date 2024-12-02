@@ -110,33 +110,3 @@ type specificV5 interface {
 	// through the API.
 	isValid() bool
 }
-
-type messageIfaceV5 interface {
-	Domain() string
-	To() []string
-	Tags() []string
-	Campaigns() []string
-	DKIM() *bool
-	DeliveryTime() time.Time
-	STOPeriod() string
-	Attachments() []string
-	ReaderAttachments() []ReaderAttachment
-	Inlines() []string
-	ReaderInlines() []ReaderAttachment
-	BufferAttachments() []BufferAttachment
-	NativeSend() bool
-	TestMode() bool
-	Tracking() *bool
-	TrackingClicks() *string
-	TrackingOpens() *bool
-	Headers() map[string]string
-	Variables() map[string]string
-	TemplateVariables() map[string]interface{}
-	RecipientVariables() map[string]map[string]interface{}
-	TemplateVersionTag() string
-	TemplateRenderText() bool
-	RequireTLS() bool
-	SkipVerification() bool
-
-	specificV5
-}
