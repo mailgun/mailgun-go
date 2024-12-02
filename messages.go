@@ -20,6 +20,7 @@ const MaxNumberOfRecipients = 1000
 const MaxNumberOfTags = 3
 
 // Message structures contain both the message text and the envelope for an e-mail message.
+// TODO(v5): rename to CommonMessage and remove Specific
 type Message struct {
 	to                []string
 	tags              []string
@@ -66,6 +67,8 @@ type BufferAttachment struct {
 // You're expected to use various setters to set most of these attributes,
 // although from, subject, and text are set when the message is created with
 // NewMessage.
+// TODO(v5): rename to PlainMessage
+// TODO(v5): embed CommonMessage
 type plainMessage struct {
 	from     string
 	cc       []string
@@ -78,6 +81,8 @@ type plainMessage struct {
 }
 
 // mimeMessage contains fields relevant to pre-packaged MIME messages.
+// TODO(v5): rename to MimeMessage
+// TODO(v5): embed CommonMessage
 type mimeMessage struct {
 	body io.ReadCloser
 }
@@ -157,6 +162,7 @@ type Specific interface {
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
+// TODO(v5): should return PlainMessage
 func NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
 		Specific: &plainMessage{
@@ -190,6 +196,7 @@ func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Messag
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
+// TODO(v5): should return MimeMessage
 func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
 		Specific: &mimeMessage{
