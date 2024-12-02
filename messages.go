@@ -612,6 +612,7 @@ type SendableMessage interface {
 	To() []string
 	Tags() []string
 	// Deprecated: is no longer supported and is deprecated for new software.
+	// TODO(v5): remove this method
 	Campaigns() []string
 	DKIM() *bool
 	DeliveryTime() time.Time
@@ -636,6 +637,8 @@ type SendableMessage interface {
 	SkipVerification() bool
 
 	RecipientCount() int
+
+	specific
 }
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
@@ -791,7 +794,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		payload.addValue("t:text", yesNo(m.TemplateRenderText()))
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.specific.endpoint(), m.Domain()))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.endpoint(), m.Domain()))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided
@@ -864,12 +867,12 @@ func trueFalse(b bool) string {
 
 // isValid returns true if, and only if,
 // a Message instance is sufficiently initialized to send via the Mailgun interface.
-func isValid(m *Message) bool {
+func isValid(m SendableMessage) bool {
 	if m == nil {
 		return false
 	}
 
-	if !m.specific.isValid() {
+	if !m.isValid() {
 		return false
 	}
 
