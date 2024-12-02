@@ -356,11 +356,11 @@ func (m *Message) RecipientCount() int {
 	return len(m.to) + m.specific.recipientCount()
 }
 
-func (pm *plainMessage) recipientCount() int {
-	return len(pm.bcc) + len(pm.cc)
+func (m *plainMessage) recipientCount() int {
+	return len(m.bcc) + len(m.cc)
 }
 
-func (mm *mimeMessage) recipientCount() int {
+func (m *mimeMessage) recipientCount() int {
 	// TODO(v5): len(m.to)
 	return 10
 }
@@ -375,22 +375,22 @@ func (m *Message) AddCC(recipient string) {
 	m.specific.addCC(recipient)
 }
 
-func (pm *plainMessage) addCC(r string) {
-	pm.cc = append(pm.cc, r)
+func (m *plainMessage) addCC(r string) {
+	m.cc = append(m.cc, r)
 }
 
-func (mm *mimeMessage) addCC(_ string) {}
+func (m *mimeMessage) addCC(_ string) {}
 
 // AddBCC appends a receiver to the blind-carbon-copy header of a message.
 func (m *Message) AddBCC(recipient string) {
 	m.specific.addBCC(recipient)
 }
 
-func (pm *plainMessage) addBCC(r string) {
-	pm.bcc = append(pm.bcc, r)
+func (m *plainMessage) addBCC(r string) {
+	m.bcc = append(m.bcc, r)
 }
 
-func (mm *mimeMessage) addBCC(_ string) {}
+func (m *mimeMessage) addBCC(_ string) {}
 
 // SetHTML is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
 // an HTML representation of your message in addition to your plain-text body.
@@ -405,11 +405,11 @@ func (m *Message) SetHtml(html string) {
 	m.setHtml(html)
 }
 
-func (pm *plainMessage) setHtml(h string) {
-	pm.html = h
+func (m *plainMessage) setHtml(h string) {
+	m.html = h
 }
 
-func (mm *mimeMessage) setHtml(_ string) {}
+func (m *mimeMessage) setHtml(_ string) {}
 
 // SetAMPHtml is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
 // an AMP-For-Email representation of your message in addition to your html & plain-text content.
@@ -417,11 +417,11 @@ func (m *Message) SetAMPHtml(html string) {
 	m.specific.setAMPHtml(html)
 }
 
-func (pm *plainMessage) setAMPHtml(h string) {
-	pm.ampHtml = h
+func (m *plainMessage) setAMPHtml(h string) {
+	m.ampHtml = h
 }
 
-func (mm *mimeMessage) setAMPHtml(_ string) {}
+func (m *mimeMessage) setAMPHtml(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -440,11 +440,11 @@ func (m *Message) SetTemplate(t string) {
 	m.specific.setTemplate(t)
 }
 
-func (pm *plainMessage) setTemplate(t string) {
-	pm.template = t
+func (m *plainMessage) setTemplate(t string) {
+	m.template = t
 }
 
-func (mm *mimeMessage) setTemplate(t string) {}
+func (m *mimeMessage) setTemplate(t string) {}
 
 // Deprecated: is no longer supported and is deprecated for new software.
 func (m *Message) AddCampaign(campaign string) {
@@ -821,36 +821,36 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	return
 }
 
-func (pm *plainMessage) addValues(p *formDataPayload) {
-	p.addValue("from", pm.from)
-	p.addValue("subject", pm.subject)
-	p.addValue("text", pm.text)
-	for _, cc := range pm.cc {
+func (m *plainMessage) addValues(p *formDataPayload) {
+	p.addValue("from", m.from)
+	p.addValue("subject", m.subject)
+	p.addValue("text", m.text)
+	for _, cc := range m.cc {
 		p.addValue("cc", cc)
 	}
-	for _, bcc := range pm.bcc {
+	for _, bcc := range m.bcc {
 		p.addValue("bcc", bcc)
 	}
-	if pm.html != "" {
-		p.addValue("html", pm.html)
+	if m.html != "" {
+		p.addValue("html", m.html)
 	}
-	if pm.template != "" {
-		p.addValue("template", pm.template)
+	if m.template != "" {
+		p.addValue("template", m.template)
 	}
-	if pm.ampHtml != "" {
-		p.addValue("amp-html", pm.ampHtml)
+	if m.ampHtml != "" {
+		p.addValue("amp-html", m.ampHtml)
 	}
 }
 
-func (mm *mimeMessage) addValues(p *formDataPayload) {
-	p.addReadCloser("message", "message.mime", mm.body)
+func (m *mimeMessage) addValues(p *formDataPayload) {
+	p.addReadCloser("message", "message.mime", m.body)
 }
 
-func (pm *plainMessage) endpoint() string {
+func (m *plainMessage) endpoint() string {
 	return messagesEndpoint
 }
 
-func (mm *mimeMessage) endpoint() string {
+func (m *mimeMessage) endpoint() string {
 	return mimeMessagesEndpoint
 }
 
@@ -892,33 +892,33 @@ func isValid(m SendableMessage) bool {
 	return true
 }
 
-func (pm *plainMessage) isValid() bool {
-	if !validateStringList(pm.cc, false) {
+func (m *plainMessage) isValid() bool {
+	if !validateStringList(m.cc, false) {
 		return false
 	}
 
-	if !validateStringList(pm.bcc, false) {
+	if !validateStringList(m.bcc, false) {
 		return false
 	}
 
-	if pm.template != "" {
-		// pm.text or pm.html not needed if template is supplied
+	if m.template != "" {
+		// m.text or m.html not needed if template is supplied
 		return true
 	}
 
-	if pm.from == "" {
+	if m.from == "" {
 		return false
 	}
 
-	if pm.text == "" && pm.html == "" {
+	if m.text == "" && m.html == "" {
 		return false
 	}
 
 	return true
 }
 
-func (mm *mimeMessage) isValid() bool {
-	return mm.body != nil
+func (m *mimeMessage) isValid() bool {
+	return m.body != nil
 }
 
 // validateStringList returns true if, and only if,
