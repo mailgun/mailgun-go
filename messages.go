@@ -361,6 +361,7 @@ func (pm *plainMessage) recipientCount() int {
 }
 
 func (mm *mimeMessage) recipientCount() int {
+	// TODO(v5): len(m.to)
 	return 10
 }
 
@@ -401,7 +402,7 @@ func (m *Message) SetHTML(html string) {
 //
 // TODO(v5): remove this method
 func (m *Message) SetHtml(html string) {
-	m.specific.setHtml(html)
+	m.setHtml(html)
 }
 
 func (pm *plainMessage) setHtml(h string) {
