@@ -391,7 +391,7 @@ func (m *plainMessage) RecipientCount() int {
 }
 
 func (m *mimeMessage) RecipientCount() int {
-	// TODO(v5): len(m.to)
+	// TODO(v5): 10 + len(m.to)
 	return 10
 }
 
