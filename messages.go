@@ -663,7 +663,7 @@ type SendableMessage interface {
 //	}
 //
 // See the public mailgun documentation for all possible return codes and error messages
-// TODO(v5): switch m to SendableMessage interface
+// TODO(v5): switch m to SendableMessage interface - https://bryanftan.medium.com/accept-interfaces-return-structs-in-go-d4cab29a301b
 func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
