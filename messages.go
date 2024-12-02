@@ -426,6 +426,7 @@ func (m *plainMessage) SetHTML(h string) {
 func (m *mimeMessage) SetHTML(_ string) {}
 
 // Deprecated: use SetAmpHTML instead.
+// TODO(v5): remove this method
 func (m *Message) SetAMPHtml(html string) {
 	m.SetAmpHTML(html)
 }
