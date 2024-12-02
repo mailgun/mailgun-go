@@ -135,10 +135,10 @@ type Specific interface {
 	RecipientCount() int
 
 	// SetTemplate sets the name of a template stored via the template API.
-	// See https://documentation.mailgun.com/en/latest/user_manual.html#templating
+	// See https://documentation.mailgun.com/docs/mailgun/user-manual/sending-messages/#templates
 	SetTemplate(string)
 
-	// // TODO(v5): move to into Specific and uncomment:
+	// // TODO(v5):
 	// // AddRecipient appends a receiver to the To: header of a message.
 	// // It will return an error if the limit of recipients have been exceeded for this message
 	// AddRecipient(recipient string) error
@@ -406,22 +406,11 @@ func (m *plainMessage) AddCC(r string) {
 
 func (m *mimeMessage) AddCC(_ string) {}
 
-// AddBCC appends a receiver to the blind-carbon-copy header of a message.
-func (m *Message) AddBCC(recipient string) {
-	m.Specific.AddBCC(recipient)
-}
-
 func (m *plainMessage) AddBCC(r string) {
 	m.bcc = append(m.bcc, r)
 }
 
 func (m *mimeMessage) AddBCC(_ string) {}
-
-// SetHTML is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
-// an HTML representation of your message in addition to your plain-text body.
-func (m *Message) SetHTML(html string) {
-	m.Specific.SetHTML(html)
-}
 
 // Deprecated: use SetHTML instead.
 //
@@ -436,15 +425,9 @@ func (m *plainMessage) SetHTML(h string) {
 
 func (m *mimeMessage) SetHTML(_ string) {}
 
-// SetAmpHTML is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
-// an AMP-For-Email representation of your message in addition to your html & plain-text content.
-func (m *Message) SetAmpHTML(html string) {
-	m.Specific.SetAmpHTML(html)
-}
-
 // Deprecated: use SetAmpHTML instead.
 func (m *Message) SetAMPHtml(html string) {
-	m.Specific.SetAmpHTML(html)
+	m.SetAmpHTML(html)
 }
 
 func (m *plainMessage) SetAmpHTML(h string) {
@@ -462,12 +445,6 @@ func (m *Message) AddTag(tag ...string) error {
 
 	m.tags = append(m.tags, tag...)
 	return nil
-}
-
-// SetTemplate sets the name of a template stored via the template API.
-// See https://documentation.mailgun.com/en/latest/user_manual.html#templating
-func (m *Message) SetTemplate(t string) {
-	m.Specific.SetTemplate(t)
 }
 
 func (m *plainMessage) SetTemplate(t string) {
@@ -666,8 +643,6 @@ type SendableMessage interface {
 	TemplateRenderText() bool
 	RequireTLS() bool
 	SkipVerification() bool
-
-	RecipientCount() int
 
 	Specific
 }
