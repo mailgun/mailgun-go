@@ -697,7 +697,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	}
 	payload := NewFormDataPayload()
 
-	m.Specific.AddValues(payload)
+	m.AddValues(payload)
 	for _, to := range m.To() {
 		payload.addValue("to", to)
 	}
@@ -800,7 +800,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		payload.addValue("t:text", yesNo(m.TemplateRenderText()))
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Specific.Endpoint(), m.Domain()))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Endpoint(), m.Domain()))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided
