@@ -52,102 +52,6 @@ type Message struct {
 	specific
 }
 
-func (m *Message) Domain() string {
-	return m.domain
-}
-
-func (m *Message) To() []string {
-	return m.to
-}
-
-func (m *Message) Tags() []string {
-	return m.tags
-}
-
-func (m *Message) Campaigns() []string {
-	return m.campaigns
-}
-
-func (m *Message) DKIM() *bool {
-	return m.dkim
-}
-
-func (m *Message) DeliveryTime() time.Time {
-	return m.deliveryTime
-}
-
-func (m *Message) STOPeriod() string {
-	return m.stoPeriod
-}
-
-func (m *Message) Attachments() []string {
-	return m.attachments
-}
-
-func (m *Message) ReaderAttachments() []ReaderAttachment {
-	return m.readerAttachments
-}
-
-func (m *Message) Inlines() []string {
-	return m.inlines
-}
-
-func (m *Message) ReaderInlines() []ReaderAttachment {
-	return m.readerInlines
-}
-
-func (m *Message) BufferAttachments() []BufferAttachment {
-	return m.bufferAttachments
-}
-
-func (m *Message) NativeSend() bool {
-	return m.nativeSend
-}
-
-func (m *Message) TestMode() bool {
-	return m.testMode
-}
-
-func (m *Message) Tracking() *bool {
-	return m.tracking
-}
-
-func (m *Message) TrackingClicks() *string {
-	return m.trackingClicks
-}
-
-func (m *Message) TrackingOpens() *bool {
-	return m.trackingOpens
-}
-
-func (m *Message) Variables() map[string]string {
-	return m.variables
-}
-
-func (m *Message) TemplateVariables() map[string]interface{} {
-	return m.templateVariables
-}
-
-func (m *Message) RecipientVariables() map[string]map[string]interface{} {
-	return m.recipientVariables
-}
-
-func (m *Message) TemplateVersionTag() string {
-	return m.templateVersionTag
-}
-
-func (m *Message) TemplateRenderText() bool {
-	return m.templateRenderText
-}
-
-func (m *Message) RequireTLS() bool {
-	return m.requireTLS
-}
-
-func (m *Message) SkipVerification() bool {
-	return m.skipVerification
-}
-
 type ReaderAttachment struct {
 	Filename   string
 	ReadCloser io.ReadCloser
@@ -270,6 +174,102 @@ func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 // TODO(v5): remove this method
 func (*MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return NewMIMEMessage(body, to...)
+}
+
+func (m *Message) Domain() string {
+	return m.domain
+}
+
+func (m *Message) To() []string {
+	return m.to
+}
+
+func (m *Message) Tags() []string {
+	return m.tags
+}
+
+func (m *Message) Campaigns() []string {
+	return m.campaigns
+}
+
+func (m *Message) DKIM() *bool {
+	return m.dkim
+}
+
+func (m *Message) DeliveryTime() time.Time {
+	return m.deliveryTime
+}
+
+func (m *Message) STOPeriod() string {
+	return m.stoPeriod
+}
+
+func (m *Message) Attachments() []string {
+	return m.attachments
+}
+
+func (m *Message) ReaderAttachments() []ReaderAttachment {
+	return m.readerAttachments
+}
+
+func (m *Message) Inlines() []string {
+	return m.inlines
+}
+
+func (m *Message) ReaderInlines() []ReaderAttachment {
+	return m.readerInlines
+}
+
+func (m *Message) BufferAttachments() []BufferAttachment {
+	return m.bufferAttachments
+}
+
+func (m *Message) NativeSend() bool {
+	return m.nativeSend
+}
+
+func (m *Message) TestMode() bool {
+	return m.testMode
+}
+
+func (m *Message) Tracking() *bool {
+	return m.tracking
+}
+
+func (m *Message) TrackingClicks() *string {
+	return m.trackingClicks
+}
+
+func (m *Message) TrackingOpens() *bool {
+	return m.trackingOpens
+}
+
+func (m *Message) Variables() map[string]string {
+	return m.variables
+}
+
+func (m *Message) TemplateVariables() map[string]interface{} {
+	return m.templateVariables
+}
+
+func (m *Message) RecipientVariables() map[string]map[string]interface{} {
+	return m.recipientVariables
+}
+
+func (m *Message) TemplateVersionTag() string {
+	return m.templateVersionTag
+}
+
+func (m *Message) TemplateRenderText() bool {
+	return m.templateRenderText
+}
+
+func (m *Message) RequireTLS() bool {
+	return m.requireTLS
+}
+
+func (m *Message) SkipVerification() bool {
+	return m.skipVerification
 }
 
 // AddReaderAttachment arranges to send a file along with the e-mail message.
