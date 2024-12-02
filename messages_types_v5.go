@@ -1,6 +1,6 @@
 package mailgun
 
-// This file contains new v5 messages.
+// This file contains a draft for new v5 messages.
 
 import (
 	"io"
