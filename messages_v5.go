@@ -1,6 +1,6 @@
 package mailgun
 
-// This file contains the new v5 Message and its methods.
+// This file contains methods for new v5 messages.
 
 import (
 	"context"
