@@ -105,7 +105,7 @@ type specificV5 interface {
 
 	// AddRecipient appends a receiver to the To: header of a message.
 	// It will return an error if the limit of recipients have been exceeded for this message
-	AddRecipient(recipient string)
+	AddRecipient(recipient string) error
 
 	// isValid yields true if and only if the message is valid enough for sending
 	// through the API.

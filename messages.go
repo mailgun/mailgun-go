@@ -49,7 +49,7 @@ type Message struct {
 	requireTLS       bool
 	skipVerification bool
 
-	specific
+	Specific
 }
 
 type ReaderAttachment struct {
@@ -94,24 +94,55 @@ type TrackingOptions struct {
 	TrackingOpens  bool
 }
 
-// specific abstracts the common characteristics between regular and MIME messages.
-// addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the AddCC, AddBCC,
-// RecipientCount, SetHTML and SetAMPHtml calls, as these functions are ignored for MIME messages.
-// Send() invokes addValues to add message-type-specific MIME headers for the API call
-// to Mailgun.
-// isValid yields true if and only if the message is valid enough for sending
-// through the API.
-// Finally, endpoint() tells Send() which endpoint to use to submit the API call.
-type specific interface {
-	addCC(string)
-	addBCC(string)
-	setHtml(string)
-	setAMPHtml(string)
-	addValues(*formDataPayload)
-	isValid() bool
-	endpoint() string
-	recipientCount() int
-	setTemplate(string)
+// Specific abstracts the common characteristics between regular and MIME messages.
+type Specific interface {
+	// AddCC appends a receiver to the carbon-copy header of a message.
+	AddCC(string)
+
+	// AddBCC appends a receiver to the blind-carbon-copy header of a message.
+	AddBCC(string)
+
+	// SetHTML If you're sending a message that isn't already MIME encoded, it will arrange to bundle
+	// an HTML representation of your message in addition to your plain-text body.
+	SetHTML(string)
+
+	// SetAmpHTML If you're sending a message that isn't already MIME encoded, it will arrange to bundle
+	// an AMP-For-Email representation of your message in addition to your html & plain-text content.
+	SetAmpHTML(string)
+
+	// AddValues invoked by Send() to add message-type-specific MIME headers for the API call
+	// to Mailgun.
+	// TODO(v5): make formDataPayload exportable
+	AddValues(*formDataPayload)
+
+	// IsValid yields true if and only if the message is valid enough for sending
+	// through the API.
+	IsValid() bool
+
+	// Endpoint tells Send() which endpoint to use to submit the API call.
+	Endpoint() string
+
+	// RecipientCount returns the total number of recipients for the message.
+	// This includes To:, Cc:, and Bcc: fields.
+	//
+	// NOTE: At present, this method is reliable only for non-MIME messages, as the
+	// Bcc: and Cc: fields are easily accessible.
+	// For MIME messages, only the To: field is considered.
+	// A fix for this issue is planned for a future release.
+	// For now, MIME messages are always assumed to have 10 recipients between Cc: and Bcc: fields.
+	// If your MIME messages have more than 10 non-To: field recipients,
+	// you may find that some recipients will not receive your e-mail.
+	// It's perfectly OK, of course, for a MIME message to not have any Cc: or Bcc: recipients.
+	RecipientCount() int
+
+	// SetTemplate sets the name of a template stored via the template API.
+	// See https://documentation.mailgun.com/en/latest/user_manual.html#templating
+	SetTemplate(string)
+
+	// // TODO(v5): move to into Specific and uncomment:
+	// // AddRecipient appends a receiver to the To: header of a message.
+	// // It will return an error if the limit of recipients have been exceeded for this message
+	// AddRecipient(recipient string) error
 }
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
@@ -129,7 +160,7 @@ type specific interface {
 // before sending, though.
 func NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
-		specific: &plainMessage{
+		Specific: &plainMessage{
 			from:    from,
 			subject: subject,
 			text:    text,
@@ -162,7 +193,7 @@ func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Messag
 // before sending, though.
 func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
-		specific: &mimeMessage{
+		Specific: &mimeMessage{
 			body: body,
 		},
 		to: to,
@@ -353,14 +384,14 @@ func (m *Message) AddRecipientAndVariables(r string, vars map[string]interface{}
 // you may find that some recipients will not receive your e-mail.
 // It's perfectly OK, of course, for a MIME message to not have any Cc: or Bcc: recipients.
 func (m *Message) RecipientCount() int {
-	return len(m.to) + m.specific.recipientCount()
+	return len(m.to) + m.Specific.RecipientCount()
 }
 
-func (m *plainMessage) recipientCount() int {
+func (m *plainMessage) RecipientCount() int {
 	return len(m.bcc) + len(m.cc)
 }
 
-func (m *mimeMessage) recipientCount() int {
+func (m *mimeMessage) RecipientCount() int {
 	// TODO(v5): len(m.to)
 	return 10
 }
@@ -372,56 +403,61 @@ func (m *Message) SetReplyTo(recipient string) {
 
 // AddCC appends a receiver to the carbon-copy header of a message.
 func (m *Message) AddCC(recipient string) {
-	m.specific.addCC(recipient)
+	m.Specific.AddCC(recipient)
 }
 
-func (m *plainMessage) addCC(r string) {
+func (m *plainMessage) AddCC(r string) {
 	m.cc = append(m.cc, r)
 }
 
-func (m *mimeMessage) addCC(_ string) {}
+func (m *mimeMessage) AddCC(_ string) {}
 
 // AddBCC appends a receiver to the blind-carbon-copy header of a message.
 func (m *Message) AddBCC(recipient string) {
-	m.specific.addBCC(recipient)
+	m.Specific.AddBCC(recipient)
 }
 
-func (m *plainMessage) addBCC(r string) {
+func (m *plainMessage) AddBCC(r string) {
 	m.bcc = append(m.bcc, r)
 }
 
-func (m *mimeMessage) addBCC(_ string) {}
+func (m *mimeMessage) AddBCC(_ string) {}
 
 // SetHTML is a helper. If you're sending a message that isn't already MIME encoded, SetHtml() will arrange to bundle
 // an HTML representation of your message in addition to your plain-text body.
 func (m *Message) SetHTML(html string) {
-	m.specific.setHtml(html)
+	m.Specific.SetHTML(html)
 }
 
 // Deprecated: use SetHTML instead.
 //
 // TODO(v5): remove this method
 func (m *Message) SetHtml(html string) {
-	m.setHtml(html)
+	m.SetHTML(html)
 }
 
-func (m *plainMessage) setHtml(h string) {
+func (m *plainMessage) SetHTML(h string) {
 	m.html = h
 }
 
-func (m *mimeMessage) setHtml(_ string) {}
+func (m *mimeMessage) SetHTML(_ string) {}
 
-// SetAMPHtml is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
+// SetAmpHTML is a helper. If you're sending a message that isn't already MIME encoded, SetAMP() will arrange to bundle
 // an AMP-For-Email representation of your message in addition to your html & plain-text content.
-func (m *Message) SetAMPHtml(html string) {
-	m.specific.setAMPHtml(html)
+func (m *Message) SetAmpHTML(html string) {
+	m.Specific.SetAmpHTML(html)
 }
 
-func (m *plainMessage) setAMPHtml(h string) {
+// Deprecated: use SetAmpHTML instead.
+func (m *Message) SetAMPHtml(html string) {
+	m.Specific.SetAmpHTML(html)
+}
+
+func (m *plainMessage) SetAmpHTML(h string) {
 	m.ampHtml = h
 }
 
-func (m *mimeMessage) setAMPHtml(_ string) {}
+func (m *mimeMessage) SetAmpHTML(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -437,14 +473,14 @@ func (m *Message) AddTag(tag ...string) error {
 // SetTemplate sets the name of a template stored via the template API.
 // See https://documentation.mailgun.com/en/latest/user_manual.html#templating
 func (m *Message) SetTemplate(t string) {
-	m.specific.setTemplate(t)
+	m.Specific.SetTemplate(t)
 }
 
-func (m *plainMessage) setTemplate(t string) {
+func (m *plainMessage) SetTemplate(t string) {
 	m.template = t
 }
 
-func (m *mimeMessage) setTemplate(t string) {}
+func (m *mimeMessage) SetTemplate(_ string) {}
 
 // Deprecated: is no longer supported and is deprecated for new software.
 func (m *Message) AddCampaign(campaign string) {
@@ -639,7 +675,7 @@ type SendableMessage interface {
 
 	RecipientCount() int
 
-	specific
+	Specific
 }
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
@@ -692,7 +728,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	}
 	payload := newFormDataPayload()
 
-	m.addValues(payload)
+	m.Specific.AddValues(payload)
 	for _, to := range m.To() {
 		payload.addValue("to", to)
 	}
@@ -795,7 +831,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		payload.addValue("t:text", yesNo(m.TemplateRenderText()))
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.endpoint(), m.Domain()))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Specific.Endpoint(), m.Domain()))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided
@@ -821,7 +857,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	return
 }
 
-func (m *plainMessage) addValues(p *formDataPayload) {
+func (m *plainMessage) AddValues(p *formDataPayload) {
 	p.addValue("from", m.from)
 	p.addValue("subject", m.subject)
 	p.addValue("text", m.text)
@@ -842,15 +878,15 @@ func (m *plainMessage) addValues(p *formDataPayload) {
 	}
 }
 
-func (m *mimeMessage) addValues(p *formDataPayload) {
+func (m *mimeMessage) AddValues(p *formDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
-func (m *plainMessage) endpoint() string {
+func (m *plainMessage) Endpoint() string {
 	return messagesEndpoint
 }
 
-func (m *mimeMessage) endpoint() string {
+func (m *mimeMessage) Endpoint() string {
 	return mimeMessagesEndpoint
 }
 
@@ -873,7 +909,7 @@ func isValid(m SendableMessage) bool {
 		return false
 	}
 
-	if !m.isValid() {
+	if !m.IsValid() {
 		return false
 	}
 
@@ -892,7 +928,7 @@ func isValid(m SendableMessage) bool {
 	return true
 }
 
-func (m *plainMessage) isValid() bool {
+func (m *plainMessage) IsValid() bool {
 	if !validateStringList(m.cc, false) {
 		return false
 	}
@@ -917,7 +953,7 @@ func (m *plainMessage) isValid() bool {
 	return true
 }
 
-func (m *mimeMessage) isValid() bool {
+func (m *mimeMessage) IsValid() bool {
 	return m.body != nil
 }
 

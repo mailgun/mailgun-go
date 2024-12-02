@@ -156,7 +156,7 @@ func TestSendMGAMPHtml(t *testing.T) {
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
-		m.SetAMPHtml(exampleAMPHtml)
+		m.SetAmpHTML(exampleAMPHtml)
 		msg, id, err := mg.Send(ctx, m)
 		require.NoError(t, err)
 		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
