@@ -455,6 +455,7 @@ func (m *plainMessage) SetTemplate(t string) {
 func (m *mimeMessage) SetTemplate(_ string) {}
 
 // Deprecated: is no longer supported and is deprecated for new software.
+// TODO(v5): remove this method.
 func (m *Message) AddCampaign(campaign string) {
 	m.campaigns = append(m.campaigns, campaign)
 }
