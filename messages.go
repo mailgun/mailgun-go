@@ -400,11 +400,6 @@ func (m *Message) SetReplyTo(recipient string) {
 	m.AddHeader("Reply-To", recipient)
 }
 
-// AddCC appends a receiver to the carbon-copy header of a message.
-func (m *Message) AddCC(recipient string) {
-	m.Specific.AddCC(recipient)
-}
-
 func (m *plainMessage) AddCC(r string) {
 	m.cc = append(m.cc, r)
 }
