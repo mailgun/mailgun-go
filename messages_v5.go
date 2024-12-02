@@ -551,13 +551,13 @@ func (m *plainMessageV5) isValid() bool {
 		return false
 	}
 
+	if m.from == "" {
+		return false
+	}
+
 	if m.template != "" {
 		// m.text or m.html not needed if template is supplied
 		return true
-	}
-
-	if m.from == "" {
-		return false
 	}
 
 	if m.text == "" && m.html == "" {
