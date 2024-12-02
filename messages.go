@@ -112,8 +112,7 @@ type Specific interface {
 
 	// AddValues invoked by Send() to add message-type-specific MIME headers for the API call
 	// to Mailgun.
-	// TODO(v5): make formDataPayload exportable
-	AddValues(*formDataPayload)
+	AddValues(*FormDataPayload)
 
 	// IsValid yields true if and only if the message is valid enough for sending
 	// through the API.
@@ -857,7 +856,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	return
 }
 
-func (m *plainMessage) AddValues(p *formDataPayload) {
+func (m *plainMessage) AddValues(p *FormDataPayload) {
 	p.addValue("from", m.from)
 	p.addValue("subject", m.subject)
 	p.addValue("text", m.text)
@@ -878,7 +877,7 @@ func (m *plainMessage) AddValues(p *formDataPayload) {
 	}
 }
 
-func (m *mimeMessage) AddValues(p *formDataPayload) {
+func (m *mimeMessage) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 

@@ -60,7 +60,7 @@ type keyNameBuff struct {
 	value []byte
 }
 
-type formDataPayload struct {
+type FormDataPayload struct {
 	contentType string
 	Values      []keyValuePair
 	Files       []keyValuePair
@@ -146,31 +146,31 @@ func (r *httpResponse) parseFromJSON(v interface{}) error {
 	return json.Unmarshal(r.Data, v)
 }
 
-func newFormDataPayload() *formDataPayload {
-	return &formDataPayload{}
+func newFormDataPayload() *FormDataPayload {
+	return &FormDataPayload{}
 }
 
-func (f *formDataPayload) getValues() []keyValuePair {
+func (f *FormDataPayload) getValues() []keyValuePair {
 	return f.Values
 }
 
-func (f *formDataPayload) addValue(key, value string) {
+func (f *FormDataPayload) addValue(key, value string) {
 	f.Values = append(f.Values, keyValuePair{key: key, value: value})
 }
 
-func (f *formDataPayload) addFile(key, file string) {
+func (f *FormDataPayload) addFile(key, file string) {
 	f.Files = append(f.Files, keyValuePair{key: key, value: file})
 }
 
-func (f *formDataPayload) addBuffer(key, file string, buff []byte) {
+func (f *FormDataPayload) addBuffer(key, file string, buff []byte) {
 	f.Buffers = append(f.Buffers, keyNameBuff{key: key, name: file, value: buff})
 }
 
-func (f *formDataPayload) addReadCloser(key, name string, rc io.ReadCloser) {
+func (f *FormDataPayload) addReadCloser(key, name string, rc io.ReadCloser) {
 	f.ReadClosers = append(f.ReadClosers, keyNameRC{key: key, name: name, value: rc})
 }
 
-func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
+func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	data := &bytes.Buffer{}
 	writer := multipart.NewWriter(data)
 	defer writer.Close()
@@ -239,7 +239,7 @@ func (f *formDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return data, nil
 }
 
-func (f *formDataPayload) getContentType() (string, error) {
+func (f *FormDataPayload) getContentType() (string, error) {
 	if f.contentType == "" {
 		_, err := f.getPayloadBuffer()
 		if err != nil {

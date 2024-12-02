@@ -80,8 +80,7 @@ type specificV5 interface {
 
 	// AddValues invoked by Send() to add message-type-specific MIME headers for the API call
 	// to Mailgun.
-	// TODO(v5): make formDataPayload exportable
-	AddValues(*formDataPayload)
+	AddValues(*FormDataPayload)
 
 	// Endpoint tells Send() which endpoint to use to submit the API call.
 	Endpoint() string

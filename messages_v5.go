@@ -348,7 +348,7 @@ func (m *plainMessageV5) SetTemplate(t string) {
 
 func (m *mimeMessageV5) SetTemplate(_ string) {}
 
-func (m *plainMessageV5) AddValues(p *formDataPayload) {
+func (m *plainMessageV5) AddValues(p *FormDataPayload) {
 	p.addValue("from", m.from)
 	p.addValue("subject", m.subject)
 	p.addValue("text", m.text)
@@ -369,7 +369,7 @@ func (m *plainMessageV5) AddValues(p *formDataPayload) {
 	}
 }
 
-func (m *mimeMessageV5) AddValues(p *formDataPayload) {
+func (m *mimeMessageV5) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
