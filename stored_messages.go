@@ -67,7 +67,7 @@ func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...str
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	payload := newFormDataPayload()
+	payload := NewFormDataPayload()
 
 	if len(recipients) == 0 {
 		return "", "", errors.New("must provide at least one recipient")

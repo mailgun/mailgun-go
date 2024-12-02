@@ -146,7 +146,7 @@ func (r *httpResponse) parseFromJSON(v interface{}) error {
 	return json.Unmarshal(r.Data, v)
 }
 
-func newFormDataPayload() *FormDataPayload {
+func NewFormDataPayload() *FormDataPayload {
 	return &FormDataPayload{}
 }
 

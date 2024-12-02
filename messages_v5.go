@@ -423,7 +423,7 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes strin
 		err = errors.New("STO can only be used on a per-message basis")
 		return
 	}
-	payload := newFormDataPayload()
+	payload := NewFormDataPayload()
 
 	m.AddValues(payload)
 	for _, to := range m.To() {
