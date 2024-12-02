@@ -49,7 +49,103 @@ type Message struct {
 	requireTLS       bool
 	skipVerification bool
 
-	specific features
+	specific
+}
+
+func (m *Message) Domain() string {
+	return m.domain
+}
+
+func (m *Message) To() []string {
+	return m.to
+}
+
+func (m *Message) Tags() []string {
+	return m.tags
+}
+
+func (m *Message) Campaigns() []string {
+	return m.campaigns
+}
+
+func (m *Message) DKIM() *bool {
+	return m.dkim
+}
+
+func (m *Message) DeliveryTime() time.Time {
+	return m.deliveryTime
+}
+
+func (m *Message) STOPeriod() string {
+	return m.stoPeriod
+}
+
+func (m *Message) Attachments() []string {
+	return m.attachments
+}
+
+func (m *Message) ReaderAttachments() []ReaderAttachment {
+	return m.readerAttachments
+}
+
+func (m *Message) Inlines() []string {
+	return m.inlines
+}
+
+func (m *Message) ReaderInlines() []ReaderAttachment {
+	return m.readerInlines
+}
+
+func (m *Message) BufferAttachments() []BufferAttachment {
+	return m.bufferAttachments
+}
+
+func (m *Message) NativeSend() bool {
+	return m.nativeSend
+}
+
+func (m *Message) TestMode() bool {
+	return m.testMode
+}
+
+func (m *Message) Tracking() *bool {
+	return m.tracking
+}
+
+func (m *Message) TrackingClicks() *string {
+	return m.trackingClicks
+}
+
+func (m *Message) TrackingOpens() *bool {
+	return m.trackingOpens
+}
+
+func (m *Message) Variables() map[string]string {
+	return m.variables
+}
+
+func (m *Message) TemplateVariables() map[string]interface{} {
+	return m.templateVariables
+}
+
+func (m *Message) RecipientVariables() map[string]map[string]interface{} {
+	return m.recipientVariables
+}
+
+func (m *Message) TemplateVersionTag() string {
+	return m.templateVersionTag
+}
+
+func (m *Message) TemplateRenderText() bool {
+	return m.templateRenderText
+}
+
+func (m *Message) RequireTLS() bool {
+	return m.requireTLS
+}
+
+func (m *Message) SkipVerification() bool {
+	return m.skipVerification
 }
 
 type ReaderAttachment struct {
@@ -94,7 +190,7 @@ type TrackingOptions struct {
 	TrackingOpens  bool
 }
 
-// features abstracts the common characteristics between regular and MIME messages.
+// specific abstracts the common characteristics between regular and MIME messages.
 // addCC, addBCC, recipientCount, setHtml and setAMPHtml are invoked via the AddCC, AddBCC,
 // RecipientCount, SetHTML and SetAMPHtml calls, as these functions are ignored for MIME messages.
 // Send() invokes addValues to add message-type-specific MIME headers for the API call
@@ -102,7 +198,7 @@ type TrackingOptions struct {
 // isValid yields true if and only if the message is valid enough for sending
 // through the API.
 // Finally, endpoint() tells Send() which endpoint to use to submit the API call.
-type features interface {
+type specific interface {
 	addCC(string)
 	addBCC(string)
 	setHtml(string)
@@ -349,7 +445,7 @@ func (pm *plainMessage) setTemplate(t string) {
 
 func (mm *mimeMessage) setTemplate(t string) {}
 
-// AddCampaign is no longer supported and is deprecated for new software.
+// Deprecated: is no longer supported and is deprecated for new software.
 func (m *Message) AddCampaign(campaign string) {
 	m.campaigns = append(m.campaigns, campaign)
 }
@@ -497,13 +593,50 @@ func (m *Message) AddDomain(domain string) {
 	m.domain = domain
 }
 
-// GetHeaders retrieves the http headers associated with this message
+// Headers retrieves the http headers associated with this message
+func (m *Message) Headers() map[string]string {
+	return m.headers
+}
+
+// Deprecated: use func Headers() instead.
+// TODO(v5): remove this method, it violates https://go.dev/doc/effective_go#Getters
 func (m *Message) GetHeaders() map[string]string {
 	return m.headers
 }
 
 // ErrInvalidMessage is returned by `Send()` when the `mailgun.Message` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
+
+type SendableMessage interface {
+	Domain() string
+	To() []string
+	Tags() []string
+	// Deprecated: is no longer supported and is deprecated for new software.
+	Campaigns() []string
+	DKIM() *bool
+	DeliveryTime() time.Time
+	STOPeriod() string
+	Attachments() []string
+	ReaderAttachments() []ReaderAttachment
+	Inlines() []string
+	ReaderInlines() []ReaderAttachment
+	BufferAttachments() []BufferAttachment
+	NativeSend() bool
+	TestMode() bool
+	Tracking() *bool
+	TrackingClicks() *string
+	TrackingOpens() *bool
+	Headers() map[string]string
+	Variables() map[string]string
+	TemplateVariables() map[string]interface{}
+	RecipientVariables() map[string]map[string]interface{}
+	TemplateVersionTag() string
+	TemplateRenderText() bool
+	RequireTLS() bool
+	SkipVerification() bool
+
+	RecipientCount() int
+}
 
 // Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
@@ -525,7 +658,8 @@ var ErrInvalidMessage = errors.New("message not valid")
 //	  Data:     "Domain not found: example.com",
 //	}
 //
-//	See the public mailgun documentation for all possible return codes and error messages
+// See the public mailgun documentation for all possible return codes and error messages
+// TODO(v5): switch m to SendableMessage interface
 func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
@@ -548,99 +682,99 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		return
 	}
 
-	if m.stoPeriod != "" && m.RecipientCount() > 1 {
+	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
 		err = errors.New("STO can only be used on a per-message basis")
 		return
 	}
 	payload := newFormDataPayload()
 
-	m.specific.addValues(payload)
-	for _, to := range m.to {
+	m.addValues(payload)
+	for _, to := range m.To() {
 		payload.addValue("to", to)
 	}
-	for _, tag := range m.tags {
+	for _, tag := range m.Tags() {
 		payload.addValue("o:tag", tag)
 	}
-	for _, campaign := range m.campaigns {
+	for _, campaign := range m.Campaigns() {
 		payload.addValue("o:campaign", campaign)
 	}
-	if m.dkim != nil {
-		payload.addValue("o:dkim", yesNo(*m.dkim))
+	if m.DKIM() != nil {
+		payload.addValue("o:dkim", yesNo(*m.DKIM()))
 	}
-	if !m.deliveryTime.IsZero() {
-		payload.addValue("o:deliverytime", formatMailgunTime(m.deliveryTime))
+	if !m.DeliveryTime().IsZero() {
+		payload.addValue("o:deliverytime", formatMailgunTime(m.DeliveryTime()))
 	}
-	if m.stoPeriod != "" {
-		payload.addValue("o:deliverytime-optimize-period", m.stoPeriod)
+	if m.STOPeriod() != "" {
+		payload.addValue("o:deliverytime-optimize-period", m.STOPeriod())
 	}
-	if m.nativeSend {
+	if m.NativeSend() {
 		payload.addValue("o:native-send", "yes")
 	}
-	if m.testMode {
+	if m.TestMode() {
 		payload.addValue("o:testmode", "yes")
 	}
-	if m.tracking != nil {
-		payload.addValue("o:tracking", yesNo(*m.tracking))
+	if m.Tracking() != nil {
+		payload.addValue("o:tracking", yesNo(*m.Tracking()))
 	}
-	if m.trackingClicks != nil {
-		payload.addValue("o:tracking-clicks", *m.trackingClicks)
+	if m.TrackingClicks() != nil {
+		payload.addValue("o:tracking-clicks", *m.TrackingClicks())
 	}
-	if m.trackingOpens != nil {
-		payload.addValue("o:tracking-opens", yesNo(*m.trackingOpens))
+	if m.TrackingOpens() != nil {
+		payload.addValue("o:tracking-opens", yesNo(*m.TrackingOpens()))
 	}
-	if m.requireTLS {
-		payload.addValue("o:require-tls", trueFalse(m.requireTLS))
+	if m.RequireTLS() {
+		payload.addValue("o:require-tls", trueFalse(m.RequireTLS()))
 	}
-	if m.skipVerification {
-		payload.addValue("o:skip-verification", trueFalse(m.skipVerification))
+	if m.SkipVerification() {
+		payload.addValue("o:skip-verification", trueFalse(m.SkipVerification()))
 	}
-	if m.headers != nil {
-		for header, value := range m.headers {
+	if m.Headers() != nil {
+		for header, value := range m.Headers() {
 			payload.addValue("h:"+header, value)
 		}
 	}
-	if m.variables != nil {
-		for variable, value := range m.variables {
+	if m.Variables() != nil {
+		for variable, value := range m.Variables() {
 			payload.addValue("v:"+variable, value)
 		}
 	}
-	if m.templateVariables != nil {
-		variableString, err := json.Marshal(m.templateVariables)
+	if m.TemplateVariables() != nil {
+		variableString, err := json.Marshal(m.TemplateVariables())
 		if err == nil {
 			// the map was marshalled as json so add it
 			payload.addValue("h:X-Mailgun-Variables", string(variableString))
 		}
 	}
-	if m.recipientVariables != nil {
-		j, err := json.Marshal(m.recipientVariables)
+	if m.RecipientVariables() != nil {
+		j, err := json.Marshal(m.RecipientVariables())
 		if err != nil {
 			return "", "", err
 		}
 		payload.addValue("recipient-variables", string(j))
 	}
-	if m.attachments != nil {
-		for _, attachment := range m.attachments {
+	if m.Attachments() != nil {
+		for _, attachment := range m.Attachments() {
 			payload.addFile("attachment", attachment)
 		}
 	}
-	if m.readerAttachments != nil {
-		for _, readerAttachment := range m.readerAttachments {
+	if m.ReaderAttachments() != nil {
+		for _, readerAttachment := range m.ReaderAttachments() {
 			payload.addReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
 		}
 	}
-	if m.bufferAttachments != nil {
-		for _, bufferAttachment := range m.bufferAttachments {
+	if m.BufferAttachments() != nil {
+		for _, bufferAttachment := range m.BufferAttachments() {
 			payload.addBuffer("attachment", bufferAttachment.Filename, bufferAttachment.Buffer)
 		}
 	}
-	if m.inlines != nil {
-		for _, inline := range m.inlines {
+	if m.Inlines() != nil {
+		for _, inline := range m.Inlines() {
 			payload.addFile("inline", inline)
 		}
 	}
 
-	if m.readerInlines != nil {
-		for _, readerAttachment := range m.readerInlines {
+	if m.ReaderInlines() != nil {
+		for _, readerAttachment := range m.ReaderInlines() {
 			payload.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
 		}
 	}
@@ -649,15 +783,15 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		m.domain = mg.Domain()
 	}
 
-	if m.templateVersionTag != "" {
-		payload.addValue("t:version", m.templateVersionTag)
+	if m.TemplateVersionTag() != "" {
+		payload.addValue("t:version", m.TemplateVersionTag())
 	}
 
-	if m.templateRenderText {
-		payload.addValue("t:text", yesNo(m.templateRenderText))
+	if m.TemplateRenderText() {
+		payload.addValue("t:text", yesNo(m.TemplateRenderText()))
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.specific.endpoint(), m.domain))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.specific.endpoint(), m.Domain()))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided
@@ -743,11 +877,11 @@ func isValid(m *Message) bool {
 		return false
 	}
 
-	if !validateStringList(m.tags, false) {
+	if !validateStringList(m.Tags(), false) {
 		return false
 	}
 
-	if !validateStringList(m.campaigns, false) || len(m.campaigns) > 3 {
+	if !validateStringList(m.Campaigns(), false) || len(m.Campaigns()) > 3 {
 		return false
 	}
 

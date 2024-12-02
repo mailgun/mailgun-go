@@ -777,3 +777,9 @@ func TestSendTemplateOptions(t *testing.T) {
 	assert.Equal(t, exampleMessage, msg)
 	assert.Equal(t, exampleID, id)
 }
+
+func TestSendableMessageIface(t *testing.T) {
+	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+
+	assert.Implements(t, (*mailgun.SendableMessage)(nil), m)
+}

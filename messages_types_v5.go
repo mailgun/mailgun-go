@@ -60,7 +60,7 @@ type mimeMessageV5 struct {
 	body io.ReadCloser
 }
 
-// features abstracts the common characteristics between regular and MIME messages.
+// specific abstracts the common characteristics between regular and MIME messages.
 type specificV5 interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
 	AddCC(string)
@@ -109,7 +109,6 @@ type specificV5 interface {
 	isValid() bool
 }
 
-// TODO(v5): implement for plain and MIME messages
 type messageIfaceV5 interface {
 	Domain() string
 	To() []string
