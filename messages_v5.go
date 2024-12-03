@@ -402,6 +402,7 @@ func (m *mimeMessageV5) Endpoint() string {
 //	}
 //
 //	See the public mailgun documentation for all possible return codes and error messages
+//nolint:gocyclo // TODO(v5): fix
 func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes string, id string, err error) {
 	// TODO(vtopc): move domain checks into NewMessage and NewMIMEMessage?
 	if m.Domain() == "" {
