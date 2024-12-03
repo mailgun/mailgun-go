@@ -713,7 +713,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		return "", "", err
 	}
 
-	// TODO(v5): remove due to domain agnostic API
+	// TODO(v5): remove due for domain agnostic API:
 	if m.Domain() == "" {
 		m.domain = mg.Domain()
 	}
