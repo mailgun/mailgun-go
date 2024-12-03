@@ -433,6 +433,7 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes strin
 
 	m.AddValues(payload)
 
+	// TODO: make (CommonMessage).AddValues():
 	err = addMessageValues(payload, m)
 	if err != nil {
 		return "", "", err
