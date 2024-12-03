@@ -797,7 +797,8 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		}
 	}
 
-	if m.domain == "" {
+	// TODO(v5): remove due to domain agnostic API
+	if m.Domain() == "" {
 		m.domain = mg.Domain()
 	}
 
