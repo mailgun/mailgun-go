@@ -402,7 +402,6 @@ func (m *mimeMessageV5) Endpoint() string {
 //	}
 //
 //	See the public mailgun documentation for all possible return codes and error messages
-//nolint:gocyclo // TODO(v5): fix
 func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes string, id string, err error) {
 	// TODO(vtopc): move domain checks into NewMessage and NewMIMEMessage?
 	if m.Domain() == "" {
@@ -433,102 +432,10 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes strin
 	payload := NewFormDataPayload()
 
 	m.AddValues(payload)
-	for _, to := range m.To() {
-		payload.addValue("to", to)
-	}
-	for _, tag := range m.Tags() {
-		payload.addValue("o:tag", tag)
-	}
-	for _, campaign := range m.Campaigns() {
-		payload.addValue("o:campaign", campaign)
-	}
-	if m.DKIM() != nil {
-		payload.addValue("o:dkim", yesNo(*m.DKIM()))
-	}
-	if !m.DeliveryTime().IsZero() {
-		payload.addValue("o:deliverytime", formatMailgunTime(m.DeliveryTime()))
-	}
-	if m.STOPeriod() != "" {
-		payload.addValue("o:deliverytime-optimize-period", m.STOPeriod())
-	}
-	if m.NativeSend() {
-		payload.addValue("o:native-send", "yes")
-	}
-	if m.TestMode() {
-		payload.addValue("o:testmode", "yes")
-	}
-	if m.Tracking() != nil {
-		payload.addValue("o:tracking", yesNo(*m.Tracking()))
-	}
-	if m.TrackingClicks() != nil {
-		payload.addValue("o:tracking-clicks", *m.TrackingClicks())
-	}
-	if m.TrackingOpens() != nil {
-		payload.addValue("o:tracking-opens", yesNo(*m.TrackingOpens()))
-	}
-	if m.RequireTLS() {
-		payload.addValue("o:require-tls", trueFalse(m.RequireTLS()))
-	}
-	if m.SkipVerification() {
-		payload.addValue("o:skip-verification", trueFalse(m.SkipVerification()))
-	}
-	if m.Headers() != nil {
-		for header, value := range m.Headers() {
-			payload.addValue("h:"+header, value)
-		}
-	}
-	if m.Variables() != nil {
-		for variable, value := range m.Variables() {
-			payload.addValue("v:"+variable, value)
-		}
-	}
-	if m.TemplateVariables() != nil {
-		variableString, err := json.Marshal(m.TemplateVariables())
-		if err == nil {
-			// the map was marshalled as json so add it
-			payload.addValue("h:X-Mailgun-Variables", string(variableString))
-		}
-	}
-	if m.RecipientVariables() != nil {
-		j, err := json.Marshal(m.RecipientVariables())
-		if err != nil {
-			return "", "", err
-		}
-		payload.addValue("recipient-variables", string(j))
-	}
-	if m.Attachments() != nil {
-		for _, attachment := range m.Attachments() {
-			payload.addFile("attachment", attachment)
-		}
-	}
-	if m.ReaderAttachments() != nil {
-		for _, readerAttachment := range m.ReaderAttachments() {
-			payload.addReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
-		}
-	}
-	if m.BufferAttachments() != nil {
-		for _, bufferAttachment := range m.BufferAttachments() {
-			payload.addBuffer("attachment", bufferAttachment.Filename, bufferAttachment.Buffer)
-		}
-	}
-	if m.Inlines() != nil {
-		for _, inline := range m.Inlines() {
-			payload.addFile("inline", inline)
-		}
-	}
 
-	if m.ReaderInlines() != nil {
-		for _, readerAttachment := range m.ReaderInlines() {
-			payload.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
-		}
-	}
-
-	if m.TemplateVersionTag() != "" {
-		payload.addValue("t:version", m.TemplateVersionTag())
-	}
-
-	if m.TemplateRenderText() {
-		payload.addValue("t:text", yesNo(m.TemplateRenderText()))
+	err = addMessageValues(payload, m)
+	if err != nil {
+		return "", "", err
 	}
 
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Endpoint(), m.Domain()))
