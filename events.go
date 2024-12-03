@@ -3,6 +3,7 @@ package mailgun
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -163,7 +164,7 @@ func (ei *EventIterator) fetch(ctx context.Context, url string) error {
 	r.setClient(ei.mg.Client())
 	r.setBasicAuth(basicAuthUser, ei.mg.APIKey())
 
-	resp, err := makeRequest(ctx, r, "GET", nil)
+	resp, err := makeRequest(ctx, r, http.MethodGet, nil)
 	if err != nil {
 		return err
 	}

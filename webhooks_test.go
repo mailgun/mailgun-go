@@ -141,7 +141,7 @@ func buildFormRequest(fields map[string]string) *http.Request {
 	}
 
 	r := strings.NewReader(values.Encode())
-	req, _ := http.NewRequest("POST", "/", r)
+	req, _ := http.NewRequest(http.MethodPost, "/", r)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return req
@@ -157,7 +157,7 @@ func buildMultipartFormRequest(fields map[string]string) *http.Request {
 
 	writer.Close()
 
-	req, _ := http.NewRequest("POST", "/", buf)
+	req, _ := http.NewRequest(http.MethodPost, "/", buf)
 	req.Header.Set("Content-type", writer.FormDataContentType())
 
 	return req
