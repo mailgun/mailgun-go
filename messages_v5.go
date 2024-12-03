@@ -403,6 +403,7 @@ func (m *mimeMessageV5) Endpoint() string {
 //
 //	See the public mailgun documentation for all possible return codes and error messages
 func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes string, id string, err error) {
+	// TODO(vtopc): move domain checks into NewMessage and NewMIMEMessage?
 	if m.Domain() == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
 		return "", "", err
