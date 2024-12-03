@@ -76,7 +76,7 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 
-	req, err := r.NewRequest(ctx, "GET", nil)
+	req, err := r.NewRequest(ctx, http.MethodGet, nil)
 	if err != nil {
 		return "", err
 	}
