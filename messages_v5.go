@@ -403,10 +403,15 @@ func (m *mimeMessageV5) Endpoint() string {
 //
 //	See the public mailgun documentation for all possible return codes and error messages
 func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes string, id string, err error) {
+	if m.Domain() == "" {
+		err = errors.New("you must provide a valid domain before calling Send()")
+		return "", "", err
+	}
+
 	invalidChars := ":&'@(),!?#;%+=<>"
 	if i := strings.ContainsAny(m.Domain(), invalidChars); i {
 		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
-		return
+		return "", "", err
 	}
 
 	if mg.apiKey == "" {

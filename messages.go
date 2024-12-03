@@ -681,13 +681,13 @@ type SendableMessage interface {
 func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
-		return
+		return "", "", err
 	}
 
 	invalidChars := ":&'@(),!?#;%+=<>"
 	if i := strings.ContainsAny(mg.domain, invalidChars); i {
 		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
-		return
+		return "", "", err
 	}
 
 	if mg.apiKey == "" {
@@ -706,7 +706,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	}
 	payload := NewFormDataPayload()
 
-	m.AddValues(payload)
+	m.Specific.AddValues(payload)
 	for _, to := range m.To() {
 		payload.addValue("to", to)
 	}
