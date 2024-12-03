@@ -681,13 +681,13 @@ type SendableMessage interface {
 func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
-		return
+		return "", "", err
 	}
 
 	invalidChars := ":&'@(),!?#;%+=<>"
 	if i := strings.ContainsAny(mg.domain, invalidChars); i {
 		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
-		return
+		return "", "", err
 	}
 
 	if mg.apiKey == "" {
@@ -706,107 +706,16 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	}
 	payload := NewFormDataPayload()
 
-	m.AddValues(payload)
-	for _, to := range m.To() {
-		payload.addValue("to", to)
-	}
-	for _, tag := range m.Tags() {
-		payload.addValue("o:tag", tag)
-	}
-	for _, campaign := range m.Campaigns() {
-		payload.addValue("o:campaign", campaign)
-	}
-	if m.DKIM() != nil {
-		payload.addValue("o:dkim", yesNo(*m.DKIM()))
-	}
-	if !m.DeliveryTime().IsZero() {
-		payload.addValue("o:deliverytime", formatMailgunTime(m.DeliveryTime()))
-	}
-	if m.STOPeriod() != "" {
-		payload.addValue("o:deliverytime-optimize-period", m.STOPeriod())
-	}
-	if m.NativeSend() {
-		payload.addValue("o:native-send", "yes")
-	}
-	if m.TestMode() {
-		payload.addValue("o:testmode", "yes")
-	}
-	if m.Tracking() != nil {
-		payload.addValue("o:tracking", yesNo(*m.Tracking()))
-	}
-	if m.TrackingClicks() != nil {
-		payload.addValue("o:tracking-clicks", *m.TrackingClicks())
-	}
-	if m.TrackingOpens() != nil {
-		payload.addValue("o:tracking-opens", yesNo(*m.TrackingOpens()))
-	}
-	if m.RequireTLS() {
-		payload.addValue("o:require-tls", trueFalse(m.RequireTLS()))
-	}
-	if m.SkipVerification() {
-		payload.addValue("o:skip-verification", trueFalse(m.SkipVerification()))
-	}
-	if m.Headers() != nil {
-		for header, value := range m.Headers() {
-			payload.addValue("h:"+header, value)
-		}
-	}
-	if m.Variables() != nil {
-		for variable, value := range m.Variables() {
-			payload.addValue("v:"+variable, value)
-		}
-	}
-	if m.TemplateVariables() != nil {
-		variableString, err := json.Marshal(m.TemplateVariables())
-		if err == nil {
-			// the map was marshalled as json so add it
-			payload.addValue("h:X-Mailgun-Variables", string(variableString))
-		}
-	}
-	if m.RecipientVariables() != nil {
-		j, err := json.Marshal(m.RecipientVariables())
-		if err != nil {
-			return "", "", err
-		}
-		payload.addValue("recipient-variables", string(j))
-	}
-	if m.Attachments() != nil {
-		for _, attachment := range m.Attachments() {
-			payload.addFile("attachment", attachment)
-		}
-	}
-	if m.ReaderAttachments() != nil {
-		for _, readerAttachment := range m.ReaderAttachments() {
-			payload.addReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
-		}
-	}
-	if m.BufferAttachments() != nil {
-		for _, bufferAttachment := range m.BufferAttachments() {
-			payload.addBuffer("attachment", bufferAttachment.Filename, bufferAttachment.Buffer)
-		}
-	}
-	if m.Inlines() != nil {
-		for _, inline := range m.Inlines() {
-			payload.addFile("inline", inline)
-		}
+	m.Specific.AddValues(payload)
+
+	err = addMessageValues(payload, m)
+	if err != nil {
+		return "", "", err
 	}
 
-	if m.ReaderInlines() != nil {
-		for _, readerAttachment := range m.ReaderInlines() {
-			payload.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
-		}
-	}
-
-	if m.domain == "" {
+	// TODO(v5): remove due for domain agnostic API:
+	if m.Domain() == "" {
 		m.domain = mg.Domain()
-	}
-
-	if m.TemplateVersionTag() != "" {
-		payload.addValue("t:version", m.TemplateVersionTag())
-	}
-
-	if m.TemplateRenderText() {
-		payload.addValue("t:text", yesNo(m.TemplateRenderText()))
 	}
 
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Endpoint(), m.Domain()))
@@ -833,6 +742,130 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 	}
 
 	return
+}
+
+func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
+	addMessageOptions(dst, src)
+	addMessageHeaders(dst, src)
+
+	err := addMessageVariables(dst, src)
+	if err != nil {
+		return err
+	}
+
+	addMessageAttachment(dst, src)
+
+	return nil
+}
+
+func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
+	for _, to := range src.To() {
+		dst.addValue("to", to)
+	}
+
+	for _, tag := range src.Tags() {
+		dst.addValue("o:tag", tag)
+	}
+	for _, campaign := range src.Campaigns() {
+		dst.addValue("o:campaign", campaign)
+	}
+	if src.DKIM() != nil {
+		dst.addValue("o:dkim", yesNo(*src.DKIM()))
+	}
+	if !src.DeliveryTime().IsZero() {
+		dst.addValue("o:deliverytime", formatMailgunTime(src.DeliveryTime()))
+	}
+	if src.STOPeriod() != "" {
+		dst.addValue("o:deliverytime-optimize-period", src.STOPeriod())
+	}
+	if src.NativeSend() {
+		dst.addValue("o:native-send", "yes")
+	}
+	if src.TestMode() {
+		dst.addValue("o:testmode", "yes")
+	}
+	if src.Tracking() != nil {
+		dst.addValue("o:tracking", yesNo(*src.Tracking()))
+	}
+	if src.TrackingClicks() != nil {
+		dst.addValue("o:tracking-clicks", *src.TrackingClicks())
+	}
+	if src.TrackingOpens() != nil {
+		dst.addValue("o:tracking-opens", yesNo(*src.TrackingOpens()))
+	}
+	if src.RequireTLS() {
+		dst.addValue("o:require-tls", trueFalse(src.RequireTLS()))
+	}
+	if src.SkipVerification() {
+		dst.addValue("o:skip-verification", trueFalse(src.SkipVerification()))
+	}
+
+	if src.TemplateVersionTag() != "" {
+		dst.addValue("t:version", src.TemplateVersionTag())
+	}
+	if src.TemplateRenderText() {
+		dst.addValue("t:text", yesNo(src.TemplateRenderText()))
+	}
+}
+
+func addMessageHeaders(dst *FormDataPayload, src SendableMessage) {
+	if src.Headers() != nil {
+		for header, value := range src.Headers() {
+			dst.addValue("h:"+header, value)
+		}
+	}
+}
+
+func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
+	if src.Variables() != nil {
+		for variable, value := range src.Variables() {
+			dst.addValue("v:"+variable, value)
+		}
+	}
+	if src.TemplateVariables() != nil {
+		variableString, err := json.Marshal(src.TemplateVariables())
+		if err == nil {
+			// the map was marshalled as json so add it
+			dst.addValue("h:X-Mailgun-Variables", string(variableString))
+		}
+	}
+	if src.RecipientVariables() != nil {
+		j, err := json.Marshal(src.RecipientVariables())
+		if err != nil {
+			return err
+		}
+		dst.addValue("recipient-variables", string(j))
+	}
+
+	return nil
+}
+
+func addMessageAttachment(dst *FormDataPayload, src SendableMessage) {
+	if src.Attachments() != nil {
+		for _, attachment := range src.Attachments() {
+			dst.addFile("attachment", attachment)
+		}
+	}
+	if src.ReaderAttachments() != nil {
+		for _, readerAttachment := range src.ReaderAttachments() {
+			dst.addReadCloser("attachment", readerAttachment.Filename, readerAttachment.ReadCloser)
+		}
+	}
+	if src.BufferAttachments() != nil {
+		for _, bufferAttachment := range src.BufferAttachments() {
+			dst.addBuffer("attachment", bufferAttachment.Filename, bufferAttachment.Buffer)
+		}
+	}
+	if src.Inlines() != nil {
+		for _, inline := range src.Inlines() {
+			dst.addFile("inline", inline)
+		}
+	}
+	if src.ReaderInlines() != nil {
+		for _, readerAttachment := range src.ReaderInlines() {
+			dst.addReadCloser("inline", readerAttachment.Filename, readerAttachment.ReadCloser)
+		}
+	}
 }
 
 func (m *plainMessage) AddValues(p *FormDataPayload) {
