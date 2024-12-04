@@ -982,8 +982,7 @@ func validateStringList(list []string, requireOne bool) bool {
 			if a == "" {
 				return false
 			} else {
-				// TODO(vtopc): hasOne is always true:
-				hasOne = hasOne || true
+				hasOne = true
 			}
 		}
 	}
