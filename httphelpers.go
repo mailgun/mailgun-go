@@ -176,12 +176,13 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	defer writer.Close()
 
 	for _, keyVal := range f.Values {
-		if tmp, err := writer.CreateFormField(keyVal.key); err == nil {
-			_, err := tmp.Write([]byte(keyVal.value))
-			if err != nil {
-				return nil, err
-			}
-		} else {
+		tmp, err := writer.CreateFormField(keyVal.key)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = tmp.Write([]byte(keyVal.value))
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -207,28 +208,29 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	}
 
 	for _, file := range f.ReadClosers {
-		if tmp, err := writer.CreateFormFile(file.key, file.name); err == nil {
-			// TODO(DE-1373): defer in a loop:
-			defer file.value.Close()
+		tmp, err := writer.CreateFormFile(file.key, file.name)
+		if err != nil {
+			return nil, err
+		}
 
-			_, err := io.Copy(tmp, file.value)
-			if err != nil {
-				return nil, err
-			}
-		} else {
+		// TODO(DE-1373): defer in a loop:
+		defer file.value.Close()
+
+		_, err = io.Copy(tmp, file.value)
+		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, buff := range f.Buffers {
-		if tmp, err := writer.CreateFormFile(buff.key, buff.name); err == nil {
-			r := bytes.NewReader(buff.value)
+		tmp, err := writer.CreateFormFile(buff.key, buff.name)
+		if err != nil {
+			return nil, err
+		}
 
-			_, err := io.Copy(tmp, r)
-			if err != nil {
-				return nil, err
-			}
-		} else {
+		r := bytes.NewReader(buff.value)
+		_, err = io.Copy(tmp, r)
+		if err != nil {
 			return nil, err
 		}
 	}
