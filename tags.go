@@ -154,9 +154,9 @@ func (ti *TagIterator) Err() error {
 	return ti.err
 }
 
-func (ti *TagIterator) fetch(ctx context.Context, url string) error {
+func (ti *TagIterator) fetch(ctx context.Context, uri string) error {
 	ti.Items = nil
-	req := newHTTPRequest(url)
+	req := newHTTPRequest(uri)
 	req.setClient(ti.mg.Client())
 	req.setBasicAuth(basicAuthUser, ti.mg.APIKey())
 	return getResponseFromJSON(ctx, req, &ti.tagsResponse)
