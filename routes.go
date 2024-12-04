@@ -303,8 +303,8 @@ func (mg *MailgunImpl) GetRoute(ctx context.Context, id string) (Route, error) {
 	if err != nil {
 		return Route{}, err
 	}
-	return *envelope.Route, err
 
+	return *envelope.Route, err
 }
 
 // UpdateRoute provides an "in-place" update of the specified route.
