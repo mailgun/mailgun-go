@@ -459,7 +459,7 @@ func TestSendDomainError(t *testing.T) {
 		{"smtp://example.com", false},
 	}
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		rsp := `{
 				"message":"Queued. Thank you",
 				"id":"<20111114174239.25659.5817@samples.mailgun.org>"
