@@ -109,11 +109,11 @@ func (j *jsonEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return bytes.NewBuffer(b), nil
 }
 
-func (j *jsonEncodedPayload) getContentType() (string, error) {
+func (*jsonEncodedPayload) getContentType() (string, error) {
 	return "application/json", nil
 }
 
-func (j *jsonEncodedPayload) getValues() []keyValuePair {
+func (*jsonEncodedPayload) getValues() []keyValuePair {
 	return nil
 }
 
