@@ -329,10 +329,10 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	if Debug {
 		if CaptureCurlOutput {
 			r.mu.Lock()
-			r.capturedCurlOutput = r.curlString(req, payload)
+			r.capturedCurlOutput = curlString(req, payload)
 			r.mu.Unlock()
 		} else {
-			fmt.Println(r.curlString(req, payload))
+			fmt.Println(curlString(req, payload))
 		}
 	}
 
@@ -385,7 +385,7 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	return uri.String(), nil
 }
 
-func (*httpRequest) curlString(req *http.Request, p payload) string {
+func curlString(req *http.Request, p payload) string {
 	parts := []string{"curl", "-i", "-X", req.Method, req.URL.String()}
 	for key, value := range req.Header {
 		if key == "Authorization" {
