@@ -134,7 +134,7 @@ func (f *urlEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return bytes.NewBufferString(data.Encode()), nil
 }
 
-func (f *urlEncodedPayload) getContentType() (string, error) {
+func (*urlEncodedPayload) getContentType() (string, error) {
 	return "application/x-www-form-urlencoded", nil
 }
 
