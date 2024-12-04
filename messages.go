@@ -692,17 +692,17 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes, id string, er
 
 	if mg.apiKey == "" {
 		err = errors.New("you must provide a valid api-key before calling Send()")
-		return
+		return "", "", err
 	}
 
 	if !isValid(m) {
 		err = ErrInvalidMessage
-		return
+		return "", "", err
 	}
 
 	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
 		err = errors.New("STO can only be used on a per-message basis")
-		return
+		return "", "", err
 	}
 	payload := NewFormDataPayload()
 
@@ -741,7 +741,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes, id string, er
 		mg.capturedCurlOutput = r.capturedCurlOutput
 	}
 
-	return
+	return mes, id, err
 }
 
 func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
