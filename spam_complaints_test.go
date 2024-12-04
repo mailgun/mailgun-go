@@ -103,5 +103,4 @@ func TestCreateDeleteComplaintList(t *testing.T) {
 		require.NoError(t, mg.DeleteComplaint(ctx, address))
 		require.False(t, hasComplaint(address))
 	}
-
 }
