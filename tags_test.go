@@ -72,7 +72,7 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 		if err != nil {
 			if mailgun.GetStatusFromErr(err) == 404 {
 				time.Sleep(time.Second * 2)
-				attempts += 1
+				attempts++
 				continue
 			}
 			return err
