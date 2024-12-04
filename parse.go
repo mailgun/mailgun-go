@@ -39,6 +39,7 @@ var EventNames = map[string]func() Event{
 func new_(e interface{}) func() Event {
 	typ := reflect.TypeOf(e)
 	return func() Event {
+		//nolint:revive // unchecked-type-assertion: this func is called on init only, so there should be no runtime panics:
 		return reflect.New(typ).Interface().(Event)
 	}
 }
