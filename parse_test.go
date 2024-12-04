@@ -29,6 +29,7 @@ func TestParseErrors(t *testing.T) {
 	require.Contains(t, err.Error(), "failed to parse event 'accepted'")
 }
 
+//nolint:revive // This is a test function.
 func TestParseSuccess(t *testing.T) {
 	event, err := ParseEvent([]byte(`{
 		"event": "accepted",

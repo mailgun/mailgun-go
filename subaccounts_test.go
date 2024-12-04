@@ -45,7 +45,7 @@ func TestSubaccountDetails(t *testing.T) {
 	iterator := mg.ListSubaccounts(nil)
 	require.NotNil(t, iterator)
 
-	page := []mailgun.Subaccount{}
+	page := make([]mailgun.Subaccount, 0, 1)
 	require.True(t, iterator.Next(context.Background(), &page))
 	require.NoError(t, iterator.Err())
 

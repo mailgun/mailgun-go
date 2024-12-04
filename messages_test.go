@@ -459,7 +459,7 @@ func TestSendDomainError(t *testing.T) {
 		{"smtp://example.com", false},
 	}
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		rsp := `{
 				"message":"Queued. Thank you",
 				"id":"<20111114174239.25659.5817@samples.mailgun.org>"
@@ -490,7 +490,7 @@ func TestSendEOFError(t *testing.T) {
 		toUser        = "test@test.com"
 	)
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 		panic("")
 	}))
 	defer srv.Close()

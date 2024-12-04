@@ -21,9 +21,9 @@ var (
 // This attribute may be used to filter the results returned by GetSubscribers().
 // All, Subscribed, and Unsubscribed provides a convenient and readable syntax for specifying the scope of the search.
 var (
-	All          *bool = nil
-	Subscribed   *bool = &yes
-	Unsubscribed *bool = &no
+	All          *bool
+	Subscribed   = &yes
+	Unsubscribed = &no
 )
 
 // A Member structure represents a member of the mailing list.

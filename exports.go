@@ -67,7 +67,7 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 	c := mg.Client()
 
 	// Ensure the client doesn't attempt to retry
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+	c.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
 		return errors.New("redirect")
 	}
 
@@ -84,10 +84,10 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 	if Debug {
 		if CaptureCurlOutput {
 			r.mu.Lock()
-			r.capturedCurlOutput = r.curlString(req, nil)
+			r.capturedCurlOutput = curlString(req, nil)
 			r.mu.Unlock()
 		} else {
-			fmt.Println(r.curlString(req, nil))
+			fmt.Println(curlString(req, nil))
 		}
 	}
 

@@ -62,7 +62,12 @@ func findAcceptedMessage(mg mailgun.Mailgun, id string) (*events.Accepted, error
 	for it.Next(context.Background(), &page) {
 		for _, event := range page {
 			if event.GetName() == events.EventAccepted && event.GetID() == id {
-				return event.(*events.Accepted), nil
+				e, ok := event.(*events.Accepted)
+				if !ok {
+					return nil, fmt.Errorf("unexpected event type: %T", event)
+				}
+
+				return e, nil
 			}
 		}
 	}

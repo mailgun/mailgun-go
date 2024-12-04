@@ -397,7 +397,7 @@ func (m *plainMessage) RecipientCount() int {
 	return len(m.bcc) + len(m.cc)
 }
 
-func (m *mimeMessage) RecipientCount() int {
+func (*mimeMessage) RecipientCount() int {
 	// TODO(v5): 10 + len(m.to)
 	return 10
 }
@@ -411,13 +411,13 @@ func (m *plainMessage) AddCC(r string) {
 	m.cc = append(m.cc, r)
 }
 
-func (m *mimeMessage) AddCC(_ string) {}
+func (*mimeMessage) AddCC(_ string) {}
 
 func (m *plainMessage) AddBCC(r string) {
 	m.bcc = append(m.bcc, r)
 }
 
-func (m *mimeMessage) AddBCC(_ string) {}
+func (*mimeMessage) AddBCC(_ string) {}
 
 // Deprecated: use SetHTML instead.
 //
@@ -430,7 +430,7 @@ func (m *plainMessage) SetHTML(h string) {
 	m.html = h
 }
 
-func (m *mimeMessage) SetHTML(_ string) {}
+func (*mimeMessage) SetHTML(_ string) {}
 
 // Deprecated: use SetAmpHTML instead.
 // TODO(v5): remove this method
@@ -442,7 +442,7 @@ func (m *plainMessage) SetAmpHTML(h string) {
 	m.ampHtml = h
 }
 
-func (m *mimeMessage) SetAmpHTML(_ string) {}
+func (*mimeMessage) SetAmpHTML(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -459,7 +459,7 @@ func (m *plainMessage) SetTemplate(t string) {
 	m.template = t
 }
 
-func (m *mimeMessage) SetTemplate(_ string) {}
+func (*mimeMessage) SetTemplate(_ string) {}
 
 // Deprecated: is no longer supported and is deprecated for new software.
 // TODO(v5): remove this method.
@@ -678,7 +678,7 @@ type SendableMessage interface {
 //
 // See the public mailgun documentation for all possible return codes and error messages
 // TODO(v5): switch m to SendableMessage interface - https://bryanftan.medium.com/accept-interfaces-return-structs-in-go-d4cab29a301b
-func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id string, err error) {
+func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes, id string, err error) {
 	if mg.domain == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
 		return "", "", err
@@ -692,17 +692,17 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 
 	if mg.apiKey == "" {
 		err = errors.New("you must provide a valid api-key before calling Send()")
-		return
+		return "", "", err
 	}
 
 	if !isValid(m) {
 		err = ErrInvalidMessage
-		return
+		return "", "", err
 	}
 
 	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
 		err = errors.New("STO can only be used on a per-message basis")
-		return
+		return "", "", err
 	}
 	payload := NewFormDataPayload()
 
@@ -741,7 +741,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes string, id str
 		mg.capturedCurlOutput = r.capturedCurlOutput
 	}
 
-	return
+	return mes, id, err
 }
 
 func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
@@ -893,11 +893,11 @@ func (m *mimeMessage) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
-func (m *plainMessage) Endpoint() string {
+func (*plainMessage) Endpoint() string {
 	return messagesEndpoint
 }
 
-func (m *mimeMessage) Endpoint() string {
+func (*mimeMessage) Endpoint() string {
 	return mimeMessagesEndpoint
 }
 
@@ -977,15 +977,14 @@ func validateStringList(list []string, requireOne bool) bool {
 
 	if list == nil {
 		return !requireOne
-	} else {
-		for _, a := range list {
-			if a == "" {
-				return false
-			} else {
-				// TODO(vtopc): hasOne is always true:
-				hasOne = hasOne || true
-			}
+	}
+
+	for _, a := range list {
+		if a == "" {
+			return false
 		}
+
+		hasOne = true
 	}
 
 	return hasOne

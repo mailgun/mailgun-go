@@ -90,7 +90,7 @@ func (ei *EventIterator) Err() error {
 // Next retrieves the next page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Next(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -98,7 +98,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	if ei.err != nil {
 		return false
 	}
@@ -111,7 +111,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 // First retrieves the first page of events from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) First(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -119,7 +119,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
@@ -127,7 +127,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Last(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -135,14 +135,14 @@ func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
 // Previous retrieves the previous page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Previous(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -153,7 +153,7 @@ func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 
 	return len(ei.Items) != 0
 }
@@ -234,7 +234,7 @@ func (ep *EventPoller) Err() error {
 	return ep.err
 }
 
-func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
+func (ep *EventPoller) Poll(ctx context.Context, ee *[]Event) bool {
 	var currentPage string
 	var results []Event
 
@@ -266,7 +266,7 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 
 		// If we have events to return
 		if len(results) != 0 {
-			*events = results
+			*ee = results
 			return true
 		}
 
@@ -284,7 +284,6 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 		case <-timer.C:
 		}
 	}
-
 }
 
 // Given time.Time{} return a float64 as given in mailgun event timestamps

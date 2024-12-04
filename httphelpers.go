@@ -76,8 +76,8 @@ type jsonEncodedPayload struct {
 	payload interface{}
 }
 
-func newHTTPRequest(url string) *httpRequest {
-	return &httpRequest{URL: url, Client: http.DefaultClient}
+func newHTTPRequest(uri string) *httpRequest {
+	return &httpRequest{URL: uri, Client: http.DefaultClient}
 }
 
 func (r *httpRequest) addParameter(name, value string) {
@@ -109,11 +109,11 @@ func (j *jsonEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return bytes.NewBuffer(b), nil
 }
 
-func (j *jsonEncodedPayload) getContentType() (string, error) {
+func (*jsonEncodedPayload) getContentType() (string, error) {
 	return "application/json", nil
 }
 
-func (j *jsonEncodedPayload) getValues() []keyValuePair {
+func (*jsonEncodedPayload) getValues() []keyValuePair {
 	return nil
 }
 
@@ -134,7 +134,7 @@ func (f *urlEncodedPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	return bytes.NewBufferString(data.Encode()), nil
 }
 
-func (f *urlEncodedPayload) getContentType() (string, error) {
+func (*urlEncodedPayload) getContentType() (string, error) {
 	return "application/x-www-form-urlencoded", nil
 }
 
@@ -176,12 +176,13 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	defer writer.Close()
 
 	for _, keyVal := range f.Values {
-		if tmp, err := writer.CreateFormField(keyVal.key); err == nil {
-			_, err := tmp.Write([]byte(keyVal.value))
-			if err != nil {
-				return nil, err
-			}
-		} else {
+		tmp, err := writer.CreateFormField(keyVal.key)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = tmp.Write([]byte(keyVal.value))
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -197,7 +198,7 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 			return nil, err
 		}
 
-		// TODO(DE-1139): defer in a loop:
+		// TODO(DE-1373): defer in a loop:
 		defer fp.Close()
 
 		_, err = io.Copy(tmp, fp)
@@ -207,28 +208,29 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	}
 
 	for _, file := range f.ReadClosers {
-		if tmp, err := writer.CreateFormFile(file.key, file.name); err == nil {
-			// TODO(DE-1139): defer in a loop:
-			defer file.value.Close()
+		tmp, err := writer.CreateFormFile(file.key, file.name)
+		if err != nil {
+			return nil, err
+		}
 
-			_, err := io.Copy(tmp, file.value)
-			if err != nil {
-				return nil, err
-			}
-		} else {
+		// TODO(DE-1373): defer in a loop:
+		defer file.value.Close()
+
+		_, err = io.Copy(tmp, file.value)
+		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, buff := range f.Buffers {
-		if tmp, err := writer.CreateFormFile(buff.key, buff.name); err == nil {
-			r := bytes.NewReader(buff.value)
+		tmp, err := writer.CreateFormFile(buff.key, buff.name)
+		if err != nil {
+			return nil, err
+		}
 
-			_, err := io.Copy(tmp, r)
-			if err != nil {
-				return nil, err
-			}
-		} else {
+		r := bytes.NewReader(buff.value)
+		_, err = io.Copy(tmp, r)
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -327,10 +329,10 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	if Debug {
 		if CaptureCurlOutput {
 			r.mu.Lock()
-			r.capturedCurlOutput = r.curlString(req, payload)
+			r.capturedCurlOutput = curlString(req, payload)
 			r.mu.Unlock()
 		} else {
-			fmt.Println(r.curlString(req, payload))
+			fmt.Println(curlString(req, payload))
 		}
 	}
 
@@ -383,8 +385,7 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	return uri.String(), nil
 }
 
-func (r *httpRequest) curlString(req *http.Request, p payload) string {
-
+func curlString(req *http.Request, p payload) string {
 	parts := []string{"curl", "-i", "-X", req.Method, req.URL.String()}
 	for key, value := range req.Header {
 		if key == "Authorization" {
@@ -398,8 +399,6 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 	if req.Host != "" {
 		parts = append(parts, fmt.Sprintf("-H \"Host: %s\"", req.Host))
 	}
-
-	// parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
 
 	if p != nil {
 		contentType, _ := p.getContentType()

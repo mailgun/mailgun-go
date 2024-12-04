@@ -53,5 +53,6 @@ func findStoredMessageURL(mg mailgun.Mailgun, id string) (string, error) {
 	if it.Err() != nil {
 		return "", it.Err()
 	}
-	return "", fmt.Errorf("No stored messages found.  Try changing MG_EMAIL_TO to an address that stores messages and try again.")
+
+	return "", fmt.Errorf("no stored messages found; try changing MG_EMAIL_TO to an address that stores messages and try again")
 }

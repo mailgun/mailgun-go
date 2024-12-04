@@ -72,14 +72,16 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 		if err != nil {
 			if mailgun.GetStatusFromErr(err) == 404 {
 				time.Sleep(time.Second * 2)
-				attempts += 1
+				attempts++
 				continue
 			}
+
 			return err
 		}
-		return nil
 
+		return nil
 	}
+
 	return errors.Errorf("Waited to long for tag '%s' to show up", tag)
 }
 
