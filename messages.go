@@ -442,7 +442,7 @@ func (m *plainMessage) SetAmpHTML(h string) {
 	m.ampHtml = h
 }
 
-func (m *mimeMessage) SetAmpHTML(_ string) {}
+func (*mimeMessage) SetAmpHTML(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
