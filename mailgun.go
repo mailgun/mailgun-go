@@ -386,7 +386,7 @@ func (mg *MailgunImpl) SetAPIBase(address string) {
 
 // AddOverrideHeader allows the user to specify additional headers that will be included in the HTTP request
 // This is mostly useful for testing the Mailgun API hosted at a different endpoint.
-func (mg *MailgunImpl) AddOverrideHeader(k string, v string) {
+func (mg *MailgunImpl) AddOverrideHeader(k, v string) {
 	if mg.overrideHeaders == nil {
 		mg.overrideHeaders = make(map[string]string)
 	}
