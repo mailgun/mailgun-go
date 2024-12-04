@@ -89,7 +89,6 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 
 	_, err := mg.GetUnsubscribe(ctx, email)
 	require.NoError(t, err)
-	/*t.Logf("Received %d out of %d unsubscribe records.\n", len(us), n)*/
 
 	// Destroy the unsubscription record
 	require.NoError(t, mg.DeleteUnsubscribe(ctx, email))
