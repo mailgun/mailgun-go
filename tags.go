@@ -67,9 +67,9 @@ func (mg *MailgunImpl) ListTags(opts *ListTagOptions) *TagIterator {
 		}
 	}
 
-	url, err := req.generateUrlWithParameters()
+	uri, err := req.generateUrlWithParameters()
 	return &TagIterator{
-		tagsResponse: tagsResponse{Paging: Paging{Next: url, First: url}},
+		tagsResponse: tagsResponse{Paging: Paging{Next: uri, First: uri}},
 		err:          err,
 		mg:           mg,
 	}
