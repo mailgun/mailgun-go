@@ -186,7 +186,7 @@ type EventPoller struct {
 	err           error
 }
 
-// Poll the events api and return new events as they occur
+// PollEvents polls the events api and return new events as they occur
 //  it = mg.PollEvents(&ListEventOptions{
 //    // Only events with a timestamp after this date/time will be returned
 //    Begin:        time.Now().Add(time.Second * -3),

@@ -1,7 +1,9 @@
 package mailgun
 
-import "fmt"
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type Recipient struct {
 	Name  string `json:"-"`
