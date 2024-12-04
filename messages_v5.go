@@ -454,7 +454,7 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes, id s
 		id = response.Id
 	}
 
-	return
+	return mes, id, err
 }
 
 func (m *plainMessageV5) isValid() bool {
