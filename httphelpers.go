@@ -208,7 +208,7 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 
 	for _, file := range f.ReadClosers {
 		if tmp, err := writer.CreateFormFile(file.key, file.name); err == nil {
-			// TODO(DE-1139): defer in a loop:
+			// TODO(DE-1373): defer in a loop:
 			defer file.value.Close()
 
 			_, err := io.Copy(tmp, file.value)
