@@ -76,8 +76,8 @@ type jsonEncodedPayload struct {
 	payload interface{}
 }
 
-func newHTTPRequest(url string) *httpRequest {
-	return &httpRequest{URL: url, Client: http.DefaultClient}
+func newHTTPRequest(uri string) *httpRequest {
+	return &httpRequest{URL: uri, Client: http.DefaultClient}
 }
 
 func (r *httpRequest) addParameter(name, value string) {
