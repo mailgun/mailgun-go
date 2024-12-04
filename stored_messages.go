@@ -82,8 +82,8 @@ func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...str
 	if err != nil {
 		return "", "", err
 	}
-	return resp.Message, resp.Id, nil
 
+	return resp.Message, resp.Id, nil
 }
 
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
