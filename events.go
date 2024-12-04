@@ -284,7 +284,6 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 		case <-timer.C:
 		}
 	}
-
 }
 
 // Given time.Time{} return a float64 as given in mailgun event timestamps
