@@ -62,7 +62,7 @@ func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (Stored
 }
 
 // Given a storage id resend the stored message to the specified recipients
-func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...string) (string, string, error) {
+func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...string) (msg string, id string, err error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -78,7 +78,7 @@ func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...str
 	}
 
 	var resp sendMessageResponse
-	err := postResponseFromJSON(ctx, r, payload, &resp)
+	err = postResponseFromJSON(ctx, r, payload, &resp)
 	if err != nil {
 		return "", "", err
 	}
