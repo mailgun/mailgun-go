@@ -75,11 +75,13 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 				attempts++
 				continue
 			}
+
 			return err
 		}
-		return nil
 
+		return nil
 	}
+
 	return errors.Errorf("Waited to long for tag '%s' to show up", tag)
 }
 
