@@ -234,7 +234,7 @@ func (ep *EventPoller) Err() error {
 	return ep.err
 }
 
-func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
+func (ep *EventPoller) Poll(ctx context.Context, ee *[]Event) bool {
 	var currentPage string
 	var results []Event
 
@@ -266,7 +266,7 @@ func (ep *EventPoller) Poll(ctx context.Context, events *[]Event) bool {
 
 		// If we have events to return
 		if len(results) != 0 {
-			*events = results
+			*ee = results
 			return true
 		}
 
