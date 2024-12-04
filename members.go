@@ -22,8 +22,8 @@ var (
 // All, Subscribed, and Unsubscribed provides a convenient and readable syntax for specifying the scope of the search.
 var (
 	All          *bool = nil
-	Subscribed   *bool = &yes
-	Unsubscribed *bool = &no
+	Subscribed         = &yes
+	Unsubscribed       = &no
 )
 
 // A Member structure represents a member of the mailing list.
