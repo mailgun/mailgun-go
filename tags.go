@@ -167,7 +167,7 @@ func canFetchPage(slug string) bool {
 	if err != nil {
 		return false
 	}
-	params, _ := url.ParseQuery(parts.RawQuery)
+	params, err := url.ParseQuery(parts.RawQuery)
 	if err != nil {
 		return false
 	}
