@@ -111,7 +111,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 // First retrieves the first page of events from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) First(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -119,7 +119,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
