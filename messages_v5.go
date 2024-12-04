@@ -311,13 +311,13 @@ func (m *plainMessageV5) AddCC(r string) {
 	m.cc = append(m.cc, r)
 }
 
-func (m *mimeMessageV5) AddCC(_ string) {}
+func (*mimeMessageV5) AddCC(_ string) {}
 
 func (m *plainMessageV5) AddBCC(r string) {
 	m.bcc = append(m.bcc, r)
 }
 
-func (m *mimeMessageV5) AddBCC(_ string) {}
+func (*mimeMessageV5) AddBCC(_ string) {}
 
 func (m *plainMessageV5) SetHTML(h string) {
 	m.html = h
@@ -329,7 +329,7 @@ func (m *plainMessageV5) SetAmpHTML(h string) {
 	m.ampHtml = h
 }
 
-func (m *mimeMessageV5) SetAmpHTML(_ string) {}
+func (*mimeMessageV5) SetAmpHTML(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -346,7 +346,7 @@ func (m *plainMessageV5) SetTemplate(t string) {
 	m.template = t
 }
 
-func (m *mimeMessageV5) SetTemplate(_ string) {}
+func (*mimeMessageV5) SetTemplate(_ string) {}
 
 func (m *plainMessageV5) AddValues(p *FormDataPayload) {
 	p.addValue("from", m.from)
@@ -373,11 +373,11 @@ func (m *mimeMessageV5) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
-func (m *plainMessageV5) Endpoint() string {
+func (*plainMessageV5) Endpoint() string {
 	return messagesEndpoint
 }
 
-func (m *mimeMessageV5) Endpoint() string {
+func (*mimeMessageV5) Endpoint() string {
 	return mimeMessagesEndpoint
 }
 
