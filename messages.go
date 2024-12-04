@@ -893,11 +893,11 @@ func (m *mimeMessage) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
-func (m *plainMessage) Endpoint() string {
+func (*plainMessage) Endpoint() string {
 	return messagesEndpoint
 }
 
-func (m *mimeMessage) Endpoint() string {
+func (*mimeMessage) Endpoint() string {
 	return mimeMessagesEndpoint
 }
 
