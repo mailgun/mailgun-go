@@ -386,7 +386,6 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 }
 
 func (r *httpRequest) curlString(req *http.Request, p payload) string {
-
 	parts := []string{"curl", "-i", "-X", req.Method, req.URL.String()}
 	for key, value := range req.Header {
 		if key == "Authorization" {
@@ -400,8 +399,6 @@ func (r *httpRequest) curlString(req *http.Request, p payload) string {
 	if req.Host != "" {
 		parts = append(parts, fmt.Sprintf("-H \"Host: %s\"", req.Host))
 	}
-
-	// parts = append(parts, fmt.Sprintf(" --user '%s:%s'", r.BasicAuthUser, r.BasicAuthPassword))
 
 	if p != nil {
 		contentType, _ := p.getContentType()
