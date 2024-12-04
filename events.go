@@ -127,7 +127,7 @@ func (ei *EventIterator) First(ctx context.Context, events *[]Event) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Last(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -135,7 +135,7 @@ func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	return true
 }
 
