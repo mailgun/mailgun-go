@@ -490,7 +490,7 @@ func TestSendEOFError(t *testing.T) {
 		toUser        = "test@test.com"
 	)
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 		panic("")
 	}))
 	defer srv.Close()
