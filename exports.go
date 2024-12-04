@@ -67,7 +67,7 @@ func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, er
 	c := mg.Client()
 
 	// Ensure the client doesn't attempt to retry
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+	c.CheckRedirect = func(_ *http.Request, via []*http.Request) error {
 		return errors.New("redirect")
 	}
 
