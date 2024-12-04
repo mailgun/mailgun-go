@@ -417,17 +417,17 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes, id s
 
 	if mg.apiKey == "" {
 		err = errors.New("you must provide a valid api-key before calling Send()")
-		return
+		return "", "", err
 	}
 
 	if !isValid(m) {
 		err = ErrInvalidMessage
-		return
+		return "", "", err
 	}
 
 	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
 		err = errors.New("STO can only be used on a per-message basis")
-		return
+		return "", "", err
 	}
 	payload := NewFormDataPayload()
 
