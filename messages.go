@@ -397,7 +397,7 @@ func (m *plainMessage) RecipientCount() int {
 	return len(m.bcc) + len(m.cc)
 }
 
-func (m *mimeMessage) RecipientCount() int {
+func (*mimeMessage) RecipientCount() int {
 	// TODO(v5): 10 + len(m.to)
 	return 10
 }
@@ -411,13 +411,13 @@ func (m *plainMessage) AddCC(r string) {
 	m.cc = append(m.cc, r)
 }
 
-func (m *mimeMessage) AddCC(_ string) {}
+func (*mimeMessage) AddCC(_ string) {}
 
 func (m *plainMessage) AddBCC(r string) {
 	m.bcc = append(m.bcc, r)
 }
 
-func (m *mimeMessage) AddBCC(_ string) {}
+func (*mimeMessage) AddBCC(_ string) {}
 
 // Deprecated: use SetHTML instead.
 //
@@ -430,7 +430,7 @@ func (m *plainMessage) SetHTML(h string) {
 	m.html = h
 }
 
-func (m *mimeMessage) SetHTML(_ string) {}
+func (*mimeMessage) SetHTML(_ string) {}
 
 // Deprecated: use SetAmpHTML instead.
 // TODO(v5): remove this method
@@ -459,7 +459,7 @@ func (m *plainMessage) SetTemplate(t string) {
 	m.template = t
 }
 
-func (m *mimeMessage) SetTemplate(_ string) {}
+func (*mimeMessage) SetTemplate(_ string) {}
 
 // Deprecated: is no longer supported and is deprecated for new software.
 // TODO(v5): remove this method.
