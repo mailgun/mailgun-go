@@ -45,6 +45,7 @@ func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
 }
 
 // ListTags returns a cursor used to iterate through a list of tags
+//
 //	it := mg.ListTags(nil)
 //	var page []mailgun.Tag
 //	for it.Next(&page) {
