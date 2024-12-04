@@ -4,24 +4,23 @@ linters:
   # Full list of linters - https://golangci-lint.run/usage/linters
   disable-all: true
   enable:
+    - typecheck
     - errcheck # Mandatory. Do not disable.
     - ineffassign # Mandatory. Do not disable.
     - staticcheck # Mandatory. Do not disable.
+    - govet
     - gosimple
     - gosec
     - bodyclose # https://github.com/timakin/bodyclose
+    - goimports
     - gocyclo
+    - noctx
     - gomodguard
     - nolintlint
 
 # TODO:
 #    - gocritic
-#    - goimports
-#    - gosimple
-#    - govet
-#    - noctx
 #    - stylecheck
-#    - typecheck
 #    - unused
 
 linters-settings:
