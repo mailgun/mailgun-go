@@ -197,7 +197,7 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 			return nil, err
 		}
 
-		// TODO(DE-1139): defer in a loop:
+		// TODO(DE-1373): defer in a loop:
 		defer fp.Close()
 
 		_, err = io.Copy(tmp, fp)
