@@ -142,7 +142,7 @@ func (ei *EventIterator) Last(ctx context.Context, events *[]Event) bool {
 // Previous retrieves the previous page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Previous(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -153,7 +153,7 @@ func (ei *EventIterator) Previous(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 
 	return len(ei.Items) != 0
 }
