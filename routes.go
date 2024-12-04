@@ -49,14 +49,15 @@ type ForwardedMessage struct {
 
 // ExtractForwardedMessage extracts the forward route payload values from a parsed PostForm
 // Example usage:
-// func Handler(w http.ResponseWriter, r *http.Request) {
+//
+//	func Handler(w http.ResponseWriter, r *http.Request) {
 //	err := r.ParseForm()
 //	if err != nil {
 //		log.Fatal(err)
 //	}
 //	forwardRoute := mailgun.ExtractForwardedMessage(r.PostForm)
 //	fmt.Printf("Forwarded message: %#v", forwardRoute)
-// }
+//	}
 func ExtractForwardedMessage(formValues url.Values) ForwardedMessage {
 	forwardedMessage := ForwardedMessage{}
 	forwardedMessage.BodyPlain = formValues.Get("body-plain")

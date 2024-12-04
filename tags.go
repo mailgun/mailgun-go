@@ -45,6 +45,7 @@ func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
 }
 
 // ListTags returns a cursor used to iterate through a list of tags
+//
 //	it := mg.ListTags(nil)
 //	var page []mailgun.Tag
 //	for it.Next(&page) {
@@ -166,7 +167,7 @@ func canFetchPage(slug string) bool {
 	if err != nil {
 		return false
 	}
-	params, _ := url.ParseQuery(parts.RawQuery)
+	params, err := url.ParseQuery(parts.RawQuery)
 	if err != nil {
 		return false
 	}

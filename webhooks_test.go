@@ -105,7 +105,7 @@ func TestVerifyWebhookRequest_Form(t *testing.T) {
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.WebhookSigningKey(), v)
-		req := buildFormRequest(fields)
+		req := buildFormRequest(context.Background(), fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
 		require.NoError(t, err)
@@ -122,7 +122,7 @@ func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.WebhookSigningKey(), v)
-		req := buildMultipartFormRequest(fields)
+		req := buildMultipartFormRequest(context.Background(), fields)
 
 		verified, err := mg.VerifyWebhookRequest(req)
 		require.NoError(t, err)
@@ -133,7 +133,7 @@ func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
 	}
 }
 
-func buildFormRequest(fields map[string]string) *http.Request {
+func buildFormRequest(ctx context.Context, fields map[string]string) *http.Request {
 	values := url.Values{}
 
 	for k, v := range fields {
@@ -141,13 +141,13 @@ func buildFormRequest(fields map[string]string) *http.Request {
 	}
 
 	r := strings.NewReader(values.Encode())
-	req, _ := http.NewRequest(http.MethodPost, "/", r)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/", r)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	return req
 }
 
-func buildMultipartFormRequest(fields map[string]string) *http.Request {
+func buildMultipartFormRequest(ctx context.Context, fields map[string]string) *http.Request {
 	buf := &bytes.Buffer{}
 	writer := multipart.NewWriter(buf)
 
@@ -157,7 +157,7 @@ func buildMultipartFormRequest(fields map[string]string) *http.Request {
 
 	writer.Close()
 
-	req, _ := http.NewRequest(http.MethodPost, "/", buf)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/", buf)
 	req.Header.Set("Content-type", writer.FormDataContentType())
 
 	return req
