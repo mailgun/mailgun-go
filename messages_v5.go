@@ -323,7 +323,7 @@ func (m *plainMessageV5) SetHTML(h string) {
 	m.html = h
 }
 
-func (m *mimeMessageV5) SetHTML(_ string) {}
+func (*mimeMessageV5) SetHTML(_ string) {}
 
 func (m *plainMessageV5) SetAmpHTML(h string) {
 	m.ampHtml = h

@@ -385,7 +385,7 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	return uri.String(), nil
 }
 
-func (r *httpRequest) curlString(req *http.Request, p payload) string {
+func (*httpRequest) curlString(req *http.Request, p payload) string {
 	parts := []string{"curl", "-i", "-X", req.Method, req.URL.String()}
 	for key, value := range req.Header {
 		if key == "Authorization" {
