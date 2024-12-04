@@ -977,13 +977,13 @@ func validateStringList(list []string, requireOne bool) bool {
 
 	if list == nil {
 		return !requireOne
-	} else {
-		for _, a := range list {
-			if a == "" {
-				return false
-			} else {
-				hasOne = true
-			}
+	}
+
+	for _, a := range list {
+		if a == "" {
+			return false
+		} else {
+			hasOne = true
 		}
 	}
 
