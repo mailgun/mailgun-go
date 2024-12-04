@@ -982,9 +982,9 @@ func validateStringList(list []string, requireOne bool) bool {
 	for _, a := range list {
 		if a == "" {
 			return false
-		} else {
-			hasOne = true
 		}
+
+		hasOne = true
 	}
 
 	return hasOne
