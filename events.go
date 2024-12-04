@@ -90,7 +90,7 @@ func (ei *EventIterator) Err() error {
 // Next retrieves the next page of events from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
+func (ei *EventIterator) Next(ctx context.Context, ee *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
@@ -98,7 +98,7 @@ func (ei *EventIterator) Next(ctx context.Context, events *[]Event) bool {
 	if ei.err != nil {
 		return false
 	}
-	*events, ei.err = ParseEvents(ei.Items)
+	*ee, ei.err = ParseEvents(ei.Items)
 	if ei.err != nil {
 		return false
 	}
