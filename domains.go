@@ -305,7 +305,7 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 		if len(opts.IPS) != 0 {
 			payload.addValue("ips", strings.Join(opts.IPS, ","))
 		}
-		if len(opts.Password) != 0 {
+		if opts.Password != "" {
 			payload.addValue("smtp_password", opts.Password)
 		}
 		if opts.WebScheme != "" {
