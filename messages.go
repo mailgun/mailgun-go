@@ -767,6 +767,7 @@ func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
 		dst.addValue("o:tag", tag)
 	}
 	for _, campaign := range src.Campaigns() {
+		// TODO(v5): deprecated - https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Messages/
 		dst.addValue("o:campaign", campaign)
 	}
 	if src.DKIM() != nil {
