@@ -30,8 +30,6 @@ func (g *Generic) GetTimestamp() time.Time {
 }
 
 func (g *Generic) SetTimestamp(t time.Time) {
-	// convert := fmt.Sprintf("%d.%06d", t.Unix(), t.Nanosecond()/int(time.Microsecond))
-	// ts, err := strconv.ParseFloat(convert, 64)
 	g.Timestamp = float64(t.Unix()) + (float64(t.Nanosecond()/int(time.Microsecond)) / float64(1000000))
 }
 

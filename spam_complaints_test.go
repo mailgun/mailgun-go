@@ -19,7 +19,6 @@ func TestGetComplaints(t *testing.T) {
 	it := mg.ListComplaints(nil)
 	var page []mailgun.Complaint
 	for it.Next(ctx, &page) {
-		// spew.Dump(page)
 	}
 	require.NoError(t, it.Err())
 }

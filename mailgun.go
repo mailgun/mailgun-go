@@ -445,7 +445,6 @@ func generateCredentialsUrl(m Mailgun, login string) string {
 		tail = fmt.Sprintf("/%s", login)
 	}
 	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail))
-	// return fmt.Sprintf("%s/domains/%s/credentials%s", apiBase, m.Domain(), tail)
 }
 
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
