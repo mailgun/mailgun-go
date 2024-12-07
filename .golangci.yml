@@ -13,6 +13,7 @@ linters:
     - govet
     - gosimple
     - goimports
+    - gocritic
     - revive
     - gocyclo
     - noctx
@@ -20,8 +21,7 @@ linters:
     - nolintlint
 
 # TODO:
-#    - gocritic
-#    - stylecheck
+#    - stylecheck # TODO(v5): enable
 #    - unused
 
 linters-settings:
@@ -32,6 +32,12 @@ linters-settings:
       - opinionated
       - performance
       - style
+    disabled-checks:
+      - singleCaseSwitch
+      - deferInLoop # TODO(DE-1373): enable
+      - hugeParam # TODO(v5): enable?
+      - sprintfQuotedString # noisy # TODO: enable
+      - exitAfterDefer # TODO: enable?
 
   errcheck:
     # List of functions to exclude from checking, where each entry is a single function to exclude.
@@ -143,15 +149,6 @@ linters-settings:
         severity: warning
         disabled: false
         exclude: [""]
-
-      # TODO(DE-1373): enable:
-      #      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#defer
-      #      - name: defer
-      #        severity: warning
-      #        disabled: false
-      #        exclude: [""]
-      #        arguments:
-      #          - [ "call-chain", "loop" ]
 
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#dot-imports
       - name: dot-imports
