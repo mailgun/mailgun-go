@@ -41,8 +41,8 @@ type Message struct {
 	trackingOpens      *bool
 	headers            map[string]string
 	variables          map[string]string
-	templateVariables  map[string]interface{}
-	recipientVariables map[string]map[string]interface{}
+	templateVariables  map[string]any
+	recipientVariables map[string]map[string]any
 	domain             string
 	templateVersionTag string
 	templateRenderText bool
@@ -285,11 +285,11 @@ func (m *Message) Variables() map[string]string {
 	return m.variables
 }
 
-func (m *Message) TemplateVariables() map[string]interface{} {
+func (m *Message) TemplateVariables() map[string]any {
 	return m.templateVariables
 }
 
-func (m *Message) RecipientVariables() map[string]map[string]interface{} {
+func (m *Message) RecipientVariables() map[string]map[string]any {
 	return m.recipientVariables
 }
 
@@ -364,14 +364,14 @@ func (m *Message) AddRecipient(recipient string) error {
 // AddRecipientAndVariables appends a receiver to the To: header of a message,
 // and as well attaches a set of variables relevant for this recipient.
 // It will return an error if the limit of recipients have been exceeded for this message
-func (m *Message) AddRecipientAndVariables(r string, vars map[string]interface{}) error {
+func (m *Message) AddRecipientAndVariables(r string, vars map[string]any) error {
 	if m.RecipientCount() >= MaxNumberOfRecipients {
 		return fmt.Errorf("recipient limit exceeded (max %d)", MaxNumberOfRecipients)
 	}
 	m.to = append(m.to, r)
 	if vars != nil {
 		if m.recipientVariables == nil {
-			m.recipientVariables = make(map[string]map[string]interface{})
+			m.recipientVariables = make(map[string]map[string]any)
 		}
 		m.recipientVariables[r] = vars
 	}
@@ -574,7 +574,7 @@ func (m *Message) AddHeader(header, value string) {
 // AddVariable lets you associate a set of variables with messages you send,
 // which Mailgun can use to, in essence, complete form-mail.
 // Refer to the Mailgun documentation for more information.
-func (m *Message) AddVariable(variable string, value interface{}) error {
+func (m *Message) AddVariable(variable string, value any) error {
 	if m.variables == nil {
 		m.variables = make(map[string]string)
 	}
@@ -597,9 +597,9 @@ func (m *Message) AddVariable(variable string, value interface{}) error {
 // AddTemplateVariable adds a template variable to the map of template variables, replacing the variable if it is already there.
 // This is used for server-side message templates and can nest arbitrary values. At send time, the resulting map will be converted into
 // a JSON string and sent as a header in the X-Mailgun-Variables header.
-func (m *Message) AddTemplateVariable(variable string, value interface{}) error {
+func (m *Message) AddTemplateVariable(variable string, value any) error {
 	if m.templateVariables == nil {
-		m.templateVariables = make(map[string]interface{})
+		m.templateVariables = make(map[string]any)
 	}
 	m.templateVariables[variable] = value
 	return nil
@@ -646,8 +646,8 @@ type SendableMessage interface {
 	TrackingOpens() *bool
 	Headers() map[string]string
 	Variables() map[string]string
-	TemplateVariables() map[string]interface{}
-	RecipientVariables() map[string]map[string]interface{}
+	TemplateVariables() map[string]any
+	RecipientVariables() map[string]map[string]any
 	TemplateVersionTag() string
 	TemplateRenderText() bool
 	RequireTLS() bool

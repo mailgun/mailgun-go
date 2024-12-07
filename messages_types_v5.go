@@ -28,8 +28,8 @@ type commonMessageV5 struct {
 	trackingOpens      *bool
 	headers            map[string]string
 	variables          map[string]string
-	templateVariables  map[string]interface{}
-	recipientVariables map[string]map[string]interface{}
+	templateVariables  map[string]any
+	recipientVariables map[string]map[string]any
 	templateVersionTag string
 	templateRenderText bool
 	requireTLS         bool

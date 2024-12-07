@@ -189,7 +189,7 @@ func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Reque
 
 	ms.templateVersions[templateName] = append(ms.templateVersions[templateName], newTemplateVersion)
 	template.Version = newTemplateVersion
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message":  "new version of the template has been stored",
 		"template": template,
 	})
@@ -246,7 +246,7 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	if len(active) != 0 {
 		if active == "yes" {
 			templateVersion.Active = true
-			for i := range ms.templateVersions[templateName] { //every other template version become not active
+			for i := range ms.templateVersions[templateName] { // every other template version become not active
 				if i == templateVersionIndex {
 					continue
 				}
@@ -263,9 +263,9 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	}
 
 	ms.templateVersions[templateName][templateVersionIndex] = templateVersion
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "version has been updated",
-		"template": map[string]interface{}{
+		"template": map[string]any{
 			"name": templateName,
 			"version": map[string]string{
 				"tag": templateVersionName,
@@ -297,9 +297,9 @@ func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.WriteHeader(http.StatusOK)
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "version has been deleted",
-		"template": map[string]interface{}{
+		"template": map[string]any{
 			"name": templateName,
 			"version": map[string]string{
 				"tag": templateVersionName,

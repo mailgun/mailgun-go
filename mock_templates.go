@@ -150,7 +150,7 @@ func (ms *mockServer) getTemplate(w http.ResponseWriter, r *http.Request) {
 		if template.Name == templateName {
 			if active == "true" {
 				version := ms.getActiveTemplateVersion(templateName)
-				if version.Active { //active version exists
+				if version.Active { // active version exists
 					template.Version = version
 				}
 			}
@@ -223,7 +223,7 @@ func (ms *mockServer) createTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ms.templates = append(ms.templates, template)
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message":  "template has been stored",
 		"template": template,
 	})
@@ -252,7 +252,7 @@ func (ms *mockServer) updateTemplate(w http.ResponseWriter, r *http.Request) {
 	for i, template := range ms.templates {
 		if template.Name == name {
 			ms.templates[i].Description = description
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "template has been updated",
 				"template": map[string]string{
 					"name": name,
@@ -263,7 +263,7 @@ func (ms *mockServer) updateTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNotFound)
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "template not found",
 	})
 }
@@ -278,7 +278,7 @@ func (ms *mockServer) deleteTemplate(w http.ResponseWriter, r *http.Request) {
 		if template.Name == templateName {
 			ms.templates = append(ms.templates[:i], ms.templates[i+1:len(ms.templates)]...)
 
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "template has been deleted",
 				"template": map[string]string{
 					"name": templateName,

@@ -36,7 +36,7 @@ var EventNames = map[string]func() Event{
 }
 
 // new_ is a universal event "constructor".
-func new_(e interface{}) func() Event {
+func new_(e any) func() Event {
 	typ := reflect.TypeOf(e)
 	return func() Event {
 		//nolint:revive // unchecked-type-assertion: this func is called on init only, so there should be no runtime panics:

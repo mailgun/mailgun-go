@@ -94,7 +94,7 @@ func (ms *mockServer) createCredential(w http.ResponseWriter, r *http.Request) {
 
 	ms.credentials = append(ms.credentials, Credential{Login: login, Password: password, CreatedAt: RFC2822Time(time.Now())})
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Credentials created",
 	})
 }
@@ -112,7 +112,7 @@ func (ms *mockServer) deleteCredential(w http.ResponseWriter, r *http.Request) {
 		}
 
 		ms.credentials = append(ms.credentials[:i], ms.credentials[i+1:]...)
-		toJSON(w, map[string]interface{}{
+		toJSON(w, map[string]any{
 			"message": "Credentials have been deleted",
 			"spec":    login,
 		})
@@ -145,7 +145,7 @@ func (ms *mockServer) updateCredential(w http.ResponseWriter, r *http.Request) {
 	for i, credential := range ms.credentials {
 		if credential.Login == login || credential.Login == login+"@"+domain {
 			ms.credentials[i].Password = password
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "Password changed",
 			})
 			return

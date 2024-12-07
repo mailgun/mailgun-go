@@ -445,12 +445,11 @@ linters-settings:
         arguments:
           - allowRegex: "^_"
 
-      # TODO(Go1.18+): enable:
-      #      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#use-any
-      #      - name: use-any
-      #        severity: warning
-      #        disabled: false
-      #        exclude: [""]
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#use-any
+      - name: use-any
+        severity: warning
+        disabled: false
+        exclude: [""]
 
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#useless-break
       - name: useless-break

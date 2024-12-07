@@ -101,11 +101,11 @@ func TestParseSuccess(t *testing.T) {
 	// Make sure the second attempt of Parse doesn't overwrite the first event struct.
 	assert.Equal(t, "dude@example.com", event.(*events.Accepted).Recipient)
 
-	assert.Equal(t, "value", event.(*events.Accepted).UserVariables.(map[string]interface{})["custom"])
-	child := event.(*events.Accepted).UserVariables.(map[string]interface{})["parent"].(map[string]interface{})["child"]
+	assert.Equal(t, "value", event.(*events.Accepted).UserVariables.(map[string]any)["custom"])
+	child := event.(*events.Accepted).UserVariables.(map[string]any)["parent"].(map[string]any)["child"]
 	assert.Equal(t, "user defined variable", child)
-	aList := event.(*events.Accepted).UserVariables.(map[string]interface{})["a-list"].([]interface{})
-	assert.Equal(t, []interface{}{1.0, 2.0, 3.0, 4.0, 5.0}, aList)
+	aList := event.(*events.Accepted).UserVariables.(map[string]any)["a-list"].([]any)
+	assert.Equal(t, []any{1.0, 2.0, 3.0, 4.0, 5.0}, aList)
 }
 
 func TestParseSuccessInvalidUserVariables(t *testing.T) {

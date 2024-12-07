@@ -166,7 +166,7 @@ func (ms *mockServer) URL() string {
 	return ms.srv.URL + "/v3"
 }
 
-func toJSON(w http.ResponseWriter, obj interface{}) {
+func toJSON(w http.ResponseWriter, obj any) {
 	if err := json.NewEncoder(w).Encode(obj); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -202,12 +202,12 @@ func stringToInt(v string) int {
 	return int(result)
 }
 
-func stringToMap(v string) map[string]interface{} {
+func stringToMap(v string) map[string]any {
 	if v == "" {
 		return nil
 	}
 
-	result := make(map[string]interface{})
+	result := make(map[string]any)
 	err := json.Unmarshal([]byte(v), &result)
 	if err != nil {
 		panic(err)

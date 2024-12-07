@@ -71,7 +71,7 @@ func AddListMembers(domain, apiKey string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateMemberList(ctx, nil, "mailgunList@example.com", []interface{}{
+	return mg.CreateMemberList(ctx, nil, "mailgunList@example.com", []any{
 		mailgun.Member{
 			Address:    "alice@example.com",
 			Name:       "Alice's debugging account",
@@ -86,7 +86,7 @@ func AddListMembers(domain, apiKey string) error {
 			Address: "joe.hamradio@example.com",
 			// Charlette is a ham radio packet BBS user.
 			// We attach her packet BBS e-mail address as an arbitrary var here.
-			Vars: map[string]interface{}{
+			Vars: map[string]any{
 				"packet-email": "KW9ABC @ BOGUS-4.#NCA.CA.USA.NOAM",
 			},
 		},
@@ -853,12 +853,12 @@ func SendTemplateMessage(domain, apiKey string) (string, error) {
 	// Set template to be applied to this message.
 	m.SetTemplate("my-template")
 
-	m.AddRecipientAndVariables("bob@example.com", map[string]interface{}{
+	m.AddRecipientAndVariables("bob@example.com", map[string]any{
 		"first": "bob",
 		"id":    1,
 	})
 
-	m.AddRecipientAndVariables("alice@example.com", map[string]interface{}{
+	m.AddRecipientAndVariables("alice@example.com", map[string]any{
 		"first": "alice",
 		"id":    2,
 	})

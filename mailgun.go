@@ -225,7 +225,7 @@ type Mailgun interface {
 	ListMembers(address string, opts *ListOptions) *MemberListIterator
 	GetMember(ctx context.Context, MemberAddr, listAddr string) (Member, error)
 	CreateMember(ctx context.Context, merge bool, addr string, prototype Member) error
-	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []interface{}) error
+	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []any) error
 	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
 	DeleteMember(ctx context.Context, Member, list string) error
 

@@ -73,7 +73,7 @@ type urlEncodedPayload struct {
 }
 
 type jsonEncodedPayload struct {
-	payload interface{}
+	payload any
 }
 
 func newHTTPRequest(uri string) *httpRequest {
@@ -96,7 +96,7 @@ func (r *httpRequest) setBasicAuth(user, password string) {
 	r.BasicAuthPassword = password
 }
 
-func newJSONEncodedPayload(payload interface{}) *jsonEncodedPayload {
+func newJSONEncodedPayload(payload any) *jsonEncodedPayload {
 	return &jsonEncodedPayload{payload: payload}
 }
 
@@ -142,7 +142,7 @@ func (f *urlEncodedPayload) getValues() []keyValuePair {
 	return f.Values
 }
 
-func (r *httpResponse) parseFromJSON(v interface{}) error {
+func (r *httpResponse) parseFromJSON(v any) error {
 	return json.Unmarshal(r.Data, v)
 }
 

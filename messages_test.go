@@ -281,7 +281,7 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, templateText)
-		err = m.AddRecipientAndVariables(toUser, map[string]interface{}{
+		err = m.AddRecipientAndVariables(toUser, map[string]any{
 			"name":  "Joe Cool Example",
 			"table": 42,
 		})
@@ -374,7 +374,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	)
 	var (
 		exampleMapVarVal        = map[string]string{"test": "123"}
-		exampleTemplateVariable = map[string]interface{}{
+		exampleTemplateVariable = map[string]any{
 			"key": map[string]string{
 				"nested": "yes",
 				"status": "test",
@@ -437,11 +437,11 @@ func TestAddRecipientAndVariablesError(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
-		err = m.AddRecipientAndVariables(recipient, map[string]interface{}{"id": i})
+		err = m.AddRecipientAndVariables(recipient, map[string]any{"id": i})
 		require.NoError(t, err)
 	}
 
-	err = m.AddRecipientAndVariables("recipient_1001@example.com", map[string]interface{}{"id": 1001})
+	err = m.AddRecipientAndVariables("recipient_1001@example.com", map[string]any{"id": 1001})
 	require.EqualError(t, err, "recipient limit exceeded (max 1000)")
 }
 
