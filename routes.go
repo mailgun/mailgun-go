@@ -163,7 +163,7 @@ func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = ri.offset + len(ri.Items)
+	ri.offset += len(ri.Items)
 	return true
 }
 
@@ -225,7 +225,7 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 		return false
 	}
 
-	ri.offset = ri.offset - (ri.limit * 2)
+	ri.offset -= ri.limit * 2
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
@@ -273,10 +273,11 @@ func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignor
 		p.addValue("action", action)
 	}
 	var resp createRouteResp
-	if err = postResponseFromJSON(ctx, r, p, &resp); err != nil {
+	if err := postResponseFromJSON(ctx, r, p, &resp); err != nil {
 		return _ignored, err
 	}
-	return resp.Route, err
+
+	return resp.Route, nil
 }
 
 // DeleteRoute removes the specified route from your domain's configuration.

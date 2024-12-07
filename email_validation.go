@@ -216,14 +216,15 @@ func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailB
 // as `https://api.mailgun.net/v3` or set `v.SetAPIBase("https://api.mailgun.net/v3")`
 //
 // Deprecated: /v3/address/parse is deprecated use ValidateEmail instead.
-func (m *EmailValidatorImpl) ParseAddresses(ctx context.Context, addresses ...string) ([]string, []string, error) {
+// TODO(v5): remove
+func (m *EmailValidatorImpl) ParseAddresses(ctx context.Context, addresses ...string) (parsed, unparseable []string, err error) {
 	r := newHTTPRequest(m.getAddressURL("parse"))
 	r.setClient(m.Client())
 	r.addParameter("addresses", strings.Join(addresses, ","))
 	r.setBasicAuth(basicAuthUser, m.APIKey())
 
 	var response addressParseResult
-	err := getResponseFromJSON(ctx, r, &response)
+	err = getResponseFromJSON(ctx, r, &response)
 	if err != nil {
 		return nil, nil, err
 	}

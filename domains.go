@@ -137,7 +137,7 @@ func (ri *DomainsIterator) Next(ctx context.Context, items *[]Domain) bool {
 	if len(ri.Items) == 0 {
 		return false
 	}
-	ri.offset = ri.offset + len(ri.Items)
+	ri.offset += len(ri.Items)
 	return true
 }
 
@@ -199,7 +199,7 @@ func (ri *DomainsIterator) Previous(ctx context.Context, items *[]Domain) bool {
 		return false
 	}
 
-	ri.offset = ri.offset - (ri.limit * 2)
+	ri.offset -= ri.limit * 2
 	if ri.offset < 0 {
 		ri.offset = 0
 	}
@@ -305,7 +305,7 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 		if len(opts.IPS) != 0 {
 			payload.addValue("ips", strings.Join(opts.IPS, ","))
 		}
-		if len(opts.Password) != 0 {
+		if opts.Password != "" {
 			payload.addValue("smtp_password", opts.Password)
 		}
 		if opts.WebScheme != "" {

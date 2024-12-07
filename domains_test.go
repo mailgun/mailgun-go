@@ -120,8 +120,8 @@ func TestDomainTracking(t *testing.T) {
 	require.NoError(t, err)
 
 	require.False(t, info.Unsubscribe.Active)
-	require.True(t, len(info.Unsubscribe.HTMLFooter) != 0)
-	require.True(t, len(info.Unsubscribe.TextFooter) != 0)
+	require.True(t, info.Unsubscribe.HTMLFooter != "")
+	require.True(t, info.Unsubscribe.TextFooter != "")
 	require.True(t, info.Click.Active)
 	require.True(t, info.Open.Active)
 
