@@ -41,7 +41,8 @@ func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var tagItem Tag
-	return tagItem, getResponseFromJSON(ctx, r, &tagItem)
+	err := getResponseFromJSON(ctx, r, &tagItem)
+	return tagItem, err
 }
 
 // ListTags returns a cursor used to iterate through a list of tags
