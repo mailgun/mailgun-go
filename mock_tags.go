@@ -128,7 +128,7 @@ func (ms *mockServer) createUpdateTags(w http.ResponseWriter, r *http.Request) {
 		ms.tags = append(ms.tags, Tag{Value: tag, Description: description})
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Tag updated",
 	})
 }
@@ -143,7 +143,7 @@ func (ms *mockServer) deleteTags(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Tag deleted",
 	})
 }

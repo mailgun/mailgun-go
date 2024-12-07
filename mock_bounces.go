@@ -158,7 +158,7 @@ func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Address has been added to the bounces table",
 		"address": fmt.Sprint(bounces),
 	})
@@ -172,14 +172,14 @@ func (ms *mockServer) deleteBounce(w http.ResponseWriter, r *http.Request) {
 		if bounce.Address == chi.URLParam(r, "address") {
 			ms.bounces = append(ms.bounces[:i], ms.bounces[i+1:len(ms.bounces)]...)
 
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "Bounce has been removed",
 			})
 			return
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Address not found in bounces table",
 	})
 }
@@ -190,7 +190,7 @@ func (ms *mockServer) deleteBouncesList(w http.ResponseWriter, r *http.Request) 
 
 	ms.bounces = []Bounce{}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "All bounces has been deleted",
 	})
 }

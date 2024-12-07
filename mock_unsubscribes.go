@@ -157,7 +157,7 @@ func (ms *mockServer) createUnsubscribe(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Address has been added to the unsubscribes table",
 		"address": fmt.Sprint(unsubscribes),
 	})
@@ -181,7 +181,7 @@ func (ms *mockServer) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if !addressExist {
-		toJSON(w, map[string]interface{}{
+		toJSON(w, map[string]any{
 			"message": "Address not found in unsubscribers table",
 		})
 		return
@@ -195,7 +195,7 @@ func (ms *mockServer) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) 
 			}
 			ms.unsubscribes = append(ms.unsubscribes[:i], ms.unsubscribes[i+1:len(ms.unsubscribes)]...)
 
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "Unsubscribe event has been removed",
 			})
 			return
@@ -211,7 +211,7 @@ func (ms *mockServer) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) 
 				continue
 			}
 			ms.unsubscribes[i].Tags = append(ms.unsubscribes[i].Tags[:j], ms.unsubscribes[i].Tags[j+1:]...)
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "Unsubscribe event has been removed",
 			})
 			return

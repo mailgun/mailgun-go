@@ -151,7 +151,7 @@ func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Address has been added to the complaints table",
 		"address": fmt.Sprint(complaints),
 	})
@@ -165,14 +165,14 @@ func (ms *mockServer) deleteComplaint(w http.ResponseWriter, r *http.Request) {
 		if complaint.Address == chi.URLParam(r, "address") {
 			ms.complaints = append(ms.complaints[:i], ms.complaints[i+1:len(ms.complaints)]...)
 
-			toJSON(w, map[string]interface{}{
+			toJSON(w, map[string]any{
 				"message": "Complaint has been removed",
 			})
 			return
 		}
 	}
 
-	toJSON(w, map[string]interface{}{
+	toJSON(w, map[string]any{
 		"message": "Address not found in complaints table",
 	})
 	return

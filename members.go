@@ -29,10 +29,10 @@ var (
 // A Member structure represents a member of the mailing list.
 // The Vars field can represent any JSON-encodable data.
 type Member struct {
-	Address    string                 `json:"address,omitempty"`
-	Name       string                 `json:"name,omitempty"`
-	Subscribed *bool                  `json:"subscribed,omitempty"`
-	Vars       map[string]interface{} `json:"vars,omitempty"`
+	Address    string         `json:"address,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Subscribed *bool          `json:"subscribed,omitempty"`
+	Vars       map[string]any `json:"vars,omitempty"`
 }
 
 type memberListResponse struct {
@@ -243,7 +243,7 @@ func (mg *MailgunImpl) DeleteMember(ctx context.Context, member, addr string) er
 // If a simple slice of strings is passed, each string refers to the member's e-mail address.
 // Otherwise, each Member needs to have at least the Address field filled out.
 // Other fields are optional, but may be set according to your needs.
-func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []interface{}) error {
+func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []any) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

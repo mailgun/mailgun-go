@@ -67,7 +67,7 @@ func TestMailingListMembers(t *testing.T) {
 	require.NoError(t, mg.DeleteMember(ctx, "joe@example.com", address))
 	assert.Equal(t, startCount, countMembers())
 
-	err = mg.CreateMemberList(ctx, nil, address, []interface{}{
+	err = mg.CreateMemberList(ctx, nil, address, []any{
 		mailgun.Member{
 			Address:    "joe.user1@example.com",
 			Name:       "Joe's debugging account",
@@ -80,7 +80,7 @@ func TestMailingListMembers(t *testing.T) {
 		},
 		mailgun.Member{
 			Address: "joe.user3@example.com",
-			Vars: map[string]interface{}{
+			Vars: map[string]any{
 				"packet-email": "KW9ABC @ BOGBBS-4.#NCA.CA.USA.NOAM",
 			},
 		},
@@ -164,9 +164,9 @@ func TestListMailingListRegression(t *testing.T) {
 	require.NoError(t, err)
 
 	for i := 0; i < 200; i++ {
-		var vars map[string]interface{}
+		var vars map[string]any
 		if i == 5 {
-			vars = map[string]interface{}{"has": "vars"}
+			vars = map[string]any{"has": "vars"}
 		}
 
 		err := mg.CreateMember(ctx, false, address, mailgun.Member{

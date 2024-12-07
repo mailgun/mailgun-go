@@ -73,7 +73,7 @@ func makeRequest(ctx context.Context, r *httpRequest, method string, p payload) 
 
 // getResponseFromJSON shim performs a GET request, checking for a positive outcome.
 // See simplehttp.GetResponseFromJSON for more details.
-func getResponseFromJSON(ctx context.Context, r *httpRequest, v interface{}) error {
+func getResponseFromJSON(ctx context.Context, r *httpRequest, v any) error {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	response, err := r.makeGetRequest(ctx)
 	if err != nil {
@@ -87,7 +87,7 @@ func getResponseFromJSON(ctx context.Context, r *httpRequest, v interface{}) err
 
 // postResponseFromJSON shim performs a POST request, checking for a positive outcome.
 // See simplehttp.PostResponseFromJSON for more details.
-func postResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v interface{}) error {
+func postResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v any) error {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	response, err := r.makePostRequest(ctx, p)
 	if err != nil {
@@ -101,7 +101,7 @@ func postResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v inte
 
 // putResponseFromJSON shim performs a PUT request, checking for a positive outcome.
 // See simplehttp.PutResponseFromJSON for more details.
-func putResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v interface{}) error {
+func putResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v any) error {
 	r.addHeader("User-Agent", MailgunGoUserAgent)
 	response, err := r.makePutRequest(ctx, p)
 	if err != nil {
