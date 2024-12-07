@@ -19,7 +19,7 @@ func createAttachment(t *testing.T) string {
 	f, err := os.Create(name)
 	require.NoError(t, err)
 
-	_, err = f.Write([]byte(randomString(100, "")))
+	_, err = f.WriteString(randomString(100, ""))
 	require.NoError(t, err)
 	require.Nil(t, f.Close())
 	return name
