@@ -273,10 +273,11 @@ func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignor
 		p.addValue("action", action)
 	}
 	var resp createRouteResp
-	if err = postResponseFromJSON(ctx, r, p, &resp); err != nil {
+	if err := postResponseFromJSON(ctx, r, p, &resp); err != nil {
 		return _ignored, err
 	}
-	return resp.Route, err
+
+	return resp.Route, nil
 }
 
 // DeleteRoute removes the specified route from your domain's configuration.
