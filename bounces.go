@@ -172,7 +172,7 @@ func (mg *MailgunImpl) GetBounce(ctx context.Context, address string) (Bounce, e
 //
 // Note that both code and error exist as strings, even though
 // code will report as a number.
-func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, error string) error {
+func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, bounceError string) error {
 	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -182,8 +182,8 @@ func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, error strin
 	if code != "" {
 		payload.addValue("code", code)
 	}
-	if error != "" {
-		payload.addValue("error", error)
+	if bounceError != "" {
+		payload.addValue("error", bounceError)
 	}
 	_, err := makePostRequest(ctx, r, payload)
 	return err
