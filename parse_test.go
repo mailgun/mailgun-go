@@ -158,7 +158,7 @@ func TestTimeStamp(t *testing.T) {
 	assert.Equal(t, ts, event.GetTimestamp())
 
 	event.Timestamp = 1546899001.019501
-	assert.Equal(t, time.Date(2019, 1, 7, 22, 10, 01, 19501056, time.UTC), event.GetTimestamp())
+	assert.Equal(t, time.Date(2019, 1, 7, 22, 10, 1, 19501056, time.UTC), event.GetTimestamp())
 }
 
 func TestEventNames(t *testing.T) {
