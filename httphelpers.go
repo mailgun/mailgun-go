@@ -188,35 +188,47 @@ func (f *FormDataPayload) getPayloadBuffer() (*bytes.Buffer, error) {
 	}
 
 	for _, file := range f.Files {
-		tmp, err := writer.CreateFormFile(file.key, path.Base(file.value))
-		if err != nil {
-			return nil, err
-		}
+		err := func() error {
+			tmp, err := writer.CreateFormFile(file.key, path.Base(file.value))
+			if err != nil {
+				return err
+			}
 
-		fp, err := os.Open(file.value)
-		if err != nil {
-			return nil, err
-		}
+			fp, err := os.Open(file.value)
+			if err != nil {
+				return err
+			}
 
-		// TODO(DE-1373): defer in a loop:
-		defer fp.Close()
+			defer fp.Close()
 
-		_, err = io.Copy(tmp, fp)
+			_, err = io.Copy(tmp, fp)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}()
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	for _, file := range f.ReadClosers {
-		tmp, err := writer.CreateFormFile(file.key, file.name)
-		if err != nil {
-			return nil, err
-		}
+		err := func() error {
+			tmp, err := writer.CreateFormFile(file.key, file.name)
+			if err != nil {
+				return err
+			}
 
-		// TODO(DE-1373): defer in a loop:
-		defer file.value.Close()
+			defer file.value.Close()
 
-		_, err = io.Copy(tmp, file.value)
+			_, err = io.Copy(tmp, file.value)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}()
 		if err != nil {
 			return nil, err
 		}
