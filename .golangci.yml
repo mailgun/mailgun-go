@@ -34,7 +34,6 @@ linters-settings:
       - style
     disabled-checks:
       - singleCaseSwitch
-      - deferInLoop # TODO(DE-1373): enable
       - hugeParam # TODO(v5): enable?
       - sprintfQuotedString # noisy # TODO: enable
       - exitAfterDefer # TODO: enable?
