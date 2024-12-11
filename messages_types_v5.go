@@ -54,7 +54,7 @@ type plainMessageV5 struct {
 	template string
 }
 
-// mimeMessage contains fields relevant to pre-packaged MIME messages.
+// MimeMessage contains fields relevant to pre-packaged MIME messages.
 // TODO(v5): rename to MimeMessage
 type mimeMessageV5 struct {
 	commonMessageV5

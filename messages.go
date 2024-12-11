@@ -80,10 +80,9 @@ type plainMessage struct {
 	template string
 }
 
-// mimeMessage contains fields relevant to pre-packaged MIME messages.
-// TODO(v5): rename to MimeMessage
+// MimeMessage contains fields relevant to pre-packaged MIME messages.
 // TODO(v5): embed CommonMessage
-type mimeMessage struct {
+type MimeMessage struct {
 	body io.ReadCloser
 }
 
@@ -199,7 +198,7 @@ func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Messag
 // TODO(v5): should return MimeMessage
 func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
-		Specific: &mimeMessage{
+		Specific: &MimeMessage{
 			body: body,
 		},
 		to: to,
@@ -397,7 +396,7 @@ func (m *plainMessage) RecipientCount() int {
 	return len(m.bcc) + len(m.cc)
 }
 
-func (*mimeMessage) RecipientCount() int {
+func (*MimeMessage) RecipientCount() int {
 	// TODO(v5): 10 + len(m.to)
 	return 10
 }
@@ -411,13 +410,13 @@ func (m *plainMessage) AddCC(r string) {
 	m.cc = append(m.cc, r)
 }
 
-func (*mimeMessage) AddCC(_ string) {}
+func (*MimeMessage) AddCC(_ string) {}
 
 func (m *plainMessage) AddBCC(r string) {
 	m.bcc = append(m.bcc, r)
 }
 
-func (*mimeMessage) AddBCC(_ string) {}
+func (*MimeMessage) AddBCC(_ string) {}
 
 // Deprecated: use SetHTML instead.
 //
@@ -430,7 +429,7 @@ func (m *plainMessage) SetHTML(h string) {
 	m.html = h
 }
 
-func (*mimeMessage) SetHTML(_ string) {}
+func (*MimeMessage) SetHTML(_ string) {}
 
 // Deprecated: use SetAmpHTML instead.
 // TODO(v5): remove this method
@@ -442,7 +441,7 @@ func (m *plainMessage) SetAmpHTML(h string) {
 	m.ampHtml = h
 }
 
-func (*mimeMessage) SetAmpHTML(_ string) {}
+func (*MimeMessage) SetAmpHTML(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
@@ -459,7 +458,7 @@ func (m *plainMessage) SetTemplate(t string) {
 	m.template = t
 }
 
-func (*mimeMessage) SetTemplate(_ string) {}
+func (*MimeMessage) SetTemplate(_ string) {}
 
 // Deprecated: is no longer supported and is deprecated for new software.
 // TODO(v5): remove this method.
@@ -890,7 +889,7 @@ func (m *plainMessage) AddValues(p *FormDataPayload) {
 	}
 }
 
-func (m *mimeMessage) AddValues(p *FormDataPayload) {
+func (m *MimeMessage) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
@@ -898,7 +897,7 @@ func (*plainMessage) Endpoint() string {
 	return messagesEndpoint
 }
 
-func (*mimeMessage) Endpoint() string {
+func (*MimeMessage) Endpoint() string {
 	return mimeMessagesEndpoint
 }
 
@@ -965,7 +964,7 @@ func (m *plainMessage) IsValid() bool {
 	return true
 }
 
-func (m *mimeMessage) IsValid() bool {
+func (m *MimeMessage) IsValid() bool {
 	return m.body != nil
 }
 
