@@ -63,13 +63,12 @@ type BufferAttachment struct {
 	Buffer   []byte
 }
 
-// plainMessage contains fields relevant to plain API-synthesized messages.
+// PlainMessage contains fields relevant to plain API-synthesized messages.
 // You're expected to use various setters to set most of these attributes,
 // although from, subject, and text are set when the message is created with
 // NewMessage.
-// TODO(v5): rename to PlainMessage
 // TODO(v5): embed CommonMessage
-type plainMessage struct {
+type PlainMessage struct {
 	from     string
 	cc       []string
 	bcc      []string
@@ -164,7 +163,7 @@ type Specific interface {
 // TODO(v5): should return PlainMessage
 func NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
-		Specific: &plainMessage{
+		Specific: &PlainMessage{
 			from:    from,
 			subject: subject,
 			text:    text,
@@ -392,7 +391,7 @@ func (m *Message) RecipientCount() int {
 	return len(m.to) + m.Specific.RecipientCount()
 }
 
-func (m *plainMessage) RecipientCount() int {
+func (m *PlainMessage) RecipientCount() int {
 	return len(m.bcc) + len(m.cc)
 }
 
@@ -406,13 +405,13 @@ func (m *Message) SetReplyTo(recipient string) {
 	m.AddHeader("Reply-To", recipient)
 }
 
-func (m *plainMessage) AddCC(r string) {
+func (m *PlainMessage) AddCC(r string) {
 	m.cc = append(m.cc, r)
 }
 
 func (*MimeMessage) AddCC(_ string) {}
 
-func (m *plainMessage) AddBCC(r string) {
+func (m *PlainMessage) AddBCC(r string) {
 	m.bcc = append(m.bcc, r)
 }
 
@@ -425,7 +424,7 @@ func (m *Message) SetHtml(html string) {
 	m.SetHTML(html)
 }
 
-func (m *plainMessage) SetHTML(h string) {
+func (m *PlainMessage) SetHTML(h string) {
 	m.html = h
 }
 
@@ -437,7 +436,7 @@ func (m *Message) SetAMPHtml(html string) {
 	m.SetAmpHTML(html)
 }
 
-func (m *plainMessage) SetAmpHTML(h string) {
+func (m *PlainMessage) SetAmpHTML(h string) {
 	m.ampHtml = h
 }
 
@@ -454,7 +453,7 @@ func (m *Message) AddTag(tag ...string) error {
 	return nil
 }
 
-func (m *plainMessage) SetTemplate(t string) {
+func (m *PlainMessage) SetTemplate(t string) {
 	m.template = t
 }
 
@@ -868,7 +867,7 @@ func addMessageAttachment(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func (m *plainMessage) AddValues(p *FormDataPayload) {
+func (m *PlainMessage) AddValues(p *FormDataPayload) {
 	p.addValue("from", m.from)
 	p.addValue("subject", m.subject)
 	p.addValue("text", m.text)
@@ -893,7 +892,7 @@ func (m *MimeMessage) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
-func (*plainMessage) Endpoint() string {
+func (*PlainMessage) Endpoint() string {
 	return messagesEndpoint
 }
 
@@ -939,7 +938,7 @@ func isValid(m SendableMessage) bool {
 	return true
 }
 
-func (m *plainMessage) IsValid() bool {
+func (m *PlainMessage) IsValid() bool {
 	if !validateStringList(m.cc, false) {
 		return false
 	}

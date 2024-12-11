@@ -36,7 +36,7 @@ type commonMessageV5 struct {
 	skipVerification   bool
 }
 
-// plainMessage contains fields relevant to plain API-synthesized messages.
+// PlainMessage contains fields relevant to plain API-synthesized messages.
 // You're expected to use various setters to set most of these attributes,
 // although from, subject, and text are set when the message is created with
 // NewMessage.
