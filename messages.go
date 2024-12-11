@@ -79,6 +79,38 @@ type PlainMessage struct {
 	template string
 }
 
+func (m *PlainMessage) From() string {
+	return m.from
+}
+
+func (m *PlainMessage) CC() []string {
+	return m.cc
+}
+
+func (m *PlainMessage) BCC() []string {
+	return m.bcc
+}
+
+func (m *PlainMessage) Subject() string {
+	return m.subject
+}
+
+func (m *PlainMessage) Text() string {
+	return m.text
+}
+
+func (m *PlainMessage) HTML() string {
+	return m.html
+}
+
+func (m *PlainMessage) AmpHTML() string {
+	return m.ampHtml
+}
+
+func (m *PlainMessage) Template() string {
+	return m.template
+}
+
 // MimeMessage contains fields relevant to pre-packaged MIME messages.
 // TODO(v5): embed CommonMessage
 type MimeMessage struct {
