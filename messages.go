@@ -420,15 +420,15 @@ func (m *Message) AddRecipientAndVariables(r string, vars map[string]any) error 
 // you may find that some recipients will not receive your e-mail.
 // It's perfectly OK, of course, for a MIME message to not have any Cc: or Bcc: recipients.
 func (m *Message) RecipientCount() int {
-	return len(m.to) + m.Specific.RecipientCount()
+	return len(m.To()) + m.Specific.RecipientCount()
 }
 
 func (m *PlainMessage) RecipientCount() int {
-	return len(m.bcc) + len(m.cc)
+	return len(m.BCC()) + len(m.CC())
 }
 
 func (*MimeMessage) RecipientCount() int {
-	// TODO(v5): 10 + len(m.to)
+	// TODO(v5): 10 + len(m.To())
 	return 10
 }
 
@@ -438,13 +438,13 @@ func (m *Message) SetReplyTo(recipient string) {
 }
 
 func (m *PlainMessage) AddCC(r string) {
-	m.cc = append(m.cc, r)
+	m.cc = append(m.CC(), r)
 }
 
 func (*MimeMessage) AddCC(_ string) {}
 
 func (m *PlainMessage) AddBCC(r string) {
-	m.bcc = append(m.bcc, r)
+	m.bcc = append(m.BCC(), r)
 }
 
 func (*MimeMessage) AddBCC(_ string) {}
@@ -477,11 +477,11 @@ func (*MimeMessage) SetAmpHTML(_ string) {}
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
 func (m *Message) AddTag(tag ...string) error {
-	if len(m.tags) >= MaxNumberOfTags {
+	if len(m.Tags()) >= MaxNumberOfTags {
 		return fmt.Errorf("cannot add any new tags. Message tag limit (%d) reached", MaxNumberOfTags)
 	}
 
-	m.tags = append(m.tags, tag...)
+	m.tags = append(m.Tags(), tag...)
 	return nil
 }
 
@@ -494,7 +494,7 @@ func (*MimeMessage) SetTemplate(_ string) {}
 // Deprecated: is no longer supported and is deprecated for new software.
 // TODO(v5): remove this method.
 func (m *Message) AddCampaign(campaign string) {
-	m.campaigns = append(m.campaigns, campaign)
+	m.campaigns = append(m.Campaigns(), campaign)
 }
 
 // SetDKIM arranges to send the o:dkim header with the message, and sets its value accordingly.
@@ -900,23 +900,23 @@ func addMessageAttachment(dst *FormDataPayload, src SendableMessage) {
 }
 
 func (m *PlainMessage) AddValues(p *FormDataPayload) {
-	p.addValue("from", m.from)
-	p.addValue("subject", m.subject)
-	p.addValue("text", m.text)
-	for _, cc := range m.cc {
+	p.addValue("from", m.From())
+	p.addValue("subject", m.Subject())
+	p.addValue("text", m.Text())
+	for _, cc := range m.CC() {
 		p.addValue("cc", cc)
 	}
-	for _, bcc := range m.bcc {
+	for _, bcc := range m.BCC() {
 		p.addValue("bcc", bcc)
 	}
-	if m.html != "" {
-		p.addValue("html", m.html)
+	if m.HTML() != "" {
+		p.addValue("html", m.HTML())
 	}
-	if m.template != "" {
-		p.addValue("template", m.template)
+	if m.Template() != "" {
+		p.addValue("template", m.Template())
 	}
-	if m.ampHtml != "" {
-		p.addValue("amp-html", m.ampHtml)
+	if m.AmpHTML() != "" {
+		p.addValue("amp-html", m.AmpHTML())
 	}
 }
 
@@ -971,24 +971,24 @@ func isValid(m SendableMessage) bool {
 }
 
 func (m *PlainMessage) IsValid() bool {
-	if !validateStringList(m.cc, false) {
+	if !validateStringList(m.CC(), false) {
 		return false
 	}
 
-	if !validateStringList(m.bcc, false) {
+	if !validateStringList(m.BCC(), false) {
 		return false
 	}
 
-	if m.from == "" {
+	if m.From() == "" {
 		return false
 	}
 
-	if m.template != "" {
+	if m.Template() != "" {
 		// m.text or m.html not needed if template is supplied
 		return true
 	}
 
-	if m.text == "" && m.html == "" {
+	if m.Text() == "" && m.HTML() == "" {
 		return false
 	}
 
