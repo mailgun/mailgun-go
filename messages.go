@@ -63,13 +63,12 @@ type BufferAttachment struct {
 	Buffer   []byte
 }
 
-// plainMessage contains fields relevant to plain API-synthesized messages.
+// PlainMessage contains fields relevant to plain API-synthesized messages.
 // You're expected to use various setters to set most of these attributes,
 // although from, subject, and text are set when the message is created with
 // NewMessage.
-// TODO(v5): rename to PlainMessage
 // TODO(v5): embed CommonMessage
-type plainMessage struct {
+type PlainMessage struct {
 	from     string
 	cc       []string
 	bcc      []string
@@ -80,10 +79,41 @@ type plainMessage struct {
 	template string
 }
 
-// mimeMessage contains fields relevant to pre-packaged MIME messages.
-// TODO(v5): rename to MimeMessage
+func (m *PlainMessage) From() string {
+	return m.from
+}
+
+func (m *PlainMessage) CC() []string {
+	return m.cc
+}
+
+func (m *PlainMessage) BCC() []string {
+	return m.bcc
+}
+
+func (m *PlainMessage) Subject() string {
+	return m.subject
+}
+
+func (m *PlainMessage) Text() string {
+	return m.text
+}
+
+func (m *PlainMessage) HTML() string {
+	return m.html
+}
+
+func (m *PlainMessage) AmpHTML() string {
+	return m.ampHtml
+}
+
+func (m *PlainMessage) Template() string {
+	return m.template
+}
+
+// MimeMessage contains fields relevant to pre-packaged MIME messages.
 // TODO(v5): embed CommonMessage
-type mimeMessage struct {
+type MimeMessage struct {
 	body io.ReadCloser
 }
 
@@ -165,7 +195,7 @@ type Specific interface {
 // TODO(v5): should return PlainMessage
 func NewMessage(from, subject, text string, to ...string) *Message {
 	return &Message{
-		Specific: &plainMessage{
+		Specific: &PlainMessage{
 			from:    from,
 			subject: subject,
 			text:    text,
@@ -199,7 +229,7 @@ func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Messag
 // TODO(v5): should return MimeMessage
 func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	return &Message{
-		Specific: &mimeMessage{
+		Specific: &MimeMessage{
 			body: body,
 		},
 		to: to,
@@ -390,15 +420,15 @@ func (m *Message) AddRecipientAndVariables(r string, vars map[string]any) error 
 // you may find that some recipients will not receive your e-mail.
 // It's perfectly OK, of course, for a MIME message to not have any Cc: or Bcc: recipients.
 func (m *Message) RecipientCount() int {
-	return len(m.to) + m.Specific.RecipientCount()
+	return len(m.To()) + m.Specific.RecipientCount()
 }
 
-func (m *plainMessage) RecipientCount() int {
-	return len(m.bcc) + len(m.cc)
+func (m *PlainMessage) RecipientCount() int {
+	return len(m.BCC()) + len(m.CC())
 }
 
-func (*mimeMessage) RecipientCount() int {
-	// TODO(v5): 10 + len(m.to)
+func (*MimeMessage) RecipientCount() int {
+	// TODO(v5): 10 + len(m.To())
 	return 10
 }
 
@@ -407,17 +437,17 @@ func (m *Message) SetReplyTo(recipient string) {
 	m.AddHeader("Reply-To", recipient)
 }
 
-func (m *plainMessage) AddCC(r string) {
-	m.cc = append(m.cc, r)
+func (m *PlainMessage) AddCC(r string) {
+	m.cc = append(m.CC(), r)
 }
 
-func (*mimeMessage) AddCC(_ string) {}
+func (*MimeMessage) AddCC(_ string) {}
 
-func (m *plainMessage) AddBCC(r string) {
-	m.bcc = append(m.bcc, r)
+func (m *PlainMessage) AddBCC(r string) {
+	m.bcc = append(m.BCC(), r)
 }
 
-func (*mimeMessage) AddBCC(_ string) {}
+func (*MimeMessage) AddBCC(_ string) {}
 
 // Deprecated: use SetHTML instead.
 //
@@ -426,11 +456,11 @@ func (m *Message) SetHtml(html string) {
 	m.SetHTML(html)
 }
 
-func (m *plainMessage) SetHTML(h string) {
+func (m *PlainMessage) SetHTML(h string) {
 	m.html = h
 }
 
-func (*mimeMessage) SetHTML(_ string) {}
+func (*MimeMessage) SetHTML(_ string) {}
 
 // Deprecated: use SetAmpHTML instead.
 // TODO(v5): remove this method
@@ -438,33 +468,33 @@ func (m *Message) SetAMPHtml(html string) {
 	m.SetAmpHTML(html)
 }
 
-func (m *plainMessage) SetAmpHTML(h string) {
+func (m *PlainMessage) SetAmpHTML(h string) {
 	m.ampHtml = h
 }
 
-func (*mimeMessage) SetAmpHTML(_ string) {}
+func (*MimeMessage) SetAmpHTML(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
 func (m *Message) AddTag(tag ...string) error {
-	if len(m.tags) >= MaxNumberOfTags {
+	if len(m.Tags()) >= MaxNumberOfTags {
 		return fmt.Errorf("cannot add any new tags. Message tag limit (%d) reached", MaxNumberOfTags)
 	}
 
-	m.tags = append(m.tags, tag...)
+	m.tags = append(m.Tags(), tag...)
 	return nil
 }
 
-func (m *plainMessage) SetTemplate(t string) {
+func (m *PlainMessage) SetTemplate(t string) {
 	m.template = t
 }
 
-func (*mimeMessage) SetTemplate(_ string) {}
+func (*MimeMessage) SetTemplate(_ string) {}
 
 // Deprecated: is no longer supported and is deprecated for new software.
 // TODO(v5): remove this method.
 func (m *Message) AddCampaign(campaign string) {
-	m.campaigns = append(m.campaigns, campaign)
+	m.campaigns = append(m.Campaigns(), campaign)
 }
 
 // SetDKIM arranges to send the o:dkim header with the message, and sets its value accordingly.
@@ -869,36 +899,36 @@ func addMessageAttachment(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func (m *plainMessage) AddValues(p *FormDataPayload) {
-	p.addValue("from", m.from)
-	p.addValue("subject", m.subject)
-	p.addValue("text", m.text)
-	for _, cc := range m.cc {
+func (m *PlainMessage) AddValues(p *FormDataPayload) {
+	p.addValue("from", m.From())
+	p.addValue("subject", m.Subject())
+	p.addValue("text", m.Text())
+	for _, cc := range m.CC() {
 		p.addValue("cc", cc)
 	}
-	for _, bcc := range m.bcc {
+	for _, bcc := range m.BCC() {
 		p.addValue("bcc", bcc)
 	}
-	if m.html != "" {
-		p.addValue("html", m.html)
+	if m.HTML() != "" {
+		p.addValue("html", m.HTML())
 	}
-	if m.template != "" {
-		p.addValue("template", m.template)
+	if m.Template() != "" {
+		p.addValue("template", m.Template())
 	}
-	if m.ampHtml != "" {
-		p.addValue("amp-html", m.ampHtml)
+	if m.AmpHTML() != "" {
+		p.addValue("amp-html", m.AmpHTML())
 	}
 }
 
-func (m *mimeMessage) AddValues(p *FormDataPayload) {
+func (m *MimeMessage) AddValues(p *FormDataPayload) {
 	p.addReadCloser("message", "message.mime", m.body)
 }
 
-func (*plainMessage) Endpoint() string {
+func (*PlainMessage) Endpoint() string {
 	return messagesEndpoint
 }
 
-func (*mimeMessage) Endpoint() string {
+func (*MimeMessage) Endpoint() string {
 	return mimeMessagesEndpoint
 }
 
@@ -940,32 +970,32 @@ func isValid(m SendableMessage) bool {
 	return true
 }
 
-func (m *plainMessage) IsValid() bool {
-	if !validateStringList(m.cc, false) {
+func (m *PlainMessage) IsValid() bool {
+	if !validateStringList(m.CC(), false) {
 		return false
 	}
 
-	if !validateStringList(m.bcc, false) {
+	if !validateStringList(m.BCC(), false) {
 		return false
 	}
 
-	if m.from == "" {
+	if m.From() == "" {
 		return false
 	}
 
-	if m.template != "" {
+	if m.Template() != "" {
 		// m.text or m.html not needed if template is supplied
 		return true
 	}
 
-	if m.text == "" && m.html == "" {
+	if m.Text() == "" && m.HTML() == "" {
 		return false
 	}
 
 	return true
 }
 
-func (m *mimeMessage) IsValid() bool {
+func (m *MimeMessage) IsValid() bool {
 	return m.body != nil
 }
 
