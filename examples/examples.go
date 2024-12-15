@@ -824,6 +824,7 @@ func SendSimpleMessage(domain, apiKey string) (string, error) {
 func SendTaggedMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
