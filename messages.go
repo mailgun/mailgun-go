@@ -21,18 +21,17 @@ const MaxNumberOfTags = 3
 
 // CommonMessage structures contain both the message text and the envelope for an e-mail message.
 type CommonMessage struct {
-	domain            string
-	to                []string
-	tags              []string
-	dkim              *bool
-	deliveryTime      time.Time
-	stoPeriod         string
-	attachments       []string
-	readerAttachments []ReaderAttachment
-	inlines           []string
-	readerInlines     []ReaderAttachment
-	bufferAttachments []BufferAttachment
-
+	domain             string
+	to                 []string
+	tags               []string
+	dkim               *bool
+	deliveryTime       time.Time
+	stoPeriod          string
+	attachments        []string
+	readerAttachments  []ReaderAttachment
+	inlines            []string
+	readerInlines      []ReaderAttachment
+	bufferAttachments  []BufferAttachment
 	nativeSend         bool
 	testMode           bool
 	tracking           *bool
@@ -44,9 +43,8 @@ type CommonMessage struct {
 	recipientVariables map[string]map[string]any
 	templateVersionTag string
 	templateRenderText bool
-
-	requireTLS       bool
-	skipVerification bool
+	requireTLS         bool
+	skipVerification   bool
 }
 
 type ReaderAttachment struct {
