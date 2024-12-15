@@ -701,7 +701,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m SendableMessage) (mes, id str
 	}
 
 	invalidChars := ":&'@(),!?#;%+=<>"
-	if i := strings.ContainsAny(mg.domain, invalidChars); i {
+	if i := strings.ContainsAny(m.Domain(), invalidChars); i {
 		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
 		return "", "", err
 	}
