@@ -112,7 +112,7 @@ Testing some Mailgun MIME awesomeness!
 	defer cancel()
 
 	mg := mailgun.NewMailgun("example.com", "my_api_key")
-	m := mailgun.NewMIMEMessage(io.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
+	m := mailgun.NewMIMEMessage("example.com", io.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
 	_, id, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Fatal(err)
