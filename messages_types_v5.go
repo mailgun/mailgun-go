@@ -1,6 +1,7 @@
 package mailgun
 
 // This file contains a draft for new v5 messages.
+// TODO(v5): remove this file
 
 import (
 	"io"
