@@ -144,8 +144,6 @@ type Mailgun interface {
 	// TODO(v5): switch m to SendableMessage interface
 	Send(ctx context.Context, m *Message) (mes string, id string, err error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
-	// Deprecated: use func NewMessage instead of method.
-	NewMessage(from, subject, text string, to ...string) *Message
 	// Deprecated: use func NewMIMEMessage instead of method.
 	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
