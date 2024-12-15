@@ -139,9 +139,8 @@ type Mailgun interface {
 	AddOverrideHeader(k string, v string)
 	GetCurlOutput() string
 
-	// Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
-	// TODO(v5): switch m to SendableMessage interface
-	Send(ctx context.Context, m *Message) (mes string, id string, err error)
+	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
+	Send(ctx context.Context, m SendableMessage) (mes string, id string, err error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
 
 	ListBounces(opts *ListOptions) *BouncesIterator

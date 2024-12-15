@@ -47,7 +47,7 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mailgun.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, body, recipient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -290,7 +290,7 @@ func main() {
 	subject := "HTML email!"
 	recipient := "recipient@example.com"
 
-	message := mailgun.NewMessage(sender, subject, "", recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, "", recipient)
 	body := `
 <html>
 <body>
@@ -351,7 +351,7 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mailgun.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, body, recipient)
 	message.SetTemplate("passwordReset")
 	err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
 	if err != nil {

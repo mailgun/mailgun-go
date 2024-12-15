@@ -242,7 +242,7 @@ func TestSendMGMIME(t *testing.T) {
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		m := mailgun.NewMIMEMessage(io.NopCloser(strings.NewReader(exampleMime)), toUser)
+		m := mailgun.NewMIMEMessage(os.Getenv("MG_DOMAIN"), io.NopCloser(strings.NewReader(exampleMime)), toUser)
 		msg, id, err := mg.Send(ctx, m)
 		require.NoError(t, err)
 		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
@@ -257,7 +257,7 @@ func TestSendMGBatchFailRecipients(t *testing.T) {
 	spendMoney(t, func() {
 		toUser := os.Getenv("MG_EMAIL_TO")
 
-		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Batch\n")
+		m := mailgun.NewMessage(os.Getenv("MG_DOMAIN"), fromUser, exampleSubject, exampleText+"Batch\n")
 		for i := 0; i < mailgun.MaxNumberOfRecipients; i++ {
 			err := m.AddRecipient("") // We expect this to indicate a failure at the API
 			require.NoError(t, err)
@@ -280,7 +280,7 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 		require.NoError(t, err)
 
 		ctx := context.Background()
-		m := mailgun.NewMessage(fromUser, exampleSubject, templateText)
+		m := mailgun.NewMessage(os.Getenv("MG_DOMAIN"), fromUser, exampleSubject, templateText)
 		err = m.AddRecipientAndVariables(toUser, map[string]any{
 			"name":  "Joe Cool Example",
 			"table": 42,
@@ -315,7 +315,7 @@ func TestSendMGOffline(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
@@ -348,7 +348,7 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	ctx := context.Background()
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.AddDomain(signingDomain)
 
 	msg, id, err := mg.Send(ctx, m)
@@ -401,7 +401,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	err := m.AddVariable(exampleStrVarKey, exampleStrVarVal)
 	require.NoError(t, err)
 	err = m.AddVariable(exampleBoolVarKey, false)
@@ -418,7 +418,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 }
 
 func TestAddRecipientsError(t *testing.T) {
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+	m := mailgun.NewMessage(domain, fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
@@ -433,7 +433,7 @@ func TestAddRecipientsError(t *testing.T) {
 func TestAddRecipientAndVariablesError(t *testing.T) {
 	var err error
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+	m := mailgun.NewMessage(domain, fromUser, exampleSubject, exampleText)
 
 	for i := 0; i < 1000; i++ {
 		recipient := fmt.Sprintf("recipient_%d@example.com", i)
@@ -472,7 +472,7 @@ func TestSendDomainError(t *testing.T) {
 		ctx := context.Background()
 		mg := mailgun.NewMailgun(c.domain, exampleAPIKey)
 		mg.SetAPIBase(srv.URL + "/v3")
-		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, "test@test.com")
+		m := mailgun.NewMessage(c.domain, fromUser, exampleSubject, exampleText, "test@test.com")
 
 		_, _, err := mg.Send(ctx, m)
 		if c.isValid {
@@ -498,7 +498,7 @@ func TestSendEOFError(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	_, _, err := mg.Send(context.Background(), m)
 	require.NotNil(t, err)
 	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
@@ -524,18 +524,18 @@ func TestHasRecipient(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	// No recipient
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText)
 	_, _, err := mg.Send(context.Background(), m)
 	require.EqualError(t, err, "message not valid")
 
 	// Provided Bcc
-	m = mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+	m = mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText)
 	m.AddBCC(recipient)
 	_, _, err = mg.Send(context.Background(), m)
 	require.NoError(t, err)
 
 	// Provided cc
-	m = mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+	m = mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText)
 	m.AddCC(recipient)
 	_, _, err = mg.Send(context.Background(), m)
 	require.NoError(t, err)
@@ -597,7 +597,7 @@ func TestAddOverrideHeader(t *testing.T) {
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -636,7 +636,7 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	mg.SetOnBehalfOfSubaccount("mailgun.subaccount")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -668,7 +668,7 @@ func TestCaptureCurlOutput(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
@@ -704,7 +704,7 @@ func TestSendTLSOptions(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -734,7 +734,7 @@ func TestSendTemplate(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, "", toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)
 	m.SetTemplate(templateName)
 
 	msg, id, err := mg.Send(ctx, m)
@@ -767,7 +767,7 @@ func TestSendTemplateOptions(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, "", toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)
 	m.SetTemplate(templateName)
 	m.SetTemplateRenderText(true)
 	m.SetTemplateVersion(templateVersionTag)
@@ -779,7 +779,7 @@ func TestSendTemplateOptions(t *testing.T) {
 }
 
 func TestSendableMessageIface(t *testing.T) {
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText)
+	m := mailgun.NewMessage(domain, fromUser, exampleSubject, exampleText)
 
 	assert.Implements(t, (*mailgun.SendableMessage)(nil), m)
 }
