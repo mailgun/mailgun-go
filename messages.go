@@ -125,7 +125,7 @@ type TrackingOptions struct {
 	TrackingOpens  bool
 }
 
-// Specific abstracts the common characteristics between regular and MIME messages.
+// Specific abstracts the common characteristics between plain text and MIME messages.
 type Specific interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
 	AddCC(string)
@@ -676,6 +676,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m SendableMessage) (mes, id str
 
 	m.AddValues(payload)
 
+	// TODO: make (CommonMessage).AddValues()?
 	err = addMessageValues(payload, m)
 	if err != nil {
 		return "", "", err
