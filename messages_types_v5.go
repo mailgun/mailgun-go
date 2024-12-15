@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Message structures contain both the message text and the envelope for an e-mail message.
+// CommonMessage structures contain both the message text and the envelope for an e-mail message.
 // TODO(v5): rename to CommonMessage
 type commonMessageV5 struct {
 	domain             string

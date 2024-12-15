@@ -119,7 +119,7 @@ func (m *commonMessageV5) SetDKIM(dkim bool) {
 	m.dkim = &dkim
 }
 
-// EnableNativeSend allows the return path to match the address in the Message.Headers.From:
+// EnableNativeSend allows the return path to match the address in the CommonMessage.Headers.From:
 // field when sending from Mailgun rather than the usual bounce+ address in the return path.
 func (m *commonMessageV5) EnableNativeSend() {
 	m.nativeSend = true
@@ -381,7 +381,7 @@ func (*mimeMessageV5) Endpoint() string {
 	return mimeMessagesEndpoint
 }
 
-// Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
+// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
 //   - A human-readable status message, typically "Queued. Thank you."
 //   - A Message ID, which is the id used to track the queued message. The message id is useful
