@@ -315,7 +315,7 @@ func TestSendMGOffline(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
@@ -348,7 +348,7 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	ctx := context.Background()
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.AddDomain(signingDomain)
 
 	msg, id, err := mg.Send(ctx, m)
@@ -401,7 +401,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	err := m.AddVariable(exampleStrVarKey, exampleStrVarVal)
 	require.NoError(t, err)
 	err = m.AddVariable(exampleBoolVarKey, false)
@@ -472,7 +472,7 @@ func TestSendDomainError(t *testing.T) {
 		ctx := context.Background()
 		mg := mailgun.NewMailgun(c.domain, exampleAPIKey)
 		mg.SetAPIBase(srv.URL + "/v3")
-		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, "test@test.com")
+		m := mailgun.NewMessage(c.domain, fromUser, exampleSubject, exampleText, "test@test.com")
 
 		_, _, err := mg.Send(ctx, m)
 		if c.isValid {
@@ -498,7 +498,7 @@ func TestSendEOFError(t *testing.T) {
 	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	_, _, err := mg.Send(context.Background(), m)
 	require.NotNil(t, err)
 	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
@@ -597,7 +597,7 @@ func TestAddOverrideHeader(t *testing.T) {
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -636,7 +636,7 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	mg.SetOnBehalfOfSubaccount("mailgun.subaccount")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -668,7 +668,7 @@ func TestCaptureCurlOutput(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
@@ -704,7 +704,7 @@ func TestSendTLSOptions(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
@@ -734,7 +734,7 @@ func TestSendTemplate(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, "", toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)
 	m.SetTemplate(templateName)
 
 	msg, id, err := mg.Send(ctx, m)
@@ -767,7 +767,7 @@ func TestSendTemplateOptions(t *testing.T) {
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
-	m := mailgun.NewMessage(fromUser, exampleSubject, "", toUser)
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)
 	m.SetTemplate(templateName)
 	m.SetTemplateRenderText(true)
 	m.SetTemplateVersion(templateVersionTag)
