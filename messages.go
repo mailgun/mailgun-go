@@ -694,8 +694,8 @@ type SendableMessage interface {
 //
 // See the public mailgun documentation for all possible return codes and error messages
 // TODO(v5): switch m to SendableMessage interface - https://bryanftan.medium.com/accept-interfaces-return-structs-in-go-d4cab29a301b
-func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes, id string, err error) {
-	if mg.domain == "" {
+func (mg *MailgunImpl) Send(ctx context.Context, m SendableMessage) (mes, id string, err error) {
+	if m.Domain() == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
 		return "", "", err
 	}
@@ -722,16 +722,11 @@ func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes, id string, er
 	}
 	payload := NewFormDataPayload()
 
-	m.Specific.AddValues(payload)
+	m.AddValues(payload)
 
 	err = addMessageValues(payload, m)
 	if err != nil {
 		return "", "", err
-	}
-
-	// TODO(v5): remove due for domain agnostic API:
-	if m.Domain() == "" {
-		m.domain = mg.Domain()
 	}
 
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Endpoint(), m.Domain()))
