@@ -229,13 +229,6 @@ func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
 	}
 }
 
-// Deprecated: use func NewMIMEMessage instead of method.
-//
-// TODO(v5): remove this method
-func (*MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
-	return NewMIMEMessage(body, to...)
-}
-
 func (m *Message) Domain() string {
 	return m.domain
 }

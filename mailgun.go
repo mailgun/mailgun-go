@@ -78,7 +78,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"sync"
@@ -144,8 +143,6 @@ type Mailgun interface {
 	// TODO(v5): switch m to SendableMessage interface
 	Send(ctx context.Context, m *Message) (mes string, id string, err error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
-	// Deprecated: use func NewMIMEMessage instead of method.
-	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
 	ListBounces(opts *ListOptions) *BouncesIterator
 	GetBounce(ctx context.Context, address string) (Bounce, error)
