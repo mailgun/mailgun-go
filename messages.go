@@ -625,7 +625,7 @@ type SendableMessage interface {
 	Specific
 }
 
-// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
+// Send attempts to queue a message (see PlainMessage, MimeMessage and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
 //   - A human-readable status message, typically "Queued. Thank you."
 //   - A Message ID, which is the id used to track the queued message. The message id is useful
