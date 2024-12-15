@@ -204,13 +204,6 @@ func NewMessage(from, subject, text string, to ...string) *Message {
 	}
 }
 
-// Deprecated: use func NewMessage instead of method.
-//
-// TODO(v5): remove this method
-func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
-	return NewMessage(from, subject, text, to...)
-}
-
 // NewMIMEMessage creates a new MIME message. These messages are largely canned;
 // you do not need to invoke setters to set message-related headers.
 // However, you do still need to call setters for Mailgun-specific settings.
