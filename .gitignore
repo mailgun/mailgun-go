@@ -2,3 +2,5 @@
 .idea/
 cmd/mailgun/mailgun
 /.env
+
+/internal/types/redocly-mailgun/

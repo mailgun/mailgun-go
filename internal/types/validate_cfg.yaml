@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
+package: validate
+output: ./internal/types/validate/model.gen.go
+generate:
+  models: true
+  client: false
