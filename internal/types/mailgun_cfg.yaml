@@ -1,0 +1,6 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
+package: types
+output: ./internal/types/mailgun.gen.go
+generate:
+  models: true
+  client: false
