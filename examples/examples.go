@@ -545,19 +545,6 @@ func ListMailingLists(domain, apiKey string) ([]mailgun.MailingList, error) {
 	return result, nil
 }
 
-func ParseAddress(apiKey string) ([]string, []string, error) {
-	mv := mailgun.NewEmailValidator(apiKey)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	return mv.ParseAddresses(ctx,
-		"Alice <alice@example.com>",
-		"bob@example.com",
-		// ...
-	)
-}
-
 func GetRoute(domain, apiKey string) (mailgun.Route, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 
@@ -779,7 +766,7 @@ func SendMimeMessage(domain, apiKey string) (string, error) {
 		return "", err
 	}
 
-	m := mailgun.NewMIMEMessage(mimeMsgReader, "bar@example.com")
+	m := mailgun.NewMIMEMessage(domain, mimeMsgReader, "bar@example.com")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -824,6 +811,7 @@ func SendSimpleMessage(domain, apiKey string) (string, error) {
 func SendTaggedMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -845,6 +833,7 @@ func SendTaggedMessage(domain, apiKey string) (string, error) {
 func SendTemplateMessage(domain, apiKey string) (string, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hey %recipient.first%",
 		"If you wish to unsubscribe, click http://mailgun/unsubscribe/%recipient.id%",
@@ -939,7 +928,7 @@ func SendMessageWithTemplate(domain, apiKey string) error {
 	time.Sleep(time.Second * 1)
 
 	// Create a new message with template
-	m := mailgun.NewMessage("Excited User <excited@example.com>", "Template example", "")
+	m := mailgun.NewMessage(domain, "Excited User <excited@example.com>", "Template example", "")
 	m.SetTemplate("my-template")
 
 	// Add recipients

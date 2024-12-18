@@ -78,7 +78,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"sync"
@@ -140,14 +139,9 @@ type Mailgun interface {
 	AddOverrideHeader(k string, v string)
 	GetCurlOutput() string
 
-	// Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
-	// TODO(v5): switch m to SendableMessage interface
-	Send(ctx context.Context, m *Message) (mes string, id string, err error)
+	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
+	Send(ctx context.Context, m SendableMessage) (mes string, id string, err error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
-	// Deprecated: use func NewMessage instead of method.
-	NewMessage(from, subject, text string, to ...string) *Message
-	// Deprecated: use func NewMIMEMessage instead of method.
-	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
 
 	ListBounces(opts *ListOptions) *BouncesIterator
 	GetBounce(ctx context.Context, address string) (Bounce, error)

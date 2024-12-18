@@ -18,7 +18,7 @@ func TestStorage(t *testing.T) {
 
 	var ctx = context.Background()
 
-	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
+	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 

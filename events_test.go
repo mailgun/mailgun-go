@@ -87,7 +87,7 @@ func TestEventPoller(t *testing.T) {
 	}()
 
 	// Send an email
-	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
+	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 

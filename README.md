@@ -1,6 +1,6 @@
 # Mailgun with Go
 
-[![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go/v4)
+[![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go/v5)
 [![Build Status](https://github.com/mailgun/mailgun-go/workflows/CI/badge.svg)](https://github.com/mailgun/mailgun-go/actions/workflows/main.yml?query=branch%3Amaster)
 
 Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/en/latest/api_reference.html).
@@ -8,9 +8,9 @@ Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https:
 ## Installation
 
 If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
-include the `/v4` at the end of your import paths
+include the `/v5` at the end of your import paths
 ```bash
-$ go get github.com/mailgun/mailgun-go/v4
+$ go get github.com/mailgun/mailgun-go/v5
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your available domain names can be found here:
@@ -47,7 +47,7 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mailgun.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, body, recipient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -72,8 +72,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 func main() {
@@ -129,7 +129,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 func main() {
@@ -170,7 +170,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your plan should include email validations.
@@ -203,8 +203,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 func main() {
@@ -271,7 +271,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your available domain names can be found here:
@@ -290,7 +290,7 @@ func main() {
 	subject := "HTML email!"
 	recipient := "recipient@example.com"
 
-	message := mailgun.NewMessage(sender, subject, "", recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, "", recipient)
 	body := `
 <html>
 <body>
@@ -330,7 +330,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your available domain names can be found here:
@@ -351,7 +351,7 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mailgun.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, body, recipient)
 	message.SetTemplate("passwordReset")
 	err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
 	if err != nil {
