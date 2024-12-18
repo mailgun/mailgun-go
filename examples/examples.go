@@ -545,19 +545,6 @@ func ListMailingLists(domain, apiKey string) ([]mailgun.MailingList, error) {
 	return result, nil
 }
 
-func ParseAddress(apiKey string) ([]string, []string, error) {
-	mv := mailgun.NewEmailValidator(apiKey)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	return mv.ParseAddresses(ctx,
-		"Alice <alice@example.com>",
-		"bob@example.com",
-		// ...
-	)
-}
-
 func GetRoute(domain, apiKey string) (mailgun.Route, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 

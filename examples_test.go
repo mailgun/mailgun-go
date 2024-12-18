@@ -35,30 +35,6 @@ func ExampleEmailValidatorImpl_ValidateEmail() {
 	}
 }
 
-func ExampleEmailValidatorImpl_ParseAddresses() {
-	v := mailgun.NewEmailValidator("my_public_validation_api_key")
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-
-	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses(ctx, "Alice <alice@example.com>", "bob@example.com", "example.com")
-	if err != nil {
-		log.Fatal(err)
-	}
-	hittest := map[string]bool{
-		"Alice <alice@example.com>": true,
-		"bob@example.com":           true,
-	}
-	for _, a := range addressesThatParsed {
-		if !hittest[a] {
-			log.Fatalf("Expected %s to be parsable", a)
-		}
-	}
-	if len(unparsableAddresses) != 1 {
-		log.Fatalf("Expected 1 address to be unparsable; got %d", len(unparsableAddresses))
-	}
-}
-
 func ExampleMailgunImpl_UpdateMailingList() {
 	mg := mailgun.NewMailgun("example.com", "my_api_key")
 

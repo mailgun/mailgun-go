@@ -36,26 +36,6 @@ func TestEmailValidationV4(t *testing.T) {
 	assert.False(t, ev.Engagement.IsBot)
 }
 
-func TestParseAddresses(t *testing.T) {
-	v := mailgun.NewEmailValidator(testKey)
-	v.SetAPIBase(server.URL())
-	ctx := context.Background()
-
-	addressesThatParsed, unparsableAddresses, err := v.ParseAddresses(ctx,
-		"Alice <alice@example.com>",
-		"bob@example.com",
-		"example.com")
-	require.NoError(t, err)
-	hittest := map[string]bool{
-		"Alice <alice@example.com>": true,
-		"bob@example.com":           true,
-	}
-	for _, a := range addressesThatParsed {
-		require.True(t, hittest[a])
-	}
-	require.Len(t, unparsableAddresses, 1)
-}
-
 func TestUnmarshallResponse(t *testing.T) {
 	payload := []byte(`{
 		"address": "some_email@aol.com",
