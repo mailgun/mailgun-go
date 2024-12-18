@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
-package: types
+package: inboxready
 output: ./internal/types/inboxready/model.gen.go
 generate:
   models: true
