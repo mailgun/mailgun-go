@@ -572,17 +572,6 @@ func ListRoutes(domain, apiKey string) ([]mailgun.Route, error) {
 	return result, nil
 }
 
-func GetStats(domain, apiKey string) ([]mailgun.Stats, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	return mg.GetStats(ctx, []string{"accepted", "delivered", "failed"}, &mailgun.GetStatOptions{
-		Duration: "1m",
-	})
-}
-
 func ListTags(domain, apiKey string) ([]mailgun.Tag, error) {
 	mg := mailgun.NewMailgun(domain, apiKey)
 	it := mg.ListTags(nil)

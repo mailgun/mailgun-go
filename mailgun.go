@@ -96,14 +96,13 @@ var CaptureCurlOutput = false
 var RedactCurlAuth = false
 
 const (
-	// Base Url the library uses to contact mailgun. Use SetAPIBase() to override
+	// APIBase - base URL the library uses to contact mailgun. Use SetAPIBase() to override
 	APIBase              = "https://api.mailgun.net/v3"
 	APIBaseUS            = APIBase
 	APIBaseEU            = "https://api.eu.mailgun.net/v3"
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
-	statsTotalEndpoint   = "stats/total"
 	metricsEndpoint      = "analytics/metrics"
 	domainsEndpoint      = "domains"
 	tagsEndpoint         = "tags"
@@ -151,8 +150,6 @@ type Mailgun interface {
 
 	ListMetrics(opts MetricsOptions) (*MetricsIterator, error)
 
-	// Deprecated: Use ListMetrics instead.
-	GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error)
 	GetTag(ctx context.Context, tag string) (Tag, error)
 	DeleteTag(ctx context.Context, tag string) error
 	ListTags(*ListTagOptions) *TagIterator
