@@ -199,7 +199,6 @@ type Mailgun interface {
 	DeleteWebhook(ctx context.Context, kind string) error
 	GetWebhook(ctx context.Context, kind string) ([]string, error)
 	UpdateWebhook(ctx context.Context, kind string, url []string) error
-	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
 	VerifyWebhookSignature(sig Signature) (verified bool, err error)
 
 	ListMailingLists(opts *ListOptions) *ListsIterator
