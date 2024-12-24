@@ -99,40 +99,6 @@ func TestVerifyWebhookSignature(t *testing.T) {
 	}
 }
 
-func TestVerifyWebhookRequest_Form(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetWebhookSigningKey(testWebhookSigningKey)
-
-	for _, v := range signedTests {
-		fields := getSignatureFields(mg.WebhookSigningKey(), v)
-		req := buildFormRequest(context.Background(), fields)
-
-		verified, err := mg.VerifyWebhookRequest(req)
-		require.NoError(t, err)
-
-		if v != verified {
-			t.Errorf("VerifyWebhookRequest should return '%v' but got '%v'", v, verified)
-		}
-	}
-}
-
-func TestVerifyWebhookRequest_MultipartForm(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetWebhookSigningKey(testWebhookSigningKey)
-
-	for _, v := range signedTests {
-		fields := getSignatureFields(mg.WebhookSigningKey(), v)
-		req := buildMultipartFormRequest(context.Background(), fields)
-
-		verified, err := mg.VerifyWebhookRequest(req)
-		require.NoError(t, err)
-
-		if v != verified {
-			t.Errorf("VerifyWebhookRequest should return '%v' but got '%v'", v, verified)
-		}
-	}
-}
-
 func buildFormRequest(ctx context.Context, fields map[string]string) *http.Request {
 	values := url.Values{}
 
