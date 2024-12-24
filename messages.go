@@ -597,7 +597,7 @@ func (m *CommonMessage) Headers() map[string]string {
 // ErrInvalidMessage is returned by `Send()` when the `mailgun.CommonMessage` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
 
-// TODO(DE-1392): rename to Message?
+// TODO(v5): rename to Message?
 type SendableMessage interface {
 	Domain() string
 	To() []string
