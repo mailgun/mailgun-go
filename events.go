@@ -10,7 +10,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/events"
 )
 
-// ListEventOptions{} modifies the behavior of ListEvents()
+// ListEventOptions modifies the behavior of ListEvents()
 type ListEventOptions struct {
 	// Limits the results to a specific start and end time
 	Begin, End time.Time
