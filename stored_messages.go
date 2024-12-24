@@ -100,16 +100,6 @@ func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (Sto
 	return response, err
 }
 
-// Deprecated: Use GetStoreMessage() instead
-func (mg *MailgunImpl) GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error) {
-	return mg.GetStoredMessage(ctx, url)
-}
-
-// Deprecated: Use GetStoreMessageRaw() instead
-func (mg *MailgunImpl) GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error) {
-	return mg.GetStoredMessageRaw(ctx, url)
-}
-
 // GetStoredAttachment retrieves the raw MIME body of a received e-mail message attachment.
 func (mg *MailgunImpl) GetStoredAttachment(ctx context.Context, url string) ([]byte, error) {
 	r := newHTTPRequest(url)
