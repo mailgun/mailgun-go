@@ -13,7 +13,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/mailgun/errors"
 )
@@ -27,9 +26,6 @@ type httpRequest struct {
 	BasicAuthUser     string
 	BasicAuthPassword string
 	Client            *http.Client
-
-	mu                 sync.RWMutex
-	capturedCurlOutput string
 }
 
 type httpResponse struct {
@@ -339,13 +335,7 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	}
 
 	if Debug {
-		if CaptureCurlOutput {
-			r.mu.Lock()
-			r.capturedCurlOutput = curlString(req, payload)
-			r.mu.Unlock()
-		} else {
-			fmt.Println(curlString(req, payload))
-		}
+		fmt.Println(curlString(req, payload))
 	}
 
 	resp, err := r.Client.Do(req)
