@@ -113,6 +113,7 @@ type MimeMessage struct {
 	body io.ReadCloser
 }
 
+// TODO(v5): return from Send()
 type sendMessageResponse struct {
 	Message string `json:"message"`
 	Id      string `json:"id"`
@@ -596,6 +597,7 @@ func (m *CommonMessage) Headers() map[string]string {
 // ErrInvalidMessage is returned by `Send()` when the `mailgun.CommonMessage` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
 
+// TODO(DE-1392): rename to Message?
 type SendableMessage interface {
 	Domain() string
 	To() []string
