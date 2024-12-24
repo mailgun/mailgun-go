@@ -80,20 +80,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sync"
 	"time"
 )
 
 // Debug set true to write the HTTP requests in curl for to stdout
 var Debug = false
-
-// CaptureCurlOutput if true, will capture the curl request of the last Send()
-// can be retrieved by calling GetCurlOutput()
-var CaptureCurlOutput = false
-
-// RedactCurlAuth will redact the authentication header when CaptureCurlOutput is
-// used.
-var RedactCurlAuth = false
 
 const (
 	// APIBase - base URL the library uses to contact mailgun. Use SetAPIBase() to override
@@ -136,7 +127,6 @@ type Mailgun interface {
 	SetClient(client *http.Client)
 	SetAPIBase(url string)
 	AddOverrideHeader(k string, v string)
-	GetCurlOutput() string
 
 	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
 	Send(ctx context.Context, m SendableMessage) (mes string, id string, err error)
@@ -263,9 +253,6 @@ type MailgunImpl struct {
 	client            *http.Client
 	baseURL           string
 	overrideHeaders   map[string]string
-
-	mu                 sync.RWMutex
-	capturedCurlOutput string
 }
 
 // NewMailGun creates a new client instance.
@@ -376,16 +363,6 @@ func (mg *MailgunImpl) AddOverrideHeader(k, v string) {
 		mg.overrideHeaders = make(map[string]string)
 	}
 	mg.overrideHeaders[k] = v
-}
-
-// GetCurlOutput will retrieve the output of the last Send() request as a curl command.
-// mailgun.CaptureCurlOutput must be set to true
-// This is mostly useful for testing the Mailgun API hosted at a different endpoint.
-func (mg *MailgunImpl) GetCurlOutput() string {
-	mg.mu.RLock()
-	defer mg.mu.RUnlock()
-
-	return mg.capturedCurlOutput
 }
 
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.

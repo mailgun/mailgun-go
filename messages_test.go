@@ -35,8 +35,6 @@ Testing some Mailgun MIME awesomeness!
 
 func init() {
 	mailgun.Debug = true
-	mailgun.CaptureCurlOutput = true
-	mailgun.RedactCurlAuth = true
 }
 
 func spendMoney(t *testing.T, tFunc func()) {
@@ -605,8 +603,6 @@ func TestAddOverrideHeader(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
 	assert.Equal(t, exampleID, id)
-
-	require.Contains(t, mg.GetCurlOutput(), "Host:")
 }
 
 func TestOnBehalfOfSubaccount(t *testing.T) {
@@ -644,38 +640,6 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, exampleMessage, msg)
 	assert.Equal(t, exampleID, id)
-
-	require.Contains(t, mg.GetCurlOutput(), "Host:")
-}
-
-func TestCaptureCurlOutput(t *testing.T) {
-	const (
-		exampleDomain  = "testDomain"
-		exampleAPIKey  = "testAPIKey"
-		toUser         = "test@test.com"
-		exampleMessage = "Queue. Thank you"
-		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
-	)
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		assert.Equal(t, http.MethodPost, req.Method)
-		assert.Equal(t, fmt.Sprintf("/v3/%s/messages", exampleDomain), req.URL.Path)
-		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
-		fmt.Fprint(w, rsp)
-	}))
-	defer srv.Close()
-
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
-	ctx := context.Background()
-
-	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
-	msg, id, err := mg.Send(ctx, m)
-	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
-
-	require.Contains(t, mg.GetCurlOutput(), "curl")
-	t.Logf("%s", mg.GetCurlOutput())
 }
 
 func TestSendTLSOptions(t *testing.T) {
