@@ -171,11 +171,6 @@ type Mailgun interface {
 	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
 	GetStoredAttachment(ctx context.Context, url string) ([]byte, error)
 
-	// Deprecated
-	GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error)
-	// Deprecated
-	GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error)
-
 	ListCredentials(opts *ListOptions) *CredentialsIterator
 	CreateCredential(ctx context.Context, login, password string) error
 	ChangeCredentialPassword(ctx context.Context, login, password string) error
