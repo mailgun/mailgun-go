@@ -358,8 +358,6 @@ type ListOptions struct {
 	Limit int
 }
 
-// TODO(v5): keep either generateApiUrl or generateApiUrlWithDomain
-
 // generateApiUrlWithDomain renders a URL for an API endpoint using the domain and endpoint name.
 func generateApiUrlWithDomain(m Mailgun, endpoint, domain string) string {
 	return fmt.Sprintf("%s/%s/%s", m.APIBase(), domain, endpoint)
