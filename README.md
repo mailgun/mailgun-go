@@ -36,7 +36,7 @@ var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
+	mg := mailgun.NewMailgun(privateAPIKey)
 	
 	//When you have an EU-domain, you must specify the endpoint:
 	//mg.SetAPIBase("https://api.eu.mailgun.net/v3")
@@ -79,9 +79,9 @@ import (
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
+	mg := mailgun.NewMailgun("your-private-key")
 
-	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
+	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
 
 	var page []mailgun.Event
 
@@ -135,12 +135,12 @@ import (
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
+	mg := mailgun.NewMailgun("your-private-key")
 
 	begin := time.Now().Add(time.Second * -3)
 
 	// Very short poll interval
-	it := mg.PollEvents(&mailgun.ListEventOptions{
+	it := mg.PollEvents("your-domain.com", &mailgun.ListEventOptions{
 		// Only events with a timestamp after this date/time will be returned
 		Begin: begin,
 		// How often we poll the api for new events
@@ -210,11 +210,10 @@ import (
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
+	mg := mailgun.NewMailgun("private-api-key")
 	mg.SetWebhookSigningKey("webhook-signing-key")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
 		var payload mailgun.WebhookPayload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			fmt.Printf("decode JSON error: %s", err)
@@ -284,7 +283,7 @@ var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
+	mg := mailgun.NewMailgun(privateAPIKey)
 
 	sender := "sender@example.com"
 	subject := "HTML email!"
@@ -343,7 +342,7 @@ var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
+	mg := mailgun.NewMailgun(privateAPIKey)
 
 	sender := "sender@example.com"
 	subject := "Fancy subject!"
