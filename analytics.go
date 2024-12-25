@@ -22,6 +22,14 @@ type MetricsPagination struct {
 
 // ListMetrics returns domain/account metrics.
 //
+// To filter by domain:
+//
+//	opts.Filter.BoolGroupAnd = []mailgun.MetricsFilterPredicate{{
+//		Attribute:     "domain",
+//		Comparator:    "=",
+//		LabeledValues: []mailgun.MetricsLabeledValue{{Label: "example.com", Value: "example.com"}},
+//	}}
+//
 // NOTE: Only for v1 API. To use the /v1 version define MG_URL in the environment variable
 // as `https://api.mailgun.net/v1` or set `mg.SetAPIBase("https://api.mailgun.net/v1")`
 //
