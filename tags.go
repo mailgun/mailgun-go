@@ -28,7 +28,7 @@ type ListTagOptions struct {
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
 func (mg *MailgunImpl) DeleteTag(ctx context.Context, domain, tag string) error {
-	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint, domain) + "/" + tag)
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -37,7 +37,7 @@ func (mg *MailgunImpl) DeleteTag(ctx context.Context, domain, tag string) error 
 
 // GetTag retrieves metadata about the tag from the api
 func (mg *MailgunImpl) GetTag(ctx context.Context, domain, tag string) (Tag, error) {
-	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint, domain) + "/" + tag)
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var tagItem Tag
@@ -58,7 +58,7 @@ func (mg *MailgunImpl) GetTag(ctx context.Context, domain, tag string) (Tag, err
 //		log.Fatal(it.Err())
 //	}
 func (mg *MailgunImpl) ListTags(domain string, opts *ListTagOptions) *TagIterator {
-	req := newHTTPRequest(generateApiUrl(mg, tagsEndpoint, domain))
+	req := newHTTPRequest(generateApiUrlWithDomain(mg, tagsEndpoint, domain))
 	if opts != nil {
 		if opts.Limit != 0 {
 			req.addParameter("limit", strconv.Itoa(opts.Limit))

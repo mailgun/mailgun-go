@@ -360,12 +360,7 @@ type ListOptions struct {
 
 // TODO(v5): keep either generateApiUrl or generateApiUrlWithDomain
 
-// generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
-func generateApiUrl(m Mailgun, endpoint, domain string) string {
-	return fmt.Sprintf("%s/%s/%s", m.APIBase(), domain, endpoint)
-}
-
-// generateApiUrlWithDomain renders a URL for an API endpoint using a separate domain and endpoint name.
+// generateApiUrlWithDomain renders a URL for an API endpoint using the domain and endpoint name.
 func generateApiUrlWithDomain(m Mailgun, endpoint, domain string) string {
 	return fmt.Sprintf("%s/%s/%s", m.APIBase(), domain, endpoint)
 }
@@ -383,10 +378,10 @@ func generateApiUrlWithTarget(m Mailgun, endpoint, domain, target string) string
 	if target != "" {
 		tail = fmt.Sprintf("/%s", target)
 	}
-	return fmt.Sprintf("%s%s", generateApiUrl(m, endpoint, domain), tail)
+	return fmt.Sprintf("%s%s", generateApiUrlWithDomain(m, endpoint, domain), tail)
 }
 
-// generateDomainApiUrl renders a URL as generateApiUrl, but
+// generateDomainApiUrl renders a URL as generateApiUrlWithDomain, but
 // addresses a family of functions which have a non-standard URL structure.
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.

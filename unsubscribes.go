@@ -19,7 +19,7 @@ type unsubscribesResponse struct {
 
 // Fetches the list of unsubscribes
 func (mg *MailgunImpl) ListUnsubscribes(domain string, opts *ListOptions) *UnsubscribesIterator {
-	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint, domain))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, unsubscribesEndpoint, domain))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
@@ -143,7 +143,7 @@ func (mg *MailgunImpl) GetUnsubscribe(ctx context.Context, domain, address strin
 
 // Unsubscribe adds an e-mail address to the domain's unsubscription table.
 func (mg *MailgunImpl) CreateUnsubscribe(ctx context.Context, domain, address, tag string) error {
-	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint, domain))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, unsubscribesEndpoint, domain))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -155,7 +155,7 @@ func (mg *MailgunImpl) CreateUnsubscribe(ctx context.Context, domain, address, t
 
 // CreateUnsubscribes adds multiple e-mail addresses to the domain's unsubscription table.
 func (mg *MailgunImpl) CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []Unsubscribe) error {
-	r := newHTTPRequest(generateApiUrl(mg, unsubscribesEndpoint, domain))
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, unsubscribesEndpoint, domain))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addHeader("Content-Type", "application/json")

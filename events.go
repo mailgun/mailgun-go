@@ -38,7 +38,7 @@ type EventIterator struct {
 
 // ListEvents creates a new iterator to fetch a page of events from the events api
 func (mg *MailgunImpl) ListEvents(domain string, opts *ListEventOptions) *EventIterator {
-	url := generateApiUrl(mg, eventsEndpoint, domain)
+	url := generateApiUrlWithDomain(mg, eventsEndpoint, domain)
 	return mg.listEvents(url, opts)
 }
 
