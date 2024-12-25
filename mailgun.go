@@ -399,8 +399,8 @@ func generateCredentialsUrl(m Mailgun, domain, login string) string {
 	return generateDomainsApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
 }
 
-// generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
-func generatePublicApiUrl(m Mailgun, endpoint string) string {
+// generateApiUrl returns domain agnostic URL.
+func generateApiUrl(m Mailgun, endpoint string) string {
 	return fmt.Sprintf("%s/%s", m.APIBase(), endpoint)
 }
 

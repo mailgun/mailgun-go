@@ -35,7 +35,7 @@ func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error
 		opts.Pagination.Limit = 10
 	}
 
-	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
+	req := newHTTPRequest(generateApiUrl(mg, metricsEndpoint))
 	req.setClient(mg.Client())
 	req.setBasicAuth(basicAuthUser, mg.APIKey())
 
