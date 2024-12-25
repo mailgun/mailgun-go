@@ -29,7 +29,7 @@ type ListTagOptions struct {
 // DeleteTag removes all counters for a particular tag, including the tag itself.
 func (mg *MailgunImpl) DeleteTag(ctx context.Context, domain, tag string) error {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -38,7 +38,7 @@ func (mg *MailgunImpl) DeleteTag(ctx context.Context, domain, tag string) error 
 // GetTag retrieves metadata about the tag from the api
 func (mg *MailgunImpl) GetTag(ctx context.Context, domain, tag string) (Tag, error) {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var tagItem Tag
 	err := getResponseFromJSON(ctx, r, &tagItem)
@@ -158,7 +158,7 @@ func (ti *TagIterator) Err() error {
 func (ti *TagIterator) fetch(ctx context.Context, uri string) error {
 	ti.Items = nil
 	req := newHTTPRequest(uri)
-	req.setClient(ti.mg.Client())
+	req.setClient(ti.mg.HTTPClient())
 	req.setBasicAuth(basicAuthUser, ti.mg.APIKey())
 	return getResponseFromJSON(ctx, req, &ti.tagsResponse)
 }

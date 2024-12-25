@@ -53,7 +53,7 @@ type StoredMessageRaw struct {
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
 func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (StoredMessage, error) {
 	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response StoredMessage
@@ -64,7 +64,7 @@ func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (Stored
 // Given a storage id resend the stored message to the specified recipients
 func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...string) (msg, id string, err error) {
 	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := NewFormDataPayload()
@@ -91,7 +91,7 @@ func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...str
 // thus delegates to the caller the required parsing.
 func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (StoredMessageRaw, error) {
 	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addHeader("Accept", "message/rfc2822")
 
@@ -103,7 +103,7 @@ func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (Sto
 // GetStoredAttachment retrieves the raw MIME body of a received e-mail message attachment.
 func (mg *MailgunImpl) GetStoredAttachment(ctx context.Context, url string) ([]byte, error) {
 	r := newHTTPRequest(url)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addHeader("Accept", "message/rfc2822")
 

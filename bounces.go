@@ -36,7 +36,7 @@ type bouncesListResponse struct {
 // Note that the length of the slice may be smaller than the total number of bounces.
 func (mg *MailgunImpl) ListBounces(domain string, opts *ListOptions) *BouncesIterator {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, bouncesEndpoint, domain))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
@@ -139,7 +139,7 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
 func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
 	ci.Items = nil
 	r := newHTTPRequest(url)
-	r.setClient(ci.mg.Client())
+	r.setClient(ci.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
 
 	return getResponseFromJSON(ctx, r, &ci.bouncesListResponse)
@@ -148,7 +148,7 @@ func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
 func (mg *MailgunImpl) GetBounce(ctx context.Context, domain, address string) (Bounce, error) {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var response Bounce
@@ -174,7 +174,7 @@ func (mg *MailgunImpl) GetBounce(ctx context.Context, domain, address string) (B
 // code will report as a number.
 func (mg *MailgunImpl) AddBounce(ctx context.Context, domain, address, code, bounceError string) error {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, bouncesEndpoint, domain))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -192,7 +192,7 @@ func (mg *MailgunImpl) AddBounce(ctx context.Context, domain, address, code, bou
 // Add Bounces adds a list of bounces to the bounce list
 func (mg *MailgunImpl) AddBounces(ctx context.Context, domain string, bounces []Bounce) error {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, bouncesEndpoint, domain))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newJSONEncodedPayload(bounces)
@@ -204,7 +204,7 @@ func (mg *MailgunImpl) AddBounces(ctx context.Context, domain string, bounces []
 // DeleteBounce removes all bounces associted with the provided e-mail address.
 func (mg *MailgunImpl) DeleteBounce(ctx context.Context, domain, address string) error {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -213,7 +213,7 @@ func (mg *MailgunImpl) DeleteBounce(ctx context.Context, domain, address string)
 // DeleteBounceList removes all bounces in the bounce list
 func (mg *MailgunImpl) DeleteBounceList(ctx context.Context, domain string) error {
 	r := newHTTPRequest(generateApiUrlWithDomain(mg, bouncesEndpoint, domain))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err

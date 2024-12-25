@@ -31,7 +31,7 @@ type WebHookResponse struct {
 // Note that a zero-length mapping is not an error.
 func (mg *MailgunImpl) ListWebhooks(ctx context.Context, domain string) (map[string][]string, error) {
 	r := newHTTPRequest(generateDomainsApiUrl(mg, webhooksEndpoint, domain))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var body WebHooksListResponse
@@ -55,7 +55,7 @@ func (mg *MailgunImpl) ListWebhooks(ctx context.Context, domain string) (map[str
 // CreateWebhook installs a new webhook for your domain.
 func (mg *MailgunImpl) CreateWebhook(ctx context.Context, domain, id string, urls []string) error {
 	r := newHTTPRequest(generateDomainsApiUrl(mg, webhooksEndpoint, domain))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("id", id)
@@ -69,7 +69,7 @@ func (mg *MailgunImpl) CreateWebhook(ctx context.Context, domain, id string, url
 // DeleteWebhook removes the specified webhook from your domain's configuration.
 func (mg *MailgunImpl) DeleteWebhook(ctx context.Context, domain, name string) error {
 	r := newHTTPRequest(generateDomainsApiUrl(mg, webhooksEndpoint, domain) + "/" + name)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -78,7 +78,7 @@ func (mg *MailgunImpl) DeleteWebhook(ctx context.Context, domain, name string) e
 // GetWebhook retrieves the currently assigned webhook URL associated with the provided type of webhook.
 func (mg *MailgunImpl) GetWebhook(ctx context.Context, domain, name string) ([]string, error) {
 	r := newHTTPRequest(generateDomainsApiUrl(mg, webhooksEndpoint, domain) + "/" + name)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var body WebHookResponse
 	if err := getResponseFromJSON(ctx, r, &body); err != nil {
@@ -97,7 +97,7 @@ func (mg *MailgunImpl) GetWebhook(ctx context.Context, domain, name string) ([]s
 // UpdateWebhook replaces one webhook setting for another.
 func (mg *MailgunImpl) UpdateWebhook(ctx context.Context, domain, name string, urls []string) error {
 	r := newHTTPRequest(generateDomainsApiUrl(mg, webhooksEndpoint, domain) + "/" + name)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	for _, url := range urls {

@@ -161,7 +161,7 @@ func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error
 	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
-	r.setClient(ri.mg.Client())
+	r.setClient(ri.mg.HTTPClient())
 
 	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
@@ -179,7 +179,7 @@ func (mg *MailgunImpl) CreateCredential(ctx context.Context, domain, login, pass
 		return ErrEmptyParam
 	}
 	r := newHTTPRequest(generateCredentialsUrl(mg, domain, ""))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("login", login)
@@ -194,7 +194,7 @@ func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, domain, log
 		return ErrEmptyParam
 	}
 	r := newHTTPRequest(generateCredentialsUrl(mg, domain, login))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("password", password)
@@ -208,7 +208,7 @@ func (mg *MailgunImpl) DeleteCredential(ctx context.Context, domain, login strin
 		return ErrEmptyParam
 	}
 	r := newHTTPRequest(generateCredentialsUrl(mg, domain, login))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err

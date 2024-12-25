@@ -122,8 +122,8 @@ const (
 type Mailgun interface {
 	APIBase() string
 	APIKey() string
-	Client() *http.Client
-	SetClient(client *http.Client)
+	HTTPClient() *http.Client
+	SetHTTPClient(client *http.Client)
 	SetAPIBase(url string)
 	AddOverrideHeader(k string, v string)
 
@@ -295,13 +295,13 @@ func (mg *MailgunImpl) APIKey() string {
 	return mg.apiKey
 }
 
-// Client returns the HTTP client configured for this client.
-func (mg *MailgunImpl) Client() *http.Client {
+// HTTPClient returns the HTTP client configured for this client.
+func (mg *MailgunImpl) HTTPClient() *http.Client {
 	return mg.client
 }
 
-// SetClient updates the HTTP client for this client.
-func (mg *MailgunImpl) SetClient(c *http.Client) {
+// SetHTTPClient updates the HTTP client for this client.
+func (mg *MailgunImpl) SetHTTPClient(c *http.Client) {
 	mg.client = c
 }
 

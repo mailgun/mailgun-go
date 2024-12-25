@@ -20,11 +20,11 @@ func TestMailgun(t *testing.T) {
 	m := mailgun.NewMailgun(apiKey)
 
 	assert.Equal(t, apiKey, m.APIKey())
-	assert.Equal(t, http.DefaultClient, m.Client())
+	assert.Equal(t, http.DefaultClient, m.HTTPClient())
 
 	client := new(http.Client)
-	m.SetClient(client)
-	assert.Equal(t, m.Client(), client)
+	m.SetHTTPClient(client)
+	assert.Equal(t, m.HTTPClient(), client)
 }
 
 func TestInvalidBaseAPI(t *testing.T) {
