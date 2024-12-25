@@ -36,15 +36,9 @@ type EventIterator struct {
 	err error
 }
 
-// Create an new iterator to fetch a page of events from the events api with a specific domain
-func (mg *MailgunImpl) ListEventsWithDomain(opts *ListEventOptions, domain string) *EventIterator {
-	url := generateApiUrlWithDomain(mg, eventsEndpoint, domain)
-	return mg.listEvents(url, opts)
-}
-
-// Create an new iterator to fetch a page of events from the events api
-func (mg *MailgunImpl) ListEvents(opts *ListEventOptions) *EventIterator {
-	url := generateApiUrl(mg, eventsEndpoint)
+// ListEvents creates a new iterator to fetch a page of events from the events api
+func (mg *MailgunImpl) ListEvents(domain string, opts *ListEventOptions) *EventIterator {
+	url := generateApiUrl(mg, eventsEndpoint, domain)
 	return mg.listEvents(url, opts)
 }
 
@@ -188,7 +182,7 @@ type EventPoller struct {
 
 // PollEvents polls the events api and return new events as they occur
 //
-//	it = mg.PollEvents(&ListEventOptions{
+//	it = mg.PollEvents("example.com", &ListEventOptions{
 //		// Only events with a timestamp after this date/time will be returned
 //		Begin:        time.Now().Add(time.Second * -3),
 //		// How often we poll the api for new events
@@ -207,7 +201,7 @@ type EventPoller struct {
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (mg *MailgunImpl) PollEvents(opts *ListEventOptions) *EventPoller {
+func (mg *MailgunImpl) PollEvents(domain string, opts *ListEventOptions) *EventPoller {
 	now := time.Now()
 	// ForceAscending must be set
 	opts.ForceAscending = true
@@ -223,7 +217,7 @@ func (mg *MailgunImpl) PollEvents(opts *ListEventOptions) *EventPoller {
 	}
 
 	return &EventPoller{
-		it:   mg.ListEvents(opts),
+		it:   mg.ListEvents(domain, opts),
 		opts: *opts,
 		mg:   mg,
 	}

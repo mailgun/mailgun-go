@@ -10,7 +10,7 @@ import (
 )
 
 func TestLimits(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()

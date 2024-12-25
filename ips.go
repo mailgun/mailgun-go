@@ -49,8 +49,8 @@ func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) 
 }
 
 // ListDomainIPS returns a list of IPs currently assigned to the specified domain.
-func (mg *MailgunImpl) ListDomainIPS(ctx context.Context) ([]IPAddress, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips")
+func (mg *MailgunImpl) ListDomainIPS(ctx context.Context, domain string) ([]IPAddress, error) {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/ips")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -66,8 +66,8 @@ func (mg *MailgunImpl) ListDomainIPS(ctx context.Context) ([]IPAddress, error) {
 }
 
 // Assign a dedicated IP to the domain specified.
-func (mg *MailgunImpl) AddDomainIP(ctx context.Context, ip string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips")
+func (mg *MailgunImpl) AddDomainIP(ctx context.Context, domain, ip string) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/ips")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -78,8 +78,8 @@ func (mg *MailgunImpl) AddDomainIP(ctx context.Context, ip string) error {
 }
 
 // Unassign an IP from the domain specified.
-func (mg *MailgunImpl) DeleteDomainIP(ctx context.Context, ip string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips/" + ip)
+func (mg *MailgunImpl) DeleteDomainIP(ctx context.Context, domain, ip string) error {
+	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/ips/" + ip)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)

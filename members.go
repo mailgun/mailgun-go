@@ -50,11 +50,6 @@ type MemberListIterator struct {
 	err error
 }
 
-// Used by List methods to specify what list parameters to send to the mailgun API
-type ListOptions struct {
-	Limit int
-}
-
 func (mg *MailgunImpl) ListMembers(address string, opts *ListOptions) *MemberListIterator {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, address) + "/pages")
 	r.setClient(mg.Client())

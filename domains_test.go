@@ -17,7 +17,7 @@ const (
 )
 
 func TestListDomains(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -34,7 +34,7 @@ func TestListDomains(t *testing.T) {
 }
 
 func TestGetSingleDomain(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -58,7 +58,7 @@ func TestGetSingleDomain(t *testing.T) {
 }
 
 func TestGetSingleDomainNotExist(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -72,7 +72,7 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 }
 
 func TestAddUpdateDeleteDomain(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -91,7 +91,7 @@ func TestAddUpdateDeleteDomain(t *testing.T) {
 }
 
 func TestDomainConnection(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -112,7 +112,7 @@ func TestDomainConnection(t *testing.T) {
 }
 
 func TestDomainTracking(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -153,7 +153,7 @@ func TestDomainTracking(t *testing.T) {
 }
 
 func TestDomainVerify(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -162,7 +162,7 @@ func TestDomainVerify(t *testing.T) {
 }
 
 func TestDomainVerifyAndReturn(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -171,7 +171,7 @@ func TestDomainVerifyAndReturn(t *testing.T) {
 }
 
 func TestDomainDkimSelector(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -181,7 +181,7 @@ func TestDomainDkimSelector(t *testing.T) {
 }
 
 func TestDomainTrackingWebPrefix(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 

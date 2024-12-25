@@ -14,11 +14,11 @@ import (
 )
 
 func TestGetBounces(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
-	it := mg.ListBounces(nil)
+	it := mg.ListBounces(testDomain, nil)
 
 	var page []mailgun.Bounce
 	for it.Next(ctx, &page) {
@@ -30,13 +30,13 @@ func TestGetBounces(t *testing.T) {
 }
 
 func TestGetSingleBounce(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")),
 		os.Getenv("MG_DOMAIN"))
-	_, err := mg.GetBounce(ctx, exampleEmail)
+	_, err := mg.GetBounce(ctx, testDomain, exampleEmail)
 	require.NotNil(t, err)
 
 	var ure *mailgun.UnexpectedResponseError
@@ -45,12 +45,12 @@ func TestGetSingleBounce(t *testing.T) {
 }
 
 func TestAddDelBounces(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	findBounce := func(address string) bool {
-		it := mg.ListBounces(nil)
+		it := mg.ListBounces(testDomain, nil)
 		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
 			require.True(t, len(page) != 0)
@@ -71,7 +71,7 @@ func TestAddDelBounces(t *testing.T) {
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
 
 	// Add the bounce for our address.
-	err := mg.AddBounce(ctx, exampleEmail, "550", "TestAddDelBounces-generated error")
+	err := mg.AddBounce(ctx, testDomain, exampleEmail, "550", "TestAddDelBounces-generated error")
 	require.NoError(t, err)
 
 	// Give API some time to refresh cache
@@ -82,7 +82,7 @@ func TestAddDelBounces(t *testing.T) {
 		t.Fatalf("Expected bounce for address %s in list of bounces", exampleEmail)
 	}
 
-	bounce, err := mg.GetBounce(ctx, exampleEmail)
+	bounce, err := mg.GetBounce(ctx, testDomain, exampleEmail)
 	require.NoError(t, err)
 	if bounce.Address != exampleEmail {
 		t.Fatalf("Expected at least one bounce for %s", exampleEmail)
@@ -90,7 +90,7 @@ func TestAddDelBounces(t *testing.T) {
 	t.Logf("Bounce Created At: %s", bounce.CreatedAt)
 
 	// Delete it.  This should put us back the way we were.
-	err = mg.DeleteBounce(ctx, exampleEmail)
+	err = mg.DeleteBounce(ctx, testDomain, exampleEmail)
 	require.NoError(t, err)
 
 	// Make sure we're back to the way we were.
@@ -98,18 +98,18 @@ func TestAddDelBounces(t *testing.T) {
 		t.Fatalf("Un-expected bounce for address %s in list of bounces", exampleEmail)
 	}
 
-	_, err = mg.GetBounce(ctx, exampleEmail)
+	_, err = mg.GetBounce(ctx, testDomain, exampleEmail)
 	require.NotNil(t, err)
 }
 
 func TestAddDelBounceList(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
 
 	findBounce := func(address string) bool {
-		it := mg.ListBounces(nil)
+		it := mg.ListBounces(testDomain, nil)
 		var page []mailgun.Bounce
 		for it.Next(ctx, &page) {
 			require.True(t, len(page) != 0)
@@ -147,7 +147,7 @@ func TestAddDelBounceList(t *testing.T) {
 	}
 
 	// Add the bounce for our address.
-	err = mg.AddBounces(ctx, bounces)
+	err = mg.AddBounces(ctx, testDomain, bounces)
 	require.NoError(t, err)
 
 	for _, expect := range bounces {
@@ -155,7 +155,7 @@ func TestAddDelBounceList(t *testing.T) {
 			t.Fatalf("Expected bounce for address %s in list of bounces", expect.Address)
 		}
 
-		bounce, err := mg.GetBounce(ctx, expect.Address)
+		bounce, err := mg.GetBounce(ctx, testDomain, expect.Address)
 		require.NoError(t, err)
 		if bounce.Address != expect.Address {
 			t.Fatalf("Expected at least one bounce for %s", expect.Address)
@@ -167,10 +167,10 @@ func TestAddDelBounceList(t *testing.T) {
 	}
 
 	// Delete the bounce list.  This should put us back the way we were.
-	err = mg.DeleteBounceList(ctx)
+	err = mg.DeleteBounceList(ctx, testDomain)
 	require.NoError(t, err)
 
-	it := mg.ListBounces(nil)
+	it := mg.ListBounces(testDomain, nil)
 	var page []mailgun.Bounce
 	if it.Next(ctx, &page) {
 		t.Fatalf("Expected no item in the bounce list")

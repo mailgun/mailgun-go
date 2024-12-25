@@ -10,7 +10,7 @@ import (
 )
 
 func TestRouteCRUD(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -58,7 +58,7 @@ func TestRouteCRUD(t *testing.T) {
 }
 
 func TestRoutesIterator(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	it := mg.ListRoutes(&mailgun.ListOptions{Limit: 2})

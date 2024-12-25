@@ -121,7 +121,6 @@ const (
 // determine the currently supported feature set.
 type Mailgun interface {
 	APIBase() string
-	Domain() string
 	APIKey() string
 	Client() *http.Client
 	SetClient(client *http.Client)
@@ -132,17 +131,17 @@ type Mailgun interface {
 	Send(ctx context.Context, m SendableMessage) (mes string, id string, err error)
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
 
-	ListBounces(opts *ListOptions) *BouncesIterator
-	GetBounce(ctx context.Context, address string) (Bounce, error)
-	AddBounce(ctx context.Context, address, code, err string) error
-	DeleteBounce(ctx context.Context, address string) error
-	DeleteBounceList(ctx context.Context) error
+	ListBounces(domain string, opts *ListOptions) *BouncesIterator
+	GetBounce(ctx context.Context, domain, address string) (Bounce, error)
+	AddBounce(ctx context.Context, domain, address, code, err string) error
+	DeleteBounce(ctx context.Context, domain, address string) error
+	DeleteBounceList(ctx context.Context, domain string) error
 
 	ListMetrics(opts MetricsOptions) (*MetricsIterator, error)
 
-	GetTag(ctx context.Context, tag string) (Tag, error)
-	DeleteTag(ctx context.Context, tag string) error
-	ListTags(*ListTagOptions) *TagIterator
+	GetTag(ctx context.Context, domain, tag string) (Tag, error)
+	DeleteTag(ctx context.Context, domain, tag string) error
+	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
 	ListDomains(opts *ListOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
@@ -161,22 +160,23 @@ type Mailgun interface {
 	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
 	GetStoredAttachment(ctx context.Context, url string) ([]byte, error)
 
-	ListCredentials(opts *ListOptions) *CredentialsIterator
-	CreateCredential(ctx context.Context, login, password string) error
-	ChangeCredentialPassword(ctx context.Context, login, password string) error
-	DeleteCredential(ctx context.Context, login string) error
+	ListCredentials(domain string, opts *ListOptions) *CredentialsIterator
+	CreateCredential(ctx context.Context, domain, login, password string) error
+	ChangeCredentialPassword(ctx context.Context, domain, login, password string) error
+	DeleteCredential(ctx context.Context, domain, login string) error
 
-	ListUnsubscribes(opts *ListOptions) *UnsubscribesIterator
-	GetUnsubscribe(ctx context.Context, address string) (Unsubscribe, error)
-	CreateUnsubscribe(ctx context.Context, address, tag string) error
-	CreateUnsubscribes(ctx context.Context, unsubscribes []Unsubscribe) error
-	DeleteUnsubscribe(ctx context.Context, address string) error
-	DeleteUnsubscribeWithTag(ctx context.Context, a, t string) error
+	ListUnsubscribes(domain string, opts *ListOptions) *UnsubscribesIterator
+	GetUnsubscribe(ctx context.Context, domain, address string) (Unsubscribe, error)
+	CreateUnsubscribe(ctx context.Context, domain, address, tag string) error
+	CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []Unsubscribe) error
+	DeleteUnsubscribe(ctx context.Context, domain, address string) error
+	DeleteUnsubscribeWithTag(ctx context.Context, domain, a, t string) error
 
-	ListComplaints(opts *ListOptions) *ComplaintsIterator
-	GetComplaint(ctx context.Context, address string) (Complaint, error)
-	CreateComplaint(ctx context.Context, address string) error
-	DeleteComplaint(ctx context.Context, address string) error
+	ListComplaints(domain string, opts *ListOptions) *ComplaintsIterator
+	GetComplaint(ctx context.Context, domain, address string) (Complaint, error)
+	CreateComplaint(ctx context.Context, domain, address string) error
+	CreateComplaints(ctx context.Context, domain string, addresses []string) error
+	DeleteComplaint(ctx context.Context, domain, address string) error
 
 	ListRoutes(opts *ListOptions) *RoutesIterator
 	GetRoute(ctx context.Context, address string) (Route, error)
@@ -184,11 +184,11 @@ type Mailgun interface {
 	DeleteRoute(ctx context.Context, address string) error
 	UpdateRoute(ctx context.Context, address string, r Route) (Route, error)
 
-	ListWebhooks(ctx context.Context) (map[string][]string, error)
-	CreateWebhook(ctx context.Context, kind string, url []string) error
-	DeleteWebhook(ctx context.Context, kind string) error
-	GetWebhook(ctx context.Context, kind string) ([]string, error)
-	UpdateWebhook(ctx context.Context, kind string, url []string) error
+	ListWebhooks(ctx context.Context, domain string) (map[string][]string, error)
+	CreateWebhook(ctx context.Context, domain, kind string, url []string) error
+	DeleteWebhook(ctx context.Context, domain, kind string) error
+	GetWebhook(ctx context.Context, domain, kind string) ([]string, error)
+	UpdateWebhook(ctx context.Context, domain, kind string, url []string) error
 	VerifyWebhookSignature(sig Signature) (verified bool, err error)
 
 	ListMailingLists(opts *ListOptions) *ListsIterator
@@ -204,15 +204,14 @@ type Mailgun interface {
 	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
 	DeleteMember(ctx context.Context, Member, list string) error
 
-	ListEventsWithDomain(opts *ListEventOptions, domain string) *EventIterator
-	ListEvents(*ListEventOptions) *EventIterator
-	PollEvents(*ListEventOptions) *EventPoller
+	ListEvents(domain string, opts *ListEventOptions) *EventIterator
+	PollEvents(domain string, opts *ListEventOptions) *EventPoller
 
 	ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error)
 	GetIP(ctx context.Context, ip string) (IPAddress, error)
-	ListDomainIPS(ctx context.Context) ([]IPAddress, error)
-	AddDomainIP(ctx context.Context, ip string) error
-	DeleteDomainIP(ctx context.Context, ip string) error
+	ListDomainIPS(ctx context.Context, domain string) ([]IPAddress, error)
+	AddDomainIP(ctx context.Context, domain, ip string) error
+	DeleteDomainIP(ctx context.Context, domain, ip string) error
 
 	ListExports(ctx context.Context, url string) ([]Export, error)
 	GetExport(ctx context.Context, id string) (Export, error)
@@ -221,17 +220,17 @@ type Mailgun interface {
 
 	GetTagLimits(ctx context.Context, domain string) (TagLimits, error)
 
-	CreateTemplate(ctx context.Context, template *Template) error
-	GetTemplate(ctx context.Context, name string) (Template, error)
-	UpdateTemplate(ctx context.Context, template *Template) error
-	DeleteTemplate(ctx context.Context, name string) error
-	ListTemplates(opts *ListTemplateOptions) *TemplatesIterator
+	CreateTemplate(ctx context.Context, domain string, template *Template) error
+	GetTemplate(ctx context.Context, domain, name string) (Template, error)
+	UpdateTemplate(ctx context.Context, domain string, template *Template) error
+	DeleteTemplate(ctx context.Context, domain, name string) error
+	ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator
 
-	AddTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
-	GetTemplateVersion(ctx context.Context, templateName, tag string) (TemplateVersion, error)
-	UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
-	DeleteTemplateVersion(ctx context.Context, templateName, tag string) error
-	ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator
+	AddTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error
+	GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (TemplateVersion, error)
+	UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error
+	DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error
+	ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
@@ -247,7 +246,6 @@ type Mailgun interface {
 // Colloquially, we refer to instances of this structure as "clients."
 type MailgunImpl struct {
 	apiBase           string
-	domain            string
 	apiKey            string
 	webhookSigningKey string
 	client            *http.Client
@@ -255,11 +253,10 @@ type MailgunImpl struct {
 	overrideHeaders   map[string]string
 }
 
-// NewMailGun creates a new client instance.
-func NewMailgun(domain, apiKey string) *MailgunImpl {
+// NewMailgun creates a new client instance.
+func NewMailgun(apiKey string) *MailgunImpl {
 	return &MailgunImpl{
 		apiBase: APIBase,
-		domain:  domain,
 		apiKey:  apiKey,
 		client:  http.DefaultClient,
 	}
@@ -272,12 +269,8 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 	if apiKey == "" {
 		return nil, errors.New("required environment variable MG_API_KEY not defined")
 	}
-	domain := os.Getenv("MG_DOMAIN")
-	if domain == "" {
-		return nil, errors.New("required environment variable MG_DOMAIN not defined")
-	}
 
-	mg := NewMailgun(domain, apiKey)
+	mg := NewMailgun(apiKey)
 
 	url := os.Getenv("MG_URL")
 	if url != "" {
@@ -297,12 +290,7 @@ func (mg *MailgunImpl) APIBase() string {
 	return mg.apiBase
 }
 
-// Domain returns the domain configured for this client.
-func (mg *MailgunImpl) Domain() string {
-	return mg.domain
-}
-
-// ApiKey returns the API key configured for this client.
+// APIKey returns the API key configured for this client.
 func (mg *MailgunImpl) APIKey() string {
 	return mg.apiKey
 }
@@ -365,9 +353,16 @@ func (mg *MailgunImpl) AddOverrideHeader(k, v string) {
 	mg.overrideHeaders[k] = v
 }
 
+// ListOptions used by List methods to specify what list parameters to send to the mailgun API
+type ListOptions struct {
+	Limit int
+}
+
+// TODO(v5): keep either generateApiUrl or generateApiUrlWithDomain
+
 // generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
-func generateApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/%s/%s", m.APIBase(), m.Domain(), endpoint)
+func generateApiUrl(m Mailgun, endpoint, domain string) string {
+	return fmt.Sprintf("%s/%s/%s", m.APIBase(), domain, endpoint)
 }
 
 // generateApiUrlWithDomain renders a URL for an API endpoint using a separate domain and endpoint name.
@@ -381,32 +376,32 @@ func generateMemberApiUrl(m Mailgun, endpoint, address string) string {
 	return fmt.Sprintf("%s/%s/%s/members", m.APIBase(), endpoint, address)
 }
 
-// generateApiUrlWithTarget works as generateApiUrl,
+// generateApiUrlWithTarget works as generateApiUrl
 // but consumes an additional resource parameter called 'target'.
-func generateApiUrlWithTarget(m Mailgun, endpoint, target string) string {
+func generateApiUrlWithTarget(m Mailgun, endpoint, domain, target string) string {
 	tail := ""
 	if target != "" {
 		tail = fmt.Sprintf("/%s", target)
 	}
-	return fmt.Sprintf("%s%s", generateApiUrl(m, endpoint), tail)
+	return fmt.Sprintf("%s%s", generateApiUrl(m, endpoint, domain), tail)
 }
 
 // generateDomainApiUrl renders a URL as generateApiUrl, but
 // addresses a family of functions which have a non-standard URL structure.
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.
-func generateDomainApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/domains/%s/%s", m.APIBase(), m.Domain(), endpoint)
+func generateDomainApiUrl(m Mailgun, endpoint, domain string) string {
+	return fmt.Sprintf("%s/domains/%s/%s", m.APIBase(), domain, endpoint)
 }
 
 // generateCredentialsUrl renders a URL as generateDomainApiUrl,
 // but focuses on the SMTP credentials family of API functions.
-func generateCredentialsUrl(m Mailgun, login string) string {
+func generateCredentialsUrl(m Mailgun, domain, login string) string {
 	tail := ""
 	if login != "" {
 		tail = fmt.Sprintf("/%s", login)
 	}
-	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail))
+	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
 }
 
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.

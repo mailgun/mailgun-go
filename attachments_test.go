@@ -26,7 +26,7 @@ func createAttachment(t *testing.T) string {
 }
 
 func TestMultipleAttachments(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	var ctx = context.Background()
@@ -56,7 +56,7 @@ func TestMultipleAttachments(t *testing.T) {
 }
 
 func findAcceptedMessage(mg mailgun.Mailgun, id string) (*events.Accepted, error) {
-	it := mg.ListEvents(nil)
+	it := mg.ListEvents(testDomain, nil)
 
 	var page []mailgun.Event
 	for it.Next(context.Background(), &page) {

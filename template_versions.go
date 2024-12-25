@@ -23,8 +23,8 @@ type templateVersionListResp struct {
 }
 
 // AddTemplateVersion adds a template version to a template
-func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions")
+func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -53,8 +53,8 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateName stri
 }
 
 // GetTemplateVersion gets a specific version of a template
-func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateName, tag string) (TemplateVersion, error) {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + tag)
+func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (TemplateVersion, error) {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -67,8 +67,8 @@ func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateName, tag
 }
 
 // Update the comment and mark a version of a template active
-func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + version.Tag)
+func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + version.Tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -93,8 +93,8 @@ func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateName s
 }
 
 // Delete a specific version of a template
-func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, templateName, tag string) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + tag)
+func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -107,9 +107,9 @@ type TemplateVersionsIterator struct {
 	err error
 }
 
-// List all the versions of a specific template
-func (mg *MailgunImpl) ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions")
+// ListTemplateVersions lists all the versions of a specific template
+func (mg *MailgunImpl) ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator {
+	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {

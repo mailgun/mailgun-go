@@ -17,7 +17,7 @@ const (
 )
 
 func TestListSubaccounts(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	iterator := mg.ListSubaccounts(nil)
@@ -37,7 +37,7 @@ func TestListSubaccounts(t *testing.T) {
 }
 
 func TestSubaccountDetails(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -55,7 +55,7 @@ func TestSubaccountDetails(t *testing.T) {
 }
 
 func TestSubaccountDetailsStatusNotFound(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -70,7 +70,7 @@ func TestSubaccountDetailsStatusNotFound(t *testing.T) {
 }
 
 func TestCreateSubaccount(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -81,7 +81,7 @@ func TestCreateSubaccount(t *testing.T) {
 }
 
 func TestEnableSubaccountAlreadyEnabled(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -91,7 +91,7 @@ func TestEnableSubaccountAlreadyEnabled(t *testing.T) {
 }
 
 func TestEnableSubaccount(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -102,7 +102,7 @@ func TestEnableSubaccount(t *testing.T) {
 }
 
 func TestDisableSubaccount(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -113,7 +113,7 @@ func TestDisableSubaccount(t *testing.T) {
 }
 
 func TestDisableSubaccountAlreadyDisabled(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()

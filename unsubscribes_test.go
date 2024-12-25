@@ -10,14 +10,14 @@ import (
 )
 
 func TestCreateUnsubscriber(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
 	ctx := context.Background()
 
 	// Create unsubscription record
-	require.NoError(t, mg.CreateUnsubscribe(ctx, email, "*"))
+	require.NoError(t, mg.CreateUnsubscribe(ctx, testDomain, email, "*"))
 }
 
 func TestCreateUnsubscribes(t *testing.T) {
@@ -30,20 +30,20 @@ func TestCreateUnsubscribes(t *testing.T) {
 			Tags:    []string{"tag1"},
 		},
 	}
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
 	// Create unsubscription records
-	require.NoError(t, mg.CreateUnsubscribes(ctx, unsubscribes))
+	require.NoError(t, mg.CreateUnsubscribes(ctx, testDomain, unsubscribes))
 }
 
 func TestListUnsubscribes(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
-	it := mg.ListUnsubscribes(nil)
+	it := mg.ListUnsubscribes(testDomain, nil)
 	var page []mailgun.Unsubscribe
 	for it.Next(ctx, &page) {
 		t.Logf("Received %d unsubscribe records.\n", len(page))
@@ -58,7 +58,7 @@ func TestListUnsubscribes(t *testing.T) {
 }
 
 func TestGetUnsubscribe(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
@@ -66,18 +66,18 @@ func TestGetUnsubscribe(t *testing.T) {
 	ctx := context.Background()
 
 	// Create unsubscription record
-	require.NoError(t, mg.CreateUnsubscribe(ctx, email, "*"))
+	require.NoError(t, mg.CreateUnsubscribe(ctx, testDomain, email, "*"))
 
-	u, err := mg.GetUnsubscribe(ctx, email)
+	u, err := mg.GetUnsubscribe(ctx, testDomain, email)
 	require.NoError(t, err)
 	t.Logf("%s\t%s\t%s\t%s\t\n", u.ID, u.Address, u.CreatedAt, u.Tags)
 
 	// Destroy the unsubscription record
-	require.NoError(t, mg.DeleteUnsubscribe(ctx, email))
+	require.NoError(t, mg.DeleteUnsubscribe(ctx, testDomain, email))
 }
 
 func TestCreateDestroyUnsubscription(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
@@ -85,11 +85,11 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 	ctx := context.Background()
 
 	// Create unsubscription record
-	require.NoError(t, mg.CreateUnsubscribe(ctx, email, "*"))
+	require.NoError(t, mg.CreateUnsubscribe(ctx, testDomain, email, "*"))
 
-	_, err := mg.GetUnsubscribe(ctx, email)
+	_, err := mg.GetUnsubscribe(ctx, testDomain, email)
 	require.NoError(t, err)
 
 	// Destroy the unsubscription record
-	require.NoError(t, mg.DeleteUnsubscribe(ctx, email))
+	require.NoError(t, mg.DeleteUnsubscribe(ctx, testDomain, email))
 }

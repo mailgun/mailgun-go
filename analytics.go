@@ -31,17 +31,6 @@ func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error
 		return nil, errors.New("only v1 API is supported")
 	}
 
-	domain := mg.Domain()
-	if domain != "" {
-		domainFilter := MetricsFilterPredicate{
-			Attribute:     "domain",
-			Comparator:    "=",
-			LabeledValues: []MetricsLabeledValue{{Label: domain, Value: domain}},
-		}
-
-		opts.Filter.BoolGroupAnd = append(opts.Filter.BoolGroupAnd, domainFilter)
-	}
-
 	if opts.Pagination.Limit == 0 {
 		opts.Pagination.Limit = 10
 	}

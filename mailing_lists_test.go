@@ -11,7 +11,7 @@ import (
 )
 
 func TestMailingListMembers(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 
 	ctx := context.Background()
@@ -95,7 +95,7 @@ func TestMailingListMembers(t *testing.T) {
 }
 
 func TestMailingLists(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 
@@ -151,7 +151,7 @@ func TestMailingLists(t *testing.T) {
 }
 
 func TestListMailingListRegression(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase(server.URL())
 	ctx := context.Background()
 	address := "test@example.com"

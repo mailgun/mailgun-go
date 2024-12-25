@@ -23,7 +23,7 @@ type credentialsListResponse struct {
 var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
 
 // ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) ListCredentials(opts *ListOptions) *CredentialsIterator {
+func (mg *MailgunImpl) ListCredentials(domain string, opts *ListOptions) *CredentialsIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
@@ -34,7 +34,7 @@ func (mg *MailgunImpl) ListCredentials(opts *ListOptions) *CredentialsIterator {
 	}
 	return &CredentialsIterator{
 		mg:                      mg,
-		url:                     generateCredentialsUrl(mg, ""),
+		url:                     generateCredentialsUrl(mg, domain, ""),
 		credentialsListResponse: credentialsListResponse{TotalCount: -1},
 		limit:                   limit,
 	}
@@ -174,11 +174,11 @@ func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.
-func (mg *MailgunImpl) CreateCredential(ctx context.Context, login, password string) error {
+func (mg *MailgunImpl) CreateCredential(ctx context.Context, domain, login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
+	r := newHTTPRequest(generateCredentialsUrl(mg, domain, ""))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -189,11 +189,11 @@ func (mg *MailgunImpl) CreateCredential(ctx context.Context, login, password str
 }
 
 // ChangeCredentialPassword attempts to alter the indicated credential's password.
-func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, login, password string) error {
+func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, domain, login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, login))
+	r := newHTTPRequest(generateCredentialsUrl(mg, domain, login))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -203,11 +203,11 @@ func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, login, pass
 }
 
 // DeleteCredential attempts to remove the indicated principle from the domain.
-func (mg *MailgunImpl) DeleteCredential(ctx context.Context, login string) error {
+func (mg *MailgunImpl) DeleteCredential(ctx context.Context, domain, login string) error {
 	if login == "" {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, login))
+	r := newHTTPRequest(generateCredentialsUrl(mg, domain, login))
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)

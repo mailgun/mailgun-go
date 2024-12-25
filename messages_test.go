@@ -309,7 +309,7 @@ func TestSendMGOffline(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
@@ -342,7 +342,7 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	ctx := context.Background()
@@ -396,7 +396,7 @@ func TestSendMGMessageVariables(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
@@ -468,7 +468,7 @@ func TestSendDomainError(t *testing.T) {
 
 	for _, c := range cases {
 		ctx := context.Background()
-		mg := mailgun.NewMailgun(c.domain, exampleAPIKey)
+		mg := mailgun.NewMailgun(exampleAPIKey)
 		mg.SetAPIBase(srv.URL + "/v3")
 		m := mailgun.NewMessage(c.domain, fromUser, exampleSubject, exampleText, "test@test.com")
 
@@ -493,7 +493,7 @@ func TestSendEOFError(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
@@ -518,7 +518,7 @@ func TestHasRecipient(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	// No recipient
@@ -557,7 +557,7 @@ func TestResendStored(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 
 	_, _, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
@@ -589,7 +589,7 @@ func TestAddOverrideHeader(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	mg.AddOverrideHeader("Host", "example.com")
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
@@ -625,7 +625,7 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	mg.AddOverrideHeader("Host", "example.com")
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
@@ -664,7 +664,7 @@ func TestSendTLSOptions(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
@@ -694,7 +694,7 @@ func TestSendTemplate(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
@@ -727,7 +727,7 @@ func TestSendTemplateOptions(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	mg := mailgun.NewMailgun(exampleDomain, exampleAPIKey)
+	mg := mailgun.NewMailgun(exampleAPIKey)
 	mg.SetAPIBase(srv.URL + "/v3")
 	ctx := context.Background()
 
