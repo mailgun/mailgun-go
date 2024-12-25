@@ -263,7 +263,7 @@ func NewMailgun(apiKey string) *MailgunImpl {
 }
 
 // NewMailgunFromEnv returns a new Mailgun client using the environment variables
-// MG_API_KEY, MG_DOMAIN, MG_URL, and MG_WEBHOOK_SIGNING_KEY
+// MG_API_KEY, MG_URL, and MG_WEBHOOK_SIGNING_KEY
 func NewMailgunFromEnv() (*MailgunImpl, error) {
 	apiKey := os.Getenv("MG_API_KEY")
 	if apiKey == "" {
