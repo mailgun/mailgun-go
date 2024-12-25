@@ -389,7 +389,6 @@ mg.SetAPIBase(mailgun.APIBaseEU)
 To run the tests various environment variables must be set. These are:
 
 * `MG_DOMAIN` is the domain name - this is a value registered in the Mailgun admin interface.
-* `MG_PUBLIC_API_KEY` is the Public Validation API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/settings/api_security)
 * `MG_API_KEY` is the Private API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/settings/api_security)
 * `MG_EMAIL_TO` is the email address used in various sending tests.
 
