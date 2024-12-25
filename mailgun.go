@@ -381,22 +381,22 @@ func generateApiUrlWithTarget(m Mailgun, endpoint, domain, target string) string
 	return fmt.Sprintf("%s%s", generateApiUrlWithDomain(m, endpoint, domain), tail)
 }
 
-// generateDomainApiUrl renders a URL as generateApiUrlWithDomain, but
+// generateDomainsApiUrl renders a URL as generateApiUrlWithDomain, but
 // addresses a family of functions which have a non-standard URL structure.
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.
-func generateDomainApiUrl(m Mailgun, endpoint, domain string) string {
+func generateDomainsApiUrl(m Mailgun, endpoint, domain string) string {
 	return fmt.Sprintf("%s/domains/%s/%s", m.APIBase(), domain, endpoint)
 }
 
-// generateCredentialsUrl renders a URL as generateDomainApiUrl,
+// generateCredentialsUrl renders a URL as generateDomainsApiUrl,
 // but focuses on the SMTP credentials family of API functions.
 func generateCredentialsUrl(m Mailgun, domain, login string) string {
 	tail := ""
 	if login != "" {
 		tail = fmt.Sprintf("/%s", login)
 	}
-	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
+	return generateDomainsApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
 }
 
 // generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
