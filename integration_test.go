@@ -21,6 +21,9 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 		require.NoError(t, err)
 	}
 
+	domain := os.Getenv("MG_DOMAIN")
+	require.NotEmpty(t, domain)
+
 	opts := mailgun.MetricsOptions{
 		End:      mailgun.RFC2822Time(time.Now().UTC()),
 		Duration: "30d",
@@ -28,6 +31,12 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 			Limit: 10,
 		},
 	}
+	// filter by domain
+	opts.Filter.BoolGroupAnd = []mailgun.MetricsFilterPredicate{{
+		Attribute:     "domain",
+		Comparator:    "=",
+		LabeledValues: []mailgun.MetricsLabeledValue{{Label: domain, Value: domain}},
+	}}
 
 	iter, err := mg.ListMetrics(opts)
 	require.NoError(t, err)
