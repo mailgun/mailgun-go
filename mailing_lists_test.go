@@ -11,8 +11,8 @@ import (
 )
 
 func TestMailingListMembers(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	address := randomEmail("list", testDomain)
@@ -95,8 +95,8 @@ func TestMailingListMembers(t *testing.T) {
 }
 
 func TestMailingLists(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	address := randomEmail("list", testDomain)
@@ -151,8 +151,8 @@ func TestMailingLists(t *testing.T) {
 }
 
 func TestListMailingListRegression(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 	address := "test@example.com"
 

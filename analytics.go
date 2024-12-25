@@ -22,6 +22,14 @@ type MetricsPagination struct {
 
 // ListMetrics returns domain/account metrics.
 //
+// To filter by domain:
+//
+//	opts.Filter.BoolGroupAnd = []mailgun.MetricsFilterPredicate{{
+//		Attribute:     "domain",
+//		Comparator:    "=",
+//		LabeledValues: []mailgun.MetricsLabeledValue{{Label: "example.com", Value: "example.com"}},
+//	}}
+//
 // NOTE: Only for v1 API. To use the /v1 version define MG_URL in the environment variable
 // as `https://api.mailgun.net/v1` or set `mg.SetAPIBase("https://api.mailgun.net/v1")`
 //
@@ -31,23 +39,12 @@ func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error
 		return nil, errors.New("only v1 API is supported")
 	}
 
-	domain := mg.Domain()
-	if domain != "" {
-		domainFilter := MetricsFilterPredicate{
-			Attribute:     "domain",
-			Comparator:    "=",
-			LabeledValues: []MetricsLabeledValue{{Label: domain, Value: domain}},
-		}
-
-		opts.Filter.BoolGroupAnd = append(opts.Filter.BoolGroupAnd, domainFilter)
-	}
-
 	if opts.Pagination.Limit == 0 {
 		opts.Pagination.Limit = 10
 	}
 
-	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
-	req.setClient(mg.Client())
+	req := newHTTPRequest(generateApiUrl(mg, metricsEndpoint))
+	req.setClient(mg.HTTPClient())
 	req.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	return &MetricsIterator{

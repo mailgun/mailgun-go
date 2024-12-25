@@ -9,8 +9,8 @@ type TagLimits struct {
 
 // GetTagLimits returns tracking settings for a domain
 func (mg *MailgunImpl) GetTagLimits(ctx context.Context, domain string) (TagLimits, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/limits/tag")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/limits/tag")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp TagLimits
 	err := getResponseFromJSON(ctx, r, &resp)

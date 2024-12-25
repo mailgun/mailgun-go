@@ -10,12 +10,12 @@ import (
 )
 
 func TestTemplateVersionsCRUD(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	findVersion := func(templateName, tag string) bool {
-		it := mg.ListTemplateVersions(templateName, nil)
+		it := mg.ListTemplateVersions(testDomain, templateName, nil)
 
 		var page []mailgun.TemplateVersion
 		for it.Next(ctx, &page) {
@@ -41,7 +41,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	}
 
 	// Create a template
-	require.NoError(t, mg.CreateTemplate(ctx, &tmpl))
+	require.NoError(t, mg.CreateTemplate(ctx, testDomain, &tmpl))
 
 	version := mailgun.TemplateVersion{
 		Tag:      Tag,
@@ -52,7 +52,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	}
 
 	// Add a version version
-	require.NoError(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version))
+	require.NoError(t, mg.AddTemplateVersion(ctx, testDomain, tmpl.Name, &version))
 	assert.Equal(t, Tag, version.Tag)
 	assert.Equal(t, Comment, version.Comment)
 	assert.Equal(t, mailgun.TemplateEngineGo, version.Engine)
@@ -63,10 +63,10 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	// Update the Comment
 	version.Comment = UpdatedComment
 	version.Template = Template + "updated"
-	require.NoError(t, mg.UpdateTemplateVersion(ctx, tmpl.Name, &version))
+	require.NoError(t, mg.UpdateTemplateVersion(ctx, testDomain, tmpl.Name, &version))
 
 	// Ensure update took
-	updated, err := mg.GetTemplateVersion(ctx, tmpl.Name, version.Tag)
+	updated, err := mg.GetTemplateVersion(ctx, testDomain, tmpl.Name, version.Tag)
 
 	require.NoError(t, err)
 	assert.Equal(t, UpdatedComment, updated.Comment)
@@ -80,17 +80,17 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 		Active:   true,
 		Engine:   mailgun.TemplateEngineGo,
 	}
-	require.NoError(t, mg.AddTemplateVersion(ctx, tmpl.Name, &version2))
+	require.NoError(t, mg.AddTemplateVersion(ctx, testDomain, tmpl.Name, &version2))
 
 	// Ensure the version is in the list
 	require.True(t, findVersion(tmpl.Name, version2.Tag))
 
 	// Delete the first version
-	require.NoError(t, mg.DeleteTemplateVersion(ctx, tmpl.Name, version.Tag))
+	require.NoError(t, mg.DeleteTemplateVersion(ctx, testDomain, tmpl.Name, version.Tag))
 
 	// Ensure version was deleted
 	require.False(t, findVersion(tmpl.Name, version.Tag))
 
 	// Delete the template
-	require.NoError(t, mg.DeleteTemplate(ctx, tmpl.Name))
+	require.NoError(t, mg.DeleteTemplate(ctx, testDomain, tmpl.Name))
 }

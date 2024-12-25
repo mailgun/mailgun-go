@@ -183,7 +183,7 @@ func (ri *SubaccountsIterator) fetch(ctx context.Context, skip, limit int) error
 	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
-	r.setClient(ri.mg.Client())
+	r.setClient(ri.mg.HTTPClient())
 
 	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))

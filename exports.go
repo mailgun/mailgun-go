@@ -19,8 +19,8 @@ type Export struct {
 
 // Create an export based on the URL given
 func (mg *MailgunImpl) CreateExport(ctx context.Context, url string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, exportsEndpoint))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -31,8 +31,8 @@ func (mg *MailgunImpl) CreateExport(ctx context.Context, url string) error {
 
 // List all exports created within the past 24 hours
 func (mg *MailgunImpl) ListExports(ctx context.Context, url string) ([]Export, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, exportsEndpoint))
+	r.setClient(mg.HTTPClient())
 	if url != "" {
 		r.addParameter("url", url)
 	}
@@ -52,8 +52,8 @@ func (mg *MailgunImpl) ListExports(ctx context.Context, url string) ([]Export, e
 
 // GetExport gets an export by id
 func (mg *MailgunImpl) GetExport(ctx context.Context, id string) (Export, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint) + "/" + id)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, exportsEndpoint) + "/" + id)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp Export
 	err := getResponseFromJSON(ctx, r, &resp)
@@ -63,15 +63,15 @@ func (mg *MailgunImpl) GetExport(ctx context.Context, id string) (Export, error)
 // Download an export by ID. This will respond with a '302 Moved'
 // with the Location header of temporary S3 URL if it is available.
 func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, exportsEndpoint) + "/" + id + "/download_url")
-	c := mg.Client()
+	r := newHTTPRequest(generateApiUrl(mg, exportsEndpoint) + "/" + id + "/download_url")
+	c := mg.HTTPClient()
 
 	// Ensure the client doesn't attempt to retry
 	c.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
 		return errors.New("redirect")
 	}
 
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	r.addHeader("User-Agent", MailgunGoUserAgent)

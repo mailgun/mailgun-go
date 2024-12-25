@@ -83,6 +83,7 @@ type EmailValidator interface {
 	ParseAddresses(ctx context.Context, addresses ...string) ([]string, []string, error)
 }
 
+// TODO(v5): switch to MailgunImpl
 type EmailValidatorImpl struct {
 	client  *http.Client
 	apiBase string
@@ -145,7 +146,7 @@ func (m *EmailValidatorImpl) APIKey() string {
 
 // ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.
 // It may also be used to break an email address into its sub-components. If user has set the
-// TODO(DE-1384): move to *MailgunImpl?
+// TODO(v5): move to *MailgunImpl?
 func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
 	// TODO(DE-1383): remove check:
 	if strings.HasSuffix(m.APIBase(), "/v4") {

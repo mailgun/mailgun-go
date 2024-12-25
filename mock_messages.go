@@ -34,7 +34,7 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		stored.Name = events.EventStored
 		stored.Timestamp = TimeToFloat(time.Now().UTC())
 		stored.ID = id
-		stored.Storage.URL = ms.URL() + "/se.storage.url/messages/" + id
+		stored.Storage.URL = ms.URL3() + "/se.storage.url/messages/" + id
 		stored.Storage.Key = id
 		stored.Message.Headers = events.MessageHeaders{
 			Subject:   r.FormValue("subject"),

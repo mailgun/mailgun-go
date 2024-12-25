@@ -13,8 +13,8 @@ import (
 )
 
 func TestStorage(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	mg.SetAPIBase(server.URL3())
 
 	var ctx = context.Background()
 
@@ -40,7 +40,7 @@ func TestStorage(t *testing.T) {
 
 // Tries to locate the first stored event type, returning the associated stored message key.
 func findStoredMessageURL(mg mailgun.Mailgun, id string) (string, error) {
-	it := mg.ListEvents(nil)
+	it := mg.ListEvents(testDomain, nil)
 
 	var page []mailgun.Event
 	for it.Next(context.Background(), &page) {

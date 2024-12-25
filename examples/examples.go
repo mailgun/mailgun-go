@@ -11,30 +11,30 @@ import (
 )
 
 func AddBounce(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.AddBounce(ctx, "bob@example.com", "550", "Undeliverable message error")
+	return mg.AddBounce(ctx, domain, "bob@example.com", "550", "Undeliverable message error")
 }
 
 func CreateComplaint(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateComplaint(ctx, "bob@example.com")
+	return mg.CreateComplaint(ctx, domain, "bob@example.com")
 }
 
 func AddDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateDomain(ctx, "example.com", &mailgun.CreateDomainOptions{
+	return mg.CreateDomain(ctx, domain, &mailgun.CreateDomainOptions{
 		Password:   "super_secret",
 		SpamAction: mailgun.SpamActionTag,
 		Wildcard:   false,
@@ -42,16 +42,16 @@ func AddDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
 }
 
 func AddDomainIPS(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.AddDomainIP(ctx, "127.0.0.1")
+	return mg.AddDomainIP(ctx, domain, "127.0.0.1")
 }
 
-func AddListMember(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func AddListMember(apiKey string) error {
+	mg := mailgun.NewMailgun(apiKey)
 
 	memberJoe := mailgun.Member{
 		Address:    "joe@example.com",
@@ -65,8 +65,8 @@ func AddListMember(domain, apiKey string) error {
 	return mg.CreateMember(ctx, true, "mailingList@example.com", memberJoe)
 }
 
-func AddListMembers(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func AddListMembers(apiKey string) error {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -94,16 +94,16 @@ func AddListMembers(domain, apiKey string) error {
 }
 
 func CreateUnsubscribe(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateUnsubscribe(ctx, "bob@example.com", "*")
+	return mg.CreateUnsubscribe(ctx, domain, "bob@example.com", "*")
 }
 
 func CreateUnsubscribes(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -113,60 +113,60 @@ func CreateUnsubscribes(domain, apiKey string) error {
 		{Address: "bob@example.com", Tags: []string{"tag1"}},
 	}
 
-	return mg.CreateUnsubscribes(ctx, unsubscribes)
+	return mg.CreateUnsubscribes(ctx, domain, unsubscribes)
 }
 
 func CreateUnsubscribeWithTag(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateUnsubscribe(ctx, "bob@example.com", "tag1")
+	return mg.CreateUnsubscribe(ctx, domain, "bob@example.com", "tag1")
 }
 
 func CreateWebhook(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateWebhook(ctx, "clicked", []string{"https://your_domain.com/v1/clicked"})
+	return mg.CreateWebhook(ctx, domain, "clicked", []string{"https://your_domain.com/v1/clicked"})
 }
 
 func ChangePassword(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.ChangeCredentialPassword(ctx, "alice", "super_secret")
+	return mg.ChangeCredentialPassword(ctx, domain, "alice", "super_secret")
 }
 
 func CreateCredential(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateCredential(ctx, "alice@example.com", "secret")
+	return mg.CreateCredential(ctx, domain, "alice@example.com", "secret")
 }
 
 func CreateDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateDomain(ctx, "example.com", &mailgun.CreateDomainOptions{
+	return mg.CreateDomain(ctx, domain, &mailgun.CreateDomainOptions{
 		Password:   "super_secret",
 		SpamAction: mailgun.SpamActionTag,
 		Wildcard:   false,
 	})
 }
 
-func CreateExport(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func CreateExport(apiKey string) error {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -174,8 +174,8 @@ func CreateExport(domain, apiKey string) error {
 	return mg.CreateExport(ctx, "/v3/domains")
 }
 
-func CreateMailingList(domain, apiKey string) (mailgun.MailingList, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func CreateMailingList(apiKey string) (mailgun.MailingList, error) {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -189,7 +189,7 @@ func CreateMailingList(domain, apiKey string) (mailgun.MailingList, error) {
 }
 
 func CreateRoute(domain, apiKey string) (mailgun.Route, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -206,46 +206,46 @@ func CreateRoute(domain, apiKey string) (mailgun.Route, error) {
 }
 
 func DeleteCredential(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.DeleteCredential(ctx, "alice")
+	return mg.DeleteCredential(ctx, domain, "alice")
 }
 
 func DeleteDomain(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.DeleteDomain(ctx, "example.com")
+	return mg.DeleteDomain(ctx, domain)
 }
 
 func DeleteTag(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.DeleteTag(ctx, "newsletter")
+	return mg.DeleteTag(ctx, domain, "newsletter")
 }
 
 func DeleteWebhook(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.DeleteWebhook(ctx, "clicked")
+	return mg.DeleteWebhook(ctx, domain, "clicked")
 }
 
 func PrintEventLog(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	// Create an iterator
-	it := mg.ListEvents(&mailgun.ListEventOptions{
+	it := mg.ListEvents(domain, &mailgun.ListEventOptions{
 		Begin: time.Now().Add(-50 * time.Minute),
 		Limit: 100,
 		Filter: map[string]string{
@@ -273,10 +273,10 @@ func PrintEventLog(domain, apiKey string) error {
 }
 
 func PrintFailedEvents(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	// Create an iterator
-	it := mg.ListEvents(&mailgun.ListEventOptions{
+	it := mg.ListEvents(domain, &mailgun.ListEventOptions{
 		Filter: map[string]string{
 			"event": "rejected OR failed",
 		},
@@ -306,10 +306,10 @@ func PrintFailedEvents(domain, apiKey string) error {
 }
 
 func PrintEvents(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	// Create an iterator
-	it := mg.ListEvents(nil)
+	it := mg.ListEvents(domain, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -337,17 +337,17 @@ func PrintEvents(domain, apiKey string) error {
 }
 
 func GetBounce(domain, apiKey string) (mailgun.Bounce, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.GetBounce(ctx, "foo@bar.com")
+	return mg.GetBounce(ctx, domain, "foo@bar.com")
 }
 
 func ListBounces(domain, apiKey string) ([]mailgun.Bounce, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListBounces(nil)
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListBounces(domain, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -364,17 +364,17 @@ func ListBounces(domain, apiKey string) ([]mailgun.Bounce, error) {
 }
 
 func GetComplaints(domain, apiKey string) (mailgun.Complaint, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.GetComplaint(ctx, "baz@example.com")
+	return mg.GetComplaint(ctx, domain, "baz@example.com")
 }
 
 func ListComplaints(domain, apiKey string) ([]mailgun.Complaint, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListComplaints(nil)
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListComplaints(domain, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -391,7 +391,7 @@ func ListComplaints(domain, apiKey string) ([]mailgun.Complaint, error) {
 }
 
 func GetDomainConnection(domain, apiKey string) (mailgun.DomainConnection, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -400,8 +400,8 @@ func GetDomainConnection(domain, apiKey string) (mailgun.DomainConnection, error
 }
 
 func ListCredentials(domain, apiKey string) ([]mailgun.Credential, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListCredentials(nil)
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListCredentials(domain, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -418,7 +418,7 @@ func ListCredentials(domain, apiKey string) ([]mailgun.Credential, error) {
 }
 
 func GetDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -427,16 +427,16 @@ func GetDomain(domain, apiKey string) (mailgun.DomainResponse, error) {
 }
 
 func ListDomainIPS(domain, apiKey string) ([]mailgun.IPAddress, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.ListDomainIPS(ctx)
+	return mg.ListDomainIPS(ctx, domain)
 }
 
 func GetDomainTracking(domain, apiKey string) (mailgun.DomainTracking, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -445,7 +445,7 @@ func GetDomainTracking(domain, apiKey string) (mailgun.DomainTracking, error) {
 }
 
 func ListDomains(domain, apiKey string) ([]mailgun.Domain, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	it := mg.ListDomains(nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -463,7 +463,7 @@ func ListDomains(domain, apiKey string) ([]mailgun.Domain, error) {
 }
 
 func GetExport(domain, apiKey string) (mailgun.Export, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -472,7 +472,7 @@ func GetExport(domain, apiKey string) (mailgun.Export, error) {
 }
 
 func GetIP(domain, apiKey string) (mailgun.IPAddress, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -481,7 +481,7 @@ func GetIP(domain, apiKey string) (mailgun.IPAddress, error) {
 }
 
 func ListIPS(domain, apiKey string) ([]mailgun.IPAddress, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -491,7 +491,7 @@ func ListIPS(domain, apiKey string) ([]mailgun.IPAddress, error) {
 }
 
 func GetTagLimits(domain, apiKey string) (mailgun.TagLimits, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -499,8 +499,8 @@ func GetTagLimits(domain, apiKey string) (mailgun.TagLimits, error) {
 	return mg.GetTagLimits(ctx, domain)
 }
 
-func ListExports(domain, apiKey string) ([]mailgun.Export, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func ListExports(apiKey string) ([]mailgun.Export, error) {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -509,8 +509,8 @@ func ListExports(domain, apiKey string) ([]mailgun.Export, error) {
 	return mg.ListExports(ctx, "")
 }
 
-func GetMembers(domain, apiKey string) ([]mailgun.Member, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func GetMembers(apiKey string) ([]mailgun.Member, error) {
+	mg := mailgun.NewMailgun(apiKey)
 	it := mg.ListMembers("list@example.com", nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -527,8 +527,8 @@ func GetMembers(domain, apiKey string) ([]mailgun.Member, error) {
 	return result, nil
 }
 
-func ListMailingLists(domain, apiKey string) ([]mailgun.MailingList, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func ListMailingLists(apiKey string) ([]mailgun.MailingList, error) {
+	mg := mailgun.NewMailgun(apiKey)
 	it := mg.ListMailingLists(nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -546,7 +546,7 @@ func ListMailingLists(domain, apiKey string) ([]mailgun.MailingList, error) {
 }
 
 func GetRoute(domain, apiKey string) (mailgun.Route, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -555,7 +555,7 @@ func GetRoute(domain, apiKey string) (mailgun.Route, error) {
 }
 
 func ListRoutes(domain, apiKey string) ([]mailgun.Route, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	it := mg.ListRoutes(nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -573,8 +573,8 @@ func ListRoutes(domain, apiKey string) ([]mailgun.Route, error) {
 }
 
 func ListTags(domain, apiKey string) ([]mailgun.Tag, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListTags(nil)
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListTags(domain, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -591,8 +591,8 @@ func ListTags(domain, apiKey string) ([]mailgun.Tag, error) {
 }
 
 func ListUnsubscribes(domain, apiKey string) ([]mailgun.Unsubscribe, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListUnsubscribes(nil)
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListUnsubscribes(domain, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -618,34 +618,34 @@ func ValidateEmail(apiKey string) (mailgun.EmailVerification, error) {
 }
 
 func GetWebhook(domain, apiKey string) ([]string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.GetWebhook(ctx, "clicked")
+	return mg.GetWebhook(ctx, domain, "clicked")
 }
 
 func ListWebhooks(domain, apiKey string) (map[string][]string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.ListWebhooks(ctx)
+	return mg.ListWebhooks(ctx, domain)
 }
 
 func DeleteDomainIP(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.DeleteDomainIP(ctx, "127.0.0.1")
+	return mg.DeleteDomainIP(ctx, domain, "127.0.0.1")
 }
 
-func DeleteListMember(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func DeleteListMember(apiKey string) error {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -653,8 +653,8 @@ func DeleteListMember(domain, apiKey string) error {
 	return mg.DeleteMember(ctx, "joe@example.com", "list@example.com")
 }
 
-func DeleteMailingList(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func DeleteMailingList(apiKey string) error {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -663,7 +663,7 @@ func DeleteMailingList(domain, apiKey string) error {
 }
 
 func ResendMessage(domain, apiKey string) (string, string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -672,8 +672,9 @@ func ResendMessage(domain, apiKey string) (string, string, error) {
 }
 
 func SendComplexMessage(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -693,8 +694,9 @@ func SendComplexMessage(domain, apiKey string) (string, error) {
 }
 
 func SendWithConnectionOptions(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -712,8 +714,9 @@ func SendWithConnectionOptions(domain, apiKey string) (string, error) {
 }
 
 func SendInlineImage(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -732,8 +735,9 @@ func SendInlineImage(domain, apiKey string) (string, error) {
 }
 
 func SendMessageNoTracking(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -749,7 +753,7 @@ func SendMessageNoTracking(domain, apiKey string) (string, error) {
 }
 
 func SendMimeMessage(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	mimeMsgReader, err := os.Open("files/message.mime")
 	if err != nil {
 		return "", err
@@ -765,8 +769,9 @@ func SendMimeMessage(domain, apiKey string) (string, error) {
 }
 
 func SendScheduledMessage(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -782,8 +787,9 @@ func SendScheduledMessage(domain, apiKey string) (string, error) {
 }
 
 func SendSimpleMessage(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
+		domain,
 		"Excited User <mailgun@YOUR_DOMAIN_NAME>",
 		"Hello",
 		"Testing some Mailgun awesomeness!",
@@ -798,7 +804,7 @@ func SendSimpleMessage(domain, apiKey string) (string, error) {
 }
 
 func SendTaggedMessage(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
 		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
@@ -820,7 +826,7 @@ func SendTaggedMessage(domain, apiKey string) (string, error) {
 }
 
 func SendTemplateMessage(domain, apiKey string) (string, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	m := mailgun.NewMessage(
 		domain,
 		"Excited User <YOU@YOUR_DOMAIN_NAME>",
@@ -849,7 +855,7 @@ func SendTemplateMessage(domain, apiKey string) (string, error) {
 }
 
 func UpdateDomainConnection(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -860,8 +866,8 @@ func UpdateDomainConnection(domain, apiKey string) error {
 	})
 }
 
-func UpdateMember(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func UpdateMember(apiKey string) error {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -874,16 +880,16 @@ func UpdateMember(domain, apiKey string) error {
 }
 
 func UpdateWebhook(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.UpdateWebhook(ctx, "clicked", []string{"https://your_domain.com/clicked"})
+	return mg.UpdateWebhook(ctx, domain, "clicked", []string{"https://your_domain.com/clicked"})
 }
 
-func VerifyWebhookSignature(domain, apiKey, webhookSigningKey, timestamp, token, signature string) (bool, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+func VerifyWebhookSignature(apiKey, webhookSigningKey, timestamp, token, signature string) (bool, error) {
+	mg := mailgun.NewMailgun(apiKey)
 	mg.SetWebhookSigningKey(webhookSigningKey)
 
 	return mg.VerifyWebhookSignature(mailgun.Signature{
@@ -894,14 +900,14 @@ func VerifyWebhookSignature(domain, apiKey, webhookSigningKey, timestamp, token,
 }
 
 func SendMessageWithTemplate(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	// Create a new template
-	err = mg.CreateTemplate(ctx, &mailgun.Template{
+	err = mg.CreateTemplate(ctx, domain, &mailgun.Template{
 		Name: "my-template",
 		Version: mailgun.TemplateVersion{
 			Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
@@ -934,12 +940,12 @@ func SendMessageWithTemplate(domain, apiKey string) error {
 }
 
 func CreateTemplate(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.CreateTemplate(ctx, &mailgun.Template{
+	return mg.CreateTemplate(ctx, domain, &mailgun.Template{
 		Name: "my-template",
 		Version: mailgun.TemplateVersion{
 			Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
@@ -950,38 +956,38 @@ func CreateTemplate(domain, apiKey string) error {
 }
 
 func DeleteTemplate(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.DeleteTemplate(ctx, "my-template")
+	return mg.DeleteTemplate(ctx, domain, "my-template")
 }
 
 func UpdateTemplate(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.UpdateTemplate(ctx, &mailgun.Template{
+	return mg.UpdateTemplate(ctx, domain, &mailgun.Template{
 		Name:        "my-template",
 		Description: "Add a description to the template",
 	})
 }
 
 func GetTemplate(domain, apiKey string) (mailgun.Template, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.GetTemplate(ctx, "my-template")
+	return mg.GetTemplate(ctx, domain, "my-template")
 }
 
 func ListActiveTemplates(domain, apiKey string) ([]mailgun.Template, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListTemplates(&mailgun.ListTemplateOptions{Active: true})
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListTemplates(domain, &mailgun.ListTemplateOptions{Active: true})
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -998,8 +1004,8 @@ func ListActiveTemplates(domain, apiKey string) ([]mailgun.Template, error) {
 }
 
 func ListTemplates(domain, apiKey string) ([]mailgun.Template, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListTemplates(nil)
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListTemplates(domain, nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -1016,12 +1022,12 @@ func ListTemplates(domain, apiKey string) ([]mailgun.Template, error) {
 }
 
 func AddTemplateVersion(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.AddTemplateVersion(ctx, "my-template", &mailgun.TemplateVersion{
+	return mg.AddTemplateVersion(ctx, domain, "my-template", &mailgun.TemplateVersion{
 		Template: `'<div class="entry"> <h1>{{.title}}</h1> <div class="body"> {{.body}} </div> </div>'`,
 		Engine:   mailgun.TemplateEngineGo,
 		Tag:      "v2",
@@ -1030,32 +1036,32 @@ func AddTemplateVersion(domain, apiKey string) error {
 }
 
 func DeleteTemplateVersion(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	// Delete the template version tagged as 'v2'
-	return mg.DeleteTemplateVersion(ctx, "my-template", "v2")
+	return mg.DeleteTemplateVersion(ctx, domain, "my-template", "v2")
 }
 
 func GetTemplateVersion(domain, apiKey string) (mailgun.TemplateVersion, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	// Get the template version tagged as 'v2'
-	return mg.GetTemplateVersion(ctx, "my-template", "v2")
+	return mg.GetTemplateVersion(ctx, domain, "my-template", "v2")
 }
 
 func UpdateTemplateVersion(domain, apiKey string) error {
-	mg := mailgun.NewMailgun(domain, apiKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.UpdateTemplateVersion(ctx, "my-template", &mailgun.TemplateVersion{
+	return mg.UpdateTemplateVersion(ctx, domain, "my-template", &mailgun.TemplateVersion{
 		Comment: "Add a comment to the template and make it 'active'",
 		Tag:     "v2",
 		Active:  true,
@@ -1063,8 +1069,8 @@ func UpdateTemplateVersion(domain, apiKey string) error {
 }
 
 func ListTemplateVersions(domain, apiKey string) ([]mailgun.TemplateVersion, error) {
-	mg := mailgun.NewMailgun(domain, apiKey)
-	it := mg.ListTemplateVersions("my-template", nil)
+	mg := mailgun.NewMailgun(apiKey)
+	it := mg.ListTemplateVersions(domain, "my-template", nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()

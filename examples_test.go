@@ -16,7 +16,7 @@ import (
 )
 
 func ExampleEmailValidatorImpl_ValidateEmail() {
-	v := mailgun.NewEmailValidator("my_public_validation_api_key")
+	v := mailgun.NewEmailValidator("my_private_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -36,7 +36,7 @@ func ExampleEmailValidatorImpl_ValidateEmail() {
 }
 
 func ExampleMailgunImpl_UpdateMailingList() {
-	mg := mailgun.NewMailgun("example.com", "my_api_key")
+	mg := mailgun.NewMailgun("my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -51,12 +51,13 @@ func ExampleMailgunImpl_UpdateMailingList() {
 }
 
 func ExampleMailgunImpl_Send_constructed() {
-	mg := mailgun.NewMailgun("example.com", "my_api_key")
+	mg := mailgun.NewMailgun("my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	m := mailgun.NewMessage(
+		"example.com",
 		"Excited User <me@example.com>",
 		"Hello World",
 		"Testing some Mailgun Awesomeness!",
@@ -87,7 +88,7 @@ Testing some Mailgun MIME awesomeness!
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	mg := mailgun.NewMailgun("example.com", "my_api_key")
+	mg := mailgun.NewMailgun("my_api_key")
 	m := mailgun.NewMIMEMessage("example.com", io.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
 	_, id, err := mg.Send(ctx, m)
 	if err != nil {
@@ -97,7 +98,7 @@ Testing some Mailgun MIME awesomeness!
 }
 
 func ExampleMailgunImpl_ListRoutes() {
-	mg := mailgun.NewMailgun("example.com", "my_api_key")
+	mg := mailgun.NewMailgun("my_api_key")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 

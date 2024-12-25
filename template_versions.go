@@ -23,9 +23,9 @@ type templateVersionListResp struct {
 }
 
 // AddTemplateVersion adds a template version to a template
-func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions")
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -53,9 +53,9 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, templateName stri
 }
 
 // GetTemplateVersion gets a specific version of a template
-func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateName, tag string) (TemplateVersion, error) {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + tag)
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (TemplateVersion, error) {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var resp templateResp
@@ -67,9 +67,9 @@ func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, templateName, tag
 }
 
 // Update the comment and mark a version of a template active
-func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + version.Tag)
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + version.Tag)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 
@@ -93,9 +93,9 @@ func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, templateName s
 }
 
 // Delete a specific version of a template
-func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, templateName, tag string) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions/" + tag)
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -107,10 +107,10 @@ type TemplateVersionsIterator struct {
 	err error
 }
 
-// List all the versions of a specific template
-func (mg *MailgunImpl) ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + templateName + "/versions")
-	r.setClient(mg.Client())
+// ListTemplateVersions lists all the versions of a specific template
+func (mg *MailgunImpl) ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
@@ -207,7 +207,7 @@ func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]Templ
 func (li *TemplateVersionsIterator) fetch(ctx context.Context, url string) error {
 	li.Template.Versions = nil
 	r := newHTTPRequest(url)
-	r.setClient(li.mg.Client())
+	r.setClient(li.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 
 	return getResponseFromJSON(ctx, r, &li.templateVersionListResp)

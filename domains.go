@@ -92,7 +92,7 @@ func (mg *MailgunImpl) ListDomains(opts *ListOptions) *DomainsIterator {
 	}
 	return &DomainsIterator{
 		mg:                  mg,
-		url:                 generatePublicApiUrl(mg, domainsEndpoint),
+		url:                 generateApiUrl(mg, domainsEndpoint),
 		domainsListResponse: domainsListResponse{TotalCount: -1},
 		limit:               limit,
 	}
@@ -219,7 +219,7 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
-	r.setClient(ri.mg.Client())
+	r.setClient(ri.mg.HTTPClient())
 
 	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
@@ -233,8 +233,8 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 
 // GetDomain retrieves detailed information about the named domain.
 func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (DomainResponse, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp DomainResponse
 	err := getResponseFromJSON(ctx, r, &resp)
@@ -242,8 +242,8 @@ func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (DomainResp
 }
 
 func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (string, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/verify")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/verify")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -254,8 +254,8 @@ func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (string,
 
 // VerifyAndReturnDomain verifies & retrieves detailed information about the named domain.
 func (mg *MailgunImpl) VerifyAndReturnDomain(ctx context.Context, domain string) (DomainResponse, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/verify")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/verify")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -282,8 +282,8 @@ type CreateDomainOptions struct {
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
 func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -319,8 +319,8 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 
 // GetDomainConnection returns delivery connection settings for the defined domain
 func (mg *MailgunImpl) GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp domainConnectionResponse
 	err := getResponseFromJSON(ctx, r, &resp)
@@ -329,8 +329,8 @@ func (mg *MailgunImpl) GetDomainConnection(ctx context.Context, domain string) (
 
 // Updates the specified delivery connection settings for the defined domain
 func (mg *MailgunImpl) UpdateDomainConnection(ctx context.Context, domain string, settings DomainConnection) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/connection")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -342,8 +342,8 @@ func (mg *MailgunImpl) UpdateDomainConnection(ctx context.Context, domain string
 
 // DeleteDomain instructs Mailgun to dispose of the named domain name
 func (mg *MailgunImpl) DeleteDomain(ctx context.Context, name string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -351,8 +351,8 @@ func (mg *MailgunImpl) DeleteDomain(ctx context.Context, name string) error {
 
 // GetDomainTracking returns tracking settings for a domain
 func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp domainTrackingResponse
 	err := getResponseFromJSON(ctx, r, &resp)
@@ -360,8 +360,8 @@ func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (Do
 }
 
 func (mg *MailgunImpl) UpdateClickTracking(ctx context.Context, domain, active string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/click")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/click")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -371,8 +371,8 @@ func (mg *MailgunImpl) UpdateClickTracking(ctx context.Context, domain, active s
 }
 
 func (mg *MailgunImpl) UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/unsubscribe")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/unsubscribe")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -384,8 +384,8 @@ func (mg *MailgunImpl) UpdateUnsubscribeTracking(ctx context.Context, domain, ac
 }
 
 func (mg *MailgunImpl) UpdateOpenTracking(ctx context.Context, domain, active string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/open")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/tracking/open")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -396,8 +396,8 @@ func (mg *MailgunImpl) UpdateOpenTracking(ctx context.Context, domain, active st
 
 // Update the DKIM selector for a domain
 func (mg *MailgunImpl) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/dkim_selector")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/dkim_selector")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -408,8 +408,8 @@ func (mg *MailgunImpl) UpdateDomainDkimSelector(ctx context.Context, domain, dki
 
 // Update the CNAME used for tracking opens and clicks
 func (mg *MailgunImpl) UpdateDomainTrackingWebPrefix(ctx context.Context, domain, webPrefix string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/web_prefix")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/web_prefix")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -426,8 +426,8 @@ type UpdateDomainOptions struct {
 // UpdateDomain updates a domain's attributes.
 // Currently only the web_scheme update is supported, spam_action and wildcard are to be added.
 func (mg *MailgunImpl) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()

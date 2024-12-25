@@ -32,9 +32,9 @@ type templateListResp struct {
 }
 
 // Create a new template which can be used to attach template versions to
-func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint))
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) CreateTemplate(ctx context.Context, domain string, template *Template) error {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -68,9 +68,9 @@ func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) e
 }
 
 // GetTemplate gets a template given the template name
-func (mg *MailgunImpl) GetTemplate(ctx context.Context, name string) (Template, error) {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) GetTemplate(ctx context.Context, domain, name string) (Template, error) {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addParameter("active", "yes")
 
@@ -83,13 +83,13 @@ func (mg *MailgunImpl) GetTemplate(ctx context.Context, name string) (Template, 
 }
 
 // Update the name and description of a template
-func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, template *Template) error {
+func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, domain string, template *Template) error {
 	if template.Name == "" {
 		return errors.New("UpdateTemplate() Template.Name cannot be empty")
 	}
 
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + template.Name)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + template.Name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 
@@ -110,9 +110,9 @@ func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, template *Template) e
 }
 
 // Delete a template given a template name
-func (mg *MailgunImpl) DeleteTemplate(ctx context.Context, name string) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) DeleteTemplate(ctx context.Context, domain, name string) error {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -130,9 +130,9 @@ type ListTemplateOptions struct {
 }
 
 // List all available templates
-func (mg *MailgunImpl) ListTemplates(opts *ListTemplateOptions) *TemplatesIterator {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint))
-	r.setClient(mg.Client())
+func (mg *MailgunImpl) ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator {
+	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
@@ -232,7 +232,7 @@ func (ti *TemplatesIterator) Previous(ctx context.Context, items *[]Template) bo
 func (ti *TemplatesIterator) fetch(ctx context.Context, url string) error {
 	ti.Items = nil
 	r := newHTTPRequest(url)
-	r.setClient(ti.mg.Client())
+	r.setClient(ti.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ti.mg.APIKey())
 
 	return getResponseFromJSON(ctx, r, &ti.templateListResp)

@@ -17,19 +17,18 @@ const domain = "valid-mailgun-domain"
 const apiKey = "valid-mailgun-api-key" //nolint:gosec // This is a test
 
 func TestMailgun(t *testing.T) {
-	m := mailgun.NewMailgun(domain, apiKey)
+	m := mailgun.NewMailgun(apiKey)
 
-	assert.Equal(t, domain, m.Domain())
 	assert.Equal(t, apiKey, m.APIKey())
-	assert.Equal(t, http.DefaultClient, m.Client())
+	assert.Equal(t, http.DefaultClient, m.HTTPClient())
 
 	client := new(http.Client)
-	m.SetClient(client)
-	assert.Equal(t, m.Client(), client)
+	m.SetHTTPClient(client)
+	assert.Equal(t, m.HTTPClient(), client)
 }
 
 func TestInvalidBaseAPI(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
+	mg := mailgun.NewMailgun(testKey)
 	mg.SetAPIBase("https://localhost")
 
 	ctx := context.Background()
@@ -53,7 +52,7 @@ func TestValidBaseAPI(t *testing.T) {
 	}
 
 	for _, apiBase := range apiBases {
-		mg := mailgun.NewMailgun(testDomain, testKey)
+		mg := mailgun.NewMailgun(testKey)
 		mg.SetAPIBase(apiBase)
 
 		ctx := context.Background()

@@ -10,8 +10,8 @@ import (
 )
 
 func TestRouteCRUD(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	var countRoutes = func() int {
@@ -58,8 +58,8 @@ func TestRouteCRUD(t *testing.T) {
 }
 
 func TestRoutesIterator(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	mg.SetAPIBase(server.URL3())
 
 	it := mg.ListRoutes(&mailgun.ListOptions{Limit: 2})
 

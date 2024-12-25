@@ -63,8 +63,8 @@ type ListsIterator struct {
 
 // ListMailingLists returns the specified set of mailing lists administered by your account.
 func (mg *MailgunImpl) ListMailingLists(opts *ListOptions) *ListsIterator {
-	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/pages")
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, listsEndpoint) + "/pages")
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
@@ -161,7 +161,7 @@ func (li *ListsIterator) Previous(ctx context.Context, items *[]MailingList) boo
 func (li *ListsIterator) fetch(ctx context.Context, url string) error {
 	li.Items = nil
 	r := newHTTPRequest(url)
-	r.setClient(li.mg.Client())
+	r.setClient(li.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 
 	return getResponseFromJSON(ctx, r, &li.listsResponse)
@@ -174,8 +174,8 @@ func (li *ListsIterator) fetch(ctx context.Context, url string) error {
 // while AccessLevel defaults to Everyone
 // and ReplyPreference defaults to List.
 func (mg *MailgunImpl) CreateMailingList(ctx context.Context, prototype MailingList) (MailingList, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, listsEndpoint))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	if prototype.Address != "" {
@@ -205,8 +205,8 @@ func (mg *MailgunImpl) CreateMailingList(ctx context.Context, prototype MailingL
 // DeleteMailingList removes all current members of the list, then removes the list itself.
 // Attempts to send e-mail to the list will fail subsequent to this call.
 func (mg *MailgunImpl) DeleteMailingList(ctx context.Context, addr string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, listsEndpoint) + "/" + addr)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -215,8 +215,8 @@ func (mg *MailgunImpl) DeleteMailingList(ctx context.Context, addr string) error
 // GetMailingList allows your application to recover the complete List structure
 // representing a mailing list, so long as you have its e-mail address.
 func (mg *MailgunImpl) GetMailingList(ctx context.Context, addr string) (MailingList, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, listsEndpoint) + "/" + addr)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	response, err := makeGetRequest(ctx, r)
 	if err != nil {
@@ -236,8 +236,8 @@ func (mg *MailgunImpl) GetMailingList(ctx context.Context, addr string) (Mailing
 // e-mail sent to the old address will not succeed.
 // Make sure you account for the change accordingly.
 func (mg *MailgunImpl) UpdateMailingList(ctx context.Context, addr string, prototype MailingList) (MailingList, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, listsEndpoint) + "/" + addr)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiUrl(mg, listsEndpoint) + "/" + addr)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	if prototype.Address != "" {
