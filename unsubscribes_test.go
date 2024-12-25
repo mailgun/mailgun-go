@@ -11,7 +11,7 @@ import (
 
 func TestCreateUnsubscriber(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
 	ctx := context.Background()
@@ -31,7 +31,7 @@ func TestCreateUnsubscribes(t *testing.T) {
 		},
 	}
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	// Create unsubscription records
@@ -40,7 +40,7 @@ func TestCreateUnsubscribes(t *testing.T) {
 
 func TestListUnsubscribes(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	it := mg.ListUnsubscribes(testDomain, nil)
@@ -59,7 +59,7 @@ func TestListUnsubscribes(t *testing.T) {
 
 func TestGetUnsubscribe(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
 
@@ -78,7 +78,7 @@ func TestGetUnsubscribe(t *testing.T) {
 
 func TestCreateDestroyUnsubscription(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
 

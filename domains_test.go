@@ -18,7 +18,7 @@ const (
 
 func TestListDomains(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	it := mg.ListDomains(nil)
@@ -35,7 +35,7 @@ func TestListDomains(t *testing.T) {
 
 func TestGetSingleDomain(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	it := mg.ListDomains(nil)
@@ -59,7 +59,7 @@ func TestGetSingleDomain(t *testing.T) {
 
 func TestGetSingleDomainNotExist(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	_, err := mg.GetDomain(ctx, "unknown.domain")
@@ -73,7 +73,7 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 
 func TestAddUpdateDeleteDomain(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	// First, we need to add the domain.
@@ -92,7 +92,7 @@ func TestAddUpdateDeleteDomain(t *testing.T) {
 
 func TestDomainConnection(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	info, err := mg.GetDomainConnection(ctx, testDomain)
@@ -113,7 +113,7 @@ func TestDomainConnection(t *testing.T) {
 
 func TestDomainTracking(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	info, err := mg.GetDomainTracking(ctx, testDomain)
@@ -154,7 +154,7 @@ func TestDomainTracking(t *testing.T) {
 
 func TestDomainVerify(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	_, err := mg.VerifyDomain(ctx, testDomain)
@@ -163,7 +163,7 @@ func TestDomainVerify(t *testing.T) {
 
 func TestDomainVerifyAndReturn(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	_, err := mg.VerifyAndReturnDomain(ctx, testDomain)
@@ -172,7 +172,7 @@ func TestDomainVerifyAndReturn(t *testing.T) {
 
 func TestDomainDkimSelector(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	// Update Domain DKIM selector
@@ -182,7 +182,7 @@ func TestDomainDkimSelector(t *testing.T) {
 
 func TestDomainTrackingWebPrefix(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	// Update Domain Tracking Web Prefix

@@ -14,7 +14,7 @@ import (
 
 func TestStorage(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	var ctx = context.Background()
 

@@ -11,7 +11,7 @@ import (
 
 func TestLimits(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	limits, err := mg.GetTagLimits(ctx, testDomain)

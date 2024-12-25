@@ -11,7 +11,7 @@ import (
 
 func TestTemplateVersionsCRUD(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	findVersion := func(templateName, tag string) bool {

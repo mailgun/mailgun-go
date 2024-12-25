@@ -15,7 +15,7 @@ import (
 
 func TestGetBounces(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	it := mg.ListBounces(testDomain, nil)
@@ -31,7 +31,7 @@ func TestGetBounces(t *testing.T) {
 
 func TestGetSingleBounce(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")),
@@ -46,7 +46,7 @@ func TestGetSingleBounce(t *testing.T) {
 
 func TestAddDelBounces(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	findBounce := func(address string) bool {
@@ -104,7 +104,7 @@ func TestAddDelBounces(t *testing.T) {
 
 func TestAddDelBounceList(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 

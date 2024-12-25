@@ -20,7 +20,7 @@ import (
 
 func TestGetWebhook(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	list, err := mg.ListWebhooks(ctx, testDomain)
@@ -35,7 +35,7 @@ func TestGetWebhook(t *testing.T) {
 
 func TestWebhookCRUD(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 	list, err := mg.ListWebhooks(ctx, testDomain)

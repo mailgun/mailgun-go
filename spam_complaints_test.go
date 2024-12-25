@@ -12,7 +12,7 @@ import (
 
 func TestGetComplaints(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 
 	ctx := context.Background()
 
@@ -25,7 +25,7 @@ func TestGetComplaints(t *testing.T) {
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	_, err := mg.GetComplaint(ctx, testDomain, randomString(64, "")+"@example.com")
@@ -38,7 +38,7 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 
 func TestCreateDeleteComplaint(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
@@ -69,7 +69,7 @@ func TestCreateDeleteComplaint(t *testing.T) {
 
 func TestCreateDeleteComplaintList(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL())
+	mg.SetAPIBase(server.URL3())
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
