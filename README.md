@@ -305,7 +305,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	// Send the message with a 10 second timeout
+	// Send the message with a 10-second timeout
 	resp, id, err := mg.Send(ctx, message)
 
 	if err != nil {
@@ -378,7 +378,7 @@ and click on the "Go" button at the top of the page.
 European customers will need to change the default API Base to access your domains
 
 ```go
-mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
+mg := mailgun.NewMailgun("private-api-key")
 mg.SetAPIBase(mailgun.APIBaseEU)
 ```
 
