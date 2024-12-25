@@ -23,6 +23,7 @@ func TestListMetrics(t *testing.T) {
 			Limit: 10,
 		},
 	}
+	// filter by domain
 	opts.Filter.BoolGroupAnd = []mailgun.MetricsFilterPredicate{{
 		Attribute:     "domain",
 		Comparator:    "=",
