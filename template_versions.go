@@ -24,7 +24,7 @@ type templateVersionListResp struct {
 
 // AddTemplateVersion adds a template version to a template
 func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -54,7 +54,7 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateN
 
 // GetTemplateVersion gets a specific version of a template
 func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (TemplateVersion, error) {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -68,7 +68,7 @@ func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, domain, templateN
 
 // Update the comment and mark a version of a template active
 func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + version.Tag)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + version.Tag)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -94,7 +94,7 @@ func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, domain, templa
 
 // Delete a specific version of a template
 func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -109,7 +109,7 @@ type TemplateVersionsIterator struct {
 
 // ListTemplateVersions lists all the versions of a specific template
 func (mg *MailgunImpl) ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {

@@ -20,7 +20,7 @@ type okResp struct {
 
 // ListIPS returns a list of IPs assigned to your account
 func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error) {
-	r := newHTTPRequest(generateApiUrl(mg, ipsEndpoint))
+	r := newHTTPRequest(generateApiUrl(mg, 3, ipsEndpoint))
 	r.setClient(mg.HTTPClient())
 	if dedicated {
 		r.addParameter("dedicated", "true")
@@ -40,7 +40,7 @@ func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress
 
 // GetIP returns information about the specified IP
 func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) {
-	r := newHTTPRequest(generateApiUrl(mg, ipsEndpoint) + "/" + ip)
+	r := newHTTPRequest(generateApiUrl(mg, 3, ipsEndpoint) + "/" + ip)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var resp IPAddress
@@ -50,7 +50,7 @@ func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) 
 
 // ListDomainIPS returns a list of IPs currently assigned to the specified domain.
 func (mg *MailgunImpl) ListDomainIPS(ctx context.Context, domain string) ([]IPAddress, error) {
-	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/ips")
+	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/ips")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -67,7 +67,7 @@ func (mg *MailgunImpl) ListDomainIPS(ctx context.Context, domain string) ([]IPAd
 
 // Assign a dedicated IP to the domain specified.
 func (mg *MailgunImpl) AddDomainIP(ctx context.Context, domain, ip string) error {
-	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/ips")
+	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/ips")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -79,7 +79,7 @@ func (mg *MailgunImpl) AddDomainIP(ctx context.Context, domain, ip string) error
 
 // Unassign an IP from the domain specified.
 func (mg *MailgunImpl) DeleteDomainIP(ctx context.Context, domain, ip string) error {
-	r := newHTTPRequest(generateApiUrl(mg, domainsEndpoint) + "/" + domain + "/ips/" + ip)
+	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/ips/" + ip)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)

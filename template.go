@@ -33,7 +33,7 @@ type templateListResp struct {
 
 // Create a new template which can be used to attach template versions to
 func (mg *MailgunImpl) CreateTemplate(ctx context.Context, domain string, template *Template) error {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain))
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -69,7 +69,7 @@ func (mg *MailgunImpl) CreateTemplate(ctx context.Context, domain string, templa
 
 // GetTemplate gets a template given the template name
 func (mg *MailgunImpl) GetTemplate(ctx context.Context, domain, name string) (Template, error) {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addParameter("active", "yes")
@@ -88,7 +88,7 @@ func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, domain string, templa
 		return errors.New("UpdateTemplate() Template.Name cannot be empty")
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + template.Name)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + template.Name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -111,7 +111,7 @@ func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, domain string, templa
 
 // Delete a template given a template name
 func (mg *MailgunImpl) DeleteTemplate(ctx context.Context, domain, name string) error {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -131,7 +131,7 @@ type ListTemplateOptions struct {
 
 // List all available templates
 func (mg *MailgunImpl) ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator {
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, templatesEndpoint, domain))
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
