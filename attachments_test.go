@@ -27,7 +27,8 @@ func createAttachment(t *testing.T) string {
 
 func TestMultipleAttachments(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL3())
+	require.NoError(t, err)
 
 	var ctx = context.Background()
 

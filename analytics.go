@@ -2,7 +2,6 @@ package mailgun
 
 import (
 	"context"
-	"strings"
 
 	"github.com/mailgun/errors"
 )
@@ -35,10 +34,6 @@ type MetricsPagination struct {
 //
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
 func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error) {
-	if !strings.HasSuffix(mg.APIBase(), "/v1") {
-		return nil, errors.New("only v1 API is supported")
-	}
-
 	if opts.Pagination.Limit == 0 {
 		opts.Pagination.Limit = 10
 	}
