@@ -43,7 +43,7 @@ func TestDomainIPS(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	err := mg.AddDomainIP(ctx, testDomain, "192.172.1.1")
+	err = mg.AddDomainIP(ctx, testDomain, "192.172.1.1")
 	require.NoError(t, err)
 
 	list, err := mg.ListDomainIPS(ctx, testDomain)
