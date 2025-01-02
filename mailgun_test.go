@@ -1,7 +1,6 @@
 package mailgun_test
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -29,11 +28,8 @@ func TestMailgun(t *testing.T) {
 
 func TestInvalidBaseAPI(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase("https://localhost")
-
-	ctx := context.Background()
-	_, err := mg.GetDomain(ctx, "unknown.domain")
-	assert.EqualError(t, err, `APIBase must end with a /v1, /v2, /v3 or /v4; SetAPIBase("https://host/v3")`)
+	err := mg.SetAPIBase("https://localhost/v3")
+	assert.EqualError(t, err, `APIBase must not contain a version; SetAPIBase("https://host")`)
 }
 
 func TestValidBaseAPI(t *testing.T) {
@@ -47,17 +43,17 @@ func TestValidBaseAPI(t *testing.T) {
 	}))
 
 	apiBases := []string{
-		fmt.Sprintf("%s/v3", testServer.URL),
-		fmt.Sprintf("%s/proxy/v3", testServer.URL),
+		mailgun.APIBase,
+		mailgun.APIBaseEU,
+		fmt.Sprintf("%s", testServer.URL),
 	}
 
 	for _, apiBase := range apiBases {
-		mg := mailgun.NewMailgun(testKey)
-		mg.SetAPIBase(apiBase)
-
-		ctx := context.Background()
-		_, err := mg.GetDomain(ctx, "unknown.domain")
-		require.NoError(t, err)
+		t.Run(apiBase, func(t *testing.T) {
+			mg := mailgun.NewMailgun(testKey)
+			err := mg.SetAPIBase(apiBase)
+			require.NoError(t, err)
+		})
 	}
 }
 

@@ -126,7 +126,7 @@ type Mailgun interface {
 	APIKey() string
 	HTTPClient() *http.Client
 	SetHTTPClient(client *http.Client)
-	SetAPIBase(url string)
+	SetAPIBase(url string) error
 	AddOverrideHeader(k string, v string)
 
 	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
@@ -276,7 +276,10 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 
 	url := os.Getenv("MG_URL")
 	if url != "" {
-		mg.SetAPIBase(url)
+		err := mg.SetAPIBase(url)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	webhookSigningKey := os.Getenv("MG_WEBHOOK_SIGNING_KEY")
@@ -342,8 +345,13 @@ func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
 //
 //	// Set a custom base API
 //	mg.SetAPIBase("https://localhost")
-func (mg *MailgunImpl) SetAPIBase(address string) {
+func (mg *MailgunImpl) SetAPIBase(address string) error {
+	if invalidURL.MatchString(address) {
+		return errors.New(`APIBase must not contain a version; SetAPIBase("https://host")`)
+	}
+
 	mg.apiBase = address
+	return nil
 }
 
 // AddOverrideHeader allows the user to specify additional headers that will be included in the HTTP request
