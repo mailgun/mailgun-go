@@ -17,9 +17,7 @@ import (
 
 type MockServer interface {
 	Stop()
-	URL1() string
-	URL4() string
-	URL3() string
+	URL() string
 	DomainIPS() []string
 	DomainList() []DomainContainer
 	ExportList() []Export
@@ -151,17 +149,8 @@ func (ms *mockServer) Stop() {
 	ms.srv.Close()
 }
 
-func (ms *mockServer) URL1() string {
-	return ms.srv.URL + "/v1"
-}
-
-// URL3 returns the URL used to connect to the mock server
-func (ms *mockServer) URL3() string {
-	return ms.srv.URL + "/v3"
-}
-
-func (ms *mockServer) URL4() string {
-	return ms.srv.URL + "/v4"
+func (ms *mockServer) URL() string {
+	return ms.srv.URL
 }
 
 func toJSON(w http.ResponseWriter, obj any) {

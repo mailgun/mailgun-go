@@ -38,8 +38,8 @@ func main() {
 	// Create an instance of the Mailgun Client
 	mg := mailgun.NewMailgun(privateAPIKey)
 	
-	//When you have an EU-domain, you must specify the endpoint:
-	//mg.SetAPIBase("https://api.eu.mailgun.net/v3")
+	// When you have an EU domain, you must specify the endpoint:
+	// err := mg.SetAPIBase(mailgun.APIBaseEU)
 
 	sender := "sender@example.com"
 	subject := "Fancy subject!"

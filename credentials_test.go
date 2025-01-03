@@ -12,7 +12,8 @@ import (
 
 func TestGetCredentials(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 	it := mg.ListCredentials(testDomain, nil)
@@ -29,7 +30,8 @@ func TestGetCredentials(t *testing.T) {
 
 func TestCreateDeleteCredentials(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	randomPassword := randomString(16, "pw")
 	randomID := strings.ToLower(randomString(16, "usr"))

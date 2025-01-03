@@ -440,7 +440,7 @@ func (mg *MailgunImpl) sendV5(ctx context.Context, m SendableMessage) (mes, id s
 		return "", "", err
 	}
 
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Endpoint(), m.Domain()))
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, m.Endpoint(), m.Domain()))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided

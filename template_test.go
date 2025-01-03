@@ -14,7 +14,9 @@ import (
 
 func TestTemplateCRUD(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	findTemplate := func(name string) bool {

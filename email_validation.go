@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/mailgun/errors"
 )
@@ -22,6 +21,7 @@ type EmailVerificationParts struct {
 
 // EmailVerification records basic facts about a validated e-mail address.
 // See the ValidateEmail method and example for more details.
+// TODO(v5): remove /v3 validations fields(Reason)
 type EmailVerification struct {
 	// Indicates whether an email address conforms to IETF RFC standards.
 	IsValid bool `json:"is_valid"`
@@ -148,16 +148,11 @@ func (m *EmailValidatorImpl) APIKey() string {
 // It may also be used to break an email address into its sub-components. If user has set the
 // TODO(v5): move to *MailgunImpl?
 func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
-	// TODO(DE-1383): remove check:
-	if strings.HasSuffix(m.APIBase(), "/v4") {
-		return m.validateV4(ctx, email, mailBoxVerify)
-	}
-
-	return EmailVerification{}, errors.New("ValidateEmail: only v4 is supported")
+	return m.validateV4(ctx, email, mailBoxVerify)
 }
 
 func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
-	r := newHTTPRequest(fmt.Sprintf("%s/address/validate", m.APIBase()))
+	r := newHTTPRequest(fmt.Sprintf("%s/v4/address/validate", m.APIBase()))
 	r.setClient(m.Client())
 	r.addParameter("address", email)
 	if mailBoxVerify {

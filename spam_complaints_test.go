@@ -12,7 +12,8 @@ import (
 
 func TestGetComplaints(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
@@ -25,10 +26,12 @@ func TestGetComplaints(t *testing.T) {
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
-	_, err := mg.GetComplaint(ctx, testDomain, randomString(64, "")+"@example.com")
+	_, err = mg.GetComplaint(ctx, testDomain, randomString(64, "")+"@example.com")
 	require.NotNil(t, err)
 
 	var ure *mailgun.UnexpectedResponseError
@@ -38,7 +41,9 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 
 func TestCreateDeleteComplaint(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
@@ -69,7 +74,9 @@ func TestCreateDeleteComplaint(t *testing.T) {
 
 func TestCreateDeleteComplaintList(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {

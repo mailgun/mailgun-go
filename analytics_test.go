@@ -11,7 +11,8 @@ import (
 
 func TestListMetrics(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL1())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	start, _ := mailgun.NewRFC2822Time("Tue, 24 Sep 2024 00:00:00 +0000")
 	end, _ := mailgun.NewRFC2822Time("Tue, 24 Oct 2024 00:00:00 +0000")

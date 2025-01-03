@@ -118,7 +118,7 @@ func (mg *MailgunImpl) ListRoutes(opts *ListOptions) *RoutesIterator {
 
 	return &RoutesIterator{
 		mg:                 mg,
-		url:                generateApiUrl(mg, routesEndpoint),
+		url:                generateApiUrl(mg, 3, routesEndpoint),
 		routesListResponse: routesListResponse{TotalCount: -1},
 		limit:              limit,
 	}
@@ -262,7 +262,7 @@ func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
 // only a subset of the fields influence the operation.
 // See the Route structure definition for more details.
 func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignored Route, err error) {
-	r := newHTTPRequest(generateApiUrl(mg, routesEndpoint))
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
@@ -284,7 +284,7 @@ func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignor
 // To avoid ambiguity, Mailgun identifies the route by unique ID.
 // See the Route structure definition and the Mailgun API documentation for more details.
 func (mg *MailgunImpl) DeleteRoute(ctx context.Context, id string) error {
-	r := newHTTPRequest(generateApiUrl(mg, routesEndpoint) + "/" + id)
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint) + "/" + id)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -293,7 +293,7 @@ func (mg *MailgunImpl) DeleteRoute(ctx context.Context, id string) error {
 
 // GetRoute retrieves the complete route definition associated with the unique route ID.
 func (mg *MailgunImpl) GetRoute(ctx context.Context, id string) (Route, error) {
-	r := newHTTPRequest(generateApiUrl(mg, routesEndpoint) + "/" + id)
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint) + "/" + id)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var envelope struct {
@@ -312,7 +312,7 @@ func (mg *MailgunImpl) GetRoute(ctx context.Context, id string) (Route, error) {
 // Only those route fields which are non-zero or non-empty are updated.
 // All other fields remain as-is.
 func (mg *MailgunImpl) UpdateRoute(ctx context.Context, id string, route Route) (Route, error) {
-	r := newHTTPRequest(generateApiUrl(mg, routesEndpoint) + "/" + id)
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint) + "/" + id)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()

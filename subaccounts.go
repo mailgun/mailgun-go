@@ -245,5 +245,5 @@ func (mg *MailgunImpl) DisableSubaccount(ctx context.Context, subaccountId strin
 }
 
 func generateSubaccountsApiUrl(m Mailgun) string {
-	return fmt.Sprintf("%s/%s/%s", m.APIBase(), accountsEndpoint, subaccountsEndpoint)
+	return fmt.Sprintf("%s/v3/%s/%s", m.APIBase(), accountsEndpoint, subaccountsEndpoint)
 }

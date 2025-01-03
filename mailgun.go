@@ -88,9 +88,10 @@ var Debug = false
 
 const (
 	// APIBase - base URL the library uses to contact mailgun. Use SetAPIBase() to override
-	APIBase              = "https://api.mailgun.net/v3"
-	APIBaseUS            = APIBase
-	APIBaseEU            = "https://api.eu.mailgun.net/v3"
+	APIBase   = "https://api.mailgun.net"
+	APIBaseUS = APIBase
+	APIBaseEU = "https://api.eu.mailgun.net"
+
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
@@ -108,7 +109,8 @@ const (
 	templatesEndpoint    = "templates"
 	accountsEndpoint     = "accounts"
 	subaccountsEndpoint  = "subaccounts"
-	OnBehalfOfHeader     = "X-Mailgun-On-Behalf-Of"
+
+	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
 )
 
 // Mailgun defines the supported subset of the Mailgun API.
@@ -124,7 +126,7 @@ type Mailgun interface {
 	APIKey() string
 	HTTPClient() *http.Client
 	SetHTTPClient(client *http.Client)
-	SetAPIBase(url string)
+	SetAPIBase(url string) error
 	AddOverrideHeader(k string, v string)
 
 	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
@@ -274,7 +276,10 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 
 	url := os.Getenv("MG_URL")
 	if url != "" {
-		mg.SetAPIBase(url)
+		err := mg.SetAPIBase(url)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	webhookSigningKey := os.Getenv("MG_WEBHOOK_SIGNING_KEY")
@@ -339,9 +344,14 @@ func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
 //	mg.SetAPIBase(mailgun.APIBaseUS)
 //
 //	// Set a custom base API
-//	mg.SetAPIBase("https://localhost/v3")
-func (mg *MailgunImpl) SetAPIBase(address string) {
+//	mg.SetAPIBase("https://localhost")
+func (mg *MailgunImpl) SetAPIBase(address string) error {
+	if invalidURL.MatchString(address) {
+		return errors.New(`APIBase must not contain a version; SetAPIBase("https://host")`)
+	}
+
 	mg.apiBase = address
+	return nil
 }
 
 // AddOverrideHeader allows the user to specify additional headers that will be included in the HTTP request
@@ -358,48 +368,54 @@ type ListOptions struct {
 	Limit int
 }
 
-// generateApiUrlWithDomain renders a URL for an API endpoint using the domain and endpoint name.
-func generateApiUrlWithDomain(m Mailgun, endpoint, domain string) string {
-	return fmt.Sprintf("%s/%s/%s", m.APIBase(), domain, endpoint)
+// TODO(vtopc): sort all these generate URL functions(some are generateApi...Url, other are generate...ApiUrl)
+
+func generateApiUrlWithDomain(m Mailgun, version int, endpoint, domain string) string {
+	return fmt.Sprintf("%s/v%d/%s/%s", m.APIBase(), version, domain, endpoint)
+}
+
+// generateApiV3UrlWithDomain renders a URL for an API endpoint using the domain and endpoint name.
+func generateApiV3UrlWithDomain(m Mailgun, endpoint, domain string) string {
+	return generateApiUrlWithDomain(m, 3, endpoint, domain)
 }
 
 // generateMemberApiUrl renders a URL relevant for specifying mailing list members.
 // The address parameter refers to the mailing list in question.
 func generateMemberApiUrl(m Mailgun, endpoint, address string) string {
-	return fmt.Sprintf("%s/%s/%s/members", m.APIBase(), endpoint, address)
+	return fmt.Sprintf("%s/v3/%s/%s/members", m.APIBase(), endpoint, address)
 }
 
-// generateApiUrlWithTarget works as generateApiUrl
+// generateApiV3UrlWithTarget works as generateApiV3UrlWithDomain
 // but consumes an additional resource parameter called 'target'.
-func generateApiUrlWithTarget(m Mailgun, endpoint, domain, target string) string {
+func generateApiV3UrlWithTarget(m Mailgun, endpoint, domain, target string) string {
 	tail := ""
 	if target != "" {
 		tail = fmt.Sprintf("/%s", target)
 	}
-	return fmt.Sprintf("%s%s", generateApiUrlWithDomain(m, endpoint, domain), tail)
+	return fmt.Sprintf("%s%s", generateApiV3UrlWithDomain(m, endpoint, domain), tail)
 }
 
-// generateDomainsApiUrl renders a URL as generateApiUrlWithDomain, but
+// generateV3DomainsApiUrl renders a URL as generateApiV3UrlWithDomain, but
 // addresses a family of functions which have a non-standard URL structure.
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.
-func generateDomainsApiUrl(m Mailgun, endpoint, domain string) string {
-	return fmt.Sprintf("%s/domains/%s/%s", m.APIBase(), domain, endpoint)
+func generateV3DomainsApiUrl(m Mailgun, endpoint, domain string) string {
+	return fmt.Sprintf("%s/v3/domains/%s/%s", m.APIBase(), domain, endpoint)
 }
 
-// generateCredentialsUrl renders a URL as generateDomainsApiUrl,
+// generateCredentialsUrl renders a URL as generateV3DomainsApiUrl,
 // but focuses on the SMTP credentials family of API functions.
 func generateCredentialsUrl(m Mailgun, domain, login string) string {
 	tail := ""
 	if login != "" {
 		tail = fmt.Sprintf("/%s", login)
 	}
-	return generateDomainsApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
+	return generateV3DomainsApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
 }
 
 // generateApiUrl returns domain agnostic URL.
-func generateApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/%s", m.APIBase(), endpoint)
+func generateApiUrl(m Mailgun, version int, endpoint string) string {
+	return fmt.Sprintf("%s/v%d/%s", m.APIBase(), version, endpoint)
 }
 
 // formatMailgunTime translates a timestamp into a human-readable form.
