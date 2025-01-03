@@ -12,7 +12,6 @@ import (
 
 func TestEmailValidationV4(t *testing.T) {
 	v := mailgun.NewEmailValidator(testKey)
-	// API Base is set to `http://server/v4`
 	v.SetAPIBase(server.URL())
 
 	ctx := context.Background()
