@@ -29,9 +29,6 @@ type MetricsPagination struct {
 //		LabeledValues: []mailgun.MetricsLabeledValue{{Label: "example.com", Value: "example.com"}},
 //	}}
 //
-// NOTE: Only for v1 API. To use the /v1 version define MG_URL in the environment variable
-// as `https://api.mailgun.net/v1` or set `mg.SetAPIBase("https://api.mailgun.net/v1")`
-//
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
 func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error) {
 	if opts.Pagination.Limit == 0 {
