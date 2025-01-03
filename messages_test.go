@@ -659,7 +659,7 @@ func TestSendTLSOptions(t *testing.T) {
 		exampleDomain  = "testDomain"
 		exampleAPIKey  = "testAPIKey"
 		toUser         = "test@test.com"
-		exampleMessage = "Queued. Thank you"
+		exampleMessage = "Queue. Thank you"
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
