@@ -294,7 +294,7 @@ func TestSendMGOffline(t *testing.T) {
 		exampleDomain  = "testDomain"
 		exampleAPIKey  = "testAPIKey"
 		toUser         = "test@test.com"
-		exampleMessage = "Queue. Thank you"
+		exampleMessage = "Queued. Thank you."
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -305,12 +305,15 @@ func TestSendMGOffline(t *testing.T) {
 		assert.Equal(t, exampleText, req.FormValue("text"))
 		assert.Equal(t, toUser, req.FormValue("to"))
 		rsp := fmt.Sprintf(`{"message":"%s", "id":"%s"}`, exampleMessage, exampleID)
-		fmt.Fprint(w, rsp)
+		_, err := fmt.Fprint(w, rsp)
+		require.NoError(t, err)
 	}))
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
@@ -343,7 +346,8 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
@@ -397,10 +401,11 @@ func TestSendMGMessageVariables(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
-	err := m.AddVariable(exampleStrVarKey, exampleStrVarVal)
+	err = m.AddVariable(exampleStrVarKey, exampleStrVarVal)
 	require.NoError(t, err)
 	err = m.AddVariable(exampleBoolVarKey, false)
 	require.NoError(t, err)
@@ -469,10 +474,12 @@ func TestSendDomainError(t *testing.T) {
 	for _, c := range cases {
 		ctx := context.Background()
 		mg := mailgun.NewMailgun(exampleAPIKey)
-		mg.SetAPIBase(srv.URL + "/v3")
+		err := mg.SetAPIBase(server.URL())
+		require.NoError(t, err)
+
 		m := mailgun.NewMessage(c.domain, fromUser, exampleSubject, exampleText, "test@test.com")
 
-		_, _, err := mg.Send(ctx, m)
+		_, _, err = mg.Send(ctx, m)
 		if c.isValid {
 			require.NoError(t, err)
 		} else {
@@ -494,10 +501,11 @@ func TestSendEOFError(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
-	_, _, err := mg.Send(context.Background(), m)
+	_, _, err = mg.Send(context.Background(), m)
 	require.NotNil(t, err)
 	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
 	require.Contains(t, err.Error(), "remote server prematurely closed connection: Post ")
@@ -519,11 +527,12 @@ func TestHasRecipient(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	// No recipient
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText)
-	_, _, err := mg.Send(context.Background(), m)
+	_, _, err = mg.Send(context.Background(), m)
 	require.EqualError(t, err, "message not valid")
 
 	// Provided Bcc
@@ -558,9 +567,10 @@ func TestResendStored(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
-	_, _, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
+	_, _, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
 	require.NotNil(t, err)
 	require.EqualError(t, err, "must provide at least one recipient")
 
@@ -590,7 +600,8 @@ func TestAddOverrideHeader(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 	mg.AddOverrideHeader("Host", "example.com")
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
 	ctx := context.Background()
@@ -626,7 +637,8 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 	mg.AddOverrideHeader("Host", "example.com")
 	mg.AddOverrideHeader("CustomHeader", "custom-value")
 	mg.SetOnBehalfOfSubaccount("mailgun.subaccount")
@@ -647,7 +659,7 @@ func TestSendTLSOptions(t *testing.T) {
 		exampleDomain  = "testDomain"
 		exampleAPIKey  = "testAPIKey"
 		toUser         = "test@test.com"
-		exampleMessage = "Queue. Thank you"
+		exampleMessage = "Queued. Thank you"
 		exampleID      = "<20111114174239.25659.5817@samples.mailgun.org>"
 	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -665,7 +677,9 @@ func TestSendTLSOptions(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
@@ -695,7 +709,9 @@ func TestSendTemplate(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)
@@ -728,7 +744,9 @@ func TestSendTemplateOptions(t *testing.T) {
 	defer srv.Close()
 
 	mg := mailgun.NewMailgun(exampleAPIKey)
-	mg.SetAPIBase(srv.URL + "/v3")
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)

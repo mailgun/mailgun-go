@@ -14,7 +14,8 @@ import (
 
 func TestEventIteratorGetNext(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	it := mg.ListEvents(testDomain, &mailgun.ListEventOptions{Limit: 5})
 
@@ -63,7 +64,8 @@ func TestEventIteratorGetNext(t *testing.T) {
 
 func TestEventPoller(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	// Very short poll interval
 	it := mg.PollEvents(testDomain, &mailgun.ListEventOptions{
@@ -113,7 +115,7 @@ func TestEventPoller(t *testing.T) {
 
 func ExampleMailgunImpl_ListEvents() {
 	mg := mailgun.NewMailgun("your-api-key")
-	mg.SetAPIBase(server.URL3())
+	_ = mg.SetAPIBase(server.URL())
 
 	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
 

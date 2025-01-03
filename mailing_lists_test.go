@@ -12,11 +12,12 @@ import (
 
 func TestMailingListMembers(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 	address := randomEmail("list", testDomain)
-	_, err := mg.CreateMailingList(ctx, mailgun.MailingList{
+	_, err = mg.CreateMailingList(ctx, mailgun.MailingList{
 		Address:     address,
 		Name:        address,
 		Description: "TestMailingListMembers-related mailing list",
@@ -96,7 +97,9 @@ func TestMailingListMembers(t *testing.T) {
 
 func TestMailingLists(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	address := randomEmail("list", testDomain)
@@ -119,7 +122,7 @@ func TestMailingLists(t *testing.T) {
 		return count
 	}
 
-	_, err := mg.CreateMailingList(ctx, protoList)
+	_, err = mg.CreateMailingList(ctx, protoList)
 	require.NoError(t, err)
 	defer func() {
 		require.NoError(t, mg.DeleteMailingList(ctx, address))
@@ -152,11 +155,13 @@ func TestMailingLists(t *testing.T) {
 
 func TestListMailingListRegression(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 	address := "test@example.com"
 
-	_, err := mg.CreateMailingList(ctx, mailgun.MailingList{
+	_, err = mg.CreateMailingList(ctx, mailgun.MailingList{
 		Address:     address,
 		Name:        "paging",
 		Description: "Test paging",

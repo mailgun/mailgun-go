@@ -2,7 +2,6 @@ package mailgun_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -45,7 +44,7 @@ func TestValidBaseAPI(t *testing.T) {
 	apiBases := []string{
 		mailgun.APIBase,
 		mailgun.APIBaseEU,
-		fmt.Sprintf("%s", testServer.URL),
+		testServer.URL,
 	}
 
 	for _, apiBase := range apiBases {

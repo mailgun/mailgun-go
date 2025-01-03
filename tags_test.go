@@ -19,7 +19,9 @@ const (
 
 func TestTags(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	msg := mailgun.NewMessage(testDomain, fromUser, exampleSubject, exampleText, "test@example.com")
 	require.NoError(t, msg.AddTag("newsletter"))
 	require.NoError(t, msg.AddTag("homer"))
@@ -29,7 +31,7 @@ func TestTags(t *testing.T) {
 
 	ctx := context.Background()
 	// Create an email with some tags attached
-	_, _, err := mg.Send(ctx, msg)
+	_, _, err = mg.Send(ctx, msg)
 	require.NoError(t, err)
 
 	// Wait for the tag to show up
@@ -87,7 +89,9 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 
 func TestDeleteTag(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	require.NoError(t, mg.DeleteTag(ctx, testDomain, "newsletter"))

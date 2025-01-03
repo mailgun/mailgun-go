@@ -18,7 +18,9 @@ const (
 
 func TestListDomains(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	it := mg.ListDomains(nil)
@@ -35,7 +37,9 @@ func TestListDomains(t *testing.T) {
 
 func TestGetSingleDomain(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	it := mg.ListDomains(nil)
@@ -59,10 +63,11 @@ func TestGetSingleDomain(t *testing.T) {
 
 func TestGetSingleDomainNotExist(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
-	_, err := mg.GetDomain(ctx, "unknown.domain")
+	_, err = mg.GetDomain(ctx, "unknown.domain")
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
@@ -73,11 +78,13 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 
 func TestAddUpdateDeleteDomain(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	// First, we need to add the domain.
-	_, err := mg.CreateDomain(ctx, "mx.mailgun.test",
+	_, err = mg.CreateDomain(ctx, "mx.mailgun.test",
 		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag, Password: "supersecret", WebScheme: "http"})
 	require.NoError(t, err)
 
@@ -92,7 +99,9 @@ func TestAddUpdateDeleteDomain(t *testing.T) {
 
 func TestDomainConnection(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	info, err := mg.GetDomainConnection(ctx, testDomain)
@@ -113,7 +122,9 @@ func TestDomainConnection(t *testing.T) {
 
 func TestDomainTracking(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	info, err := mg.GetDomainTracking(ctx, testDomain)
@@ -154,38 +165,46 @@ func TestDomainTracking(t *testing.T) {
 
 func TestDomainVerify(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
-	_, err := mg.VerifyDomain(ctx, testDomain)
+	_, err = mg.VerifyDomain(ctx, testDomain)
 	require.NoError(t, err)
 }
 
 func TestDomainVerifyAndReturn(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
-	_, err := mg.VerifyAndReturnDomain(ctx, testDomain)
+	_, err = mg.VerifyAndReturnDomain(ctx, testDomain)
 	require.NoError(t, err)
 }
 
 func TestDomainDkimSelector(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	// Update Domain DKIM selector
-	err := mg.UpdateDomainDkimSelector(ctx, testDomain, "gotest")
+	err = mg.UpdateDomainDkimSelector(ctx, testDomain, "gotest")
 	require.NoError(t, err)
 }
 
 func TestDomainTrackingWebPrefix(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	// Update Domain Tracking Web Prefix
-	err := mg.UpdateDomainTrackingWebPrefix(ctx, testDomain, "gotest")
+	err = mg.UpdateDomainTrackingWebPrefix(ctx, testDomain, "gotest")
 	require.NoError(t, err)
 }

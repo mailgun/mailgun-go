@@ -15,7 +15,8 @@ import (
 
 func TestGetBounces(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 	it := mg.ListBounces(testDomain, nil)
@@ -31,12 +32,13 @@ func TestGetBounces(t *testing.T) {
 
 func TestGetSingleBounce(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(64, "")),
 		os.Getenv("MG_DOMAIN"))
-	_, err := mg.GetBounce(ctx, testDomain, exampleEmail)
+	_, err = mg.GetBounce(ctx, testDomain, exampleEmail)
 	require.NotNil(t, err)
 
 	var ure *mailgun.UnexpectedResponseError
@@ -46,7 +48,9 @@ func TestGetSingleBounce(t *testing.T) {
 
 func TestAddDelBounces(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	findBounce := func(address string) bool {
@@ -71,7 +75,7 @@ func TestAddDelBounces(t *testing.T) {
 	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
 
 	// Add the bounce for our address.
-	err := mg.AddBounce(ctx, testDomain, exampleEmail, "550", "TestAddDelBounces-generated error")
+	err = mg.AddBounce(ctx, testDomain, exampleEmail, "550", "TestAddDelBounces-generated error")
 	require.NoError(t, err)
 
 	// Give API some time to refresh cache
@@ -104,7 +108,8 @@ func TestAddDelBounces(t *testing.T) {
 
 func TestAddDelBounceList(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
-	mg.SetAPIBase(server.URL3())
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
