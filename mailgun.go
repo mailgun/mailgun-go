@@ -368,6 +368,8 @@ type ListOptions struct {
 	Limit int
 }
 
+// TODO(vtopc): sort all these generate URL functions(some are generateApi...Url, other are generate...ApiUrl)
+
 func generateApiUrlWithDomain(m Mailgun, version int, endpoint, domain string) string {
 	return fmt.Sprintf("%s/v%d/%s/%s", m.APIBase(), version, domain, endpoint)
 }
