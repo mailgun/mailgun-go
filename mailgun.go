@@ -393,22 +393,22 @@ func generateApiV3UrlWithTarget(m Mailgun, endpoint, domain, target string) stri
 	return fmt.Sprintf("%s%s", generateApiV3UrlWithDomain(m, endpoint, domain), tail)
 }
 
-// generateDomainsApiUrl renders a URL as generateApiV3UrlWithDomain, but
+// generateV3DomainsApiUrl renders a URL as generateApiV3UrlWithDomain, but
 // addresses a family of functions which have a non-standard URL structure.
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.
-func generateDomainsApiUrl(m Mailgun, endpoint, domain string) string {
+func generateV3DomainsApiUrl(m Mailgun, endpoint, domain string) string {
 	return fmt.Sprintf("%s/v3/domains/%s/%s", m.APIBase(), domain, endpoint)
 }
 
-// generateCredentialsUrl renders a URL as generateDomainsApiUrl,
+// generateCredentialsUrl renders a URL as generateV3DomainsApiUrl,
 // but focuses on the SMTP credentials family of API functions.
 func generateCredentialsUrl(m Mailgun, domain, login string) string {
 	tail := ""
 	if login != "" {
 		tail = fmt.Sprintf("/%s", login)
 	}
-	return generateDomainsApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
+	return generateV3DomainsApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
 }
 
 // generateApiUrl returns domain agnostic URL.
