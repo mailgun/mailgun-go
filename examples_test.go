@@ -16,7 +16,7 @@ import (
 )
 
 func ExampleEmailValidatorImpl_ValidateEmail() {
-	v := mailgun.NewEmailValidator("my_private_api_key")
+	v := mailgun.NewEmailValidator("my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -25,10 +25,6 @@ func ExampleEmailValidatorImpl_ValidateEmail() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if !ev.IsValid {
-		log.Fatal("Expected valid e-mail address")
-	}
-	log.Printf("Parts local_part=%s domain=%s display_name=%s", ev.Parts.LocalPart, ev.Parts.Domain, ev.Parts.DisplayName)
 	if ev.DidYouMean != "" {
 		log.Printf("The address is syntactically valid, but perhaps has a typo.")
 		log.Printf("Did you mean %s instead?", ev.DidYouMean)
