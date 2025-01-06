@@ -2,7 +2,6 @@ package mailgun_test
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
@@ -19,49 +18,13 @@ func TestEmailValidationV4(t *testing.T) {
 	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
 	require.NoError(t, err)
 
-	assert.True(t, ev.IsValid)
-	assert.Equal(t, "", ev.MailboxVerification)
 	assert.False(t, ev.IsDisposableAddress)
 	assert.False(t, ev.IsRoleAddress)
-	assert.Equal(t, "", ev.Parts.DisplayName)
-	assert.Equal(t, "foo", ev.Parts.LocalPart)
-	assert.Equal(t, "mailgun.com", ev.Parts.Domain)
-	assert.Equal(t, "", ev.Reason)
-	assert.True(t, len(ev.Reasons) != 0)
-	assert.Equal(t, "no-reason", ev.Reasons[0])
+	assert.True(t, len(ev.Reason) != 0)
+	assert.Equal(t, "no-reason", ev.Reason[0])
 	assert.Equal(t, "unknown", ev.Risk)
 	assert.Equal(t, "deliverable", ev.Result)
 	assert.Equal(t, "disengaged", ev.Engagement.Behavior)
 	assert.False(t, ev.Engagement.Engaging)
 	assert.False(t, ev.Engagement.IsBot)
-}
-
-func TestUnmarshallResponse(t *testing.T) {
-	payload := []byte(`{
-		"address": "some_email@aol.com",
-		"did_you_mean": null,
-		"is_disposable_address": false,
-		"is_role_address": false,
-		"is_valid": true,
-		"mailbox_verification": "unknown",
-		"parts":
-		{
-			"display_name": null,
-			"domain": "aol.com",
-			"local_part": "some_email"
-		},
-		"reason": "no-reason"
-	}`)
-	var ev mailgun.EmailVerification
-	err := json.Unmarshal(payload, &ev)
-	require.NoError(t, err)
-
-	assert.True(t, ev.IsValid)
-	assert.Equal(t, "unknown", ev.MailboxVerification)
-	assert.False(t, ev.IsDisposableAddress)
-	assert.False(t, ev.IsRoleAddress)
-	assert.Equal(t, "", ev.Parts.DisplayName)
-	assert.Equal(t, "some_email", ev.Parts.LocalPart)
-	assert.Equal(t, "aol.com", ev.Parts.Domain)
-	assert.Equal(t, "no-reason", ev.Reason)
 }

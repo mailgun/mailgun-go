@@ -9,78 +9,50 @@ import (
 	"github.com/mailgun/errors"
 )
 
-// The EmailVerificationParts structure breaks out the basic elements of an email address.
-// LocalPart includes everything up to the '@' in an e-mail address.
-// Domain includes everything after the '@'.
-// DisplayName is no longer used, and will appear as "".
-type EmailVerificationParts struct {
-	LocalPart   string `json:"local_part"`
-	Domain      string `json:"domain"`
-	DisplayName string `json:"display_name"`
-}
-
 // EmailVerification records basic facts about a validated e-mail address.
 // See the ValidateEmail method and example for more details.
-// TODO(v5): remove /v3 validations fields(Reason)
 type EmailVerification struct {
-	// Indicates whether an email address conforms to IETF RFC standards.
-	IsValid bool `json:"is_valid"`
-	// Indicates whether an email address is deliverable.
-	MailboxVerification string `json:"mailbox_verification"`
-	// Parts records the different subfields of the parsed email address
-	Parts EmailVerificationParts `json:"parts"`
 	// Echoes the address provided.
 	Address string `json:"address"`
-	// Provides a simple recommendation in case the address is invalid or
-	// Mailgun thinks you might have a typo. May be empty, in which case
-	// Mailgun has no recommendation to give.
-	DidYouMean string `json:"did_you_mean"`
+
 	// Indicates whether Mailgun thinks the address is from a known
 	// disposable mailbox provider.
 	IsDisposableAddress bool `json:"is_disposable_address"`
+
 	// Indicates whether Mailgun thinks the address is an email distribution list.
 	IsRoleAddress bool `json:"is_role_address"`
-	// The reason why a specific validation may be unsuccessful. (Available in the V3 response)
-	Reason string `json:"reason"`
+
 	// A list of potential reasons why a specific validation may be unsuccessful. (Available in the v4 response)
-	Reasons []string
-	// Risk assessment for the provided email.
-	Risk string `json:"risk"`
+	Reason []string `json:"reason"`
+
 	// Result
 	Result string `json:"result"`
+
+	// Risk assessment for the provided email.
+	Risk string `json:"risk"`
+
+	LastSeen int64 `json:"last_seen,omitempty"`
+
+	// Provides a simple recommendation in case the address is invalid or
+	// Mailgun thinks you might have a typo. May be empty, in which case
+	// Mailgun has no recommendation to give.
+	DidYouMean string `json:"did_you_mean,omitempty"`
+
 	// Engagement results are a macro-level view that explain an email recipient’s propensity to engage.
 	// https://documentation.mailgun.com/docs/inboxready/mailgun-validate/validate_engagement/
 	Engagement *EngagementData `json:"engagement,omitempty"`
+
+	RootAddress string `json:"root_address,omitempty"`
 }
 
 type EngagementData struct {
 	Engaging bool   `json:"engaging"`
-	Behavior string `json:"behavior,omitempty"`
 	IsBot    bool   `json:"is_bot"`
-}
-
-type v4EmailValidationResp struct {
-	IsValid             bool                   `json:"is_valid"`
-	MailboxVerification string                 `json:"mailbox_verification"`
-	Parts               EmailVerificationParts `json:"parts"`
-	Address             string                 `json:"address"`
-	DidYouMean          string                 `json:"did_you_mean"`
-	IsDisposableAddress bool                   `json:"is_disposable_address"`
-	IsRoleAddress       bool                   `json:"is_role_address"`
-	Reason              []string               `json:"reason"`
-	Risk                string                 `json:"risk"`
-	Result              string                 `json:"result"`
-	Engagement          *EngagementData        `json:"engagement,omitempty"`
-}
-
-type addressParseResult struct {
-	Parsed      []string `json:"parsed"`
-	Unparseable []string `json:"unparseable"`
+	Behavior string `json:"behavior,omitempty"`
 }
 
 type EmailValidator interface {
 	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error)
-	ParseAddresses(ctx context.Context, addresses ...string) ([]string, []string, error)
 }
 
 // TODO(v5): switch to MailgunImpl
@@ -148,10 +120,6 @@ func (m *EmailValidatorImpl) APIKey() string {
 // It may also be used to break an email address into its sub-components. If user has set the
 // TODO(v5): move to *MailgunImpl?
 func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
-	return m.validateV4(ctx, email, mailBoxVerify)
-}
-
-func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
 	r := newHTTPRequest(fmt.Sprintf("%s/v4/address/validate", m.APIBase()))
 	r.setClient(m.Client())
 	r.addParameter("address", email)
@@ -160,22 +128,10 @@ func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailB
 	}
 	r.setBasicAuth(basicAuthUser, m.APIKey())
 
-	var res v4EmailValidationResp
+	var res EmailVerification
 	err := getResponseFromJSON(ctx, r, &res)
 	if err != nil {
 		return EmailVerification{}, err
 	}
-	return EmailVerification{
-		IsValid:             res.IsValid,
-		MailboxVerification: res.MailboxVerification,
-		Parts:               res.Parts,
-		Address:             res.Address,
-		DidYouMean:          res.DidYouMean,
-		IsDisposableAddress: res.IsDisposableAddress,
-		IsRoleAddress:       res.IsRoleAddress,
-		Reasons:             res.Reason,
-		Result:              res.Result,
-		Risk:                res.Risk,
-		Engagement:          res.Engagement,
-	}, nil
+	return res, nil
 }
