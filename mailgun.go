@@ -28,7 +28,7 @@
 //
 // For example, the following iterates over all pages of events 100 items at a time
 //
-//	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+//	mg := mailgun.NewMailgun("your-api-key")
 //	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
 //
 //	// The entire operation should not take longer than 30 seconds
