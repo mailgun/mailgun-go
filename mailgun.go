@@ -238,7 +238,7 @@ type Mailgun interface {
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
-	SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+	GetSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
 	EnableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
 	DisableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
 

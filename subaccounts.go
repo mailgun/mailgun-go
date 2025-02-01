@@ -211,9 +211,9 @@ func (mg *MailgunImpl) CreateSubaccount(ctx context.Context, subaccountName stri
 	return resp, err
 }
 
-// SubaccountDetails retrieves detailed information about subaccount using subaccountId.
-func (mg *MailgunImpl) SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error) {
-	r := newHTTPRequest(generateSubaccountsApiUrl(mg) + "/" + subaccountId)
+// GetSubaccount retrieves detailed information about subaccount using subaccountID.
+func (mg *MailgunImpl) GetSubaccount(ctx context.Context, subaccountID string) (SubaccountResponse, error) {
+	r := newHTTPRequest(generateSubaccountsApiUrl(mg) + "/" + subaccountID)
 	r.setClient(mg.client)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -245,5 +245,5 @@ func (mg *MailgunImpl) DisableSubaccount(ctx context.Context, subaccountId strin
 }
 
 func generateSubaccountsApiUrl(m Mailgun) string {
-	return fmt.Sprintf("%s/v3/%s/%s", m.APIBase(), accountsEndpoint, subaccountsEndpoint)
+	return fmt.Sprintf("%s/v5/%s/%s", m.APIBase(), accountsEndpoint, subaccountsEndpoint)
 }
