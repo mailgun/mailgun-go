@@ -15,13 +15,13 @@ import (
 	"github.com/mailgun/mailgun-go/v4/events"
 )
 
-func ExampleEmailValidatorImpl_ValidateEmail() {
-	v := mailgun.NewEmailValidator("my_api_key")
+func ExampleMailgunImpl_ValidateEmail() {
+	mg := mailgun.NewMailgun("my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	ev, err := v.ValidateEmail(ctx, "joe@example.com", false)
+	ev, err := mg.ValidateEmail(ctx, "joe@example.com", false)
 	if err != nil {
 		log.Fatal(err)
 	}

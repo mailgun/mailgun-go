@@ -234,6 +234,8 @@ type Mailgun interface {
 	DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error
 	ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator
 
+	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (ValidateEmailResponse, error)
+
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
 	SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error)

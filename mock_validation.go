@@ -17,7 +17,7 @@ func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var results EmailVerification
+	var results ValidateEmailResponse
 	results.Address = r.FormValue("address")
 	results.Reason = []string{"no-reason"}
 	results.Risk = "unknown"

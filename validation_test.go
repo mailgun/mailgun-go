@@ -9,13 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestEmailValidationV4(t *testing.T) {
-	v := mailgun.NewEmailValidator(testKey)
-	v.SetAPIBase(server.URL())
+func TestValidateEmail(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
-	ev, err := v.ValidateEmail(ctx, "foo@mailgun.com", false)
+	ev, err := mg.ValidateEmail(ctx, "foo@mailgun.com", false)
 	require.NoError(t, err)
 
 	assert.False(t, ev.IsDisposableAddress)
