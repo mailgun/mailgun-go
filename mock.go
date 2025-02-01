@@ -134,6 +134,8 @@ func NewMockServer() MockServer {
 		ms.addBouncesRoutes(r)
 		ms.addCredentialsRoutes(r)
 		ms.addTagsRoutes(r)
+	})
+	r.Route("/v5", func(r chi.Router) {
 		ms.addSubaccountRoutes(r)
 	})
 	ms.addValidationRoutes(r)
