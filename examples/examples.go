@@ -608,13 +608,13 @@ func ListUnsubscribes(domain, apiKey string) ([]mailgun.Unsubscribe, error) {
 	return result, nil
 }
 
-func ValidateEmail(apiKey string) (mailgun.EmailVerification, error) {
-	mv := mailgun.NewEmailValidator(apiKey)
+func ValidateEmail(apiKey string) (mailgun.ValidateEmailResponse, error) {
+	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mv.ValidateEmail(ctx, "foo@mailgun.net", false)
+	return mg.ValidateEmail(ctx, "foo@mailgun.net", false)
 }
 
 func GetWebhook(domain, apiKey string) ([]string, error) {
