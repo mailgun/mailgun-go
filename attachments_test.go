@@ -26,12 +26,13 @@ func createAttachment(t *testing.T) string {
 }
 
 func TestMultipleAttachments(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	var ctx = context.Background()
 
-	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "attachment@"+testDomain)
+	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "attachment@"+testDomain)
 
 	// Add 2 attachments
 	m.AddAttachment(createAttachment(t))
@@ -56,7 +57,7 @@ func TestMultipleAttachments(t *testing.T) {
 }
 
 func findAcceptedMessage(mg mailgun.Mailgun, id string) (*events.Accepted, error) {
-	it := mg.ListEvents(nil)
+	it := mg.ListEvents(testDomain, nil)
 
 	var page []mailgun.Event
 	for it.Next(context.Background(), &page) {

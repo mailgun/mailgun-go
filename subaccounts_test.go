@@ -17,8 +17,9 @@ const (
 )
 
 func TestListSubaccounts(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	iterator := mg.ListSubaccounts(nil)
 	require.NotNil(t, iterator)
@@ -36,9 +37,10 @@ func TestListSubaccounts(t *testing.T) {
 	require.True(t, iterator.Total != 0)
 }
 
-func TestSubaccountDetails(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+func TestGetSubaccount(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
@@ -49,18 +51,19 @@ func TestSubaccountDetails(t *testing.T) {
 	require.True(t, iterator.Next(context.Background(), &page))
 	require.NoError(t, iterator.Err())
 
-	resp, err := mg.SubaccountDetails(ctx, page[0].Id)
+	resp, err := mg.GetSubaccount(ctx, page[0].Id)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 }
 
-func TestSubaccountDetailsStatusNotFound(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+func TestGetSubaccountStatusNotFound(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
-	_, err := mg.SubaccountDetails(ctx, "unexisting.id")
+	_, err = mg.GetSubaccount(ctx, "unexisting.id")
 	if err == nil {
 		t.Fatal("Did not expect a subaccount to exist")
 	}
@@ -70,8 +73,9 @@ func TestSubaccountDetailsStatusNotFound(t *testing.T) {
 }
 
 func TestCreateSubaccount(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
@@ -81,18 +85,20 @@ func TestCreateSubaccount(t *testing.T) {
 }
 
 func TestEnableSubaccountAlreadyEnabled(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
-	_, err := mg.EnableSubaccount(ctx, testEnabledSubaccountId)
+	_, err = mg.EnableSubaccount(ctx, testEnabledSubaccountId)
 	require.NoError(t, err)
 }
 
 func TestEnableSubaccount(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
@@ -102,8 +108,9 @@ func TestEnableSubaccount(t *testing.T) {
 }
 
 func TestDisableSubaccount(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
@@ -113,11 +120,12 @@ func TestDisableSubaccount(t *testing.T) {
 }
 
 func TestDisableSubaccountAlreadyDisabled(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
-	_, err := mg.DisableSubaccount(ctx, testDisabledSubaccountId)
+	_, err = mg.DisableSubaccount(ctx, testDisabledSubaccountId)
 	require.NoError(t, err)
 }

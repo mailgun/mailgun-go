@@ -2,7 +2,6 @@ package mailgun
 
 import (
 	"context"
-	"strings"
 
 	"github.com/mailgun/errors"
 )
@@ -22,32 +21,22 @@ type MetricsPagination struct {
 
 // ListMetrics returns domain/account metrics.
 //
-// NOTE: Only for v1 API. To use the /v1 version define MG_URL in the environment variable
-// as `https://api.mailgun.net/v1` or set `mg.SetAPIBase("https://api.mailgun.net/v1")`
+// To filter by domain:
+//
+//	opts.Filter.BoolGroupAnd = []mailgun.MetricsFilterPredicate{{
+//		Attribute:     "domain",
+//		Comparator:    "=",
+//		LabeledValues: []mailgun.MetricsLabeledValue{{Label: "example.com", Value: "example.com"}},
+//	}}
 //
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
 func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error) {
-	if !strings.HasSuffix(mg.APIBase(), "/v1") {
-		return nil, errors.New("only v1 API is supported")
-	}
-
-	domain := mg.Domain()
-	if domain != "" {
-		domainFilter := MetricsFilterPredicate{
-			Attribute:     "domain",
-			Comparator:    "=",
-			LabeledValues: []MetricsLabeledValue{{Label: domain, Value: domain}},
-		}
-
-		opts.Filter.BoolGroupAnd = append(opts.Filter.BoolGroupAnd, domainFilter)
-	}
-
 	if opts.Pagination.Limit == 0 {
 		opts.Pagination.Limit = 10
 	}
 
-	req := newHTTPRequest(generatePublicApiUrl(mg, metricsEndpoint))
-	req.setClient(mg.Client())
+	req := newHTTPRequest(generateApiUrl(mg, 1, metricsEndpoint))
+	req.setClient(mg.HTTPClient())
 	req.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	return &MetricsIterator{

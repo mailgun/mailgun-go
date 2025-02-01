@@ -50,14 +50,9 @@ type MemberListIterator struct {
 	err error
 }
 
-// Used by List methods to specify what list parameters to send to the mailgun API
-type ListOptions struct {
-	Limit int
-}
-
 func (mg *MailgunImpl) ListMembers(address string, opts *ListOptions) *MemberListIterator {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, address) + "/pages")
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
@@ -146,7 +141,7 @@ func (li *MemberListIterator) Previous(ctx context.Context, items *[]Member) boo
 func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
 	li.Lists = nil
 	r := newHTTPRequest(url)
-	r.setClient(li.mg.Client())
+	r.setClient(li.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 
 	return getResponseFromJSON(ctx, r, &li.memberListResponse)
@@ -156,7 +151,7 @@ func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
 // given only their subscription e-mail address.
 func (mg *MailgunImpl) GetMember(ctx context.Context, s, l string) (Member, error) {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	response, err := makeGetRequest(ctx, r)
 	if err != nil {
@@ -177,7 +172,7 @@ func (mg *MailgunImpl) CreateMember(ctx context.Context, merge bool, addr string
 	}
 
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr))
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := NewFormDataPayload()
 	p.addValue("upsert", yesNo(merge))
@@ -195,7 +190,7 @@ func (mg *MailgunImpl) CreateMember(ctx context.Context, merge bool, addr string
 // Address, Name, Vars, and Subscribed fields may be changed.
 func (mg *MailgunImpl) UpdateMember(ctx context.Context, s, l string, prototype Member) (Member, error) {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := NewFormDataPayload()
 	if prototype.Address != "" {
@@ -228,7 +223,7 @@ func (mg *MailgunImpl) UpdateMember(ctx context.Context, s, l string, prototype 
 // DeleteMember removes the member from the list.
 func (mg *MailgunImpl) DeleteMember(ctx context.Context, member, addr string) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + "/" + member)
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
@@ -245,7 +240,7 @@ func (mg *MailgunImpl) DeleteMember(ctx context.Context, member, addr string) er
 // Other fields are optional, but may be set according to your needs.
 func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []any) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
-	r.setClient(mg.Client())
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := NewFormDataPayload()
 	if u != nil {

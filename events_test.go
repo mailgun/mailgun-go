@@ -13,10 +13,11 @@ import (
 )
 
 func TestEventIteratorGetNext(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
-	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 5})
+	it := mg.ListEvents(testDomain, &mailgun.ListEventOptions{Limit: 5})
 
 	var firstPage, secondPage, previousPage []mailgun.Event
 	var ctx = context.Background()
@@ -62,11 +63,12 @@ func TestEventIteratorGetNext(t *testing.T) {
 }
 
 func TestEventPoller(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	// Very short poll interval
-	it := mg.PollEvents(&mailgun.ListEventOptions{
+	it := mg.PollEvents(testDomain, &mailgun.ListEventOptions{
 		// Only events with a timestamp after this date/time will be returned
 		Begin: time.Now().Add(time.Second * -3),
 		// How often we poll the api for new events
@@ -87,7 +89,7 @@ func TestEventPoller(t *testing.T) {
 	}()
 
 	// Send an email
-	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
+	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 
@@ -112,10 +114,10 @@ func TestEventPoller(t *testing.T) {
 }
 
 func ExampleMailgunImpl_ListEvents() {
-	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun("your-api-key")
+	_ = mg.SetAPIBase(server.URL())
 
-	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
+	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
 
 	var page []mailgun.Event
 
