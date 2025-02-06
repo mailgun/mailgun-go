@@ -24,14 +24,15 @@ func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var results v4EmailValidationResp
+	results.Risk = "unknown"
 	parts, err := mail.ParseAddress(r.FormValue("address"))
 	if err == nil {
+		results.Risk = "low"
 		results.Parts.Domain = strings.Split(parts.Address, "@")[1]
 		results.Parts.LocalPart = strings.Split(parts.Address, "@")[0]
 		results.Parts.DisplayName = parts.Name
 	}
 	results.Reason = []string{"no-reason"}
-	results.Risk = "low"
 	results.Result = "deliverable"
 	results.Engagement = &EngagementData{
 		Engaging: false,
