@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"net/http"
+	"net/mail"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -18,9 +19,12 @@ func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var results ValidateEmailResponse
-	results.Address = r.FormValue("address")
-	results.Reason = []string{"no-reason"}
 	results.Risk = "unknown"
+	_, err := mail.ParseAddress(r.FormValue("address"))
+	if err == nil {
+		results.Risk = "low"
+	}
+	results.Reason = []string{"no-reason"}
 	results.Result = "deliverable"
 	results.Engagement = &EngagementData{
 		Engaging: false,
