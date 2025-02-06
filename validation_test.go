@@ -23,7 +23,7 @@ func TestValidateEmail(t *testing.T) {
 	assert.False(t, ev.IsRoleAddress)
 	assert.True(t, len(ev.Reason) != 0)
 	assert.Equal(t, "no-reason", ev.Reason[0])
-	assert.Equal(t, "unknown", ev.Risk)
+	assert.Equal(t, "low", ev.Risk)
 	assert.Equal(t, "deliverable", ev.Result)
 	assert.Equal(t, "disengaged", ev.Engagement.Behavior)
 	assert.False(t, ev.Engagement.Engaging)
