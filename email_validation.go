@@ -24,6 +24,7 @@ type EmailVerificationParts struct {
 // See the ValidateEmail method and example for more details.
 type EmailVerification struct {
 	// Indicates whether an email address conforms to IETF RFC standards.
+	// Deprecated: use Risk instead.
 	IsValid bool `json:"is_valid"`
 	// Indicates whether an email address is deliverable.
 	MailboxVerification string `json:"mailbox_verification"`
@@ -44,7 +45,7 @@ type EmailVerification struct {
 	Reason string `json:"reason"`
 	// A list of potential reasons why a specific validation may be unsuccessful. (Available in the v4 response)
 	Reasons []string
-	// Risk assessment for the provided email.
+	// Risk assessment for the provided email: low/medium/high/unknown.
 	Risk string `json:"risk"`
 	// Result
 	Result string `json:"result"`
@@ -60,7 +61,6 @@ type EngagementData struct {
 }
 
 type v4EmailValidationResp struct {
-	IsValid             bool                   `json:"is_valid"`
 	MailboxVerification string                 `json:"mailbox_verification"`
 	Parts               EmailVerificationParts `json:"parts"`
 	Address             string                 `json:"address"`
@@ -195,7 +195,7 @@ func (m *EmailValidatorImpl) validateV4(ctx context.Context, email string, mailB
 		return EmailVerification{}, err
 	}
 	return EmailVerification{
-		IsValid:             res.IsValid,
+		IsValid:             res.Risk == "low",
 		MailboxVerification: res.MailboxVerification,
 		Parts:               res.Parts,
 		Address:             res.Address,
