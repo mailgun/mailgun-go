@@ -17,7 +17,6 @@ type DomainContainer struct {
 }
 
 func (ms *mockServer) addDomainRoutes(r chi.Router) {
-
 	ms.domainList = append(ms.domainList, DomainContainer{
 		Domain: Domain{
 			CreatedAt:    RFC2822Time(time.Now().UTC()),
@@ -88,15 +87,17 @@ func (ms *mockServer) addDomainRoutes(r chi.Router) {
 	r.Put("/v4/domains/{domain}", ms.updateDomain)
 	r.Put("/v4/domains/{domain}/verify", ms.getDomain)
 	r.Delete("/v3/domains/{domain}", ms.deleteDomain)
-	r.Get("/v4/domains/{domain}/connection", ms.getConnection)
-	r.Put("/v4/domains/{domain}/connection", ms.updateConnection)
-	r.Get("/v4/domains/{domain}/tracking", ms.getTracking)
-	r.Put("/v4/domains/{domain}/tracking/click", ms.updateClickTracking)
-	r.Put("/v4/domains/{domain}/tracking/open", ms.updateOpenTracking)
-	r.Put("/v4/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
-	r.Get("/v4/domains/{domain}/limits/tag", ms.getTagLimits)
-	r.Put("/v4/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
-	r.Put("/v4/domains/{domain}/web_prefix", ms.updateWebPrefix)
+
+	r.Get("/v3/domains/{domain}/connection", ms.getConnection)
+	r.Put("/v3/domains/{domain}/connection", ms.updateConnection)
+
+	r.Get("/v3/domains/{domain}/tracking", ms.getTracking)
+	r.Put("/v3/domains/{domain}/tracking/click", ms.updateClickTracking)
+	r.Put("/v3/domains/{domain}/tracking/open", ms.updateOpenTracking)
+	r.Put("/v3/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
+	r.Get("/v3/domains/{domain}/limits/tag", ms.getTagLimits)
+
+	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
 }
 
 func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
