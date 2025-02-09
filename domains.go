@@ -20,14 +20,22 @@ type SpamAction string
 
 // A Domain structure holds information about a domain used when sending mail.
 type Domain struct {
-	CreatedAt    RFC2822Time `json:"created_at"`
-	SMTPLogin    string      `json:"smtp_login"`
-	Name         string      `json:"name"`
-	SMTPPassword string      `json:"smtp_password"`
-	Wildcard     bool        `json:"wildcard"`
-	SpamAction   SpamAction  `json:"spam_action"`
-	State        string      `json:"state"`
-	WebScheme    string      `json:"web_scheme"`
+	CreatedAt                  string     `json:"created_at"`
+	ID                         string     `json:"id"`
+	IsDisabled                 bool       `json:"is_disabled"`
+	Name                       string     `json:"name"`
+	RequireTLS                 bool       `json:"require_tls"`
+	SkipVerification           bool       `json:"skip_verification"`
+	SMTPLogin                  string     `json:"smtp_login"`
+	SMTPPassword               string     `json:"smtp_password,omitempty"`
+	SpamAction                 SpamAction `json:"spam_action"`
+	State                      string     `json:"state"`
+	Type                       string     `json:"type"`
+	TrackingHost               string     `json:"tracking_host,omitempty"`
+	UseAutomaticSenderSecurity bool       `json:"use_automatic_sender_security"`
+	WebPrefix                  string     `json:"web_prefix"`
+	WebScheme                  string     `json:"web_scheme"`
+	Wildcard                   bool       `json:"wildcard"`
 }
 
 // DNSRecord structures describe intended records to properly configure your domain for use with Mailgun.
