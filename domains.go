@@ -288,7 +288,7 @@ type CreateDomainOptions struct {
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
 func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error) {
-	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint))
+	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
