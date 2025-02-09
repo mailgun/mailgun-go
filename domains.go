@@ -104,7 +104,7 @@ func (mg *MailgunImpl) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
 	}
 	return &DomainsIterator{
 		mg:                  mg,
-		url:                 generateApiUrl(mg, 3, domainsEndpoint),
+		url:                 generateApiUrl(mg, 4, domainsEndpoint),
 		domainsListResponse: domainsListResponse{TotalCount: -1},
 		limit:               limit,
 	}
