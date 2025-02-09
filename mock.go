@@ -121,7 +121,6 @@ func NewMockServer() MockServer {
 	r.Route("/v3", func(r chi.Router) {
 		ms.addIPRoutes(r)
 		ms.addExportRoutes(r)
-		ms.addDomainRoutes(r)
 		ms.addMailingListRoutes(r)
 		ms.addEventRoutes(r)
 		ms.addMessagesRoutes(r)
@@ -138,6 +137,7 @@ func NewMockServer() MockServer {
 	r.Route("/v5", func(r chi.Router) {
 		ms.addSubaccountRoutes(r)
 	})
+	ms.addDomainRoutes(r) // mix of v3 and v4
 	ms.addValidationRoutes(r)
 	ms.addAnalyticsRoutes(r)
 

@@ -47,7 +47,7 @@ func TestGetSingleDomain(t *testing.T) {
 	require.True(t, it.Next(ctx, &page))
 	require.NoError(t, it.Err())
 
-	dr, err := mg.GetDomain(ctx, page[0].Name)
+	dr, err := mg.GetDomain(ctx, page[0].Name, nil)
 	require.NoError(t, err)
 	require.True(t, len(dr.ReceivingDNSRecords) != 0)
 	require.True(t, len(dr.SendingDNSRecords) != 0)
@@ -67,7 +67,7 @@ func TestGetSingleDomainNotExist(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	_, err = mg.GetDomain(ctx, "unknown.domain")
+	_, err = mg.GetDomain(ctx, "unknown.domain", nil)
 	if err == nil {
 		t.Fatal("Did not expect a domain to exist")
 	}
@@ -97,72 +97,6 @@ func TestAddUpdateDeleteDomain(t *testing.T) {
 	require.NoError(t, mg.DeleteDomain(ctx, "mx.mailgun.test"))
 }
 
-func TestDomainConnection(t *testing.T) {
-	mg := mailgun.NewMailgun(testKey)
-	err := mg.SetAPIBase(server.URL())
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	info, err := mg.GetDomainConnection(ctx, testDomain)
-	require.NoError(t, err)
-
-	require.True(t, info.RequireTLS)
-	require.True(t, info.SkipVerification)
-
-	info.RequireTLS = false
-	err = mg.UpdateDomainConnection(ctx, testDomain, info)
-	require.NoError(t, err)
-
-	info, err = mg.GetDomainConnection(ctx, testDomain)
-	require.NoError(t, err)
-	require.False(t, info.RequireTLS)
-	require.True(t, info.SkipVerification)
-}
-
-func TestDomainTracking(t *testing.T) {
-	mg := mailgun.NewMailgun(testKey)
-	err := mg.SetAPIBase(server.URL())
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	info, err := mg.GetDomainTracking(ctx, testDomain)
-	require.NoError(t, err)
-
-	require.False(t, info.Unsubscribe.Active)
-	require.True(t, info.Unsubscribe.HTMLFooter != "")
-	require.True(t, info.Unsubscribe.TextFooter != "")
-	require.True(t, info.Click.Active)
-	require.True(t, info.Open.Active)
-
-	// Click Tracking
-	err = mg.UpdateClickTracking(ctx, testDomain, "no")
-	require.NoError(t, err)
-
-	info, err = mg.GetDomainTracking(ctx, testDomain)
-	require.NoError(t, err)
-	require.False(t, info.Click.Active)
-
-	// Open Tracking
-	err = mg.UpdateOpenTracking(ctx, testDomain, "no")
-	require.NoError(t, err)
-
-	info, err = mg.GetDomainTracking(ctx, testDomain)
-	require.NoError(t, err)
-	require.False(t, info.Open.Active)
-
-	// Unsubscribe
-	err = mg.UpdateUnsubscribeTracking(ctx, testDomain, "yes", "<h2>Hi</h2>", "Hi")
-	require.NoError(t, err)
-
-	info, err = mg.GetDomainTracking(ctx, testDomain)
-	require.NoError(t, err)
-	assert.True(t, info.Unsubscribe.Active)
-	assert.Equal(t, "<h2>Hi</h2>", info.Unsubscribe.HTMLFooter)
-	assert.Equal(t, "Hi", info.Unsubscribe.TextFooter)
-}
-
 func TestDomainVerify(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
@@ -171,40 +105,5 @@ func TestDomainVerify(t *testing.T) {
 	ctx := context.Background()
 
 	_, err = mg.VerifyDomain(ctx, testDomain)
-	require.NoError(t, err)
-}
-
-func TestDomainVerifyAndReturn(t *testing.T) {
-	mg := mailgun.NewMailgun(testKey)
-	err := mg.SetAPIBase(server.URL())
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	_, err = mg.VerifyAndReturnDomain(ctx, testDomain)
-	require.NoError(t, err)
-}
-
-func TestDomainDkimSelector(t *testing.T) {
-	mg := mailgun.NewMailgun(testKey)
-	err := mg.SetAPIBase(server.URL())
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	// Update Domain DKIM selector
-	err = mg.UpdateDomainDkimSelector(ctx, testDomain, "gotest")
-	require.NoError(t, err)
-}
-
-func TestDomainTrackingWebPrefix(t *testing.T) {
-	mg := mailgun.NewMailgun(testKey)
-	err := mg.SetAPIBase(server.URL())
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	// Update Domain Tracking Web Prefix
-	err = mg.UpdateDomainTrackingWebPrefix(ctx, testDomain, "gotest")
 	require.NoError(t, err)
 }

@@ -17,7 +17,6 @@ type DomainContainer struct {
 }
 
 func (ms *mockServer) addDomainRoutes(r chi.Router) {
-
 	ms.domainList = append(ms.domainList, DomainContainer{
 		Domain: Domain{
 			CreatedAt:    RFC2822Time(time.Now().UTC()),
@@ -82,25 +81,23 @@ func (ms *mockServer) addDomainRoutes(r chi.Router) {
 		},
 	})
 
-	r.Get("/domains", ms.listDomains)
-	r.Post("/domains", ms.createDomain)
-	r.Get("/domains/{domain}", ms.getDomain)
-	r.Put("/domains/{domain}", ms.updateDomain)
-	r.Put("/domains/{domain}/verify", ms.getDomain)
-	r.Delete("/domains/{domain}", ms.deleteDomain)
-	//r.Get("/domains/{domain}/credentials", ms.getCredentials)
-	//r.Post("/domains/{domain}/credentials", ms.createCredentials)
-	//r.Put("/domains/{domain}/credentials/{login}", ms.updateCredentials)
-	//r.Delete("/domains/{domain}/credentials/{login}", ms.deleteCredentials)
-	r.Get("/domains/{domain}/connection", ms.getConnection)
-	r.Put("/domains/{domain}/connection", ms.updateConnection)
-	r.Get("/domains/{domain}/tracking", ms.getTracking)
-	r.Put("/domains/{domain}/tracking/click", ms.updateClickTracking)
-	r.Put("/domains/{domain}/tracking/open", ms.updateOpenTracking)
-	r.Put("/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
-	r.Get("/domains/{domain}/limits/tag", ms.getTagLimits)
-	r.Put("/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
-	r.Put("/domains/{domain}/web_prefix", ms.updateWebPrefix)
+	r.Get("/v4/domains", ms.listDomains)
+	r.Post("/v4/domains", ms.createDomain)
+	r.Get("/v4/domains/{domain}", ms.getDomain)
+	r.Put("/v4/domains/{domain}", ms.updateDomain)
+	r.Put("/v4/domains/{domain}/verify", ms.getDomain)
+	r.Delete("/v3/domains/{domain}", ms.deleteDomain)
+
+	r.Get("/v3/domains/{domain}/connection", ms.getConnection)
+	r.Put("/v3/domains/{domain}/connection", ms.updateConnection)
+
+	r.Get("/v3/domains/{domain}/tracking", ms.getTracking)
+	r.Put("/v3/domains/{domain}/tracking/click", ms.updateClickTracking)
+	r.Put("/v3/domains/{domain}/tracking/open", ms.updateOpenTracking)
+	r.Put("/v3/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
+	r.Get("/v3/domains/{domain}/limits/tag", ms.getTagLimits)
+
+	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
 }
 
 func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {

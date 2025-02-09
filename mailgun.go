@@ -145,18 +145,21 @@ type Mailgun interface {
 	DeleteTag(ctx context.Context, domain, tag string) error
 	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
-	ListDomains(opts *ListOptions) *DomainsIterator
-	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
-	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error)
+	ListDomains(opts *ListDomainsOptions) *DomainsIterator
+	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (GetDomainResponse, error)
+	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (GetDomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
-	VerifyDomain(ctx context.Context, name string) (string, error)
-	VerifyAndReturnDomain(ctx context.Context, name string) (DomainResponse, error)
+	VerifyDomain(ctx context.Context, name string) (GetDomainResponse, error)
+
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
+
 	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)
 	UpdateClickTracking(ctx context.Context, domain, active string) error
 	UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error
 	UpdateOpenTracking(ctx context.Context, domain, active string) error
+
+	UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error
 
 	GetStoredMessage(ctx context.Context, url string) (StoredMessage, error)
 	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
