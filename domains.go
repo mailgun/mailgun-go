@@ -80,8 +80,12 @@ type domainTrackingResponse struct {
 	Tracking DomainTracking `json:"tracking"`
 }
 
+type ListDomainsOptions struct {
+	Limit int
+}
+
 // ListDomains retrieves a set of domains from Mailgun.
-func (mg *MailgunImpl) ListDomains(opts *ListOptions) *DomainsIterator {
+func (mg *MailgunImpl) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit

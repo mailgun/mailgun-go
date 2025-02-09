@@ -145,7 +145,7 @@ type Mailgun interface {
 	DeleteTag(ctx context.Context, domain, tag string) error
 	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
-	ListDomains(opts *ListOptions) *DomainsIterator
+	ListDomains(opts *ListDomainsOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
 	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
