@@ -16,6 +16,6 @@ func TestDomainDkimSelector(t *testing.T) {
 	ctx := context.Background()
 
 	// Update Domain DKIM selector
-	err = mg.UpdateDomainDkimSelector(ctx, testDomain, true)
+	err = mg.UpdateDomainDkimSelector(ctx, testDomain, "gotest")
 	require.NoError(t, err)
 }

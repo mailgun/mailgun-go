@@ -159,7 +159,7 @@ type Mailgun interface {
 	UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error
 	UpdateOpenTracking(ctx context.Context, domain, active string) error
 
-	UpdateDomainDkimSelector(ctx context.Context, domain string, self bool) error
+	UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error
 
 	GetStoredMessage(ctx context.Context, url string) (StoredMessage, error)
 	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
