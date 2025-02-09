@@ -406,7 +406,9 @@ func (mg *MailgunImpl) UpdateDomainDkimSelector(ctx context.Context, domain, dki
 	return err
 }
 
-// Update the CNAME used for tracking opens and clicks
+// UpdateDomainTrackingWebPrefix updates the CNAME used for tracking opens and clicks
+// Deprecated: Use UpdateDomainOptions use UpdateDomain
+// https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/PUT-v3-domains--name--web-prefix
 func (mg *MailgunImpl) UpdateDomainTrackingWebPrefix(ctx context.Context, domain, webPrefix string) error {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + domain + "/web_prefix")
 	r.setClient(mg.Client())
