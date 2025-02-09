@@ -264,7 +264,9 @@ func (mg *MailgunImpl) VerifyAndReturnDomain(ctx context.Context, domain string)
 	return resp, err
 }
 
-// Optional parameters when creating a domain
+// CreateDomainOptions - optional parameters when creating a domain
+// TODO(vtopc): support all fields
+//  https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/POST-v4-domains
 type CreateDomainOptions struct {
 	Password           string
 	SpamAction         SpamAction
@@ -309,7 +311,7 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 			payload.addValue("smtp_password", opts.Password)
 		}
 		if opts.WebScheme != "" {
-			payload.addValue("web_scheme", string(opts.WebScheme))
+			payload.addValue("web_scheme", opts.WebScheme)
 		}
 	}
 	var resp DomainResponse
