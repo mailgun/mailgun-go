@@ -8,11 +8,11 @@ import (
 
 // Use these to specify a spam action when creating a new domain.
 const (
-	// Tag the received message with headers providing a measure of its spamness.
+	// SpamActionTag tags the received message with headers providing a measure of its spamness.
 	SpamActionTag = SpamAction("tag")
-	// Prevents Mailgun from taking any action on what it perceives to be spam.
+	// SpamActionDisabled prevents Mailgun from taking any action on what it perceives to be spam.
 	SpamActionDisabled = SpamAction("disabled")
-	// instructs Mailgun to just block or delete the message all-together.
+	// SpamActionDelete instructs Mailgun to just block or delete the message all-together.
 	SpamActionDelete = SpamAction("delete")
 )
 
