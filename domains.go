@@ -41,14 +41,16 @@ type Domain struct {
 // DNSRecord structures describe intended records to properly configure your domain for use with Mailgun.
 // Note that Mailgun does not host DNS records.
 type DNSRecord struct {
-	Priority   string
-	RecordType string `json:"record_type"`
-	Valid      string
-	Name       string
-	Value      string
+	Active   bool     `json:"is_active"`
+	Cached   []string `json:"cached"`
+	Name     string   `json:"name,omitempty"`
+	Priority string   `json:"priority,omitempty"`
+	Type     string   `json:"record_type"`
+	Valid    string   `json:"valid"`
+	Value    string   `json:"value"`
 }
 
-type DomainResponse struct {
+type GetDomainResponse struct {
 	Domain              Domain      `json:"domain"`
 	ReceivingDNSRecords []DNSRecord `json:"receiving_dns_records"`
 	SendingDNSRecords   []DNSRecord `json:"sending_dns_records"`
@@ -244,11 +246,11 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 }
 
 // GetDomain retrieves detailed information about the named domain.
-func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (DomainResponse, error) {
-	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain)
+func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string) (GetDomainResponse, error) {
+	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp DomainResponse
+	var resp GetDomainResponse
 	err := getResponseFromJSON(ctx, r, &resp)
 	return resp, err
 }
@@ -259,19 +261,19 @@ func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (string,
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
-	var resp DomainResponse
+	var resp GetDomainResponse
 	err := putResponseFromJSON(ctx, r, payload, &resp)
 	return resp.Domain.State, err
 }
 
 // VerifyAndReturnDomain verifies & retrieves detailed information about the named domain.
-func (mg *MailgunImpl) VerifyAndReturnDomain(ctx context.Context, domain string) (DomainResponse, error) {
+func (mg *MailgunImpl) VerifyAndReturnDomain(ctx context.Context, domain string) (GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/verify")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
-	var resp DomainResponse
+	var resp GetDomainResponse
 	err := putResponseFromJSON(ctx, r, payload, &resp)
 	return resp, err
 }
@@ -295,7 +297,7 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error) {
+func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -326,7 +328,7 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 			payload.addValue("web_scheme", opts.WebScheme)
 		}
 	}
-	var resp DomainResponse
+	var resp GetDomainResponse
 	err := postResponseFromJSON(ctx, r, payload, &resp)
 	return resp, err
 }

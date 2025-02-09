@@ -146,11 +146,11 @@ type Mailgun interface {
 	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
 	ListDomains(opts *ListDomainsOptions) *DomainsIterator
-	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
-	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error)
+	GetDomain(ctx context.Context, domain string) (GetDomainResponse, error)
+	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (GetDomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
 	VerifyDomain(ctx context.Context, name string) (string, error)
-	VerifyAndReturnDomain(ctx context.Context, name string) (DomainResponse, error)
+	VerifyAndReturnDomain(ctx context.Context, name string) (GetDomainResponse, error)
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
 	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)

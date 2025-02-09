@@ -33,7 +33,7 @@ func TestInvalidBaseAPI(t *testing.T) {
 
 func TestValidBaseAPI(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		var resp mailgun.DomainResponse
+		var resp mailgun.GetDomainResponse
 		b, err := json.Marshal(resp)
 		require.NoError(t, err)
 
