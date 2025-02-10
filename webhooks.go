@@ -122,7 +122,12 @@ type WebhookPayload struct {
 
 // VerifyWebhookSignature - use this method to parse the webhook signature given as JSON in the webhook response
 func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err error) {
-	h := hmac.New(sha256.New, []byte(mg.WebhookSigningKey()))
+	webhookSigningKey := mg.WebhookSigningKey()
+	if webhookSigningKey == "" {
+		return false, fmt.Errorf("webhook signing key is not set")
+	}
+
+	h := hmac.New(sha256.New, []byte(webhookSigningKey))
 
 	_, err = io.WriteString(h, sig.TimeStamp)
 	if err != nil {
