@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
+	_ "github.com/mailgun/mailgun-go/v4/blah"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
