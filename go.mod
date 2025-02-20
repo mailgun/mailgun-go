@@ -3,7 +3,7 @@ module github.com/mailgun/mailgun-go/v4
 go 1.22
 
 require (
-	github.com/go-chi/chi/v5 v5.2.0
+	github.com/go-chi/chi/v5 v5.2.1
 	github.com/json-iterator/go v1.1.12
 	github.com/mailgun/errors v0.4.0
 	github.com/stretchr/testify v1.10.0
