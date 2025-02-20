@@ -10,8 +10,9 @@ import (
 )
 
 func TestListMetrics(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL1())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	start, _ := mailgun.NewRFC2822Time("Tue, 24 Sep 2024 00:00:00 +0000")
 	end, _ := mailgun.NewRFC2822Time("Tue, 24 Oct 2024 00:00:00 +0000")
@@ -23,6 +24,12 @@ func TestListMetrics(t *testing.T) {
 			Limit: 10,
 		},
 	}
+	// filter by domain
+	opts.Filter.BoolGroupAnd = []mailgun.MetricsFilterPredicate{{
+		Attribute:     "domain",
+		Comparator:    "=",
+		LabeledValues: []mailgun.MetricsLabeledValue{{Label: testDomain, Value: testDomain}},
+	}}
 
 	wantResp := mailgun.MetricsResponse{
 		Start:      start,

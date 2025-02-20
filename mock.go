@@ -17,8 +17,6 @@ import (
 
 type MockServer interface {
 	Stop()
-	URL1() string
-	URL4() string
 	URL() string
 	DomainIPS() []string
 	DomainList() []DomainContainer
@@ -47,7 +45,6 @@ type mockServer struct {
 	complaints       []Complaint
 	bounces          []Bounce
 	credentials      []Credential
-	stats            []Stats
 	tags             []Tag
 	subaccountList   []Subaccount
 	webhooks         WebHooksListResponse
@@ -124,7 +121,6 @@ func NewMockServer() MockServer {
 	r.Route("/v3", func(r chi.Router) {
 		ms.addIPRoutes(r)
 		ms.addExportRoutes(r)
-		ms.addDomainRoutes(r)
 		ms.addMailingListRoutes(r)
 		ms.addEventRoutes(r)
 		ms.addMessagesRoutes(r)
@@ -136,10 +132,12 @@ func NewMockServer() MockServer {
 		ms.addComplaintsRoutes(r)
 		ms.addBouncesRoutes(r)
 		ms.addCredentialsRoutes(r)
-		ms.addStatsRoutes(r)
 		ms.addTagsRoutes(r)
+	})
+	r.Route("/v5", func(r chi.Router) {
 		ms.addSubaccountRoutes(r)
 	})
+	ms.addDomainRoutes(r) // mix of v3 and v4
 	ms.addValidationRoutes(r)
 	ms.addAnalyticsRoutes(r)
 
@@ -153,17 +151,8 @@ func (ms *mockServer) Stop() {
 	ms.srv.Close()
 }
 
-func (ms *mockServer) URL1() string {
-	return ms.srv.URL + "/v1"
-}
-
-func (ms *mockServer) URL4() string {
-	return ms.srv.URL + "/v4"
-}
-
-// URL returns the URL used to connect to the mock server
 func (ms *mockServer) URL() string {
-	return ms.srv.URL + "/v3"
+	return ms.srv.URL
 }
 
 func toJSON(w http.ResponseWriter, obj any) {

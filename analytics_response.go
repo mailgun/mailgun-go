@@ -21,27 +21,25 @@ type MetricsAggregates struct {
 }
 
 type Metrics struct {
-	AcceptedIncomingCount   *uint64 `json:"accepted_incoming_count,omitempty"`
-	AcceptedOutgoingCount   *uint64 `json:"accepted_outgoing_count,omitempty"`
-	AcceptedCount           *uint64 `json:"accepted_count,omitempty"`
-	DeliveredSMTPCount      *uint64 `json:"delivered_smtp_count,omitempty"`
-	DeliveredHTTPCount      *uint64 `json:"delivered_http_count,omitempty"`
-	DeliveredOptimizedCount *uint64 `json:"delivered_optimized_count,omitempty"`
-	DeliveredCount          *uint64 `json:"delivered_count,omitempty"`
-	StoredCount             *uint64 `json:"stored_count,omitempty"`
-	ProcessedCount          *uint64 `json:"processed_count,omitempty"`
-	SentCount               *uint64 `json:"sent_count,omitempty"`
-	OpenedCount             *uint64 `json:"opened_count,omitempty"`
-	ClickedCount            *uint64 `json:"clicked_count,omitempty"`
-	UniqueOpenedCount       *uint64 `json:"unique_opened_count,omitempty"`
-	UniqueClickedCount      *uint64 `json:"unique_clicked_count,omitempty"`
-	UnsubscribedCount       *uint64 `json:"unsubscribed_count,omitempty"`
-	ComplainedCount         *uint64 `json:"complained_count,omitempty"`
-	FailedCount             *uint64 `json:"failed_count,omitempty"`
-	TemporaryFailedCount    *uint64 `json:"temporary_failed_count,omitempty"`
-	PermanentFailedCount    *uint64 `json:"permanent_failed_count,omitempty"`
-	// Deprecated: use TemporaryFailedESPBlockCount instead of ESPBlockCount
-	ESPBlockCount                 *uint64 `json:"esp_block_count,omitempty"`
+	AcceptedIncomingCount         *uint64 `json:"accepted_incoming_count,omitempty"`
+	AcceptedOutgoingCount         *uint64 `json:"accepted_outgoing_count,omitempty"`
+	AcceptedCount                 *uint64 `json:"accepted_count,omitempty"`
+	DeliveredSMTPCount            *uint64 `json:"delivered_smtp_count,omitempty"`
+	DeliveredHTTPCount            *uint64 `json:"delivered_http_count,omitempty"`
+	DeliveredOptimizedCount       *uint64 `json:"delivered_optimized_count,omitempty"`
+	DeliveredCount                *uint64 `json:"delivered_count,omitempty"`
+	StoredCount                   *uint64 `json:"stored_count,omitempty"`
+	ProcessedCount                *uint64 `json:"processed_count,omitempty"`
+	SentCount                     *uint64 `json:"sent_count,omitempty"`
+	OpenedCount                   *uint64 `json:"opened_count,omitempty"`
+	ClickedCount                  *uint64 `json:"clicked_count,omitempty"`
+	UniqueOpenedCount             *uint64 `json:"unique_opened_count,omitempty"`
+	UniqueClickedCount            *uint64 `json:"unique_clicked_count,omitempty"`
+	UnsubscribedCount             *uint64 `json:"unsubscribed_count,omitempty"`
+	ComplainedCount               *uint64 `json:"complained_count,omitempty"`
+	FailedCount                   *uint64 `json:"failed_count,omitempty"`
+	TemporaryFailedCount          *uint64 `json:"temporary_failed_count,omitempty"`
+	PermanentFailedCount          *uint64 `json:"permanent_failed_count,omitempty"`
 	TemporaryFailedESPBlockCount  *uint64 `json:"temporary_failed_esp_block_count,omitempty"`
 	PermanentFailedESPBlockCount  *uint64 `json:"permanent_failed_esp_block_count,omitempty"`
 	WebhookCount                  *uint64 `json:"webhook_count,omitempty"`

@@ -13,12 +13,11 @@ import (
 	"path"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/mailgun/errors"
 )
 
-var validURL = regexp.MustCompile(`/v[1-5].*`)
+var invalidURL = regexp.MustCompile(`/v\d+.*`)
 
 type httpRequest struct {
 	URL               string
@@ -27,9 +26,6 @@ type httpRequest struct {
 	BasicAuthUser     string
 	BasicAuthPassword string
 	Client            *http.Client
-
-	mu                 sync.RWMutex
-	capturedCurlOutput string
 }
 
 type httpResponse struct {
@@ -339,13 +335,7 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	}
 
 	if Debug {
-		if CaptureCurlOutput {
-			r.mu.Lock()
-			r.capturedCurlOutput = curlString(req, payload)
-			r.mu.Unlock()
-		} else {
-			fmt.Println(curlString(req, payload))
-		}
+		fmt.Println(curlString(req, payload))
 	}
 
 	resp, err := r.Client.Do(req)
@@ -378,10 +368,6 @@ func (r *httpRequest) generateUrlWithParameters() (string, error) {
 	uri, err := url.Parse(r.URL)
 	if err != nil {
 		return "", err
-	}
-
-	if !validURL.MatchString(uri.Path) {
-		return "", errors.New(`APIBase must end with a /v1, /v2, /v3 or /v4; SetAPIBase("https://host/v3")`)
 	}
 
 	q := uri.Query()

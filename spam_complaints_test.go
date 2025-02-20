@@ -11,12 +11,13 @@ import (
 )
 
 func TestGetComplaints(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 
-	it := mg.ListComplaints(nil)
+	it := mg.ListComplaints(testDomain, nil)
 	var page []mailgun.Complaint
 	for it.Next(ctx, &page) {
 	}
@@ -24,11 +25,13 @@ func TestGetComplaints(t *testing.T) {
 }
 
 func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
-	_, err := mg.GetComplaint(ctx, randomString(64, "")+"@example.com")
+	_, err = mg.GetComplaint(ctx, testDomain, randomString(64, "")+"@example.com")
 	require.NotNil(t, err)
 
 	var ure *mailgun.UnexpectedResponseError
@@ -37,13 +40,15 @@ func TestGetComplaintFromRandomNoComplaint(t *testing.T) {
 }
 
 func TestCreateDeleteComplaint(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
-		it := mg.ListComplaints(nil)
+		it := mg.ListComplaints(testDomain, nil)
 		require.NoError(t, it.Err())
 
 		var page []mailgun.Complaint
@@ -61,20 +66,22 @@ func TestCreateDeleteComplaint(t *testing.T) {
 	randomMail := strings.ToLower(randomString(64, "")) + "@example.com"
 	require.False(t, hasComplaint(randomMail))
 
-	require.NoError(t, mg.CreateComplaint(ctx, randomMail))
+	require.NoError(t, mg.CreateComplaint(ctx, testDomain, randomMail))
 	require.True(t, hasComplaint(randomMail))
-	require.NoError(t, mg.DeleteComplaint(ctx, randomMail))
+	require.NoError(t, mg.DeleteComplaint(ctx, testDomain, randomMail))
 	require.False(t, hasComplaint(randomMail))
 }
 
 func TestCreateDeleteComplaintList(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	var hasComplaint = func(email string) bool {
 		t.Logf("hasComplaint: %s\n", email)
-		it := mg.ListComplaints(nil)
+		it := mg.ListComplaints(testDomain, nil)
 		require.NoError(t, it.Err())
 
 		var page []mailgun.Complaint
@@ -95,11 +102,11 @@ func TestCreateDeleteComplaintList(t *testing.T) {
 		strings.ToLower(randomString(64, "")) + "@example3.com",
 	}
 
-	require.NoError(t, mg.CreateComplaints(ctx, addresses))
+	require.NoError(t, mg.CreateComplaints(ctx, testDomain, addresses))
 
 	for _, address := range addresses {
 		require.True(t, hasComplaint(address))
-		require.NoError(t, mg.DeleteComplaint(ctx, address))
+		require.NoError(t, mg.DeleteComplaint(ctx, testDomain, address))
 		require.False(t, hasComplaint(address))
 	}
 }
