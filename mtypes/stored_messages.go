@@ -31,7 +31,7 @@ type StoredMessage struct {
 // StoredAttachment structures contain information on an attachment associated with a stored message.
 type StoredAttachment struct {
 	Size        int    `json:"size"`
-	Url         string `json:"url"`
+	URL         string `json:"url"`
 	Name        string `json:"name"`
 	ContentType string `json:"content-type"`
 }
