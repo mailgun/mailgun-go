@@ -36,7 +36,7 @@ func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error
 }
 
 type MetricsIterator struct {
-	opts mtypes.MetricsRequest
+	opts MetricsOptions
 	req  *httpRequest
 	err  error
 }
