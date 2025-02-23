@@ -12,8 +12,6 @@ type ListDomainsOptions struct {
 	Limit int
 }
 
-type GetDomainOptions struct{}
-
 // ListDomains retrieves a set of domains from Mailgun.
 func (mg *MailgunImpl) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
 	var limit int
@@ -164,6 +162,8 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 
 	return getResponseFromJSON(ctx, r, &ri.ListDomainsResponse)
 }
+
+type GetDomainOptions struct{}
 
 // GetDomain retrieves detailed information about the named domain.
 func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string, _ *GetDomainOptions) (mtypes.GetDomainResponse, error) {
