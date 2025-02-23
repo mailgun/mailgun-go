@@ -436,6 +436,7 @@ func ptr[T any](v T) *T {
 	return &v
 }
 
+// TODO(vtopc): remove boolToString and use strconv.FormatBool() directly.
 func boolToString(b bool) string {
 	return strconv.FormatBool(b)
 }
