@@ -8,25 +8,6 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-// CreateDomainOptions - optional parameters when creating a domain
-// https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/POST-v4-domains
-// TODO(vtopc): support all fields
-type CreateDomainOptions struct {
-	Password           string
-	SpamAction         mtypes.SpamAction
-	Wildcard           bool
-	ForceDKIMAuthority bool
-	DKIMKeySize        int
-	IPS                []string
-	WebScheme          string
-}
-
-// UpdateDomainOptions options for updating a domain
-type UpdateDomainOptions struct {
-	WebScheme string
-	WebPrefix string
-}
-
 type ListDomainsOptions struct {
 	Limit int
 }
@@ -205,6 +186,19 @@ func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (mtypes.
 	return resp, err
 }
 
+// CreateDomainOptions - optional parameters when creating a domain
+// https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/POST-v4-domains
+// TODO(vtopc): support all fields
+type CreateDomainOptions struct {
+	Password           string
+	SpamAction         mtypes.SpamAction
+	Wildcard           bool
+	ForceDKIMAuthority bool
+	DKIMKeySize        int
+	IPS                []string
+	WebScheme          string
+}
+
 // CreateDomain instructs Mailgun to create a new domain for your account.
 // The name parameter identifies the domain.
 // The smtpPassword parameter provides an access credential for the domain.
@@ -254,6 +248,12 @@ func (mg *MailgunImpl) DeleteDomain(ctx context.Context, name string) error {
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
+}
+
+// UpdateDomainOptions options for updating a domain
+type UpdateDomainOptions struct {
+	WebScheme string
+	WebPrefix string
 }
 
 // UpdateDomain updates a domain's attributes.
