@@ -20,7 +20,7 @@ type StoredMessage struct {
 	Attachments       []StoredAttachment `json:"attachments"`
 	MessageUrl        string             `json:"message-url"`
 	ContentIDMap      map[string]struct {
-		Url         string `json:"url"`
+		URL         string `json:"url"`
 		ContentType string `json:"content-type"`
 		Name        string `json:"name"`
 		Size        int64  `json:"size"`
