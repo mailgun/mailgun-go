@@ -80,7 +80,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 // Debug set true to write the HTTP requests in curl for to stdout
@@ -134,35 +137,35 @@ type Mailgun interface {
 	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
 
 	ListBounces(domain string, opts *ListOptions) *BouncesIterator
-	GetBounce(ctx context.Context, domain, address string) (Bounce, error)
+	GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error)
 	AddBounce(ctx context.Context, domain, address, code, err string) error
 	DeleteBounce(ctx context.Context, domain, address string) error
 	DeleteBounceList(ctx context.Context, domain string) error
 
 	ListMetrics(opts MetricsOptions) (*MetricsIterator, error)
 
-	GetTag(ctx context.Context, domain, tag string) (Tag, error)
+	GetTag(ctx context.Context, domain, tag string) (mtypes.Tag, error)
 	DeleteTag(ctx context.Context, domain, tag string) error
 	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
 	ListDomains(opts *ListDomainsOptions) *DomainsIterator
-	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (GetDomainResponse, error)
-	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (GetDomainResponse, error)
+	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
+	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
-	VerifyDomain(ctx context.Context, name string) (GetDomainResponse, error)
+	VerifyDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
 
-	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
-	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
+	UpdateDomainConnection(ctx context.Context, domain string, dc mtypes.DomainConnection) error
+	GetDomainConnection(ctx context.Context, domain string) (mtypes.DomainConnection, error)
 
-	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)
+	GetDomainTracking(ctx context.Context, domain string) (mtypes.DomainTracking, error)
 	UpdateClickTracking(ctx context.Context, domain, active string) error
 	UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error
 	UpdateOpenTracking(ctx context.Context, domain, active string) error
 
 	UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error
 
-	GetStoredMessage(ctx context.Context, url string) (StoredMessage, error)
-	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
+	GetStoredMessage(ctx context.Context, url string) (mtypes.StoredMessage, error)
+	GetStoredMessageRaw(ctx context.Context, id string) (mtypes.StoredMessageRaw, error)
 	GetStoredAttachment(ctx context.Context, url string) ([]byte, error)
 
 	ListCredentials(domain string, opts *ListOptions) *CredentialsIterator
@@ -171,81 +174,81 @@ type Mailgun interface {
 	DeleteCredential(ctx context.Context, domain, login string) error
 
 	ListUnsubscribes(domain string, opts *ListOptions) *UnsubscribesIterator
-	GetUnsubscribe(ctx context.Context, domain, address string) (Unsubscribe, error)
+	GetUnsubscribe(ctx context.Context, domain, address string) (mtypes.Unsubscribe, error)
 	CreateUnsubscribe(ctx context.Context, domain, address, tag string) error
-	CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []Unsubscribe) error
+	CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []mtypes.Unsubscribe) error
 	DeleteUnsubscribe(ctx context.Context, domain, address string) error
 	DeleteUnsubscribeWithTag(ctx context.Context, domain, a, t string) error
 
 	ListComplaints(domain string, opts *ListOptions) *ComplaintsIterator
-	GetComplaint(ctx context.Context, domain, address string) (Complaint, error)
+	GetComplaint(ctx context.Context, domain, address string) (mtypes.Complaint, error)
 	CreateComplaint(ctx context.Context, domain, address string) error
 	CreateComplaints(ctx context.Context, domain string, addresses []string) error
 	DeleteComplaint(ctx context.Context, domain, address string) error
 
 	ListRoutes(opts *ListOptions) *RoutesIterator
-	GetRoute(ctx context.Context, address string) (Route, error)
-	CreateRoute(ctx context.Context, address Route) (Route, error)
+	GetRoute(ctx context.Context, address string) (mtypes.Route, error)
+	CreateRoute(ctx context.Context, address mtypes.Route) (mtypes.Route, error)
 	DeleteRoute(ctx context.Context, address string) error
-	UpdateRoute(ctx context.Context, address string, r Route) (Route, error)
+	UpdateRoute(ctx context.Context, address string, r mtypes.Route) (mtypes.Route, error)
 
 	ListWebhooks(ctx context.Context, domain string) (map[string][]string, error)
 	CreateWebhook(ctx context.Context, domain, kind string, url []string) error
 	DeleteWebhook(ctx context.Context, domain, kind string) error
 	GetWebhook(ctx context.Context, domain, kind string) ([]string, error)
 	UpdateWebhook(ctx context.Context, domain, kind string, url []string) error
-	VerifyWebhookSignature(sig Signature) (verified bool, err error)
+	VerifyWebhookSignature(sig mtypes.Signature) (verified bool, err error)
 
 	ListMailingLists(opts *ListOptions) *ListsIterator
-	CreateMailingList(ctx context.Context, address MailingList) (MailingList, error)
+	CreateMailingList(ctx context.Context, address mtypes.MailingList) (mtypes.MailingList, error)
 	DeleteMailingList(ctx context.Context, address string) error
-	GetMailingList(ctx context.Context, address string) (MailingList, error)
-	UpdateMailingList(ctx context.Context, address string, ml MailingList) (MailingList, error)
+	GetMailingList(ctx context.Context, address string) (mtypes.MailingList, error)
+	UpdateMailingList(ctx context.Context, address string, ml mtypes.MailingList) (mtypes.MailingList, error)
 
 	ListMembers(address string, opts *ListOptions) *MemberListIterator
-	GetMember(ctx context.Context, MemberAddr, listAddr string) (Member, error)
-	CreateMember(ctx context.Context, merge bool, addr string, prototype Member) error
+	GetMember(ctx context.Context, MemberAddr, listAddr string) (mtypes.Member, error)
+	CreateMember(ctx context.Context, merge bool, addr string, prototype mtypes.Member) error
 	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []any) error
-	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
+	UpdateMember(ctx context.Context, Member, list string, prototype mtypes.Member) (mtypes.Member, error)
 	DeleteMember(ctx context.Context, Member, list string) error
 
 	ListEvents(domain string, opts *ListEventOptions) *EventIterator
 	PollEvents(domain string, opts *ListEventOptions) *EventPoller
 
-	ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error)
-	GetIP(ctx context.Context, ip string) (IPAddress, error)
-	ListDomainIPS(ctx context.Context, domain string) ([]IPAddress, error)
+	ListIPS(ctx context.Context, dedicated bool) ([]mtypes.IPAddress, error)
+	GetIP(ctx context.Context, ip string) (mtypes.IPAddress, error)
+	ListDomainIPS(ctx context.Context, domain string) ([]mtypes.IPAddress, error)
 	AddDomainIP(ctx context.Context, domain, ip string) error
 	DeleteDomainIP(ctx context.Context, domain, ip string) error
 
-	ListExports(ctx context.Context, url string) ([]Export, error)
-	GetExport(ctx context.Context, id string) (Export, error)
+	ListExports(ctx context.Context, url string) ([]mtypes.Export, error)
+	GetExport(ctx context.Context, id string) (mtypes.Export, error)
 	GetExportLink(ctx context.Context, id string) (string, error)
 	CreateExport(ctx context.Context, url string) error
 
-	GetTagLimits(ctx context.Context, domain string) (TagLimits, error)
+	GetTagLimits(ctx context.Context, domain string) (mtypes.TagLimits, error)
 
-	CreateTemplate(ctx context.Context, domain string, template *Template) error
-	GetTemplate(ctx context.Context, domain, name string) (Template, error)
-	UpdateTemplate(ctx context.Context, domain string, template *Template) error
+	CreateTemplate(ctx context.Context, domain string, template *mtypes.Template) error
+	GetTemplate(ctx context.Context, domain, name string) (mtypes.Template, error)
+	UpdateTemplate(ctx context.Context, domain string, template *mtypes.Template) error
 	DeleteTemplate(ctx context.Context, domain, name string) error
 	ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator
 
-	AddTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error
-	GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (TemplateVersion, error)
-	UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error
+	AddTemplateVersion(ctx context.Context, domain, templateName string, version *mtypes.TemplateVersion) error
+	GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (mtypes.TemplateVersion, error)
+	UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *mtypes.TemplateVersion) error
 	DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error
 	ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator
 
-	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (ValidateEmailResponse, error)
+	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (mtypes.ValidateEmailResponse, error)
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
-	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
-	GetSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
-	EnableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
-	DisableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+	CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error)
+	GetSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
+	EnableSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
+	DisableSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
 
-	SetOnBehalfOfSubaccount(subaccountId string)
+	SetOnBehalfOfSubaccount(subaccountID string)
 	RemoveOnBehalfOfSubaccount()
 }
 
@@ -369,6 +372,11 @@ type ListOptions struct {
 	Limit int
 }
 
+// TimeToFloat given time.Time{} return a float64 as given in mailgun event timestamps
+func TimeToFloat(t time.Time) float64 {
+	return float64(t.Unix()) + (float64(t.Nanosecond()/int(time.Microsecond)) / float64(1000000))
+}
+
 // TODO(vtopc): sort all these generate URL functions(some are generateApi...Url, other are generate...ApiUrl)
 
 func generateApiUrlWithDomain(m Mailgun, version int, endpoint, domain string) string {
@@ -426,4 +434,9 @@ func formatMailgunTime(t time.Time) string {
 
 func ptr[T any](v T) *T {
 	return &v
+}
+
+// TODO(vtopc): remove boolToString and use strconv.FormatBool() directly.
+func boolToString(b bool) string {
+	return strconv.FormatBool(b)
 }

@@ -4,20 +4,10 @@ import (
 	"context"
 
 	"github.com/mailgun/errors"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-type MetricsPagination struct {
-	// Colon-separated value indicating column name and sort direction e.g. 'domain:asc'.
-	Sort string `json:"sort"`
-	// The number of items to skip over when satisfying the request.
-	// To get the first page of data set skip to zero.
-	// Then increment the skip by the limit for subsequent calls.
-	Skip int `json:"skip"`
-	// The maximum number of items returned in the response.
-	Limit int `json:"limit"`
-	// The total number of items in the query result set.
-	Total int `json:"total"`
-}
+type MetricsOptions = mtypes.MetricsRequest
 
 // ListMetrics returns domain/account metrics.
 //
@@ -58,7 +48,7 @@ func (iter *MetricsIterator) Err() error {
 // Next retrieves the next page of items from the api. Returns false when there are
 // no more pages to retrieve or if there was an error.
 // Use `.Err()` to retrieve the error
-func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) (more bool) {
+func (iter *MetricsIterator) Next(ctx context.Context, resp *mtypes.MetricsResponse) (more bool) {
 	if iter.err != nil {
 		return false
 	}
@@ -73,7 +63,7 @@ func (iter *MetricsIterator) Next(ctx context.Context, resp *MetricsResponse) (m
 	return len(resp.Items) == iter.opts.Pagination.Limit
 }
 
-func (iter *MetricsIterator) fetch(ctx context.Context, resp *MetricsResponse) error {
+func (iter *MetricsIterator) fetch(ctx context.Context, resp *mtypes.MetricsResponse) error {
 	if resp == nil {
 		return errors.New("resp cannot be nil")
 	}
@@ -86,7 +76,7 @@ func (iter *MetricsIterator) fetch(ctx context.Context, resp *MetricsResponse) e
 	}
 
 	// preallocate
-	resp.Items = make([]MetricsItem, 0, iter.opts.Pagination.Limit)
+	resp.Items = make([]mtypes.MetricsItem, 0, iter.opts.Pagination.Limit)
 
 	err = httpResp.parseFromJSON(resp)
 	if err != nil {

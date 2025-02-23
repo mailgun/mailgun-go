@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -86,7 +87,7 @@ func TestVerifyWebhookSignature(t *testing.T) {
 
 	for _, v := range signedTests {
 		fields := getSignatureFields(mg.WebhookSigningKey(), v)
-		sig := mailgun.Signature{
+		sig := mtypes.Signature{
 			TimeStamp: fields["timestamp"],
 			Token:     fields["token"],
 			Signature: fields["signature"],

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addComplaintsRoutes(r chi.Router) {
@@ -17,13 +18,13 @@ func (ms *mockServer) addComplaintsRoutes(r chi.Router) {
 	r.Delete("/{domain}/complaints/{address}", ms.deleteComplaint)
 	r.Post("/{domain}/complaints", ms.createComplaint)
 
-	ms.complaints = append(ms.complaints, Complaint{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.complaints = append(ms.complaints, mtypes.Complaint{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Address:   "foo@mailgun.test",
 	})
 
-	ms.complaints = append(ms.complaints, Complaint{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.complaints = append(ms.complaints, mtypes.Complaint{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Address:   "alice@example.com",
 	})
 }
@@ -54,20 +55,20 @@ func (ms *mockServer) listComplaints(w http.ResponseWriter, r *http.Request) {
 	}
 	start, end := pageOffsets(idx, page, pivot, limit)
 	var nextAddress, prevAddress string
-	var results []Complaint
+	var results []mtypes.Complaint
 
 	if start != end {
 		results = ms.complaints[start:end]
 		nextAddress = results[len(results)-1].Address
 		prevAddress = results[0].Address
 	} else {
-		results = []Complaint{}
+		results = []mtypes.Complaint{}
 		nextAddress = pivot
 		prevAddress = pivot
 	}
 
-	toJSON(w, complaintsResponse{
-		Paging: Paging{
+	toJSON(w, mtypes.ComplaintsResponse{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -105,7 +106,7 @@ func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var complaints []Complaint
+	var complaints []mtypes.Complaint
 	if r.Header.Get("Content-Type") == "application/json" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -134,7 +135,7 @@ func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		complaints = append(complaints, Complaint{Address: address, CreatedAt: RFC2822Time(time.Now())})
+		complaints = append(complaints, mtypes.Complaint{Address: address, CreatedAt: mtypes.RFC2822Time(time.Now())})
 	}
 
 	for _, complaint := range complaints {
@@ -146,7 +147,7 @@ func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !addressExist {
-			complaint.CreatedAt = RFC2822Time(time.Now())
+			complaint.CreatedAt = mtypes.RFC2822Time(time.Now())
 			ms.complaints = append(ms.complaints, complaint)
 		}
 	}

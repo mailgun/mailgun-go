@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,7 +27,7 @@ func TestListSubaccounts(t *testing.T) {
 
 	ctx := context.Background()
 
-	var page []mailgun.Subaccount
+	var page []mtypes.Subaccount
 	for iterator.Next(ctx, &page) {
 		for _, d := range page {
 			t.Logf("TestListSubaccounts: %#v\n", d)
@@ -47,11 +48,11 @@ func TestGetSubaccount(t *testing.T) {
 	iterator := mg.ListSubaccounts(nil)
 	require.NotNil(t, iterator)
 
-	page := make([]mailgun.Subaccount, 0, 1)
+	page := make([]mtypes.Subaccount, 0, 1)
 	require.True(t, iterator.Next(context.Background(), &page))
 	require.NoError(t, iterator.Err())
 
-	resp, err := mg.GetSubaccount(ctx, page[0].Id)
+	resp, err := mg.GetSubaccount(ctx, page[0].ID)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 }

@@ -11,21 +11,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
-
-type UrlOrUrls struct {
-	Urls []string `json:"urls"`
-	Url  string   `json:"url"`
-}
-
-type WebHooksListResponse struct {
-	Webhooks map[string]UrlOrUrls `json:"webhooks"`
-}
-
-type WebHookResponse struct {
-	Webhook UrlOrUrls `json:"webhook"`
-}
 
 // ListWebhooks returns the complete set of webhooks configured for your domain.
 // Note that a zero-length mapping is not an error.
@@ -34,7 +21,7 @@ func (mg *MailgunImpl) ListWebhooks(ctx context.Context, domain string) (map[str
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var body WebHooksListResponse
+	var body mtypes.WebHooksListResponse
 	err := getResponseFromJSON(ctx, r, &body)
 	if err != nil {
 		return nil, err
@@ -80,7 +67,7 @@ func (mg *MailgunImpl) GetWebhook(ctx context.Context, domain, name string) ([]s
 	r := newHTTPRequest(generateV3DomainsApiUrl(mg, webhooksEndpoint, domain) + "/" + name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var body WebHookResponse
+	var body mtypes.WebHookResponse
 	if err := getResponseFromJSON(ctx, r, &body); err != nil {
 		return nil, err
 	}
@@ -107,21 +94,8 @@ func (mg *MailgunImpl) UpdateWebhook(ctx context.Context, domain, name string, u
 	return err
 }
 
-// Signature represents the signature portion of the webhook POST body
-type Signature struct {
-	TimeStamp string `json:"timestamp"`
-	Token     string `json:"token"`
-	Signature string `json:"signature"`
-}
-
-// WebhookPayload represents the JSON payload provided when a Webhook is called by mailgun
-type WebhookPayload struct {
-	Signature Signature      `json:"signature"`
-	EventData events.RawJSON `json:"event-data"`
-}
-
 // VerifyWebhookSignature - use this method to parse the webhook signature given as JSON in the webhook response
-func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err error) {
+func (mg *MailgunImpl) VerifyWebhookSignature(sig mtypes.Signature) (verified bool, err error) {
 	webhookSigningKey := mg.WebhookSigningKey()
 	if webhookSigningKey == "" {
 		return false, fmt.Errorf("webhook signing key is not set")

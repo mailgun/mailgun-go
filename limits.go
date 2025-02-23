@@ -1,18 +1,17 @@
 package mailgun
 
-import "context"
+import (
+	"context"
 
-type TagLimits struct {
-	Limit int `json:"limit"`
-	Count int `json:"count"`
-}
+	"github.com/mailgun/mailgun-go/v4/mtypes"
+)
 
 // GetTagLimits returns tracking settings for a domain
-func (mg *MailgunImpl) GetTagLimits(ctx context.Context, domain string) (TagLimits, error) {
+func (mg *MailgunImpl) GetTagLimits(ctx context.Context, domain string) (mtypes.TagLimits, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/limits/tag")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp TagLimits
+	var resp mtypes.TagLimits
 	err := getResponseFromJSON(ctx, r, &resp)
 	return resp, err
 }

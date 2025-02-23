@@ -3,31 +3,13 @@ package mailgun
 import (
 	"context"
 	"strconv"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-// Bounce aggregates data relating to undeliverable messages to a specific intended recipient,
-// identified by Address.
-type Bounce struct {
-	// The time at which Mailgun detected the bounce.
-	CreatedAt RFC2822Time `json:"created_at"`
-	// Code provides the SMTP error code that caused the bounce
-	Code string `json:"code"`
-	// Address the bounce is for
-	Address string `json:"address"`
-	// human readable reason why
-	Error string `json:"error"`
-}
-
-type Paging struct {
-	First    string `json:"first,omitempty"`
-	Next     string `json:"next,omitempty"`
-	Previous string `json:"previous,omitempty"`
-	Last     string `json:"last,omitempty"`
-}
-
 type bouncesListResponse struct {
-	Items  []Bounce `json:"items"`
-	Paging Paging   `json:"paging"`
+	Items  []mtypes.Bounce `json:"items"`
+	Paging mtypes.Paging   `json:"paging"`
 }
 
 // ListBounces returns a complete set of bounces logged against the sender's domain, if any.
@@ -46,7 +28,7 @@ func (mg *MailgunImpl) ListBounces(domain string, opts *ListOptions) *BouncesIte
 	url, err := r.generateUrlWithParameters()
 	return &BouncesIterator{
 		mg:                  mg,
-		bouncesListResponse: bouncesListResponse{Paging: Paging{Next: url, First: url}},
+		bouncesListResponse: bouncesListResponse{Paging: mtypes.Paging{Next: url, First: url}},
 		err:                 err,
 	}
 }
@@ -57,7 +39,7 @@ type BouncesIterator struct {
 	err error
 }
 
-// If an error occurred during iteration `Err()` will return non nil
+// Err if an error occurred during iteration `Err()` will return non nil
 func (ci *BouncesIterator) Err() error {
 	return ci.err
 }
@@ -65,7 +47,7 @@ func (ci *BouncesIterator) Err() error {
 // Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) Next(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -73,7 +55,7 @@ func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 
@@ -83,7 +65,7 @@ func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) First(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -91,7 +73,7 @@ func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 	return true
@@ -101,7 +83,7 @@ func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) Last(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -109,7 +91,7 @@ func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 	return true
@@ -118,7 +100,7 @@ func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
 // Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) Previous(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -129,7 +111,7 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 
@@ -146,12 +128,12 @@ func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
 }
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
-func (mg *MailgunImpl) GetBounce(ctx context.Context, domain, address string) (Bounce, error) {
+func (mg *MailgunImpl) GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error) {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var response Bounce
+	var response mtypes.Bounce
 	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }
@@ -190,7 +172,7 @@ func (mg *MailgunImpl) AddBounce(ctx context.Context, domain, address, code, bou
 }
 
 // Add Bounces adds a list of bounces to the bounce list
-func (mg *MailgunImpl) AddBounces(ctx context.Context, domain string, bounces []Bounce) error {
+func (mg *MailgunImpl) AddBounces(ctx context.Context, domain string, bounces []mtypes.Bounce) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

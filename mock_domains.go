@@ -5,47 +5,48 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 type DomainContainer struct {
-	Domain              Domain            `json:"domain"`
-	ReceivingDNSRecords []DNSRecord       `json:"receiving_dns_records"`
-	SendingDNSRecords   []DNSRecord       `json:"sending_dns_records"`
-	Connection          *DomainConnection `json:"connection,omitempty"`
-	Tracking            *DomainTracking   `json:"tracking,omitempty"`
-	TagLimits           *TagLimits        `json:"limits,omitempty"`
+	Domain              mtypes.Domain            `json:"domain"`
+	ReceivingDNSRecords []mtypes.DNSRecord       `json:"receiving_dns_records"`
+	SendingDNSRecords   []mtypes.DNSRecord       `json:"sending_dns_records"`
+	Connection          *mtypes.DomainConnection `json:"connection,omitempty"`
+	Tracking            *mtypes.DomainTracking   `json:"tracking,omitempty"`
+	TagLimits           *mtypes.TagLimits        `json:"limits,omitempty"`
 }
 
 func (ms *mockServer) addDomainRoutes(r chi.Router) {
 	ms.domainList = append(ms.domainList, DomainContainer{
-		Domain: Domain{
-			CreatedAt:    RFC2822Time(time.Now().UTC()),
+		Domain: mtypes.Domain{
+			CreatedAt:    mtypes.RFC2822Time(time.Now().UTC()),
 			Name:         "mailgun.test",
 			SMTPLogin:    "postmaster@mailgun.test",
 			SMTPPassword: "4rtqo4p6rrx9",
 			Wildcard:     true,
-			SpamAction:   SpamActionDisabled,
+			SpamAction:   mtypes.SpamActionDisabled,
 			State:        "active",
 			WebScheme:    "http",
 		},
-		Connection: &DomainConnection{
+		Connection: &mtypes.DomainConnection{
 			RequireTLS:       true,
 			SkipVerification: true,
 		},
-		TagLimits: &TagLimits{
+		TagLimits: &mtypes.TagLimits{
 			Limit: 50000,
 			Count: 5000,
 		},
-		Tracking: &DomainTracking{
-			Click: TrackingStatus{Active: true},
-			Open:  TrackingStatus{Active: true},
-			Unsubscribe: TrackingStatus{
+		Tracking: &mtypes.DomainTracking{
+			Click: mtypes.TrackingStatus{Active: true},
+			Open:  mtypes.TrackingStatus{Active: true},
+			Unsubscribe: mtypes.TrackingStatus{
 				Active:     false,
 				HTMLFooter: "\n<br>\n<p><a href=\"%unsubscribe_url%\">unsubscribe</a></p>\n",
 				TextFooter: "\n\nTo unsubscribe click: <%unsubscribe_url%>\n\n",
 			},
 		},
-		ReceivingDNSRecords: []DNSRecord{
+		ReceivingDNSRecords: []mtypes.DNSRecord{
 			{
 				Priority:   "10",
 				RecordType: "MX",
@@ -59,7 +60,7 @@ func (ms *mockServer) addDomainRoutes(r chi.Router) {
 				Value:      "mxb.mailgun.org",
 			},
 		},
-		SendingDNSRecords: []DNSRecord{
+		SendingDNSRecords: []mtypes.DNSRecord{
 			{
 				RecordType: "TXT",
 				Valid:      "valid",
@@ -104,7 +105,7 @@ func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var list []Domain
+	var list []mtypes.Domain
 	for _, domain := range ms.domainList {
 		list = append(list, domain.Domain)
 	}
@@ -126,14 +127,14 @@ func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
 
 	// If we are at the end of the list
 	if skip == end {
-		toJSON(w, domainsListResponse{
+		toJSON(w, mtypes.ListDomainsResponse{
 			TotalCount: len(list),
-			Items:      []Domain{},
+			Items:      []mtypes.Domain{},
 		})
 		return
 	}
 
-	toJSON(w, domainsListResponse{
+	toJSON(w, mtypes.ListDomainsResponse{
 		TotalCount: len(list),
 		Items:      list[skip:end],
 	})
@@ -159,13 +160,13 @@ func (ms *mockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	ms.domainList = append(ms.domainList, DomainContainer{
-		Domain: Domain{
-			CreatedAt:    RFC2822Time(time.Now()),
+		Domain: mtypes.Domain{
+			CreatedAt:    mtypes.RFC2822Time(time.Now()),
 			Name:         r.FormValue("name"),
 			SMTPLogin:    r.FormValue("smtp_login"),
 			SMTPPassword: r.FormValue("smtp_password"),
 			Wildcard:     stringToBool(r.FormValue("wildcard")),
-			SpamAction:   SpamAction(r.FormValue("spam_action")),
+			SpamAction:   mtypes.SpamAction(r.FormValue("spam_action")),
 			State:        "active",
 			WebScheme:    "http",
 		},
@@ -214,7 +215,7 @@ func (ms *mockServer) getConnection(w http.ResponseWriter, r *http.Request) {
 
 	for _, d := range ms.domainList {
 		if d.Domain.Name == chi.URLParam(r, "domain") {
-			resp := domainConnectionResponse{
+			resp := mtypes.DomainConnectionResponse{
 				Connection: *d.Connection,
 			}
 			toJSON(w, resp)
@@ -231,7 +232,7 @@ func (ms *mockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
 
 	for i, d := range ms.domainList {
 		if d.Domain.Name == chi.URLParam(r, "domain") {
-			ms.domainList[i].Connection = &DomainConnection{
+			ms.domainList[i].Connection = &mtypes.DomainConnection{
 				RequireTLS:       stringToBool(r.FormValue("require_tls")),
 				SkipVerification: stringToBool(r.FormValue("skip_verification")),
 			}
@@ -249,7 +250,7 @@ func (ms *mockServer) getTracking(w http.ResponseWriter, r *http.Request) {
 
 	for _, d := range ms.domainList {
 		if d.Domain.Name == chi.URLParam(r, "domain") {
-			resp := domainTrackingResponse{
+			resp := mtypes.DomainTrackingResponse{
 				Tracking: *d.Tracking,
 			}
 			toJSON(w, resp)

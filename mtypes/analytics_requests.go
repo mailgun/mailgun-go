@@ -1,6 +1,6 @@
-package mailgun
+package mtypes
 
-type MetricsOptions struct {
+type MetricsRequest struct {
 	// A start date (default: 7 days before current time).
 	Start RFC2822Time `json:"start,omitempty"`
 	// An end date (default: current time).

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addUnsubscribesRoutes(r chi.Router) {
@@ -17,15 +18,15 @@ func (ms *mockServer) addUnsubscribesRoutes(r chi.Router) {
 	r.Delete("/{domain}/unsubscribes/{address}", ms.deleteUnsubscribe)
 	r.Post("/{domain}/unsubscribes", ms.createUnsubscribe)
 
-	ms.unsubscribes = append(ms.unsubscribes, Unsubscribe{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.unsubscribes = append(ms.unsubscribes, mtypes.Unsubscribe{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Tags:      []string{"*"},
 		ID:        "1",
 		Address:   "foo@mailgun.test",
 	})
 
-	ms.unsubscribes = append(ms.unsubscribes, Unsubscribe{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.unsubscribes = append(ms.unsubscribes, mtypes.Unsubscribe{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Tags:      []string{"some", "tag"},
 		ID:        "2",
 		Address:   "alice@example.com",
@@ -58,20 +59,20 @@ func (ms *mockServer) listUnsubscribes(w http.ResponseWriter, r *http.Request) {
 	}
 	start, end := pageOffsets(idx, page, pivot, limit)
 	var nextAddress, prevAddress string
-	var results []Unsubscribe
+	var results []mtypes.Unsubscribe
 
 	if start != end {
 		results = ms.unsubscribes[start:end]
 		nextAddress = results[len(results)-1].Address
 		prevAddress = results[0].Address
 	} else {
-		results = []Unsubscribe{}
+		results = []mtypes.Unsubscribe{}
 		nextAddress = pivot
 		prevAddress = pivot
 	}
 
-	toJSON(w, unsubscribesResponse{
-		Paging: Paging{
+	toJSON(w, mtypes.ListUnsubscribesResponse{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -109,7 +110,7 @@ func (ms *mockServer) createUnsubscribe(w http.ResponseWriter, r *http.Request) 
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var unsubscribes []Unsubscribe
+	var unsubscribes []mtypes.Unsubscribe
 	if r.Header.Get("Content-Type") == "application/json" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -140,7 +141,7 @@ func (ms *mockServer) createUnsubscribe(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		unsubscribes = append(unsubscribes, Unsubscribe{Address: address, Tags: []string{tag}})
+		unsubscribes = append(unsubscribes, mtypes.Unsubscribe{Address: address, Tags: []string{tag}})
 	}
 
 	for _, unsubscribe := range unsubscribes {

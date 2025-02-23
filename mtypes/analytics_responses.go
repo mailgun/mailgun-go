@@ -1,4 +1,4 @@
-package mailgun
+package mtypes
 
 type MetricsResponse struct {
 	Start      RFC2822Time       `json:"start"`

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,7 +23,7 @@ func TestCreateUnsubscriber(t *testing.T) {
 }
 
 func TestCreateUnsubscribes(t *testing.T) {
-	unsubscribes := []mailgun.Unsubscribe{
+	unsubscribes := []mtypes.Unsubscribe{
 		{
 			Address: randomEmail("unsubcribe", os.Getenv("MG_DOMAIN")),
 		},
@@ -49,7 +50,7 @@ func TestListUnsubscribes(t *testing.T) {
 	ctx := context.Background()
 
 	it := mg.ListUnsubscribes(testDomain, nil)
-	var page []mailgun.Unsubscribe
+	var page []mtypes.Unsubscribe
 	for it.Next(ctx, &page) {
 		t.Logf("Received %d unsubscribe records.\n", len(page))
 		if len(page) > 0 {

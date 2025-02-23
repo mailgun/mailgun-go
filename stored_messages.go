@@ -3,65 +3,24 @@ package mailgun
 import (
 	"context"
 	"errors"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
-
-// StoredMessage structures contain the (parsed) message content for an email
-// sent to a Mailgun account.
-//
-// The MessageHeaders field is special, in that it's formatted as a slice of pairs.
-// Each pair consists of a name [0] and value [1].  Array notation is used instead of a map
-// because that's how it's sent over the wire, and it's how encoding/json expects this field
-// to be.
-type StoredMessage struct {
-	Recipients        string             `json:"recipients"`
-	Sender            string             `json:"sender"`
-	From              string             `json:"from"`
-	Subject           string             `json:"subject"`
-	BodyPlain         string             `json:"body-plain"`
-	StrippedText      string             `json:"stripped-text"`
-	StrippedSignature string             `json:"stripped-signature"`
-	BodyHtml          string             `json:"body-html"`
-	StrippedHtml      string             `json:"stripped-html"`
-	Attachments       []StoredAttachment `json:"attachments"`
-	MessageUrl        string             `json:"message-url"`
-	ContentIDMap      map[string]struct {
-		Url         string `json:"url"`
-		ContentType string `json:"content-type"`
-		Name        string `json:"name"`
-		Size        int64  `json:"size"`
-	} `json:"content-id-map"`
-	MessageHeaders [][]string `json:"message-headers"`
-}
-
-// StoredAttachment structures contain information on an attachment associated with a stored message.
-type StoredAttachment struct {
-	Size        int    `json:"size"`
-	Url         string `json:"url"`
-	Name        string `json:"name"`
-	ContentType string `json:"content-type"`
-}
-
-type StoredMessageRaw struct {
-	Recipients string `json:"recipients"`
-	Sender     string `json:"sender"`
-	From       string `json:"from"`
-	Subject    string `json:"subject"`
-	BodyMime   string `json:"body-mime"`
-}
 
 // GetStoredMessage retrieves information about a received e-mail message.
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (StoredMessage, error) {
+func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (mtypes.StoredMessage, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var response StoredMessage
+	var response mtypes.StoredMessage
 	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }
 
-// Given a storage id resend the stored message to the specified recipients
+// ReSend given a storage id resend the stored message to the specified recipients
+// TODO(v5): return SendMessageResponse
 func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...string) (msg, id string, err error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
@@ -83,19 +42,19 @@ func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...str
 		return "", "", err
 	}
 
-	return resp.Message, resp.Id, nil
+	return resp.Message, resp.ID, nil
 }
 
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
 // Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
 // thus delegates to the caller the required parsing.
-func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (StoredMessageRaw, error) {
+func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (mtypes.StoredMessageRaw, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addHeader("Accept", "message/rfc2822")
 
-	var response StoredMessageRaw
+	var response mtypes.StoredMessageRaw
 	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }

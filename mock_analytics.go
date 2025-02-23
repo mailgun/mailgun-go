@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addAnalyticsRoutes(r chi.Router) {
@@ -11,23 +12,23 @@ func (ms *mockServer) addAnalyticsRoutes(r chi.Router) {
 }
 
 func (ms *mockServer) listMetrics(w http.ResponseWriter, _ *http.Request) {
-	start, _ := NewRFC2822Time("Tue, 24 Sep 2024 00:00:00 +0000")
-	end, _ := NewRFC2822Time("Tue, 24 Oct 2024 00:00:00 +0000")
+	start, _ := mtypes.NewRFC2822Time("Tue, 24 Sep 2024 00:00:00 +0000")
+	end, _ := mtypes.NewRFC2822Time("Tue, 24 Oct 2024 00:00:00 +0000")
 
-	resp := MetricsResponse{
+	resp := mtypes.MetricsResponse{
 		Start:      start,
 		End:        end,
 		Resolution: "day",
 		Duration:   "30d",
 		Dimensions: []string{"time"},
-		Items: []MetricsItem{
+		Items: []mtypes.MetricsItem{
 			{
-				Dimensions: []MetricsDimension{{
+				Dimensions: []mtypes.MetricsDimension{{
 					Dimension:    "time",
 					Value:        "Tue, 24 Sep 2024 00:00:00 +0000",
 					DisplayValue: "Tue, 24 Sep 2024 00:00:00 +0000",
 				}},
-				Metrics: Metrics{
+				Metrics: mtypes.Metrics{
 					SentCount:      ptr(uint64(4)),
 					DeliveredCount: ptr(uint64(3)),
 					OpenedCount:    ptr(uint64(2)),
@@ -35,7 +36,7 @@ func (ms *mockServer) listMetrics(w http.ResponseWriter, _ *http.Request) {
 				},
 			},
 		},
-		Pagination: MetricsPagination{
+		Pagination: mtypes.MetricsPagination{
 			Sort:  "",
 			Skip:  0,
 			Limit: 10,

@@ -1,4 +1,4 @@
-package mailgun
+package mtypes
 
 import (
 	"encoding/json"

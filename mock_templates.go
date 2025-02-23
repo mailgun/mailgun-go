@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addTemplateRoutes(r chi.Router) {
@@ -19,53 +20,53 @@ func (ms *mockServer) addTemplateRoutes(r chi.Router) {
 	r.Delete("/{domain}/templates/{name}", ms.deleteTemplate)
 	r.Delete("/{domain}/templates/{name}", ms.deleteAllTemplates)
 
-	ms.templates = append(ms.templates, Template{
+	ms.templates = append(ms.templates, mtypes.Template{
 		Name:        "template1",
 		Description: "template1 description",
-		CreatedAt:   RFC2822Time(time.Now()),
+		CreatedAt:   mtypes.RFC2822Time(time.Now()),
 	})
 
-	ms.templateVersions = make(map[string][]TemplateVersion)
-	ms.templateVersions["template1"] = []TemplateVersion{
+	ms.templateVersions = make(map[string][]mtypes.TemplateVersion)
+	ms.templateVersions["template1"] = []mtypes.TemplateVersion{
 		{
 			Tag:       "test",
 			Template:  "template1 content",
 			Engine:    "go",
-			CreatedAt: RFC2822Time(time.Now()),
+			CreatedAt: mtypes.RFC2822Time(time.Now()),
 			Comment:   "template1 comment",
 			Active:    true,
 		},
 	}
 
-	ms.templates = append(ms.templates, Template{
+	ms.templates = append(ms.templates, mtypes.Template{
 		Name:        "template2",
 		Description: "template2 description",
-		CreatedAt:   RFC2822Time(time.Now()),
+		CreatedAt:   mtypes.RFC2822Time(time.Now()),
 	})
 
-	ms.templateVersions["template2"] = []TemplateVersion{
+	ms.templateVersions["template2"] = []mtypes.TemplateVersion{
 		{
 			Tag:       "test",
 			Template:  "template2 content",
 			Engine:    "go",
-			CreatedAt: RFC2822Time(time.Now()),
+			CreatedAt: mtypes.RFC2822Time(time.Now()),
 			Comment:   "template2 comment",
 			Active:    false,
 		},
 	}
 
-	ms.templates = append(ms.templates, Template{
+	ms.templates = append(ms.templates, mtypes.Template{
 		Name:        "template3",
 		Description: "template3 description",
-		CreatedAt:   RFC2822Time(time.Now()),
+		CreatedAt:   mtypes.RFC2822Time(time.Now()),
 	})
 
-	ms.templateVersions["template3"] = []TemplateVersion{
+	ms.templateVersions["template3"] = []mtypes.TemplateVersion{
 		{
 			Tag:       "test",
 			Template:  "template3 content",
 			Engine:    "go",
-			CreatedAt: RFC2822Time(time.Now()),
+			CreatedAt: mtypes.RFC2822Time(time.Now()),
 			Comment:   "template3 comment",
 			Active:    false,
 		},
@@ -98,20 +99,20 @@ func (ms *mockServer) listTemplates(w http.ResponseWriter, r *http.Request) {
 	}
 	start, end := pageOffsets(idx, page, pivot, limit)
 	var nextAddress, prevAddress string
-	var results []Template
+	var results []mtypes.Template
 
 	if start != end {
 		results = ms.templates[start:end]
 		nextAddress = results[len(results)-1].Name
 		prevAddress = results[0].Name
 	} else {
-		results = []Template{}
+		results = []mtypes.Template{}
 		nextAddress = pivot
 		prevAddress = pivot
 	}
 
-	toJSON(w, templateListResp{
-		Paging: Paging{
+	toJSON(w, mtypes.ListTemplateResp{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -154,7 +155,7 @@ func (ms *mockServer) getTemplate(w http.ResponseWriter, r *http.Request) {
 					template.Version = version
 				}
 			}
-			toJSON(w, &templateResp{
+			toJSON(w, &mtypes.TemplateResp{
 				Item: template,
 			})
 			return
@@ -187,8 +188,8 @@ func (ms *mockServer) createTemplate(w http.ResponseWriter, r *http.Request) {
 
 	name = strings.ToLower(name)
 
-	template := Template{Name: name}
-	template.CreatedAt = RFC2822Time(time.Now())
+	template := mtypes.Template{Name: name}
+	template.CreatedAt = mtypes.RFC2822Time(time.Now())
 
 	description := r.FormValue("description")
 	if len(description) > 0 {
@@ -197,7 +198,7 @@ func (ms *mockServer) createTemplate(w http.ResponseWriter, r *http.Request) {
 
 	templateContent := r.FormValue("template")
 	if len(templateContent) > 0 {
-		templateVersion := TemplateVersion{Template: templateContent}
+		templateVersion := mtypes.TemplateVersion{Template: templateContent}
 		tag := r.FormValue("tag")
 		if len(tag) > 0 {
 			templateVersion.Tag = tag
@@ -206,7 +207,7 @@ func (ms *mockServer) createTemplate(w http.ResponseWriter, r *http.Request) {
 		}
 
 		templateVersion.Comment = r.FormValue("comment")
-		templateVersion.CreatedAt = RFC2822Time(time.Now())
+		templateVersion.CreatedAt = mtypes.RFC2822Time(time.Now())
 		templateVersion.Active = true
 
 		engine := r.FormValue("engine")
@@ -216,7 +217,7 @@ func (ms *mockServer) createTemplate(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte(fmt.Sprintf("{\"message\": \"Invalid parameter: engine %s is not supported\"}", engine)))
 				return
 			}
-			templateVersion.Engine = TemplateEngine(engine)
+			templateVersion.Engine = mtypes.TemplateEngine(engine)
 		}
 
 		template.Version = templateVersion
@@ -296,18 +297,18 @@ func (ms *mockServer) deleteAllTemplates(w http.ResponseWriter, r *http.Request)
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	ms.templates = []Template{}
-	ms.templateVersions = map[string][]TemplateVersion{}
+	ms.templates = []mtypes.Template{}
+	ms.templateVersions = map[string][]mtypes.TemplateVersion{}
 
 	toJSON(w, map[string]string{"message": "templates have been deleted"})
 }
 
-func (ms *mockServer) getActiveTemplateVersion(templateName string) TemplateVersion {
+func (ms *mockServer) getActiveTemplateVersion(templateName string) mtypes.TemplateVersion {
 	for _, templateVersion := range ms.templateVersions[templateName] {
 		if templateVersion.Active {
 			return templateVersion
 		}
 	}
 
-	return TemplateVersion{}
+	return mtypes.TemplateVersion{}
 }

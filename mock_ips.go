@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addIPRoutes(r chi.Router) {
@@ -18,14 +19,14 @@ func (ms *mockServer) addIPRoutes(r chi.Router) {
 }
 
 func (ms *mockServer) listIPS(w http.ResponseWriter, _ *http.Request) {
-	toJSON(w, ipAddressListResponse{
+	toJSON(w, mtypes.IPAddressListResponse{
 		TotalCount: 2,
 		Items:      []string{"172.0.0.1", "192.168.1.1"},
 	})
 }
 
 func (ms *mockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
-	toJSON(w, IPAddress{
+	toJSON(w, mtypes.IPAddress{
 		IP:        chi.URLParam(r, "ip"),
 		RDNS:      "luna.mailgun.net",
 		Dedicated: true,
@@ -35,7 +36,7 @@ func (ms *mockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
 func (ms *mockServer) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
-	toJSON(w, ipAddressListResponse{
+	toJSON(w, mtypes.IPAddressListResponse{
 		TotalCount: 2,
 		Items:      ms.domainIPS,
 	})

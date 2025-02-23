@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 type MailingListContainer struct {
-	MailingList MailingList
-	Members     []Member
+	MailingList mtypes.MailingList
+	Members     []mtypes.Member
 }
 
 func (ms *mockServer) addMailingListRoutes(r chi.Router) {
@@ -29,16 +30,16 @@ func (ms *mockServer) addMailingListRoutes(r chi.Router) {
 	r.Post("/lists/{address}/members.json", ms.bulkCreate)
 
 	ms.mailingList = append(ms.mailingList, MailingListContainer{
-		MailingList: MailingList{
+		MailingList: mtypes.MailingList{
 			ReplyPreference: "list",
 			AccessLevel:     "everyone",
 			Address:         "foo@mailgun.test",
-			CreatedAt:       RFC2822Time(time.Now().UTC()),
+			CreatedAt:       mtypes.RFC2822Time(time.Now().UTC()),
 			Description:     "Mailgun developers list",
 			MembersCount:    1,
 			Name:            "",
 		},
-		Members: []Member{
+		Members: []mtypes.Member{
 			{
 				Address: "dev@samples.mailgun.org",
 				Name:    "Developer",
@@ -51,7 +52,7 @@ func (ms *mockServer) listMailingLists(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var list []MailingList
+	var list []mtypes.MailingList
 	var idx []string
 
 	for _, ml := range ms.mailingList {
@@ -67,12 +68,12 @@ func (ms *mockServer) listMailingLists(w http.ResponseWriter, r *http.Request) {
 	results := list[start:end]
 
 	if len(results) == 0 {
-		toJSON(w, listsResponse{})
+		toJSON(w, mtypes.ListMailingListsResponse{})
 		return
 	}
 
-	resp := listsResponse{
-		Paging: Paging{
+	resp := mtypes.ListMailingListsResponse{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -99,7 +100,7 @@ func (ms *mockServer) getMailingList(w http.ResponseWriter, r *http.Request) {
 
 	for _, ml := range ms.mailingList {
 		if ml.MailingList.Address == chi.URLParam(r, "address") {
-			toJSON(w, mailingListResponse{MailingList: ml.MailingList})
+			toJSON(w, mtypes.GetMailingListResponse{MailingList: ml.MailingList})
 			return
 		}
 	}
@@ -145,10 +146,10 @@ func (ms *mockServer) updateMailingList(w http.ResponseWriter, r *http.Request) 
 				ms.mailingList[i].MailingList.Description = r.FormValue("description")
 			}
 			if r.FormValue("access_level") != "" {
-				ms.mailingList[i].MailingList.AccessLevel = AccessLevel(r.FormValue("access_level"))
+				ms.mailingList[i].MailingList.AccessLevel = mtypes.AccessLevel(r.FormValue("access_level"))
 			}
 			if r.FormValue("reply_preference") != "" {
-				ms.mailingList[i].MailingList.ReplyPreference = ReplyPreference(r.FormValue("reply_preference"))
+				ms.mailingList[i].MailingList.ReplyPreference = mtypes.ReplyPreference(r.FormValue("reply_preference"))
 			}
 			toJSON(w, okResp{Message: "Mailing list member has been updated"})
 			return
@@ -163,13 +164,13 @@ func (ms *mockServer) createMailingList(w http.ResponseWriter, r *http.Request) 
 	ms.mutex.Lock()
 
 	ms.mailingList = append(ms.mailingList, MailingListContainer{
-		MailingList: MailingList{
-			CreatedAt:       RFC2822Time(time.Now().UTC()),
+		MailingList: mtypes.MailingList{
+			CreatedAt:       mtypes.RFC2822Time(time.Now().UTC()),
 			Name:            r.FormValue("name"),
 			Address:         r.FormValue("address"),
 			Description:     r.FormValue("description"),
-			AccessLevel:     AccessLevel(r.FormValue("access_level")),
-			ReplyPreference: ReplyPreference(r.FormValue("reply_preference")),
+			AccessLevel:     mtypes.AccessLevel(r.FormValue("access_level")),
+			ReplyPreference: mtypes.ReplyPreference(r.FormValue("reply_preference")),
 		},
 	})
 	toJSON(w, okResp{Message: "Mailing list has been created"})
@@ -179,7 +180,7 @@ func (ms *mockServer) listMembers(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var list []Member
+	var list []mtypes.Member
 	var idx []string
 	var found bool
 
@@ -207,12 +208,12 @@ func (ms *mockServer) listMembers(w http.ResponseWriter, r *http.Request) {
 	results := list[start:end]
 
 	if len(results) == 0 {
-		toJSON(w, memberListResponse{})
+		toJSON(w, mtypes.MemberListResponse{})
 		return
 	}
 
-	resp := memberListResponse{
-		Paging: Paging{
+	resp := mtypes.MemberListResponse{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -243,7 +244,7 @@ func (ms *mockServer) getMember(w http.ResponseWriter, r *http.Request) {
 			found = true
 			for _, member := range ml.Members {
 				if member.Address == chi.URLParam(r, "member") {
-					toJSON(w, memberResponse{Member: member})
+					toJSON(w, mtypes.MemberResponse{Member: member})
 					return
 				}
 			}
@@ -372,7 +373,7 @@ func (ms *mockServer) createMember(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ms.mailingList[idx].Members = append(ms.mailingList[idx].Members, Member{
+	ms.mailingList[idx].Members = append(ms.mailingList[idx].Members, mtypes.Member{
 		Name:       r.FormValue("name"),
 		Address:    parseAddress(r.FormValue("address")),
 		Vars:       stringToMap(r.FormValue("vars")),
@@ -398,7 +399,7 @@ func (ms *mockServer) bulkCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var bulkList []Member
+	var bulkList []mtypes.Member
 	if err := json.Unmarshal([]byte(r.FormValue("members")), &bulkList); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		toJSON(w, okResp{Message: "while un-marshalling 'members' param - " + err.Error()})

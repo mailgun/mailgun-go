@@ -2,20 +2,22 @@ package mailgun
 
 import (
 	"context"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 // GetDomainConnection returns delivery connection settings for the defined domain
-func (mg *MailgunImpl) GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error) {
+func (mg *MailgunImpl) GetDomainConnection(ctx context.Context, domain string) (mtypes.DomainConnection, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp domainConnectionResponse
+	var resp mtypes.DomainConnectionResponse
 	err := getResponseFromJSON(ctx, r, &resp)
 	return resp.Connection, err
 }
 
 // UpdateDomainConnection updates the specified delivery connection settings for the defined domain
-func (mg *MailgunImpl) UpdateDomainConnection(ctx context.Context, domain string, settings DomainConnection) error {
+func (mg *MailgunImpl) UpdateDomainConnection(ctx context.Context, domain string, settings mtypes.DomainConnection) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/connection")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

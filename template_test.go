@@ -8,6 +8,7 @@ import (
 
 	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +23,7 @@ func TestTemplateCRUD(t *testing.T) {
 	findTemplate := func(name string) bool {
 		it := mg.ListTemplates(testDomain, nil)
 
-		var page []mailgun.Template
+		var page []mtypes.Template
 		for it.Next(ctx, &page) {
 			for _, template := range page {
 				if template.Name == name {
@@ -40,7 +41,7 @@ func TestTemplateCRUD(t *testing.T) {
 		UpdatedDesc = "Mailgun-Go Test Updated Description"
 	)
 
-	tmpl := mailgun.Template{
+	tmpl := mtypes.Template{
 		Name:        Name,
 		Description: Description,
 	}

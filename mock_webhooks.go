@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addWebhookRoutes(r chi.Router) {
@@ -15,8 +16,8 @@ func (ms *mockServer) addWebhookRoutes(r chi.Router) {
 		sr.Delete("/{webhook}", ms.deleteWebHook)
 	})
 
-	ms.webhooks = WebHooksListResponse{
-		Webhooks: map[string]UrlOrUrls{
+	ms.webhooks = mtypes.WebHooksListResponse{
+		Webhooks: map[string]mtypes.UrlOrUrls{
 			"new-webhook": {
 				Urls: []string{"http://example.com/new"},
 			},
@@ -38,8 +39,8 @@ func (ms *mockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	resp := WebHookResponse{
-		Webhook: UrlOrUrls{
+	resp := mtypes.WebHookResponse{
+		Webhook: mtypes.UrlOrUrls{
 			Urls: ms.webhooks.Webhooks[chi.URLParam(r, "webhook")].Urls,
 		},
 	}
@@ -60,7 +61,7 @@ func (ms *mockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
 	for _, url := range r.Form["url"] {
 		urls = append(urls, url)
 	}
-	ms.webhooks.Webhooks[r.FormValue("id")] = UrlOrUrls{Urls: urls}
+	ms.webhooks.Webhooks[r.FormValue("id")] = mtypes.UrlOrUrls{Urls: urls}
 
 	toJSON(w, okResp{Message: "success"})
 }
@@ -79,7 +80,7 @@ func (ms *mockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
 	for _, url := range r.Form["url"] {
 		urls = append(urls, url)
 	}
-	ms.webhooks.Webhooks[chi.URLParam(r, "webhook")] = UrlOrUrls{Urls: urls}
+	ms.webhooks.Webhooks[chi.URLParam(r, "webhook")] = mtypes.UrlOrUrls{Urls: urls}
 
 	toJSON(w, okResp{Message: "success"})
 }

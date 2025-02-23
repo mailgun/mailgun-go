@@ -23,7 +23,7 @@ func TestStorage(t *testing.T) {
 	msg, id, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 
-	t.Logf("New Email: %s Id: %s\n", msg, id)
+	t.Logf("New Email: %s ID: %s\n", msg, id)
 
 	url, err := findStoredMessageURL(mg, strings.Trim(id, "<>"))
 	require.NoError(t, err)

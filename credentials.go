@@ -2,25 +2,20 @@ package mailgun
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"strconv"
-)
 
-// A Credential structure describes a principle allowed to send or receive mail at the domain.
-type Credential struct {
-	CreatedAt RFC2822Time `json:"created_at"`
-	Login     string      `json:"login"`
-	Password  string      `json:"password"`
-}
+	"github.com/mailgun/mailgun-go/v4/mtypes"
+)
 
 type credentialsListResponse struct {
 	// is -1 if Next() or First() have not been called
-	TotalCount int          `json:"total_count"`
-	Items      []Credential `json:"items"`
+	TotalCount int                 `json:"total_count"`
+	Items      []mtypes.Credential `json:"items"`
 }
 
-// Returned when a required parameter is missing.
-var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
+// ErrEmptyParam is returned when a required parameter is missing.
+var ErrEmptyParam = errors.New("empty or illegal parameter")
 
 // ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
 func (mg *MailgunImpl) ListCredentials(domain string, opts *ListOptions) *CredentialsIterator {
@@ -63,7 +58,7 @@ func (ri *CredentialsIterator) Offset() int {
 // Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) Next(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -73,7 +68,7 @@ func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bo
 		return false
 	}
 
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	if len(ri.Items) == 0 {
@@ -86,7 +81,7 @@ func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bo
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) First(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -94,7 +89,7 @@ func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) b
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	ri.offset = len(ri.Items)
@@ -105,7 +100,7 @@ func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) b
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) Last(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -123,7 +118,7 @@ func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bo
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	return true
@@ -132,7 +127,7 @@ func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bo
 // Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -150,7 +145,7 @@ func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 

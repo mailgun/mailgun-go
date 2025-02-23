@@ -279,8 +279,3 @@ func (ep *EventPoller) Poll(ctx context.Context, ee *[]Event) bool {
 		}
 	}
 }
-
-// Given time.Time{} return a float64 as given in mailgun event timestamps
-func TimeToFloat(t time.Time) float64 {
-	return float64(t.Unix()) + (float64(t.Nanosecond()/int(time.Microsecond)) / float64(1000000))
-}
