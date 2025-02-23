@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addEventRoutes(r chi.Router) {
@@ -190,8 +191,8 @@ func (ms *mockServer) addEventRoutes(r chi.Router) {
 }
 
 type eventsResponse struct {
-	Items  []Event `json:"items"`
-	Paging Paging  `json:"paging"`
+	Items  []Event       `json:"items"`
+	Paging mtypes.Paging `json:"paging"`
 }
 
 func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
@@ -223,7 +224,7 @@ func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := eventsResponse{
-		Paging: Paging{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addBouncesRoutes(r chi.Router) {
@@ -18,15 +19,15 @@ func (ms *mockServer) addBouncesRoutes(r chi.Router) {
 	r.Delete("/{domain}/bounces", ms.deleteBouncesList)
 	r.Post("/{domain}/bounces", ms.createBounce)
 
-	ms.bounces = append(ms.bounces, Bounce{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.bounces = append(ms.bounces, mtypes.Bounce{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Error:     "invalid address",
 		Code:      "INVALID",
 		Address:   "foo@mailgun.test",
 	})
 
-	ms.bounces = append(ms.bounces, Bounce{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.bounces = append(ms.bounces, mtypes.Bounce{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Error:     "non existing address",
 		Code:      "NOT_EXIST",
 		Address:   "alice@example.com",
@@ -59,20 +60,20 @@ func (ms *mockServer) listBounces(w http.ResponseWriter, r *http.Request) {
 	}
 	start, end := pageOffsets(idx, page, pivot, limit)
 	var nextAddress, prevAddress string
-	var results []Bounce
+	var results []mtypes.Bounce
 
 	if start != end {
 		results = ms.bounces[start:end]
 		nextAddress = results[len(results)-1].Address
 		prevAddress = results[0].Address
 	} else {
-		results = []Bounce{}
+		results = []mtypes.Bounce{}
 		nextAddress = pivot
 		prevAddress = pivot
 	}
 
 	toJSON(w, bouncesListResponse{
-		Paging: Paging{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -110,7 +111,7 @@ func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var bounces []Bounce
+	var bounces []mtypes.Bounce
 	if r.Header.Get("Content-Type") == "application/json" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -142,7 +143,7 @@ func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		bounces = append(bounces, Bounce{Address: address, Code: code, Error: bounceError})
+		bounces = append(bounces, mtypes.Bounce{Address: address, Code: code, Error: bounceError})
 	}
 
 	for _, bounce := range bounces {
@@ -188,7 +189,7 @@ func (ms *mockServer) deleteBouncesList(w http.ResponseWriter, r *http.Request) 
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	ms.bounces = []Bounce{}
+	ms.bounces = []mtypes.Bounce{}
 
 	toJSON(w, map[string]any{
 		"message": "All bounces has been deleted",

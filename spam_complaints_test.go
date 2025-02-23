@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +19,7 @@ func TestGetComplaints(t *testing.T) {
 	ctx := context.Background()
 
 	it := mg.ListComplaints(testDomain, nil)
-	var page []mailgun.Complaint
+	var page []mtypes.Complaint
 	for it.Next(ctx, &page) {
 	}
 	require.NoError(t, it.Err())
@@ -51,7 +52,7 @@ func TestCreateDeleteComplaint(t *testing.T) {
 		it := mg.ListComplaints(testDomain, nil)
 		require.NoError(t, it.Err())
 
-		var page []mailgun.Complaint
+		var page []mtypes.Complaint
 		for it.Next(ctx, &page) {
 			for _, complaint := range page {
 				t.Logf("Complaint Address: %s\n", complaint.Address)
@@ -84,7 +85,7 @@ func TestCreateDeleteComplaintList(t *testing.T) {
 		it := mg.ListComplaints(testDomain, nil)
 		require.NoError(t, it.Err())
 
-		var page []mailgun.Complaint
+		var page []mtypes.Complaint
 		for it.Next(ctx, &page) {
 			for _, complaint := range page {
 				t.Logf("Complaint Address: %s\n", complaint.Address)

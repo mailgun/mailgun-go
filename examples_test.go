@@ -13,6 +13,7 @@ import (
 
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func ExampleMailgunImpl_ValidateEmail() {
@@ -37,7 +38,7 @@ func ExampleMailgunImpl_UpdateMailingList() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	_, err := mg.UpdateMailingList(ctx, "joe-stat@example.com", mailgun.MailingList{
+	_, err := mg.UpdateMailingList(ctx, "joe-stat@example.com", mtypes.MailingList{
 		Name:        "Joe Stat",
 		Description: "Joe's status report list",
 	})
@@ -99,7 +100,7 @@ func ExampleMailgunImpl_ListRoutes() {
 	defer cancel()
 
 	it := mg.ListRoutes(nil)
-	var page []mailgun.Route
+	var page []mtypes.Route
 	for it.Next(ctx, &page) {
 		for _, r := range page {
 			log.Printf("Route pri=%d expr=%s desc=%s", r.Priority, r.Expression, r.Description)
@@ -119,7 +120,7 @@ func ExampleMailgunImpl_VerifyWebhookSignature() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var payload mailgun.WebhookPayload
+		var payload mtypes.WebhookPayload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			fmt.Printf("decode JSON error: %s", err)
 			w.WriteHeader(http.StatusNotAcceptable)

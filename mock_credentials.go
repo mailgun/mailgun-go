@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addCredentialsRoutes(r chi.Router) {
@@ -13,14 +14,14 @@ func (ms *mockServer) addCredentialsRoutes(r chi.Router) {
 	r.Delete("/domains/{domain}/credentials/{login}", ms.deleteCredential)
 	r.Post("/domains/{domain}/credentials", ms.createCredential)
 
-	ms.credentials = append(ms.credentials, Credential{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.credentials = append(ms.credentials, mtypes.Credential{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Login:     "alice",
 		Password:  "alices_password",
 	})
 
-	ms.credentials = append(ms.credentials, Credential{
-		CreatedAt: RFC2822Time(time.Now()),
+	ms.credentials = append(ms.credentials, mtypes.Credential{
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 		Login:     "bob",
 		Password:  "bobs_password",
 	})
@@ -37,7 +38,7 @@ func (ms *mockServer) listCredentials(w http.ResponseWriter, r *http.Request) {
 
 	skip := stringToInt(r.FormValue("skip"))
 
-	var results []Credential
+	var results []mtypes.Credential
 
 	if skip > 0 {
 		if len(ms.credentials[skip:]) < limit {
@@ -92,7 +93,7 @@ func (ms *mockServer) createCredential(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ms.credentials = append(ms.credentials, Credential{Login: login, Password: password, CreatedAt: RFC2822Time(time.Now())})
+	ms.credentials = append(ms.credentials, mtypes.Credential{Login: login, Password: password, CreatedAt: mtypes.RFC2822Time(time.Now())})
 
 	toJSON(w, map[string]any{
 		"message": "Credentials created",

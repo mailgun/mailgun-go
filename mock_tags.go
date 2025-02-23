@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addTagsRoutes(r chi.Router) {
@@ -16,14 +17,14 @@ func (ms *mockServer) addTagsRoutes(r chi.Router) {
 
 	tenMinutesBefore := time.Now().Add(-10 * time.Minute)
 	now := time.Now()
-	ms.tags = append(ms.tags, Tag{
+	ms.tags = append(ms.tags, mtypes.Tag{
 		Value:       "test",
 		Description: "test description",
 		FirstSeen:   &tenMinutesBefore,
 		LastSeen:    &now,
 	})
 
-	ms.tags = append(ms.tags, Tag{
+	ms.tags = append(ms.tags, mtypes.Tag{
 		Value:       "test2",
 		Description: "test2 description",
 		FirstSeen:   &tenMinutesBefore,
@@ -57,20 +58,20 @@ func (ms *mockServer) listTags(w http.ResponseWriter, r *http.Request) {
 	}
 	start, end := pageOffsets(idx, page, pivot, limit)
 	var nextAddress, prevAddress string
-	var results []Tag
+	var results []mtypes.Tag
 
 	if start != end {
 		results = ms.tags[start:end]
 		nextAddress = results[len(results)-1].Value
 		prevAddress = results[0].Value
 	} else {
-		results = []Tag{}
+		results = []mtypes.Tag{}
 		nextAddress = pivot
 		prevAddress = pivot
 	}
 
-	toJSON(w, tagsResponse{
-		Paging: Paging{
+	toJSON(w, mtypes.TagsResponse{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -125,7 +126,7 @@ func (ms *mockServer) createUpdateTags(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !tagExists {
-		ms.tags = append(ms.tags, Tag{Value: tag, Description: description})
+		ms.tags = append(ms.tags, mtypes.Tag{Value: tag, Description: description})
 	}
 
 	toJSON(w, map[string]any{

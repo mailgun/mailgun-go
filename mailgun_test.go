@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +34,7 @@ func TestInvalidBaseAPI(t *testing.T) {
 
 func TestValidBaseAPI(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		var resp mailgun.GetDomainResponse
+		var resp mtypes.GetDomainResponse
 		b, err := json.Marshal(resp)
 		require.NoError(t, err)
 

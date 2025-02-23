@@ -2,14 +2,16 @@ package mailgun
 
 import (
 	"context"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 // GetDomainTracking returns tracking settings for a domain
-func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error) {
+func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (mtypes.DomainTracking, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/tracking")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp domainTrackingResponse
+	var resp mtypes.DomainTrackingResponse
 	err := getResponseFromJSON(ctx, r, &resp)
 	return resp.Tracking, err
 }

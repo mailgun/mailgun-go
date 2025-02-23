@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +25,7 @@ func TestListDomains(t *testing.T) {
 	ctx := context.Background()
 
 	it := mg.ListDomains(nil)
-	var page []mailgun.Domain
+	var page []mtypes.Domain
 	for it.Next(ctx, &page) {
 		for _, d := range page {
 			t.Logf("TestListDomains: %#v\n", d)
@@ -43,7 +44,7 @@ func TestGetSingleDomain(t *testing.T) {
 	ctx := context.Background()
 
 	it := mg.ListDomains(nil)
-	var page []mailgun.Domain
+	var page []mtypes.Domain
 	require.True(t, it.Next(ctx, &page))
 	require.NoError(t, it.Err())
 
@@ -85,7 +86,7 @@ func TestAddUpdateDeleteDomain(t *testing.T) {
 
 	// First, we need to add the domain.
 	_, err = mg.CreateDomain(ctx, "mx.mailgun.test",
-		&mailgun.CreateDomainOptions{SpamAction: mailgun.SpamActionTag, Password: "supersecret", WebScheme: "http"})
+		&mailgun.CreateDomainOptions{SpamAction: mtypes.SpamActionTag, Password: "supersecret", WebScheme: "http"})
 	require.NoError(t, err)
 
 	// Then, we update it.

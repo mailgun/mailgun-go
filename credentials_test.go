@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +19,7 @@ func TestGetCredentials(t *testing.T) {
 	ctx := context.Background()
 	it := mg.ListCredentials(testDomain, nil)
 
-	var page []mailgun.Credential
+	var page []mtypes.Credential
 	for it.Next(ctx, &page) {
 		t.Logf("Login\tCreated At\t\n")
 		for _, c := range page {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,7 +40,7 @@ func TestTags(t *testing.T) {
 
 	// Should return a list of available tags
 	it := mg.ListTags(testDomain, nil)
-	var page []mailgun.Tag
+	var page []mtypes.Tag
 	for it.Next(ctx, &page) {
 		require.True(t, len(page) != 0)
 	}
@@ -48,7 +49,7 @@ func TestTags(t *testing.T) {
 	// Should return a limited list of available tags
 	cursor := mg.ListTags(testDomain, &mailgun.ListTagOptions{Limit: 1})
 
-	var tags []mailgun.Tag
+	var tags []mtypes.Tag
 	for cursor.Next(ctx, &tags) {
 		require.Len(t, tags, 1)
 	}

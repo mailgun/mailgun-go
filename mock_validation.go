@@ -5,6 +5,7 @@ import (
 	"net/mail"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addValidationRoutes(r chi.Router) {
@@ -18,7 +19,7 @@ func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var results ValidateEmailResponse
+	var results mtypes.ValidateEmailResponse
 	results.Risk = "unknown"
 	_, err := mail.ParseAddress(r.FormValue("address"))
 	if err == nil {
@@ -26,7 +27,7 @@ func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 	}
 	results.Reason = []string{"no-reason"}
 	results.Result = "deliverable"
-	results.Engagement = &EngagementData{
+	results.Engagement = &mtypes.EngagementData{
 		Engaging: false,
 		Behavior: "disengaged",
 		IsBot:    false,

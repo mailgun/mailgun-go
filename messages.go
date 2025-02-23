@@ -114,9 +114,10 @@ type MimeMessage struct {
 }
 
 // TODO(v5): return from Send()
+// TODO(v5): move to mtypes?
 type sendMessageResponse struct {
 	Message string `json:"message"`
-	Id      string `json:"id"`
+	ID      string `json:"id"`
 }
 
 // TrackingOptions contains fields relevant to tracking.
@@ -696,7 +697,7 @@ func (mg *MailgunImpl) Send(ctx context.Context, m SendableMessage) (mes, id str
 	err = postResponseFromJSON(ctx, r, payload, &response)
 	if err == nil {
 		mes = response.Message
-		id = response.Id
+		id = response.ID
 	}
 
 	return mes, id, err

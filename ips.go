@@ -1,25 +1,13 @@
 package mailgun
 
-import "context"
+import (
+	"context"
 
-type ipAddressListResponse struct {
-	TotalCount int      `json:"total_count"`
-	Items      []string `json:"items"`
-}
-
-type IPAddress struct {
-	IP        string `json:"ip"`
-	RDNS      string `json:"rdns"`
-	Dedicated bool   `json:"dedicated"`
-}
-
-type okResp struct {
-	ID      string `json:"id,omitempty"`
-	Message string `json:"message"`
-}
+	"github.com/mailgun/mailgun-go/v4/mtypes"
+)
 
 // ListIPS returns a list of IPs assigned to your account
-func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error) {
+func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]mtypes.IPAddress, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, ipsEndpoint))
 	r.setClient(mg.HTTPClient())
 	if dedicated {
@@ -27,40 +15,40 @@ func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress
 	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp ipAddressListResponse
+	var resp mtypes.IPAddressListResponse
 	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
 		return nil, err
 	}
-	var result []IPAddress
+	var result []mtypes.IPAddress
 	for _, ip := range resp.Items {
-		result = append(result, IPAddress{IP: ip})
+		result = append(result, mtypes.IPAddress{IP: ip})
 	}
 	return result, nil
 }
 
 // GetIP returns information about the specified IP
-func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) {
+func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (mtypes.IPAddress, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, ipsEndpoint) + "/" + ip)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var resp IPAddress
+	var resp mtypes.IPAddress
 	err := getResponseFromJSON(ctx, r, &resp)
 	return resp, err
 }
 
 // ListDomainIPS returns a list of IPs currently assigned to the specified domain.
-func (mg *MailgunImpl) ListDomainIPS(ctx context.Context, domain string) ([]IPAddress, error) {
+func (mg *MailgunImpl) ListDomainIPS(ctx context.Context, domain string) ([]mtypes.IPAddress, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/ips")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp ipAddressListResponse
+	var resp mtypes.IPAddressListResponse
 	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
 		return nil, err
 	}
-	var result []IPAddress
+	var result []mtypes.IPAddress
 	for _, ip := range resp.Items {
-		result = append(result, IPAddress{IP: ip})
+		result = append(result, mtypes.IPAddress{IP: ip})
 	}
 	return result, nil
 }

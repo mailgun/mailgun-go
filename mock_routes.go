@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 type routeResponse struct {
-	Route Route `json:"route"`
+	Route mtypes.Route `json:"route"`
 }
 
 func (ms *mockServer) addRoutes(r chi.Router) {
@@ -20,7 +21,7 @@ func (ms *mockServer) addRoutes(r chi.Router) {
 	r.Delete("/routes/{id}", ms.deleteRoute)
 
 	for i := 0; i < 10; i++ {
-		ms.routeList = append(ms.routeList, Route{
+		ms.routeList = append(ms.routeList, mtypes.Route{
 			Id:          randomString(10, "ID-"),
 			Priority:    0,
 			Description: fmt.Sprintf("Sample Route %d", i),
@@ -51,14 +52,14 @@ func (ms *mockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
 
 	// If we are at the end of the list
 	if skip == end {
-		toJSON(w, routesListResponse{
+		toJSON(w, mtypes.RoutesListResponse{
 			TotalCount: len(ms.routeList),
-			Items:      []Route{},
+			Items:      []mtypes.Route{},
 		})
 		return
 	}
 
-	toJSON(w, routesListResponse{
+	toJSON(w, mtypes.RoutesListResponse{
 		TotalCount: len(ms.routeList),
 		Items:      ms.routeList[skip:end],
 	})
@@ -85,15 +86,15 @@ func (ms *mockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ms.routeList = append(ms.routeList, Route{
-		CreatedAt:   RFC2822Time(time.Now().UTC()),
+	ms.routeList = append(ms.routeList, mtypes.Route{
+		CreatedAt:   mtypes.RFC2822Time(time.Now().UTC()),
 		Id:          randomString(10, "ID-"),
 		Priority:    stringToInt(r.FormValue("priority")),
 		Description: r.FormValue("description"),
 		Expression:  r.FormValue("expression"),
 		Actions:     r.Form["action"],
 	})
-	toJSON(w, createRouteResp{
+	toJSON(w, mtypes.CreateRouteResp{
 		Message: "Route has been created",
 		Route:   ms.routeList[len(ms.routeList)-1],
 	})

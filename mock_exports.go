@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addExportRoutes(r chi.Router) {
@@ -17,7 +18,7 @@ func (ms *mockServer) addExportRoutes(r chi.Router) {
 func (ms *mockServer) postExports(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
-	e := Export{
+	e := mtypes.Export{
 		ID:     strconv.Itoa(len(ms.exportList)),
 		URL:    r.FormValue("url"),
 		Status: "complete",
@@ -30,7 +31,7 @@ func (ms *mockServer) postExports(w http.ResponseWriter, r *http.Request) {
 func (ms *mockServer) listExports(w http.ResponseWriter, _ *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
-	toJSON(w, ExportList{
+	toJSON(w, mtypes.ExportList{
 		Items: ms.exportList,
 	})
 }

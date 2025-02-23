@@ -1,6 +1,4 @@
-package mailgun
-
-// common things for stats and metrics
+package mtypes
 
 type Resolution string
 

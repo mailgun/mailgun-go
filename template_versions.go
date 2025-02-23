@@ -3,27 +3,12 @@ package mailgun
 import (
 	"context"
 	"strconv"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-type TemplateVersion struct {
-	Tag       string         `json:"tag"`
-	Template  string         `json:"template,omitempty"`
-	Engine    TemplateEngine `json:"engine"`
-	CreatedAt RFC2822Time    `json:"createdAt"`
-	Comment   string         `json:"comment"`
-	Active    bool           `json:"active"`
-}
-
-type templateVersionListResp struct {
-	Template struct {
-		Template
-		Versions []TemplateVersion `json:"versions,omitempty"`
-	} `json:"template"`
-	Paging Paging `json:"paging"`
-}
-
 // AddTemplateVersion adds a template version to a template
-func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
+func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateName string, version *mtypes.TemplateVersion) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -44,7 +29,7 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateN
 		payload.addValue("active", boolToString(version.Active))
 	}
 
-	var resp templateResp
+	var resp mtypes.TemplateResp
 	if err := postResponseFromJSON(ctx, r, payload, &resp); err != nil {
 		return err
 	}
@@ -53,21 +38,21 @@ func (mg *MailgunImpl) AddTemplateVersion(ctx context.Context, domain, templateN
 }
 
 // GetTemplateVersion gets a specific version of a template
-func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (TemplateVersion, error) {
+func (mg *MailgunImpl) GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (mtypes.TemplateVersion, error) {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + tag)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp templateResp
+	var resp mtypes.TemplateResp
 	err := getResponseFromJSON(ctx, r, &resp)
 	if err != nil {
-		return TemplateVersion{}, err
+		return mtypes.TemplateVersion{}, err
 	}
 	return resp.Item.Version, nil
 }
 
 // Update the comment and mark a version of a template active
-func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *TemplateVersion) error {
+func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *mtypes.TemplateVersion) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + templateName + "/versions/" + version.Tag)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -83,7 +68,7 @@ func (mg *MailgunImpl) UpdateTemplateVersion(ctx context.Context, domain, templa
 		p.addValue("template", version.Template)
 	}
 
-	var resp templateResp
+	var resp mtypes.TemplateResp
 	err := putResponseFromJSON(ctx, r, p, &resp)
 	if err != nil {
 		return err
@@ -102,7 +87,7 @@ func (mg *MailgunImpl) DeleteTemplateVersion(ctx context.Context, domain, templa
 }
 
 type TemplateVersionsIterator struct {
-	templateVersionListResp
+	mtypes.TemplateVersionListResp
 	mg  Mailgun
 	err error
 }
@@ -120,7 +105,7 @@ func (mg *MailgunImpl) ListTemplateVersions(domain, templateName string, opts *L
 	url, err := r.generateUrlWithParameters()
 	return &TemplateVersionsIterator{
 		mg:                      mg,
-		templateVersionListResp: templateVersionListResp{Paging: Paging{Next: url, First: url}},
+		TemplateVersionListResp: mtypes.TemplateVersionListResp{Paging: mtypes.Paging{Next: url, First: url}},
 		err:                     err,
 	}
 }
@@ -133,7 +118,7 @@ func (li *TemplateVersionsIterator) Err() error {
 // Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]TemplateVersion) bool {
+func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]mtypes.TemplateVersion) bool {
 	if li.err != nil {
 		return false
 	}
@@ -141,7 +126,7 @@ func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]TemplateV
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	cpy := make([]mtypes.TemplateVersion, len(li.Template.Versions))
 	copy(cpy, li.Template.Versions)
 	*items = cpy
 
@@ -151,7 +136,7 @@ func (li *TemplateVersionsIterator) Next(ctx context.Context, items *[]TemplateV
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (li *TemplateVersionsIterator) First(ctx context.Context, items *[]TemplateVersion) bool {
+func (li *TemplateVersionsIterator) First(ctx context.Context, items *[]mtypes.TemplateVersion) bool {
 	if li.err != nil {
 		return false
 	}
@@ -159,7 +144,7 @@ func (li *TemplateVersionsIterator) First(ctx context.Context, items *[]Template
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	cpy := make([]mtypes.TemplateVersion, len(li.Template.Versions))
 	copy(cpy, li.Template.Versions)
 	*items = cpy
 	return true
@@ -169,7 +154,7 @@ func (li *TemplateVersionsIterator) First(ctx context.Context, items *[]Template
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (li *TemplateVersionsIterator) Last(ctx context.Context, items *[]TemplateVersion) bool {
+func (li *TemplateVersionsIterator) Last(ctx context.Context, items *[]mtypes.TemplateVersion) bool {
 	if li.err != nil {
 		return false
 	}
@@ -177,7 +162,7 @@ func (li *TemplateVersionsIterator) Last(ctx context.Context, items *[]TemplateV
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	cpy := make([]mtypes.TemplateVersion, len(li.Template.Versions))
 	copy(cpy, li.Template.Versions)
 	*items = cpy
 	return true
@@ -186,7 +171,7 @@ func (li *TemplateVersionsIterator) Last(ctx context.Context, items *[]TemplateV
 // Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]TemplateVersion) bool {
+func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]mtypes.TemplateVersion) bool {
 	if li.err != nil {
 		return false
 	}
@@ -197,7 +182,7 @@ func (li *TemplateVersionsIterator) Previous(ctx context.Context, items *[]Templ
 	if li.err != nil {
 		return false
 	}
-	cpy := make([]TemplateVersion, len(li.Template.Versions))
+	cpy := make([]mtypes.TemplateVersion, len(li.Template.Versions))
 	copy(cpy, li.Template.Versions)
 	*items = cpy
 
@@ -210,5 +195,5 @@ func (li *TemplateVersionsIterator) fetch(ctx context.Context, url string) error
 	r.setClient(li.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 
-	return getResponseFromJSON(ctx, r, &li.templateVersionListResp)
+	return getResponseFromJSON(ctx, r, &li.TemplateVersionListResp)
 }

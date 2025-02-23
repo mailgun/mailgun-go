@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,18 +25,18 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 	domain := os.Getenv("MG_DOMAIN")
 	require.NotEmpty(t, domain)
 
-	opts := mailgun.MetricsOptions{
-		End:      mailgun.RFC2822Time(time.Now().UTC()),
+	opts := mtypes.MetricsRequest{
+		End:      mtypes.RFC2822Time(time.Now().UTC()),
 		Duration: "30d",
-		Pagination: mailgun.MetricsPagination{
+		Pagination: mtypes.MetricsPagination{
 			Limit: 10,
 		},
 	}
 	// filter by domain
-	opts.Filter.BoolGroupAnd = []mailgun.MetricsFilterPredicate{{
+	opts.Filter.BoolGroupAnd = []mtypes.MetricsFilterPredicate{{
 		Attribute:     "domain",
 		Comparator:    "=",
-		LabeledValues: []mailgun.MetricsLabeledValue{{Label: domain, Value: domain}},
+		LabeledValues: []mtypes.MetricsLabeledValue{{Label: domain, Value: domain}},
 	}}
 
 	iter, err := mg.ListMetrics(opts)
@@ -46,7 +47,7 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 	defer cancel()
 
 	for i := 0; i < 2; i++ {
-		var resp mailgun.MetricsResponse
+		var resp mtypes.MetricsResponse
 		more := iter.Next(ctx, &resp)
 		if iter.Err() != nil {
 			require.NoError(t, err)

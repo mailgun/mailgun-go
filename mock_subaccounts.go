@@ -4,15 +4,16 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addSubaccountRoutes(r chi.Router) {
-	ms.subaccountList = append(ms.subaccountList, Subaccount{
-		Id:     "enabled.subaccount",
+	ms.subaccountList = append(ms.subaccountList, mtypes.Subaccount{
+		ID:     "enabled.subaccount",
 		Name:   "mailgun.test",
 		Status: "enabled",
-	}, Subaccount{
-		Id:     "disabled.subaccount",
+	}, mtypes.Subaccount{
+		ID:     "disabled.subaccount",
 		Name:   "mailgun.test",
 		Status: "disabled",
 	})
@@ -29,7 +30,7 @@ func (ms *mockServer) listSubaccounts(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var list subaccountsListResponse
+	var list mtypes.ListSubaccountsResponse
 	for _, subaccount := range ms.subaccountList {
 		list.Items = append(list.Items, subaccount)
 	}
@@ -51,14 +52,14 @@ func (ms *mockServer) listSubaccounts(w http.ResponseWriter, r *http.Request) {
 
 	// If we are at the end of the list
 	if skip == end {
-		toJSON(w, subaccountsListResponse{
+		toJSON(w, mtypes.ListSubaccountsResponse{
 			Total: len(list.Items),
-			Items: []Subaccount{},
+			Items: []mtypes.Subaccount{},
 		})
 		return
 	}
 
-	toJSON(w, subaccountsListResponse{
+	toJSON(w, mtypes.ListSubaccountsResponse{
 		Total: len(list.Items),
 		Items: list.Items[skip:end],
 	})
@@ -69,8 +70,8 @@ func (ms *mockServer) getSubaccount(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for _, s := range ms.subaccountList {
-		if s.Id == chi.URLParam(r, "subaccountID") {
-			toJSON(w, SubaccountResponse{Item: s})
+		if s.ID == chi.URLParam(r, "subaccountID") {
+			toJSON(w, mtypes.SubaccountResponse{Item: s})
 			return
 		}
 	}
@@ -82,8 +83,8 @@ func (ms *mockServer) createSubaccount(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	ms.subaccountList = append(ms.subaccountList, Subaccount{
-		Id:     "test",
+	ms.subaccountList = append(ms.subaccountList, mtypes.Subaccount{
+		ID:     "test",
 		Name:   r.FormValue("name"),
 		Status: "active",
 	})
@@ -95,12 +96,12 @@ func (ms *mockServer) enableSubaccount(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	for _, subaccount := range ms.subaccountList {
-		if subaccount.Id == chi.URLParam(r, "subaccountID") && subaccount.Status == "disabled" {
+		if subaccount.ID == chi.URLParam(r, "subaccountID") && subaccount.Status == "disabled" {
 			subaccount.Status = "enabled"
-			toJSON(w, SubaccountResponse{Item: subaccount})
+			toJSON(w, mtypes.SubaccountResponse{Item: subaccount})
 			return
 		}
-		if subaccount.Id == chi.URLParam(r, "subaccountID") && subaccount.Status == "enabled" {
+		if subaccount.ID == chi.URLParam(r, "subaccountID") && subaccount.Status == "enabled" {
 			toJSON(w, okResp{Message: "subaccount is already enabled"})
 			return
 		}
@@ -113,12 +114,12 @@ func (ms *mockServer) disableSubaccount(w http.ResponseWriter, r *http.Request) 
 	ms.mutex.Lock()
 
 	for _, subaccount := range ms.subaccountList {
-		if subaccount.Id == chi.URLParam(r, "subaccountID") && subaccount.Status == "enabled" {
+		if subaccount.ID == chi.URLParam(r, "subaccountID") && subaccount.Status == "enabled" {
 			subaccount.Status = "disabled"
-			toJSON(w, SubaccountResponse{Item: subaccount})
+			toJSON(w, mtypes.SubaccountResponse{Item: subaccount})
 			return
 		}
-		if subaccount.Id == chi.URLParam(r, "subaccountID") && subaccount.Status == "disabled" {
+		if subaccount.ID == chi.URLParam(r, "subaccountID") && subaccount.Status == "disabled" {
 			toJSON(w, okResp{Message: "subaccount is already disabled"})
 			return
 		}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addMessagesRoutes(r chi.Router) {
@@ -94,7 +95,7 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !tagExists {
-			ms.tags = append(ms.tags, Tag{Value: newTag})
+			ms.tags = append(ms.tags, mtypes.Tag{Value: newTag})
 		}
 	}
 
@@ -119,7 +120,7 @@ func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) 
 		toJSON(w, okResp{Message: "not found"})
 	}
 
-	toJSON(w, StoredMessage{
+	toJSON(w, mtypes.StoredMessage{
 		Recipients: strings.Join(stored.Message.Recipients, ","),
 		Sender:     stored.Message.Headers.From,
 		Subject:    stored.Message.Headers.Subject,

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +20,7 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	findVersion := func(templateName, tag string) bool {
 		it := mg.ListTemplateVersions(testDomain, templateName, nil)
 
-		var page []mailgun.TemplateVersion
+		var page []mtypes.TemplateVersion
 		for it.Next(ctx, &page) {
 			for _, v := range page {
 				if v.Tag == tag {
@@ -38,26 +39,26 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 		Tag            = "v1"
 	)
 
-	tmpl := mailgun.Template{
+	tmpl := mtypes.Template{
 		Name: randomString(10, "Mailgun-go-TestTemplateVersionsCRUD-"),
 	}
 
 	// Create a template
 	require.NoError(t, mg.CreateTemplate(ctx, testDomain, &tmpl))
 
-	version := mailgun.TemplateVersion{
+	version := mtypes.TemplateVersion{
 		Tag:      Tag,
 		Comment:  Comment,
 		Template: Template,
 		Active:   true,
-		Engine:   mailgun.TemplateEngineGo,
+		Engine:   mtypes.TemplateEngineGo,
 	}
 
 	// Add a version version
 	require.NoError(t, mg.AddTemplateVersion(ctx, testDomain, tmpl.Name, &version))
 	assert.Equal(t, Tag, version.Tag)
 	assert.Equal(t, Comment, version.Comment)
-	assert.Equal(t, mailgun.TemplateEngineGo, version.Engine)
+	assert.Equal(t, mtypes.TemplateEngineGo, version.Engine)
 
 	// Ensure the version is in the list
 	require.True(t, findVersion(tmpl.Name, version.Tag))
@@ -75,12 +76,12 @@ func TestTemplateVersionsCRUD(t *testing.T) {
 	assert.Equal(t, Template+"updated", updated.Template)
 
 	// Add a new active Version
-	version2 := mailgun.TemplateVersion{
+	version2 := mtypes.TemplateVersion{
 		Tag:      "v2",
 		Comment:  Comment,
 		Template: Template,
 		Active:   true,
-		Engine:   mailgun.TemplateEngineGo,
+		Engine:   mtypes.TemplateEngineGo,
 	}
 	require.NoError(t, mg.AddTemplateVersion(ctx, testDomain, tmpl.Name, &version2))
 

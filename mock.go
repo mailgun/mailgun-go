@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 type MockServer interface {
@@ -20,13 +21,13 @@ type MockServer interface {
 	URL() string
 	DomainIPS() []string
 	DomainList() []DomainContainer
-	ExportList() []Export
+	ExportList() []mtypes.Export
 	MailingList() []MailingListContainer
-	RouteList() []Route
+	RouteList() []mtypes.Route
 	Events() []Event
-	Webhooks() WebHooksListResponse
-	Templates() []Template
-	SubaccountList() []Subaccount
+	Webhooks() mtypes.WebHooksListResponse
+	Templates() []mtypes.Template
+	SubaccountList() []mtypes.Subaccount
 }
 
 // A mailgun api mock suitable for testing
@@ -35,19 +36,19 @@ type mockServer struct {
 
 	domainIPS        []string
 	domainList       []DomainContainer
-	exportList       []Export
+	exportList       []mtypes.Export
 	mailingList      []MailingListContainer
-	routeList        []Route
+	routeList        []mtypes.Route
 	events           []Event
-	templates        []Template
-	templateVersions map[string][]TemplateVersion
-	unsubscribes     []Unsubscribe
-	complaints       []Complaint
-	bounces          []Bounce
-	credentials      []Credential
-	tags             []Tag
-	subaccountList   []Subaccount
-	webhooks         WebHooksListResponse
+	templates        []mtypes.Template
+	templateVersions map[string][]mtypes.TemplateVersion
+	unsubscribes     []mtypes.Unsubscribe
+	complaints       []mtypes.Complaint
+	bounces          []mtypes.Bounce
+	credentials      []mtypes.Credential
+	tags             []mtypes.Tag
+	subaccountList   []mtypes.Subaccount
+	webhooks         mtypes.WebHooksListResponse
 	mutex            sync.Mutex
 }
 
@@ -63,7 +64,7 @@ func (ms *mockServer) DomainList() []DomainContainer {
 	return ms.domainList
 }
 
-func (ms *mockServer) ExportList() []Export {
+func (ms *mockServer) ExportList() []mtypes.Export {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.exportList
@@ -75,7 +76,7 @@ func (ms *mockServer) MailingList() []MailingListContainer {
 	return ms.mailingList
 }
 
-func (ms *mockServer) RouteList() []Route {
+func (ms *mockServer) RouteList() []mtypes.Route {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.routeList
@@ -87,25 +88,25 @@ func (ms *mockServer) Events() []Event {
 	return ms.events
 }
 
-func (ms *mockServer) Webhooks() WebHooksListResponse {
+func (ms *mockServer) Webhooks() mtypes.WebHooksListResponse {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.webhooks
 }
 
-func (ms *mockServer) Templates() []Template {
+func (ms *mockServer) Templates() []mtypes.Template {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.templates
 }
 
-func (ms *mockServer) Unsubscribes() []Unsubscribe {
+func (ms *mockServer) Unsubscribes() []mtypes.Unsubscribe {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.unsubscribes
 }
 
-func (ms *mockServer) SubaccountList() []Subaccount {
+func (ms *mockServer) SubaccountList() []mtypes.Subaccount {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.subaccountList
@@ -285,4 +286,9 @@ func randomString(n int, prefix string) string {
 
 func randomEmail(prefix, domain string) string {
 	return strings.ToLower(fmt.Sprintf("%s@%s", randomString(20, prefix), domain))
+}
+
+type okResp struct {
+	ID      string `json:"id,omitempty"`
+	Message string `json:"message"`
 }

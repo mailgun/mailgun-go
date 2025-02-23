@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 func (ms *mockServer) addTemplateVersionRoutes(r chi.Router) {
@@ -54,20 +55,20 @@ func (ms *mockServer) listTemplateVersions(w http.ResponseWriter, r *http.Reques
 	}
 	start, end := pageOffsets(idx, page, pivot, limit)
 	var nextAddress, prevAddress string
-	var results []TemplateVersion
+	var results []mtypes.TemplateVersion
 
 	if start != end {
 		results = ms.templateVersions[templateName][start:end]
 		nextAddress = results[len(results)-1].Tag
 		prevAddress = results[0].Tag
 	} else {
-		results = []TemplateVersion{}
+		results = []mtypes.TemplateVersion{}
 		nextAddress = pivot
 		prevAddress = pivot
 	}
 
-	toJSON(w, templateVersionListResp{
-		Paging: Paging{
+	toJSON(w, mtypes.TemplateVersionListResp{
+		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
@@ -84,8 +85,8 @@ func (ms *mockServer) listTemplateVersions(w http.ResponseWriter, r *http.Reques
 			}),
 		},
 		Template: struct {
-			Template
-			Versions []TemplateVersion `json:"versions,omitempty"`
+			mtypes.Template
+			Versions []mtypes.TemplateVersion `json:"versions,omitempty"`
 		}{
 			Template: template,
 			Versions: results,
@@ -118,7 +119,7 @@ func (ms *mockServer) getTemplateVersion(w http.ResponseWriter, r *http.Request)
 
 	template.Version = templateVersion
 
-	toJSON(w, &templateResp{
+	toJSON(w, &mtypes.TemplateResp{
 		Item: template,
 	})
 }
@@ -172,12 +173,12 @@ func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Reque
 		engine = "handlebars"
 	}
 
-	newTemplateVersion := TemplateVersion{
+	newTemplateVersion := mtypes.TemplateVersion{
 		Template:  templateContent,
 		Comment:   comment,
 		Tag:       tagName,
-		Engine:    TemplateEngine(engine),
-		CreatedAt: RFC2822Time(time.Now()),
+		Engine:    mtypes.TemplateEngine(engine),
+		CreatedAt: mtypes.RFC2822Time(time.Now()),
 	}
 
 	if active == "yes" {
@@ -212,7 +213,7 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	}
 
 	var templateVersionFound bool
-	var templateVersion TemplateVersion
+	var templateVersion mtypes.TemplateVersion
 	var templateVersionIndex int
 	for i, tmplVersion := range ms.templateVersions[templateName] {
 		if tmplVersion.Tag == templateVersionName {
@@ -308,7 +309,7 @@ func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-func (ms *mockServer) fetchTemplate(name string) (template Template, found bool) {
+func (ms *mockServer) fetchTemplate(name string) (template mtypes.Template, found bool) {
 	for _, existingTemplate := range ms.templates {
 		if existingTemplate.Name == name {
 			template = existingTemplate
@@ -316,15 +317,15 @@ func (ms *mockServer) fetchTemplate(name string) (template Template, found bool)
 		}
 	}
 
-	return Template{}, false
+	return mtypes.Template{}, false
 }
 
-func (ms *mockServer) fetchTemplateVersion(templateName string, templateVersionTag string) (TemplateVersion, bool) {
+func (ms *mockServer) fetchTemplateVersion(templateName string, templateVersionTag string) (mtypes.TemplateVersion, bool) {
 	for _, existingTemplate := range ms.templateVersions[templateName] {
 		if existingTemplate.Tag == templateVersionTag {
 			return existingTemplate, true
 		}
 	}
 
-	return TemplateVersion{}, false
+	return mtypes.TemplateVersion{}, false
 }

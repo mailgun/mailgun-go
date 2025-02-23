@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,7 +22,7 @@ func TestGetBounces(t *testing.T) {
 	ctx := context.Background()
 	it := mg.ListBounces(testDomain, nil)
 
-	var page []mailgun.Bounce
+	var page []mtypes.Bounce
 	for it.Next(ctx, &page) {
 		for _, bounce := range page {
 			t.Logf("Bounce: %+v\n", bounce)
@@ -55,7 +56,7 @@ func TestAddDelBounces(t *testing.T) {
 
 	findBounce := func(address string) bool {
 		it := mg.ListBounces(testDomain, nil)
-		var page []mailgun.Bounce
+		var page []mtypes.Bounce
 		for it.Next(ctx, &page) {
 			require.True(t, len(page) != 0)
 			for _, bounce := range page {
@@ -115,7 +116,7 @@ func TestAddDelBounceList(t *testing.T) {
 
 	findBounce := func(address string) bool {
 		it := mg.ListBounces(testDomain, nil)
-		var page []mailgun.Bounce
+		var page []mtypes.Bounce
 		for it.Next(ctx, &page) {
 			require.True(t, len(page) != 0)
 			for _, bounce := range page {
@@ -131,13 +132,13 @@ func TestAddDelBounceList(t *testing.T) {
 		return false
 	}
 
-	createdAt, err := mailgun.NewRFC2822Time("Thu, 13 Oct 2011 18:02:00 +0000")
+	createdAt, err := mtypes.NewRFC2822Time("Thu, 13 Oct 2011 18:02:00 +0000")
 	if err != nil {
 		t.Fatalf("invalid time")
 	}
 
 	// Generate a list of bounces
-	bounces := []mailgun.Bounce{
+	bounces := []mtypes.Bounce{
 		{
 			Code:    "550",
 			Address: fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain),
@@ -176,7 +177,7 @@ func TestAddDelBounceList(t *testing.T) {
 	require.NoError(t, err)
 
 	it := mg.ListBounces(testDomain, nil)
-	var page []mailgun.Bounce
+	var page []mtypes.Bounce
 	if it.Next(ctx, &page) {
 		t.Fatalf("Expected no item in the bounce list")
 	}

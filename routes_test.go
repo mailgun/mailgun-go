@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +18,7 @@ func TestRouteCRUD(t *testing.T) {
 	ctx := context.Background()
 	var countRoutes = func() int {
 		it := mg.ListRoutes(nil)
-		var page []mailgun.Route
+		var page []mtypes.Route
 		it.Next(ctx, &page)
 		require.NoError(t, it.Err())
 		return it.TotalCount
@@ -25,7 +26,7 @@ func TestRouteCRUD(t *testing.T) {
 
 	routeCount := countRoutes()
 
-	newRoute, err := mg.CreateRoute(ctx, mailgun.Route{
+	newRoute, err := mg.CreateRoute(ctx, mtypes.Route{
 		Priority:    1,
 		Description: "Sample Route",
 		Expression:  "match_recipient(\".*@samples.mailgun.org\")",
@@ -50,7 +51,7 @@ func TestRouteCRUD(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, newRoute, theRoute)
 
-	changedRoute, err := mg.UpdateRoute(ctx, newRoute.Id, mailgun.Route{
+	changedRoute, err := mg.UpdateRoute(ctx, newRoute.Id, mtypes.Route{
 		Priority: 2,
 	})
 	require.NoError(t, err)
@@ -65,7 +66,7 @@ func TestRoutesIterator(t *testing.T) {
 
 	it := mg.ListRoutes(&mailgun.ListOptions{Limit: 2})
 
-	var firstPage, secondPage, previousPage, lastPage []mailgun.Route
+	var firstPage, secondPage, previousPage, lastPage []mtypes.Route
 	var ctx = context.Background()
 
 	// Calling Last() is invalid unless you first use First() or Next()
