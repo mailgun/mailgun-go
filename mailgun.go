@@ -80,6 +80,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/mailgun/mailgun-go/v4/mtypes"
@@ -436,8 +437,5 @@ func ptr[T any](v T) *T {
 }
 
 func boolToString(b bool) string {
-	if b {
-		return "true"
-	}
-	return "false"
+	return strconv.FormatBool(b)
 }
