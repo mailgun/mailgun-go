@@ -141,7 +141,7 @@ type Mailgun interface {
 	DeleteBounce(ctx context.Context, domain, address string) error
 	DeleteBounceList(ctx context.Context, domain string) error
 
-	ListMetrics(mtypes.MetricsRequest) (*MetricsIterator, error)
+	ListMetrics(opts MetricsOptions) (*MetricsIterator, error)
 
 	GetTag(ctx context.Context, domain, tag string) (mtypes.Tag, error)
 	DeleteTag(ctx context.Context, domain, tag string) error

@@ -7,6 +7,8 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
+type MetricsOptions = mtypes.MetricsRequest
+
 // ListMetrics returns domain/account metrics.
 //
 // To filter by domain:
@@ -18,7 +20,7 @@ import (
 //	}}
 //
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
-func (mg *MailgunImpl) ListMetrics(opts mtypes.MetricsRequest) (*MetricsIterator, error) {
+func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error) {
 	if opts.Pagination.Limit == 0 {
 		opts.Pagination.Limit = 10
 	}
