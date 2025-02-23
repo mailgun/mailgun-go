@@ -1,5 +1,7 @@
 package mailgun
 
+// TODO(v5): move to events package?
+
 import (
 	"fmt"
 	"reflect"
