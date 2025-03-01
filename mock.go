@@ -17,6 +17,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
+// TODO(v5): remove/move?
 type MockServer interface {
 	Stop()
 	URL() string
@@ -32,6 +33,7 @@ type MockServer interface {
 }
 
 // A mailgun api mock suitable for testing
+// TODO(v5): rename to MockServer?
 type mockServer struct {
 	srv *httptest.Server
 
