@@ -33,7 +33,7 @@ linters-settings:
       - performance
       - style
     disabled-checks:
-      - singleCaseSwitch
+      - singleCaseSwitch # redundant
       - hugeParam # TODO(v6): allocations critical; enable?
       - sprintfQuotedString # noisy # TODO: enable
 
