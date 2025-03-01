@@ -27,7 +27,7 @@ godoc:
 # TODO(vtopc): fix mocks and enable nilaway for them too?
 .PHONY: nilaway
 nilaway: $(NILAWAY)
-	$(NILAWAY) -include-pkgs="$(PACKAGE)" -test=false -exclude-errors-in-files=mock_ ./...
+	$(NILAWAY) -include-pkgs="$(PACKAGE)" -test=false -exclude-errors-in-files=mocks/ ./...
 
 # linter:
 GOLINT = $(GOPATH)/bin/golangci-lint
