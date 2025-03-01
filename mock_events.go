@@ -191,8 +191,8 @@ func (ms *mockServer) addEventRoutes(r chi.Router) {
 }
 
 type eventsResponse struct {
-	Items  []Event       `json:"items"`
-	Paging mtypes.Paging `json:"paging"`
+	Items  []events.Event `json:"items"`
+	Paging mtypes.Paging  `json:"paging"`
 }
 
 func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
@@ -211,14 +211,14 @@ func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
 	start, end := pageOffsets(idx, r.FormValue("page"), r.FormValue("address"), limit)
 
 	var nextAddress, prevAddress string
-	var results []Event
+	var results []events.Event
 
 	if start != end {
 		results = ms.events[start:end]
 		nextAddress = results[len(results)-1].GetID()
 		prevAddress = results[0].GetID()
 	} else {
-		results = []Event{}
+		results = []events.Event{}
 		nextAddress = r.FormValue("address")
 		prevAddress = r.FormValue("address")
 	}

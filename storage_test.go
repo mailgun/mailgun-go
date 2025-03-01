@@ -43,7 +43,7 @@ func TestStorage(t *testing.T) {
 func findStoredMessageURL(mg mailgun.Mailgun, id string) (string, error) {
 	it := mg.ListEvents(testDomain, nil)
 
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Next(context.Background(), &page) {
 		for _, event := range page {
 			if event.GetName() == events.EventStored && event.GetID() == id {

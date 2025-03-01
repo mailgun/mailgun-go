@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
@@ -24,7 +25,7 @@ type MockServer interface {
 	ExportList() []mtypes.Export
 	MailingList() []MailingListContainer
 	RouteList() []mtypes.Route
-	Events() []Event
+	Events() []events.Event
 	Webhooks() mtypes.WebHooksListResponse
 	Templates() []mtypes.Template
 	SubaccountList() []mtypes.Subaccount
@@ -39,7 +40,7 @@ type mockServer struct {
 	exportList       []mtypes.Export
 	mailingList      []MailingListContainer
 	routeList        []mtypes.Route
-	events           []Event
+	events           []events.Event
 	templates        []mtypes.Template
 	templateVersions map[string][]mtypes.TemplateVersion
 	unsubscribes     []mtypes.Unsubscribe
@@ -82,7 +83,7 @@ func (ms *mockServer) RouteList() []mtypes.Route {
 	return ms.routeList
 }
 
-func (ms *mockServer) Events() []Event {
+func (ms *mockServer) Events() []events.Event {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.events

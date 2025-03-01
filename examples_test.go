@@ -144,7 +144,7 @@ func ExampleMailgunImpl_VerifyWebhookSignature() {
 
 		// Parse the raw event to extract the
 
-		e, err := mailgun.ParseEvent(payload.EventData)
+		e, err := events.ParseEvent(payload.EventData)
 		if err != nil {
 			fmt.Printf("parse event error: %s\n", err)
 			return

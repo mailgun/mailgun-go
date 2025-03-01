@@ -1,4 +1,4 @@
-package mailgun
+package events
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -84,9 +83,9 @@ func TestParseSuccess(t *testing.T) {
 	}`))
 	require.NoError(t, err)
 	require.Equal(t, reflect.TypeOf(event).String(), "*events.Accepted")
-	subject := event.(*events.Accepted).Message.Headers.Subject
+	subject := event.(*Accepted).Message.Headers.Subject
 	assert.Equal(t, "Test message going through the bus.", subject)
-	assert.Equal(t, "AgEASDSGFB8y4--TSDGxvccvmQB==", event.(*events.Accepted).Storage.Key)
+	assert.Equal(t, "AgEASDSGFB8y4--TSDGxvccvmQB==", event.(*Accepted).Storage.Key)
 
 	// Make sure the next event parsing attempt will zero the fields.
 	event2, err := ParseEvent([]byte(`{
@@ -97,14 +96,14 @@ func TestParseSuccess(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC), event2.GetTimestamp())
-	assert.Equal(t, "", event2.(*events.Accepted).Message.Headers.Subject)
+	assert.Equal(t, "", event2.(*Accepted).Message.Headers.Subject)
 	// Make sure the second attempt of Parse doesn't overwrite the first event struct.
-	assert.Equal(t, "dude@example.com", event.(*events.Accepted).Recipient)
+	assert.Equal(t, "dude@example.com", event.(*Accepted).Recipient)
 
-	assert.Equal(t, "value", event.(*events.Accepted).UserVariables.(map[string]any)["custom"])
-	child := event.(*events.Accepted).UserVariables.(map[string]any)["parent"].(map[string]any)["child"]
+	assert.Equal(t, "value", event.(*Accepted).UserVariables.(map[string]any)["custom"])
+	child := event.(*Accepted).UserVariables.(map[string]any)["parent"].(map[string]any)["child"]
 	assert.Equal(t, "user defined variable", child)
-	aList := event.(*events.Accepted).UserVariables.(map[string]any)["a-list"].([]any)
+	aList := event.(*Accepted).UserVariables.(map[string]any)["a-list"].([]any)
 	assert.Equal(t, []any{1.0, 2.0, 3.0, 4.0, 5.0}, aList)
 }
 
@@ -117,7 +116,7 @@ func TestParseSuccessInvalidUserVariables(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "*events.Accepted", reflect.TypeOf(event).String())
 	assert.Equal(t, "Could not load user-variables. They were either truncated or invalid JSON",
-		event.(*events.Accepted).UserVariables)
+		event.(*Accepted).UserVariables)
 }
 
 func TestParseResponse(t *testing.T) {
@@ -145,14 +144,14 @@ func TestParseResponse(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "accepted", evnts[0].GetName())
-	assert.Equal(t, "someone@example.com", evnts[0].(*events.Accepted).Recipient)
+	assert.Equal(t, "someone@example.com", evnts[0].(*Accepted).Recipient)
 
 	assert.Equal(t, "delivered", evnts[1].GetName())
-	assert.Equal(t, "test@mailgun.test", evnts[1].(*events.Delivered).Recipient)
+	assert.Equal(t, "test@mailgun.test", evnts[1].(*Delivered).Recipient)
 }
 
 func TestTimeStamp(t *testing.T) {
-	var event events.Generic
+	var event Generic
 	ts := time.Date(2018, 8, 10, 17, 35, 16, 538978048, time.UTC)
 	event.SetTimestamp(ts)
 	assert.Equal(t, ts, event.GetTimestamp())
@@ -184,7 +183,7 @@ func TestEventMessageWithAttachment(t *testing.T) {
                 "size": 142698}}`)
 	event, err := ParseEvent(body)
 	require.NoError(t, err)
-	assert.Equal(t, "doc.pdf", event.(*events.Delivered).Message.Attachments[0].FileName)
+	assert.Equal(t, "doc.pdf", event.(*Delivered).Message.Attachments[0].FileName)
 }
 
 func TestStored(t *testing.T) {
@@ -198,6 +197,6 @@ func TestStored(t *testing.T) {
         }}`, key, url))
 	event, err := ParseEvent(body)
 	require.NoError(t, err)
-	assert.Equal(t, key, event.(*events.Stored).Storage.Key)
-	assert.Equal(t, url, event.(*events.Stored).Storage.URL)
+	assert.Equal(t, key, event.(*Stored).Storage.Key)
+	assert.Equal(t, url, event.(*Stored).Storage.URL)
 }
