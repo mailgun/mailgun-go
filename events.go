@@ -7,7 +7,7 @@ import (
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 // ListEventOptions modifies the behavior of ListEvents()
@@ -37,12 +37,12 @@ type EventIterator struct {
 }
 
 // ListEvents creates a new iterator to fetch a page of events from the events api
-func (mg *MailgunImpl) ListEvents(domain string, opts *ListEventOptions) *EventIterator {
+func (mg *Client) ListEvents(domain string, opts *ListEventOptions) *EventIterator {
 	url := generateApiV3UrlWithDomain(mg, eventsEndpoint, domain)
 	return mg.listEvents(url, opts)
 }
 
-func (mg *MailgunImpl) listEvents(url string, opts *ListEventOptions) *EventIterator {
+func (mg *Client) listEvents(url string, opts *ListEventOptions) *EventIterator {
 	req := newHTTPRequest(url)
 	if opts != nil {
 		if opts.Limit > 0 {
@@ -199,7 +199,7 @@ type EventPoller struct {
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (mg *MailgunImpl) PollEvents(domain string, opts *ListEventOptions) *EventPoller {
+func (mg *Client) PollEvents(domain string, opts *ListEventOptions) *EventPoller {
 	now := time.Now()
 	// ForceAscending must be set
 	opts.ForceAscending = true

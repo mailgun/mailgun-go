@@ -3,11 +3,11 @@ package mailgun
 import (
 	"context"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // GetDomainTracking returns tracking settings for a domain
-func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (mtypes.DomainTracking, error) {
+func (mg *Client) GetDomainTracking(ctx context.Context, domain string) (mtypes.DomainTracking, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/tracking")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -16,7 +16,7 @@ func (mg *MailgunImpl) GetDomainTracking(ctx context.Context, domain string) (mt
 	return resp.Tracking, err
 }
 
-func (mg *MailgunImpl) UpdateClickTracking(ctx context.Context, domain, active string) error {
+func (mg *Client) UpdateClickTracking(ctx context.Context, domain, active string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/tracking/click")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -27,7 +27,7 @@ func (mg *MailgunImpl) UpdateClickTracking(ctx context.Context, domain, active s
 	return err
 }
 
-func (mg *MailgunImpl) UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error {
+func (mg *Client) UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/tracking/unsubscribe")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -40,7 +40,7 @@ func (mg *MailgunImpl) UpdateUnsubscribeTracking(ctx context.Context, domain, ac
 	return err
 }
 
-func (mg *MailgunImpl) UpdateOpenTracking(ctx context.Context, domain, active string) error {
+func (mg *Client) UpdateOpenTracking(ctx context.Context, domain, active string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/tracking/open")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

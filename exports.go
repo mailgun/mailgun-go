@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // CreateExport creates an export based on the URL given
-func (mg *MailgunImpl) CreateExport(ctx context.Context, url string) error {
+func (mg *Client) CreateExport(ctx context.Context, url string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, exportsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -22,7 +22,7 @@ func (mg *MailgunImpl) CreateExport(ctx context.Context, url string) error {
 }
 
 // ListExports lists all exports created within the past 24 hours
-func (mg *MailgunImpl) ListExports(ctx context.Context, url string) ([]mtypes.Export, error) {
+func (mg *Client) ListExports(ctx context.Context, url string) ([]mtypes.Export, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, exportsEndpoint))
 	r.setClient(mg.HTTPClient())
 	if url != "" {
@@ -43,7 +43,7 @@ func (mg *MailgunImpl) ListExports(ctx context.Context, url string) ([]mtypes.Ex
 }
 
 // GetExport gets an export by id
-func (mg *MailgunImpl) GetExport(ctx context.Context, id string) (mtypes.Export, error) {
+func (mg *Client) GetExport(ctx context.Context, id string) (mtypes.Export, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, exportsEndpoint) + "/" + id)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -54,7 +54,7 @@ func (mg *MailgunImpl) GetExport(ctx context.Context, id string) (mtypes.Export,
 
 // Download an export by ID. This will respond with a '302 Moved'
 // with the Location header of temporary S3 URL if it is available.
-func (mg *MailgunImpl) GetExportLink(ctx context.Context, id string) (string, error) {
+func (mg *Client) GetExportLink(ctx context.Context, id string) (string, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, exportsEndpoint) + "/" + id + "/download_url")
 	c := mg.HTTPClient()
 

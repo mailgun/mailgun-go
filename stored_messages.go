@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // GetStoredMessage retrieves information about a received e-mail message.
 // This provides visibility into, e.g., replies to a message sent to a mailing list.
-func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (mtypes.StoredMessage, error) {
+func (mg *Client) GetStoredMessage(ctx context.Context, url string) (mtypes.StoredMessage, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -21,7 +21,7 @@ func (mg *MailgunImpl) GetStoredMessage(ctx context.Context, url string) (mtypes
 
 // ReSend given a storage id resend the stored message to the specified recipients
 // TODO(v5): return SendMessageResponse
-func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...string) (msg, id string, err error) {
+func (mg *Client) ReSend(ctx context.Context, url string, recipients ...string) (msg, id string, err error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -48,7 +48,7 @@ func (mg *MailgunImpl) ReSend(ctx context.Context, url string, recipients ...str
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.
 // Compared to GetStoredMessage, it gives access to the unparsed MIME body, and
 // thus delegates to the caller the required parsing.
-func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (mtypes.StoredMessageRaw, error) {
+func (mg *Client) GetStoredMessageRaw(ctx context.Context, url string) (mtypes.StoredMessageRaw, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -60,7 +60,7 @@ func (mg *MailgunImpl) GetStoredMessageRaw(ctx context.Context, url string) (mty
 }
 
 // GetStoredAttachment retrieves the raw MIME body of a received e-mail message attachment.
-func (mg *MailgunImpl) GetStoredAttachment(ctx context.Context, url string) ([]byte, error) {
+func (mg *Client) GetStoredAttachment(ctx context.Context, url string) ([]byte, error) {
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

@@ -649,7 +649,7 @@ type SendableMessage interface {
 //	}
 //
 // See the public mailgun documentation for all possible return codes and error messages
-func (mg *MailgunImpl) Send(ctx context.Context, m SendableMessage) (mes, id string, err error) {
+func (mg *Client) Send(ctx context.Context, m SendableMessage) (mes, id string, err error) {
 	if m.Domain() == "" {
 		err = errors.New("you must provide a valid domain before calling Send()")
 		return "", "", err

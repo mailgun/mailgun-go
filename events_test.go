@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -113,7 +113,7 @@ func TestEventPoller(t *testing.T) {
 	assert.Equal(t, "user@"+testDomain, accepted.Recipient)
 }
 
-func ExampleMailgunImpl_ListEvents() {
+func ExampleMailgun_ListEvents() {
 	mg := mailgun.NewMailgun("your-api-key")
 	_ = mg.SetAPIBase(server.URL())
 

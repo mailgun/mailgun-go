@@ -83,7 +83,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // Debug set true to write the HTTP requests in curl for to stdout
@@ -253,9 +253,8 @@ type Mailgun interface {
 	RemoveOnBehalfOfSubaccount()
 }
 
-// MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
-// Colloquially, we refer to instances of this structure as "clients."
-type MailgunImpl struct {
+// Client bundles data needed by a large number of methods in order to interact with the Mailgun API.
+type Client struct {
 	apiBase           string
 	apiKey            string
 	webhookSigningKey string
@@ -264,8 +263,8 @@ type MailgunImpl struct {
 }
 
 // NewMailgun creates a new client instance.
-func NewMailgun(apiKey string) *MailgunImpl {
-	return &MailgunImpl{
+func NewMailgun(apiKey string) *Client {
+	return &Client{
 		apiBase: APIBase,
 		apiKey:  apiKey,
 		client:  http.DefaultClient,
@@ -274,7 +273,7 @@ func NewMailgun(apiKey string) *MailgunImpl {
 
 // NewMailgunFromEnv returns a new Mailgun client using the environment variables
 // MG_API_KEY, MG_URL, and MG_WEBHOOK_SIGNING_KEY
-func NewMailgunFromEnv() (*MailgunImpl, error) {
+func NewMailgunFromEnv() (*Client, error) {
 	apiKey := os.Getenv("MG_API_KEY")
 	if apiKey == "" {
 		return nil, errors.New("required environment variable MG_API_KEY not defined")
@@ -299,43 +298,43 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 }
 
 // APIBase returns the API Base URL configured for this client.
-func (mg *MailgunImpl) APIBase() string {
+func (mg *Client) APIBase() string {
 	return mg.apiBase
 }
 
 // APIKey returns the API key configured for this client.
-func (mg *MailgunImpl) APIKey() string {
+func (mg *Client) APIKey() string {
 	return mg.apiKey
 }
 
 // HTTPClient returns the HTTP client configured for this client.
-func (mg *MailgunImpl) HTTPClient() *http.Client {
+func (mg *Client) HTTPClient() *http.Client {
 	return mg.client
 }
 
 // SetHTTPClient updates the HTTP client for this client.
-func (mg *MailgunImpl) SetHTTPClient(c *http.Client) {
+func (mg *Client) SetHTTPClient(c *http.Client) {
 	mg.client = c
 }
 
 // WebhookSigningKey returns the webhook signing key configured for this client
-func (mg *MailgunImpl) WebhookSigningKey() string {
+func (mg *Client) WebhookSigningKey() string {
 	return mg.webhookSigningKey
 }
 
 // SetWebhookSigningKey updates the webhook signing key for this client
-func (mg *MailgunImpl) SetWebhookSigningKey(webhookSigningKey string) {
+func (mg *Client) SetWebhookSigningKey(webhookSigningKey string) {
 	mg.webhookSigningKey = webhookSigningKey
 }
 
 // SetOnBehalfOfSubaccount sets X-Mailgun-On-Behalf-Of header to SUBACCOUNT_ACCOUNT_ID in order to perform API request
 // on behalf of subaccount.
-func (mg *MailgunImpl) SetOnBehalfOfSubaccount(subaccountId string) {
+func (mg *Client) SetOnBehalfOfSubaccount(subaccountId string) {
 	mg.AddOverrideHeader(OnBehalfOfHeader, subaccountId)
 }
 
 // RemoveOnBehalfOfSubaccount remove X-Mailgun-On-Behalf-Of header for primary usage.
-func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
+func (mg *Client) RemoveOnBehalfOfSubaccount() {
 	delete(mg.overrideHeaders, OnBehalfOfHeader)
 }
 
@@ -349,7 +348,7 @@ func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
 //
 //	// Set a custom base API
 //	mg.SetAPIBase("https://localhost")
-func (mg *MailgunImpl) SetAPIBase(address string) error {
+func (mg *Client) SetAPIBase(address string) error {
 	if invalidURL.MatchString(address) {
 		return errors.New(`APIBase must not contain a version; SetAPIBase("https://host")`)
 	}
@@ -360,7 +359,7 @@ func (mg *MailgunImpl) SetAPIBase(address string) error {
 
 // AddOverrideHeader allows the user to specify additional headers that will be included in the HTTP request
 // This is mostly useful for testing the Mailgun API hosted at a different endpoint.
-func (mg *MailgunImpl) AddOverrideHeader(k, v string) {
+func (mg *Client) AddOverrideHeader(k, v string) {
 	if mg.overrideHeaders == nil {
 		mg.overrideHeaders = make(map[string]string)
 	}
