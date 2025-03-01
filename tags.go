@@ -16,7 +16,7 @@ type ListTagOptions struct {
 }
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
-func (mg *MailgunImpl) DeleteTag(ctx context.Context, domain, tag string) error {
+func (mg *Client) DeleteTag(ctx context.Context, domain, tag string) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -25,7 +25,7 @@ func (mg *MailgunImpl) DeleteTag(ctx context.Context, domain, tag string) error 
 }
 
 // GetTag retrieves metadata about the tag from the api
-func (mg *MailgunImpl) GetTag(ctx context.Context, domain, tag string) (mtypes.Tag, error) {
+func (mg *Client) GetTag(ctx context.Context, domain, tag string) (mtypes.Tag, error) {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -46,7 +46,7 @@ func (mg *MailgunImpl) GetTag(ctx context.Context, domain, tag string) (mtypes.T
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (mg *MailgunImpl) ListTags(domain string, opts *ListTagOptions) *TagIterator {
+func (mg *Client) ListTags(domain string, opts *ListTagOptions) *TagIterator {
 	req := newHTTPRequest(generateApiV3UrlWithDomain(mg, tagsEndpoint, domain))
 	if opts != nil {
 		if opts.Limit != 0 {

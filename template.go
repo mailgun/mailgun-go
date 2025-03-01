@@ -9,7 +9,7 @@ import (
 )
 
 // Create a new template which can be used to attach template versions to
-func (mg *MailgunImpl) CreateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
+func (mg *Client) CreateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -45,7 +45,7 @@ func (mg *MailgunImpl) CreateTemplate(ctx context.Context, domain string, templa
 }
 
 // GetTemplate gets a template given the template name
-func (mg *MailgunImpl) GetTemplate(ctx context.Context, domain, name string) (mtypes.Template, error) {
+func (mg *Client) GetTemplate(ctx context.Context, domain, name string) (mtypes.Template, error) {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -60,7 +60,7 @@ func (mg *MailgunImpl) GetTemplate(ctx context.Context, domain, name string) (mt
 }
 
 // Update the name and description of a template
-func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
+func (mg *Client) UpdateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
 	if template.Name == "" {
 		return errors.New("UpdateTemplate() Template.Name cannot be empty")
 	}
@@ -87,7 +87,7 @@ func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, domain string, templa
 }
 
 // Delete a template given a template name
-func (mg *MailgunImpl) DeleteTemplate(ctx context.Context, domain, name string) error {
+func (mg *Client) DeleteTemplate(ctx context.Context, domain, name string) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -107,7 +107,7 @@ type ListTemplateOptions struct {
 }
 
 // List all available templates
-func (mg *MailgunImpl) ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator {
+func (mg *Client) ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

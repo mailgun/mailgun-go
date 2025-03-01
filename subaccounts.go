@@ -29,7 +29,7 @@ type SubaccountsIterator struct {
 }
 
 // ListSubaccounts retrieves a set of subaccount linked to the primary Mailgun account.
-func (mg *MailgunImpl) ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator {
+func (mg *Client) ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator {
 	r := newHTTPRequest(generateSubaccountsApiUrl(mg))
 	r.setClient(mg.client)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -185,7 +185,7 @@ func (ri *SubaccountsIterator) fetch(ctx context.Context, skip, limit int) error
 // Subaccounts are child accounts that share the same plan and usage allocations as the primary, but have their own
 // assets (sending domains, unique users, API key, SMTP credentials, settings, statistics and site login).
 // All you need is the name of the subaccount.
-func (mg *MailgunImpl) CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error) {
+func (mg *Client) CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error) {
 	r := newHTTPRequest(generateSubaccountsApiUrl(mg))
 	r.setClient(mg.client)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -198,7 +198,7 @@ func (mg *MailgunImpl) CreateSubaccount(ctx context.Context, subaccountName stri
 }
 
 // GetSubaccount retrieves detailed information about subaccount using subaccountID.
-func (mg *MailgunImpl) GetSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error) {
+func (mg *Client) GetSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error) {
 	r := newHTTPRequest(generateSubaccountsApiUrl(mg) + "/" + subaccountID)
 	r.setClient(mg.client)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -209,7 +209,7 @@ func (mg *MailgunImpl) GetSubaccount(ctx context.Context, subaccountID string) (
 }
 
 // EnableSubaccount instructs Mailgun to enable subaccount.
-func (mg *MailgunImpl) EnableSubaccount(ctx context.Context, subaccountId string) (mtypes.SubaccountResponse, error) {
+func (mg *Client) EnableSubaccount(ctx context.Context, subaccountId string) (mtypes.SubaccountResponse, error) {
 	r := newHTTPRequest(generateSubaccountsApiUrl(mg) + "/" + subaccountId + "/" + "enable")
 	r.setClient(mg.client)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -220,7 +220,7 @@ func (mg *MailgunImpl) EnableSubaccount(ctx context.Context, subaccountId string
 }
 
 // DisableSubaccount instructs Mailgun to disable subaccount.
-func (mg *MailgunImpl) DisableSubaccount(ctx context.Context, subaccountId string) (mtypes.SubaccountResponse, error) {
+func (mg *Client) DisableSubaccount(ctx context.Context, subaccountId string) (mtypes.SubaccountResponse, error) {
 	r := newHTTPRequest(generateSubaccountsApiUrl(mg) + "/" + subaccountId + "/" + "disable")
 	r.setClient(mg.client)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

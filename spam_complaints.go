@@ -14,7 +14,7 @@ const (
 // ListComplaints returns a set of spam complaints registered against your domain.
 // Recipients of your messages can click on a link which sends feedback to Mailgun
 // indicating that the message they received is, to them, spam.
-func (mg *MailgunImpl) ListComplaints(domain string, opts *ListOptions) *ComplaintsIterator {
+func (mg *Client) ListComplaints(domain string, opts *ListOptions) *ComplaintsIterator {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -127,7 +127,7 @@ func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {
 
 // GetComplaint returns a single complaint record filed by a recipient at the email address provided.
 // If no complaint exists, the Complaint instance returned will be empty.
-func (mg *MailgunImpl) GetComplaint(ctx context.Context, domain, address string) (mtypes.Complaint, error) {
+func (mg *Client) GetComplaint(ctx context.Context, domain, address string) (mtypes.Complaint, error) {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain) + "/" + address)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -139,7 +139,7 @@ func (mg *MailgunImpl) GetComplaint(ctx context.Context, domain, address string)
 
 // CreateComplaint registers the specified address as a recipient who has complained of receiving spam
 // from your domain.
-func (mg *MailgunImpl) CreateComplaint(ctx context.Context, domain, address string) error {
+func (mg *Client) CreateComplaint(ctx context.Context, domain, address string) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -149,7 +149,7 @@ func (mg *MailgunImpl) CreateComplaint(ctx context.Context, domain, address stri
 	return err
 }
 
-func (mg *MailgunImpl) CreateComplaints(ctx context.Context, domain string, addresses []string) error {
+func (mg *Client) CreateComplaints(ctx context.Context, domain string, addresses []string) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -167,7 +167,7 @@ func (mg *MailgunImpl) CreateComplaints(ctx context.Context, domain string, addr
 
 // DeleteComplaint removes a previously registered e-mail address from the list of people who complained
 // of receiving spam from your domain.
-func (mg *MailgunImpl) DeleteComplaint(ctx context.Context, domain, address string) error {
+func (mg *Client) DeleteComplaint(ctx context.Context, domain, address string) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain) + "/" + address)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

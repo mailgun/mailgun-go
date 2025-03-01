@@ -13,7 +13,7 @@ type ListDomainsOptions struct {
 }
 
 // ListDomains retrieves a set of domains from Mailgun.
-func (mg *MailgunImpl) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
+func (mg *Client) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
@@ -166,7 +166,7 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 type GetDomainOptions struct{}
 
 // GetDomain retrieves detailed information about the named domain.
-func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string, _ *GetDomainOptions) (mtypes.GetDomainResponse, error) {
+func (mg *Client) GetDomain(ctx context.Context, domain string, _ *GetDomainOptions) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -175,7 +175,7 @@ func (mg *MailgunImpl) GetDomain(ctx context.Context, domain string, _ *GetDomai
 	return resp, err
 }
 
-func (mg *MailgunImpl) VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
+func (mg *Client) VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain + "/verify")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -205,7 +205,7 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error) {
+func (mg *Client) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -242,7 +242,7 @@ func (mg *MailgunImpl) CreateDomain(ctx context.Context, name string, opts *Crea
 }
 
 // DeleteDomain instructs Mailgun to dispose of the named domain name
-func (mg *MailgunImpl) DeleteDomain(ctx context.Context, name string) error {
+func (mg *Client) DeleteDomain(ctx context.Context, name string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -258,7 +258,7 @@ type UpdateDomainOptions struct {
 
 // UpdateDomain updates a domain's attributes.
 // Currently only the web_scheme update is supported, spam_action and wildcard are to be added.
-func (mg *MailgunImpl) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
+func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + name)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

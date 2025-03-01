@@ -14,7 +14,7 @@ type MemberListIterator struct {
 	err error
 }
 
-func (mg *MailgunImpl) ListMembers(address string, opts *ListOptions) *MemberListIterator {
+func (mg *Client) ListMembers(address string, opts *ListOptions) *MemberListIterator {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, address) + "/pages")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -113,7 +113,7 @@ func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
 
 // GetMember returns a complete Member structure for a member of a mailing list,
 // given only their subscription e-mail address.
-func (mg *MailgunImpl) GetMember(ctx context.Context, s, l string) (mtypes.Member, error) {
+func (mg *Client) GetMember(ctx context.Context, s, l string) (mtypes.Member, error) {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -129,7 +129,7 @@ func (mg *MailgunImpl) GetMember(ctx context.Context, s, l string) (mtypes.Membe
 // CreateMember registers a new member of the indicated mailing list.
 // If merge is set to true, then the registration may update an existing Member's settings.
 // Otherwise, an error will occur if you attempt to add a member with a duplicate e-mail address.
-func (mg *MailgunImpl) CreateMember(ctx context.Context, merge bool, addr string, prototype mtypes.Member) error {
+func (mg *Client) CreateMember(ctx context.Context, merge bool, addr string, prototype mtypes.Member) error {
 	vs, err := json.Marshal(prototype.Vars)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (mg *MailgunImpl) CreateMember(ctx context.Context, merge bool, addr string
 
 // UpdateMember lets you change certain details about the indicated mailing list member.
 // Address, Name, Vars, and Subscribed fields may be changed.
-func (mg *MailgunImpl) UpdateMember(ctx context.Context, s, l string, prototype mtypes.Member) (mtypes.Member, error) {
+func (mg *Client) UpdateMember(ctx context.Context, s, l string, prototype mtypes.Member) (mtypes.Member, error) {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -185,7 +185,7 @@ func (mg *MailgunImpl) UpdateMember(ctx context.Context, s, l string, prototype 
 }
 
 // DeleteMember removes the member from the list.
-func (mg *MailgunImpl) DeleteMember(ctx context.Context, member, addr string) error {
+func (mg *Client) DeleteMember(ctx context.Context, member, addr string) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + "/" + member)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -202,7 +202,7 @@ func (mg *MailgunImpl) DeleteMember(ctx context.Context, member, addr string) er
 // If a simple slice of strings is passed, each string refers to the member's e-mail address.
 // Otherwise, each Member needs to have at least the Address field filled out.
 // Other fields are optional, but may be set according to your needs.
-func (mg *MailgunImpl) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []any) error {
+func (mg *Client) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []any) error {
 	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

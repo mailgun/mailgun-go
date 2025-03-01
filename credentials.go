@@ -12,7 +12,7 @@ import (
 var ErrEmptyParam = errors.New("empty or illegal parameter")
 
 // ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) ListCredentials(domain string, opts *ListOptions) *CredentialsIterator {
+func (mg *Client) ListCredentials(domain string, opts *ListOptions) *CredentialsIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
@@ -163,7 +163,7 @@ func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.
-func (mg *MailgunImpl) CreateCredential(ctx context.Context, domain, login, password string) error {
+func (mg *Client) CreateCredential(ctx context.Context, domain, login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
@@ -178,7 +178,7 @@ func (mg *MailgunImpl) CreateCredential(ctx context.Context, domain, login, pass
 }
 
 // ChangeCredentialPassword attempts to alter the indicated credential's password.
-func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, domain, login, password string) error {
+func (mg *Client) ChangeCredentialPassword(ctx context.Context, domain, login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
@@ -192,7 +192,7 @@ func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, domain, log
 }
 
 // DeleteCredential attempts to remove the indicated principle from the domain.
-func (mg *MailgunImpl) DeleteCredential(ctx context.Context, domain, login string) error {
+func (mg *Client) DeleteCredential(ctx context.Context, domain, login string) error {
 	if login == "" {
 		return ErrEmptyParam
 	}

@@ -113,7 +113,7 @@ func TestEventPoller(t *testing.T) {
 	assert.Equal(t, "user@"+testDomain, accepted.Recipient)
 }
 
-func ExampleMailgunImpl_ListEvents() {
+func ExampleMailgun_ListEvents() {
 	mg := mailgun.NewMailgun("your-api-key")
 	_ = mg.SetAPIBase(server.URL())
 

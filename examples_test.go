@@ -16,7 +16,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func ExampleMailgunImpl_ValidateEmail() {
+func ExampleMailgun_ValidateEmail() {
 	mg := mailgun.NewMailgun("my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -33,7 +33,7 @@ func ExampleMailgunImpl_ValidateEmail() {
 	}
 }
 
-func ExampleMailgunImpl_UpdateMailingList() {
+func ExampleMailgun_UpdateMailingList() {
 	mg := mailgun.NewMailgun("my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -49,7 +49,7 @@ func ExampleMailgunImpl_UpdateMailingList() {
 	}
 }
 
-func ExampleMailgunImpl_Send_constructed() {
+func ExampleMailgun_Send_constructed() {
 	mg := mailgun.NewMailgun("my_api_key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -74,7 +74,7 @@ func ExampleMailgunImpl_Send_constructed() {
 	log.Printf("Message id=%s", id)
 }
 
-func ExampleMailgunImpl_Send_mime() {
+func ExampleMailgun_Send_mime() {
 	exampleMime := `Content-Type: text/plain; charset="ascii"
 Subject: Joe's Example Subject
 From: Joe Example <joe@example.com>
@@ -98,7 +98,7 @@ Testing some Mailgun MIME awesomeness!
 	log.Printf("Message id=%s", id)
 }
 
-func ExampleMailgunImpl_ListRoutes() {
+func ExampleMailgun_ListRoutes() {
 	mg := mailgun.NewMailgun("my_api_key")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -116,7 +116,7 @@ func ExampleMailgunImpl_ListRoutes() {
 	}
 }
 
-func ExampleMailgunImpl_VerifyWebhookSignature() {
+func ExampleMailgun_VerifyWebhookSignature() {
 	// Create an instance of the Mailgun Client
 	mg, err := mailgun.NewMailgunFromEnv()
 	if err != nil {

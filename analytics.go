@@ -20,7 +20,7 @@ type MetricsOptions = mtypes.MetricsRequest
 //	}}
 //
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Metrics/
-func (mg *MailgunImpl) ListMetrics(opts MetricsOptions) (*MetricsIterator, error) {
+func (mg *Client) ListMetrics(opts MetricsOptions) (*MetricsIterator, error) {
 	if opts.Pagination.Limit == 0 {
 		opts.Pagination.Limit = 10
 	}
