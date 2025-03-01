@@ -13,7 +13,7 @@ type routeResponse struct {
 	Route mtypes.Route `json:"route"`
 }
 
-func (ms *mockServer) addRoutes(r chi.Router) {
+func (ms *Server) addRoutes(r chi.Router) {
 	r.Post("/routes", ms.createRoute)
 	r.Get("/routes", ms.listRoutes)
 	r.Get("/routes/{id}", ms.getRoute)
@@ -34,7 +34,7 @@ func (ms *mockServer) addRoutes(r chi.Router) {
 	}
 }
 
-func (ms *mockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listRoutes(w http.ResponseWriter, r *http.Request) {
 	skip := stringToInt(r.FormValue("skip"))
 	limit := stringToInt(r.FormValue("limit"))
 	if limit == 0 {
@@ -65,7 +65,7 @@ func (ms *mockServer) listRoutes(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getRoute(w http.ResponseWriter, r *http.Request) {
 	for _, item := range ms.routeList {
 		if item.Id == chi.URLParam(r, "id") {
 			toJSON(w, routeResponse{Route: item})
@@ -76,7 +76,7 @@ func (ms *mockServer) getRoute(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "route not found"})
 }
 
-func (ms *mockServer) createRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createRoute(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -100,7 +100,7 @@ func (ms *mockServer) createRoute(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateRoute(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -127,7 +127,7 @@ func (ms *mockServer) updateRoute(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "route not found"})
 }
 
-func (ms *mockServer) deleteRoute(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteRoute(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

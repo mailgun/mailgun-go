@@ -17,24 +17,8 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-// TODO(v5): remove/move?
-type MockServer interface {
-	Stop()
-	URL() string
-	DomainIPS() []string
-	DomainList() []DomainContainer
-	ExportList() []mtypes.Export
-	MailingList() []MailingListContainer
-	RouteList() []mtypes.Route
-	Events() []events.Event
-	Webhooks() mtypes.WebHooksListResponse
-	Templates() []mtypes.Template
-	SubaccountList() []mtypes.Subaccount
-}
-
-// A mailgun api mock suitable for testing
-// TODO(v5): rename to MockServer?
-type mockServer struct {
+// Server is a Mailgun API mock suitable for testing
+type Server struct {
 	srv *httptest.Server
 
 	domainIPS        []string
@@ -55,69 +39,69 @@ type mockServer struct {
 	mutex            sync.Mutex
 }
 
-func (ms *mockServer) DomainIPS() []string {
+func (ms *Server) DomainIPS() []string {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.domainIPS
 }
 
-func (ms *mockServer) DomainList() []DomainContainer {
+func (ms *Server) DomainList() []DomainContainer {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.domainList
 }
 
-func (ms *mockServer) ExportList() []mtypes.Export {
+func (ms *Server) ExportList() []mtypes.Export {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.exportList
 }
 
-func (ms *mockServer) MailingList() []MailingListContainer {
+func (ms *Server) MailingList() []MailingListContainer {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.mailingList
 }
 
-func (ms *mockServer) RouteList() []mtypes.Route {
+func (ms *Server) RouteList() []mtypes.Route {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.routeList
 }
 
-func (ms *mockServer) Events() []events.Event {
+func (ms *Server) Events() []events.Event {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.events
 }
 
-func (ms *mockServer) Webhooks() mtypes.WebHooksListResponse {
+func (ms *Server) Webhooks() mtypes.WebHooksListResponse {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.webhooks
 }
 
-func (ms *mockServer) Templates() []mtypes.Template {
+func (ms *Server) Templates() []mtypes.Template {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.templates
 }
 
-func (ms *mockServer) Unsubscribes() []mtypes.Unsubscribe {
+func (ms *Server) Unsubscribes() []mtypes.Unsubscribe {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.unsubscribes
 }
 
-func (ms *mockServer) SubaccountList() []mtypes.Subaccount {
+func (ms *Server) SubaccountList() []mtypes.Subaccount {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.subaccountList
 }
 
-// Create a new instance of the mailgun API mock server
-func NewMockServer() MockServer {
-	ms := mockServer{}
+// NewServer creates a new instance of the mailgun API mock server
+func NewServer() *Server {
+	ms := Server{}
 
 	// Add all our handlers
 	r := chi.NewRouter()
@@ -151,11 +135,11 @@ func NewMockServer() MockServer {
 }
 
 // Stop the server
-func (ms *mockServer) Stop() {
+func (ms *Server) Stop() {
 	ms.srv.Close()
 }
 
-func (ms *mockServer) URL() string {
+func (ms *Server) URL() string {
 	return ms.srv.URL
 }
 

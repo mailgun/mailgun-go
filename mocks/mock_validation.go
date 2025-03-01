@@ -8,11 +8,11 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addValidationRoutes(r chi.Router) {
+func (ms *Server) addValidationRoutes(r chi.Router) {
 	r.Get("/v4/address/validate", ms.validateEmailV4)
 }
 
-func (ms *mockServer) validateEmailV4(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("address") == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		toJSON(w, okResp{Message: "'address' parameter is required"})

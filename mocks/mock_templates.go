@@ -11,7 +11,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addTemplateRoutes(r chi.Router) {
+func (ms *Server) addTemplateRoutes(r chi.Router) {
 	r.Get("/{domain}/templates", ms.listTemplates)
 	r.Get("/{domain}/templates/{name}", ms.getTemplate)
 
@@ -73,7 +73,7 @@ func (ms *mockServer) addTemplateRoutes(r chi.Router) {
 	}
 }
 
-func (ms *mockServer) listTemplates(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listTemplates(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -132,7 +132,7 @@ func (ms *mockServer) listTemplates(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getTemplate(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getTemplate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -166,7 +166,7 @@ func (ms *mockServer) getTemplate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{\"message\": \"template not found\"}"))
 }
 
-func (ms *mockServer) createTemplate(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createTemplate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -230,7 +230,7 @@ func (ms *mockServer) createTemplate(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) updateTemplate(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateTemplate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -269,7 +269,7 @@ func (ms *mockServer) updateTemplate(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) deleteTemplate(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteTemplate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -293,7 +293,7 @@ func (ms *mockServer) deleteTemplate(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, map[string]string{"message": "template not found"})
 }
 
-func (ms *mockServer) deleteAllTemplates(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteAllTemplates(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -303,7 +303,7 @@ func (ms *mockServer) deleteAllTemplates(w http.ResponseWriter, r *http.Request)
 	toJSON(w, map[string]string{"message": "templates have been deleted"})
 }
 
-func (ms *mockServer) getActiveTemplateVersion(templateName string) mtypes.TemplateVersion {
+func (ms *Server) getActiveTemplateVersion(templateName string) mtypes.TemplateVersion {
 	for _, templateVersion := range ms.templateVersions[templateName] {
 		if templateVersion.Active {
 			return templateVersion

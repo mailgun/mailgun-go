@@ -9,11 +9,11 @@ import (
 
 const metricsEndpoint = "analytics/metrics"
 
-func (ms *mockServer) addAnalyticsRoutes(r chi.Router) {
+func (ms *Server) addAnalyticsRoutes(r chi.Router) {
 	r.Post("/v1/"+metricsEndpoint, ms.listMetrics)
 }
 
-func (ms *mockServer) listMetrics(w http.ResponseWriter, _ *http.Request) {
+func (ms *Server) listMetrics(w http.ResponseWriter, _ *http.Request) {
 	start, _ := mtypes.NewRFC2822Time("Tue, 24 Sep 2024 00:00:00 +0000")
 	end, _ := mtypes.NewRFC2822Time("Tue, 24 Oct 2024 00:00:00 +0000")
 

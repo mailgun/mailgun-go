@@ -7,7 +7,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addWebhookRoutes(r chi.Router) {
+func (ms *Server) addWebhookRoutes(r chi.Router) {
 	r.Route("/domains/{domain}/webhooks", func(sr chi.Router) {
 		sr.Get("/", ms.listWebHooks)
 		sr.Post("/", ms.postWebHook)
@@ -28,14 +28,14 @@ func (ms *mockServer) addWebhookRoutes(r chi.Router) {
 	}
 }
 
-func (ms *mockServer) listWebHooks(w http.ResponseWriter, _ *http.Request) {
+func (ms *Server) listWebHooks(w http.ResponseWriter, _ *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
 	toJSON(w, ms.webhooks)
 }
 
-func (ms *mockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getWebHook(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -47,7 +47,7 @@ func (ms *mockServer) getWebHook(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, resp)
 }
 
-func (ms *mockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) postWebHook(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -66,7 +66,7 @@ func (ms *mockServer) postWebHook(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *mockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) putWebHook(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -85,7 +85,7 @@ func (ms *mockServer) putWebHook(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *mockServer) deleteWebHook(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteWebHook(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

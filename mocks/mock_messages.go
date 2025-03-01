@@ -12,7 +12,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addMessagesRoutes(r chi.Router) {
+func (ms *Server) addMessagesRoutes(r chi.Router) {
 	r.Post("/{domain}/messages", ms.createMessages)
 
 	// This path is made up; it could be anything as the storage url could change over time
@@ -21,7 +21,7 @@ func (ms *mockServer) addMessagesRoutes(r chi.Router) {
 }
 
 // TODO: This implementation doesn't support multiple recipients
-func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createMessages(w http.ResponseWriter, r *http.Request) {
 	to, err := mail.ParseAddress(r.FormValue("to"))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -103,7 +103,7 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{ID: "<" + id + ">", Message: "Queued. Thank you."})
 }
 
-func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getStoredMessages(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
@@ -135,7 +135,7 @@ func (ms *mockServer) getStoredMessages(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-func (ms *mockServer) sendStoredMessages(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) sendStoredMessages(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()

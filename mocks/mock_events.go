@@ -11,7 +11,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addEventRoutes(r chi.Router) {
+func (ms *Server) addEventRoutes(r chi.Router) {
 	r.Get("/{domain}/events", ms.listEvents)
 
 	var (
@@ -196,7 +196,7 @@ type eventsResponse struct {
 	Paging mtypes.Paging  `json:"paging"`
 }
 
-func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listEvents(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	var idx []string

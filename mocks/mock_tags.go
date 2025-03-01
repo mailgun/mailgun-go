@@ -9,7 +9,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addTagsRoutes(r chi.Router) {
+func (ms *Server) addTagsRoutes(r chi.Router) {
 	r.Get("/{domain}/tags", ms.listTags)
 	r.Get("/{domain}/tags/{tag}", ms.getTags)
 	r.Delete("/{domain}/tags/{tag}", ms.deleteTags)
@@ -32,7 +32,7 @@ func (ms *mockServer) addTagsRoutes(r chi.Router) {
 	})
 }
 
-func (ms *mockServer) listTags(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listTags(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -91,7 +91,7 @@ func (ms *mockServer) listTags(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getTags(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getTags(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	for _, tag := range ms.tags {
@@ -104,7 +104,7 @@ func (ms *mockServer) getTags(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{\"message\": \"Tag not found\"}"))
 }
 
-func (ms *mockServer) createUpdateTags(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createUpdateTags(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -134,7 +134,7 @@ func (ms *mockServer) createUpdateTags(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) deleteTags(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteTags(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

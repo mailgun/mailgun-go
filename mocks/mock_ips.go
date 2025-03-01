@@ -7,7 +7,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addIPRoutes(r chi.Router) {
+func (ms *Server) addIPRoutes(r chi.Router) {
 	r.Get("/ips", ms.listIPS)
 	r.Get("/ips/{ip}", ms.getIPAddress)
 	r.Route("/domains/{domain}/ips", func(r chi.Router) {
@@ -18,14 +18,14 @@ func (ms *mockServer) addIPRoutes(r chi.Router) {
 	})
 }
 
-func (ms *mockServer) listIPS(w http.ResponseWriter, _ *http.Request) {
+func (ms *Server) listIPS(w http.ResponseWriter, _ *http.Request) {
 	toJSON(w, mtypes.IPAddressListResponse{
 		TotalCount: 2,
 		Items:      []string{"172.0.0.1", "192.168.1.1"},
 	})
 }
 
-func (ms *mockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getIPAddress(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, mtypes.IPAddress{
 		IP:        chi.URLParam(r, "ip"),
 		RDNS:      "luna.mailgun.net",
@@ -33,7 +33,7 @@ func (ms *mockServer) getIPAddress(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
+func (ms *Server) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	toJSON(w, mtypes.IPAddressListResponse{
@@ -42,14 +42,14 @@ func (ms *mockServer) listDomainIPS(w http.ResponseWriter, _ *http.Request) {
 	})
 }
 
-func (ms *mockServer) postDomainIPS(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) postDomainIPS(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	ms.domainIPS = append(ms.domainIPS, r.FormValue("ip"))
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *mockServer) deleteDomainIPS(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteDomainIPS(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	result := ms.domainIPS[:0]

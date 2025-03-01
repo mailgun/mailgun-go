@@ -15,7 +15,7 @@ type MailingListContainer struct {
 	Members     []mtypes.Member
 }
 
-func (ms *mockServer) addMailingListRoutes(r chi.Router) {
+func (ms *Server) addMailingListRoutes(r chi.Router) {
 	r.Get("/lists/pages", ms.listMailingLists)
 	r.Get("/lists/{address}", ms.getMailingList)
 	r.Post("/lists", ms.createMailingList)
@@ -48,7 +48,7 @@ func (ms *mockServer) addMailingListRoutes(r chi.Router) {
 	})
 }
 
-func (ms *mockServer) listMailingLists(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listMailingLists(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -94,7 +94,7 @@ func (ms *mockServer) listMailingLists(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, resp)
 }
 
-func (ms *mockServer) getMailingList(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getMailingList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -108,7 +108,7 @@ func (ms *mockServer) getMailingList(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "mailing list not found"})
 }
 
-func (ms *mockServer) deleteMailingList(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteMailingList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -130,7 +130,7 @@ func (ms *mockServer) deleteMailingList(w http.ResponseWriter, r *http.Request) 
 	toJSON(w, okResp{Message: "mailing list not found"})
 }
 
-func (ms *mockServer) updateMailingList(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateMailingList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -159,7 +159,7 @@ func (ms *mockServer) updateMailingList(w http.ResponseWriter, r *http.Request) 
 	toJSON(w, okResp{Message: "mailing list not found"})
 }
 
-func (ms *mockServer) createMailingList(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createMailingList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -176,7 +176,7 @@ func (ms *mockServer) createMailingList(w http.ResponseWriter, r *http.Request) 
 	toJSON(w, okResp{Message: "Mailing list has been created"})
 }
 
-func (ms *mockServer) listMembers(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listMembers(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -234,7 +234,7 @@ func (ms *mockServer) listMembers(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, resp)
 }
 
-func (ms *mockServer) getMember(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -261,7 +261,7 @@ func (ms *mockServer) getMember(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "member not found"})
 }
 
-func (ms *mockServer) deleteMember(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -296,7 +296,7 @@ func (ms *mockServer) deleteMember(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "member not found"})
 }
 
-func (ms *mockServer) updateMember(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -336,7 +336,7 @@ func (ms *mockServer) updateMember(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "member not found"})
 }
 
-func (ms *mockServer) createMember(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -382,7 +382,7 @@ func (ms *mockServer) createMember(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "Mailing list member has been created"})
 }
 
-func (ms *mockServer) bulkCreate(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) bulkCreate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
