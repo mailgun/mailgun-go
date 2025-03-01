@@ -2,11 +2,9 @@ package mailgun_test
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
