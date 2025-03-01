@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -6,18 +6,19 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addEventRoutes(r chi.Router) {
+func (ms *Server) addEventRoutes(r chi.Router) {
 	r.Get("/{domain}/events", ms.listEvents)
 
 	var (
 		tags            = []string{"tag1", "tag2"}
 		recipients      = []string{"one@mailgun.test", "two@mailgun.test"}
 		recipientDomain = "mailgun.test"
-		timeStamp       = TimeToFloat(time.Now().UTC())
+		timeStamp       = mailgun.TimeToFloat(time.Now().UTC())
 		ipAddress       = "192.168.1.1"
 		message         = events.Message{Headers: events.MessageHeaders{MessageID: "1234"}}
 		clientInfo      = events.ClientInfo{
@@ -191,11 +192,11 @@ func (ms *mockServer) addEventRoutes(r chi.Router) {
 }
 
 type eventsResponse struct {
-	Items  []Event       `json:"items"`
-	Paging mtypes.Paging `json:"paging"`
+	Items  []events.Event `json:"items"`
+	Paging mtypes.Paging  `json:"paging"`
 }
 
-func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listEvents(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	var idx []string
@@ -211,14 +212,14 @@ func (ms *mockServer) listEvents(w http.ResponseWriter, r *http.Request) {
 	start, end := pageOffsets(idx, r.FormValue("page"), r.FormValue("address"), limit)
 
 	var nextAddress, prevAddress string
-	var results []Event
+	var results []events.Event
 
 	if start != end {
 		results = ms.events[start:end]
 		nextAddress = results[len(results)-1].GetID()
 		prevAddress = results[0].GetID()
 	} else {
-		results = []Event{}
+		results = []events.Event{}
 		nextAddress = r.FormValue("address")
 		prevAddress = r.FormValue("address")
 	}

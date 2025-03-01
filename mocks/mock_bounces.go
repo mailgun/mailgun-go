@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addBouncesRoutes(r chi.Router) {
+func (ms *Server) addBouncesRoutes(r chi.Router) {
 	r.Get("/{domain}/bounces", ms.listBounces)
 	r.Get("/{domain}/bounces/{address}", ms.getBounce)
 	r.Delete("/{domain}/bounces/{address}", ms.deleteBounce)
@@ -34,7 +34,7 @@ func (ms *mockServer) addBouncesRoutes(r chi.Router) {
 	})
 }
 
-func (ms *mockServer) listBounces(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listBounces(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -72,7 +72,7 @@ func (ms *mockServer) listBounces(w http.ResponseWriter, r *http.Request) {
 		prevAddress = pivot
 	}
 
-	toJSON(w, bouncesListResponse{
+	toJSON(w, mtypes.BouncesListResponse{
 		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
@@ -93,7 +93,7 @@ func (ms *mockServer) listBounces(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getBounce(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getBounce(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -107,7 +107,7 @@ func (ms *mockServer) getBounce(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{\"message\": \"Address not found in bounces table\"}"))
 }
 
-func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createBounce(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -165,7 +165,7 @@ func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) deleteBounce(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteBounce(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -185,7 +185,7 @@ func (ms *mockServer) deleteBounce(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) deleteBouncesList(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteBouncesList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

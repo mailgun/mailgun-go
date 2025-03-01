@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addCredentialsRoutes(r chi.Router) {
+func (ms *Server) addCredentialsRoutes(r chi.Router) {
 	r.Get("/domains/{domain}/credentials", ms.listCredentials)
 	r.Put("/domains/{domain}/credentials/{login}", ms.updateCredential)
 	r.Delete("/domains/{domain}/credentials/{login}", ms.deleteCredential)
@@ -27,7 +27,7 @@ func (ms *mockServer) addCredentialsRoutes(r chi.Router) {
 	})
 }
 
-func (ms *mockServer) listCredentials(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listCredentials(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -54,13 +54,13 @@ func (ms *mockServer) listCredentials(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	toJSON(w, credentialsListResponse{
+	toJSON(w, mtypes.CredentialsListResponse{
 		Items:      results,
 		TotalCount: len(results),
 	})
 }
 
-func (ms *mockServer) createCredential(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createCredential(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -100,7 +100,7 @@ func (ms *mockServer) createCredential(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) deleteCredential(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteCredential(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -124,7 +124,7 @@ func (ms *mockServer) deleteCredential(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, map[string]string{"message": "Credentials not found"})
 }
 
-func (ms *mockServer) updateCredential(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateCredential(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

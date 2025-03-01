@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -17,7 +17,7 @@ type DomainContainer struct {
 	TagLimits           *mtypes.TagLimits        `json:"limits,omitempty"`
 }
 
-func (ms *mockServer) addDomainRoutes(r chi.Router) {
+func (ms *Server) addDomainRoutes(r chi.Router) {
 	ms.domainList = append(ms.domainList, DomainContainer{
 		Domain: mtypes.Domain{
 			CreatedAt:    mtypes.RFC2822Time(time.Now().UTC()),
@@ -101,7 +101,7 @@ func (ms *mockServer) addDomainRoutes(r chi.Router) {
 	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
 }
 
-func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listDomains(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -140,7 +140,7 @@ func (ms *mockServer) listDomains(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getDomain(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getDomain(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -155,7 +155,7 @@ func (ms *mockServer) getDomain(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) createDomain(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createDomain(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -174,7 +174,7 @@ func (ms *mockServer) createDomain(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "Domain has been created"})
 }
 
-func (ms *mockServer) updateDomain(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateDomain(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -187,7 +187,7 @@ func (ms *mockServer) updateDomain(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "Domain has been updated"})
 }
 
-func (ms *mockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteDomain(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -209,7 +209,7 @@ func (ms *mockServer) deleteDomain(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) getConnection(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getConnection(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -226,7 +226,7 @@ func (ms *mockServer) getConnection(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateConnection(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -244,7 +244,7 @@ func (ms *mockServer) updateConnection(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) getTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getTracking(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -261,7 +261,7 @@ func (ms *mockServer) getTracking(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) updateClickTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateClickTracking(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -276,7 +276,7 @@ func (ms *mockServer) updateClickTracking(w http.ResponseWriter, r *http.Request
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateOpenTracking(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -291,7 +291,7 @@ func (ms *mockServer) updateOpenTracking(w http.ResponseWriter, r *http.Request)
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateUnsubTracking(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -312,7 +312,7 @@ func (ms *mockServer) updateUnsubTracking(w http.ResponseWriter, r *http.Request
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getTagLimits(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -331,7 +331,7 @@ func (ms *mockServer) getTagLimits(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateDKIMSelector(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -349,7 +349,7 @@ func (ms *mockServer) updateDKIMSelector(w http.ResponseWriter, r *http.Request)
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *mockServer) updateWebPrefix(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateWebPrefix(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

@@ -258,7 +258,7 @@ func PrintEventLog(domain, apiKey string) error {
 	defer cancel()
 
 	// Iterate through all the pages of events
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Next(ctx, &page) {
 		for _, event := range page {
 			fmt.Printf("%+v\n", event)
@@ -287,7 +287,7 @@ func PrintFailedEvents(domain, apiKey string) error {
 	defer cancel()
 
 	// Iterate through all the pages of events
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Next(ctx, &page) {
 		for _, event := range page {
 			switch e := event.(type) {
@@ -316,7 +316,7 @@ func PrintEvents(domain, apiKey string) error {
 	defer cancel()
 
 	// Iterate through all the pages of events
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Next(ctx, &page) {
 		for _, event := range page {
 			switch e := event.(type) {

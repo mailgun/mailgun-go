@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -8,14 +8,14 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addExportRoutes(r chi.Router) {
+func (ms *Server) addExportRoutes(r chi.Router) {
 	r.Post("/exports", ms.postExports)
 	r.Get("/exports", ms.listExports)
 	r.Get("/exports/{id}", ms.getExport)
 	r.Get("/exports/{id}/download_url", ms.getExportLink)
 }
 
-func (ms *mockServer) postExports(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) postExports(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	e := mtypes.Export{
@@ -28,7 +28,7 @@ func (ms *mockServer) postExports(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *mockServer) listExports(w http.ResponseWriter, _ *http.Request) {
+func (ms *Server) listExports(w http.ResponseWriter, _ *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	toJSON(w, mtypes.ExportList{
@@ -36,7 +36,7 @@ func (ms *mockServer) listExports(w http.ResponseWriter, _ *http.Request) {
 	})
 }
 
-func (ms *mockServer) getExport(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getExport(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	for _, export := range ms.exportList {
@@ -49,7 +49,7 @@ func (ms *mockServer) getExport(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "export not found"})
 }
 
-func (ms *mockServer) getExportLink(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getExportLink(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Location", "/some/s3/url")
 	w.WriteHeader(http.StatusFound)
 }

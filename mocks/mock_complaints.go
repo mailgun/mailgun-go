@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addComplaintsRoutes(r chi.Router) {
+func (ms *Server) addComplaintsRoutes(r chi.Router) {
 	r.Get("/{domain}/complaints", ms.listComplaints)
 	r.Get("/{domain}/complaints/{address}", ms.getComplaint)
 	r.Delete("/{domain}/complaints/{address}", ms.deleteComplaint)
@@ -29,7 +29,7 @@ func (ms *mockServer) addComplaintsRoutes(r chi.Router) {
 	})
 }
 
-func (ms *mockServer) listComplaints(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listComplaints(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -88,7 +88,7 @@ func (ms *mockServer) listComplaints(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getComplaint(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -102,7 +102,7 @@ func (ms *mockServer) getComplaint(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{\"message\": \"Address not found in complaints table\"}"))
 }
 
-func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -158,7 +158,7 @@ func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) deleteComplaint(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

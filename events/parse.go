@@ -1,6 +1,4 @@
-package mailgun
-
-// TODO(v5): move to events package?
+package events
 
 import (
 	"fmt"
@@ -8,7 +6,6 @@ import (
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/mailgun/mailgun-go/v4/events"
 )
 
 // All events returned by the EventIterator conform to this interface
@@ -23,31 +20,31 @@ type Event interface {
 
 // A list of all JSON event types returned by the /events API
 var EventNames = map[string]func() Event{
-	"accepted":                 new_(events.Accepted{}),
-	"clicked":                  new_(events.Clicked{}),
-	"complained":               new_(events.Complained{}),
-	"delivered":                new_(events.Delivered{}),
-	"failed":                   new_(events.Failed{}),
-	"opened":                   new_(events.Opened{}),
-	"rejected":                 new_(events.Rejected{}),
-	"stored":                   new_(events.Stored{}),
-	"unsubscribed":             new_(events.Unsubscribed{}),
-	"list_member_uploaded":     new_(events.ListMemberUploaded{}),
-	"list_member_upload_error": new_(events.ListMemberUploadError{}),
-	"list_uploaded":            new_(events.ListUploaded{}),
+	"accepted":                 new_(Accepted{}),
+	"clicked":                  new_(Clicked{}),
+	"complained":               new_(Complained{}),
+	"delivered":                new_(Delivered{}),
+	"failed":                   new_(Failed{}),
+	"opened":                   new_(Opened{}),
+	"rejected":                 new_(Rejected{}),
+	"stored":                   new_(Stored{}),
+	"unsubscribed":             new_(Unsubscribed{}),
+	"list_member_uploaded":     new_(ListMemberUploaded{}),
+	"list_member_upload_error": new_(ListMemberUploadError{}),
+	"list_uploaded":            new_(ListUploaded{}),
 }
 
 // new_ is a universal event "constructor".
 func new_(e any) func() Event {
 	typ := reflect.TypeOf(e)
 	return func() Event {
-		//nolint:revive // unchecked-type-assertion: this func is called on init only, so there should be no runtime panics:
+		//nolint:revive // unchecked-type-assertion: TODO: return error?
 		return reflect.New(typ).Interface().(Event)
 	}
 }
 
 func parseResponse(raw []byte) ([]Event, error) {
-	var resp events.Response
+	var resp Response
 	if err := jsoniter.Unmarshal(raw, &resp); err != nil {
 		return nil, fmt.Errorf("failed to un-marshall event.Response: %s", err)
 	}
@@ -64,7 +61,7 @@ func parseResponse(raw []byte) ([]Event, error) {
 }
 
 // Given a slice of events.RawJSON events return a slice of Event for each parsed event
-func ParseEvents(raw []events.RawJSON) ([]Event, error) {
+func ParseEvents(raw []RawJSON) ([]Event, error) {
 	var result []Event
 	for _, value := range raw {
 		event, err := ParseEvent(value)
@@ -79,7 +76,7 @@ func ParseEvents(raw []events.RawJSON) ([]Event, error) {
 // Parse converts raw bytes data into an event struct. Can accept events.RawJSON as input
 func ParseEvent(raw []byte) (Event, error) {
 	// Try to recognize the event first.
-	var e events.EventName
+	var e EventName
 	if err := jsoniter.Unmarshal(raw, &e); err != nil {
 		return nil, fmt.Errorf("failed to recognize event: %v", err)
 	}

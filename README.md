@@ -83,7 +83,7 @@ func main() {
 
 	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
 
-	var page []mailgun.Event
+	var page []events.Event
 
 	// The entire operation should not take longer than 30 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -151,7 +151,7 @@ func main() {
 	defer cancel()
 
 	// Poll until our email event arrives
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Poll(ctx, &page) {
 		for _, e := range page {
 			log.Printf("Got an event: %q (%q)", e.GetName(), e.GetID())

@@ -6,3 +6,9 @@ type Credential struct {
 	Login     string      `json:"login"`
 	Password  string      `json:"password"`
 }
+
+type CredentialsListResponse struct {
+	// is -1 if Next() or First() have not been called
+	TotalCount int          `json:"total_count"`
+	Items      []Credential `json:"items"`
+}

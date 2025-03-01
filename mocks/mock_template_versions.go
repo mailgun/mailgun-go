@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addTemplateVersionRoutes(r chi.Router) {
+func (ms *Server) addTemplateVersionRoutes(r chi.Router) {
 	r.Get("/{domain}/templates/{template}/versions", ms.listTemplateVersions)
 	r.Get("/{domain}/templates/{template}/versions/{tag}", ms.getTemplateVersion)
 	r.Post("/{domain}/templates/{template}/versions", ms.createTemplateVersion)
@@ -19,7 +19,7 @@ func (ms *mockServer) addTemplateVersionRoutes(r chi.Router) {
 	r.Delete("/{domain}/templates/{template}/versions/{tag}", ms.deleteTemplateVersion)
 }
 
-func (ms *mockServer) listTemplateVersions(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listTemplateVersions(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -94,7 +94,7 @@ func (ms *mockServer) listTemplateVersions(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-func (ms *mockServer) getTemplateVersion(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getTemplateVersion(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -124,7 +124,7 @@ func (ms *mockServer) getTemplateVersion(w http.ResponseWriter, r *http.Request)
 	})
 }
 
-func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createTemplateVersion(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -196,7 +196,7 @@ func (ms *mockServer) createTemplateVersion(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) updateTemplateVersion(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -275,7 +275,7 @@ func (ms *mockServer) updateTemplateVersion(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteTemplateVersion(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -309,7 +309,7 @@ func (ms *mockServer) deleteTemplateVersion(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-func (ms *mockServer) fetchTemplate(name string) (template mtypes.Template, found bool) {
+func (ms *Server) fetchTemplate(name string) (template mtypes.Template, found bool) {
 	for _, existingTemplate := range ms.templates {
 		if existingTemplate.Name == name {
 			template = existingTemplate
@@ -320,7 +320,7 @@ func (ms *mockServer) fetchTemplate(name string) (template mtypes.Template, foun
 	return mtypes.Template{}, false
 }
 
-func (ms *mockServer) fetchTemplateVersion(templateName string, templateVersionTag string) (mtypes.TemplateVersion, bool) {
+func (ms *Server) fetchTemplateVersion(templateName string, templateVersionTag string) (mtypes.TemplateVersion, bool) {
 	for _, existingTemplate := range ms.templateVersions[templateName] {
 		if existingTemplate.Tag == templateVersionTag {
 			return existingTemplate, true

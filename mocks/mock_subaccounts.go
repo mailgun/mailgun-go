@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addSubaccountRoutes(r chi.Router) {
+func (ms *Server) addSubaccountRoutes(r chi.Router) {
 	ms.subaccountList = append(ms.subaccountList, mtypes.Subaccount{
 		ID:     "enabled.subaccount",
 		Name:   "mailgun.test",
@@ -26,7 +26,7 @@ func (ms *mockServer) addSubaccountRoutes(r chi.Router) {
 	r.Post("/accounts/subaccounts/{subaccountID}/disable", ms.disableSubaccount)
 }
 
-func (ms *mockServer) listSubaccounts(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listSubaccounts(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -65,7 +65,7 @@ func (ms *mockServer) listSubaccounts(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getSubaccount(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getSubaccount(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -79,7 +79,7 @@ func (ms *mockServer) getSubaccount(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "Not Found"})
 }
 
-func (ms *mockServer) createSubaccount(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createSubaccount(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -91,7 +91,7 @@ func (ms *mockServer) createSubaccount(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "Subaccount has been created"})
 }
 
-func (ms *mockServer) enableSubaccount(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) enableSubaccount(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -109,7 +109,7 @@ func (ms *mockServer) enableSubaccount(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "Not Found"})
 }
 
-func (ms *mockServer) disableSubaccount(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) disableSubaccount(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

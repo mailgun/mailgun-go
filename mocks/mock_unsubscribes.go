@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"encoding/json"
@@ -12,7 +12,7 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addUnsubscribesRoutes(r chi.Router) {
+func (ms *Server) addUnsubscribesRoutes(r chi.Router) {
 	r.Get("/{domain}/unsubscribes", ms.listUnsubscribes)
 	r.Get("/{domain}/unsubscribes/{address}", ms.getUnsubscribe)
 	r.Delete("/{domain}/unsubscribes/{address}", ms.deleteUnsubscribe)
@@ -33,7 +33,7 @@ func (ms *mockServer) addUnsubscribesRoutes(r chi.Router) {
 	})
 }
 
-func (ms *mockServer) listUnsubscribes(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listUnsubscribes(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -92,7 +92,7 @@ func (ms *mockServer) listUnsubscribes(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getUnsubscribe(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -106,7 +106,7 @@ func (ms *mockServer) getUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{\"message\": \"Address not found in unsubscribers table\"}"))
 }
 
-func (ms *mockServer) createUnsubscribe(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -164,7 +164,7 @@ func (ms *mockServer) createUnsubscribe(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-func (ms *mockServer) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

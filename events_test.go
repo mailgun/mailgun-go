@@ -19,7 +19,7 @@ func TestEventIteratorGetNext(t *testing.T) {
 
 	it := mg.ListEvents(testDomain, &mailgun.ListEventOptions{Limit: 5})
 
-	var firstPage, secondPage, previousPage []mailgun.Event
+	var firstPage, secondPage, previousPage []events.Event
 	var ctx = context.Background()
 
 	require.True(t, it.Next(ctx, &firstPage))
@@ -53,7 +53,7 @@ func TestEventIteratorGetNext(t *testing.T) {
 	require.NotEqual(t, firstPage, secondPage)
 
 	// Last()
-	var lastPage []mailgun.Event
+	var lastPage []events.Event
 	require.True(t, it.Next(ctx, &firstPage))
 	require.True(t, len(firstPage) != 0)
 
@@ -74,12 +74,12 @@ func TestEventPoller(t *testing.T) {
 		// How often we poll the api for new events
 		PollInterval: time.Second * 4})
 
-	eventChan := make(chan mailgun.Event, 1)
+	eventChan := make(chan events.Event, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go func() {
 		// Poll until our email event arrives
-		var page []mailgun.Event
+		var page []events.Event
 		for it.Poll(ctx, &page) {
 			for _, e := range page {
 				eventChan <- e
@@ -119,7 +119,7 @@ func ExampleMailgunImpl_ListEvents() {
 
 	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
 
-	var page []mailgun.Event
+	var page []events.Event
 
 	// The entire operation should not take longer than 30 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)

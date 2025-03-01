@@ -59,7 +59,7 @@ func TestMultipleAttachments(t *testing.T) {
 func findAcceptedMessage(mg mailgun.Mailgun, id string) (*events.Accepted, error) {
 	it := mg.ListEvents(testDomain, nil)
 
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Next(context.Background(), &page) {
 		for _, event := range page {
 			if event.GetName() == events.EventAccepted && event.GetID() == id {
