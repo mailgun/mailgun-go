@@ -21,7 +21,7 @@ linters:
     - nolintlint
 
 # TODO:
-#    - stylecheck # TODO(v5): enable
+#    - stylecheck # TODO(v6): enable
 #    - unused
 
 linters-settings:
@@ -34,9 +34,8 @@ linters-settings:
       - style
     disabled-checks:
       - singleCaseSwitch
-      - hugeParam # TODO(v5): enable?
+      - hugeParam # TODO(v6): allocations critical; enable?
       - sprintfQuotedString # noisy # TODO: enable
-      - exitAfterDefer # TODO: enable?
 
   errcheck:
     # List of functions to exclude from checking, where each entry is a single function to exclude.

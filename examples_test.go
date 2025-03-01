@@ -24,7 +24,8 @@ func ExampleMailgunImpl_ValidateEmail() {
 
 	ev, err := mg.ValidateEmail(ctx, "joe@example.com", false)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	if ev.DidYouMean != "" {
 		log.Printf("The address is syntactically valid, but perhaps has a typo.")
@@ -43,7 +44,8 @@ func ExampleMailgunImpl_UpdateMailingList() {
 		Description: "Joe's status report list",
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 }
 
@@ -66,7 +68,8 @@ func ExampleMailgunImpl_Send_constructed() {
 	m.SetHTML("<html><body><h1>Testing some Mailgun Awesomeness!!</h1></body></html>")
 	_, id, err := mg.Send(ctx, m)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	log.Printf("Message id=%s", id)
 }
@@ -89,7 +92,8 @@ Testing some Mailgun MIME awesomeness!
 	m := mailgun.NewMIMEMessage("example.com", io.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
 	_, id, err := mg.Send(ctx, m)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	log.Printf("Message id=%s", id)
 }
@@ -107,7 +111,8 @@ func ExampleMailgunImpl_ListRoutes() {
 		}
 	}
 	if it.Err() != nil {
-		log.Fatal(it.Err())
+		log.Println(it.Err())
+		return
 	}
 }
 
