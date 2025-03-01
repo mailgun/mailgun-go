@@ -3,7 +3,7 @@ package mailgun
 import (
 	"context"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // GetDomainConnection returns delivery connection settings for the defined domain

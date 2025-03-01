@@ -3,7 +3,7 @@ package mailgun
 import (
 	"context"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // ListIPS returns a list of IPs assigned to your account

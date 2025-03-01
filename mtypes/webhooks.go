@@ -1,7 +1,7 @@
 package mtypes
 
 import (
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 type UrlOrUrls struct {

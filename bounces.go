@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // ListBounces returns a complete set of bounces logged against the sender's domain, if any.

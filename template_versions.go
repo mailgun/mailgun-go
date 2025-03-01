@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // AddTemplateVersion adds a template version to a template

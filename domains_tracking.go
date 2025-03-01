@@ -3,7 +3,7 @@ package mailgun
 import (
 	"context"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // GetDomainTracking returns tracking settings for a domain

@@ -83,7 +83,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // Debug set true to write the HTTP requests in curl for to stdout

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // ForwardedMessage represents the payload the server will get on match

@@ -13,8 +13,8 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/mailgun/mailgun-go/v4/events"
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/events"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // Server is a Mailgun API mock suitable for testing

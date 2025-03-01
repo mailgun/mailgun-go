@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.

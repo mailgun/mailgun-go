@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // ListWebhooks returns the complete set of webhooks configured for your domain.

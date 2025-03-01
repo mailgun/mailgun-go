@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // ErrEmptyParam is returned when a required parameter is missing.
