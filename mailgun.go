@@ -95,6 +95,8 @@ const (
 	APIBaseUS = APIBase
 	APIBaseEU = "https://api.eu.mailgun.net"
 
+	basicAuthUser = "api"
+
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
@@ -108,7 +110,6 @@ const (
 	exportsEndpoint      = "exports"
 	webhooksEndpoint     = "webhooks"
 	listsEndpoint        = "lists"
-	basicAuthUser        = "api"
 	templatesEndpoint    = "templates"
 	accountsEndpoint     = "accounts"
 	subaccountsEndpoint  = "subaccounts"
