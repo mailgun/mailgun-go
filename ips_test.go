@@ -11,15 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var server *mocks.Server
-
-// Setup and shutdown the mailgun mock server for the entire test suite
-func TestMain(m *testing.M) {
-	server = mocks.NewServer()
-	defer server.Stop()
-	os.Exit(m.Run())
-}
-
 func TestListIPS(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())

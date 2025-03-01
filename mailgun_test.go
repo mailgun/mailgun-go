@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mocks"
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,6 +16,15 @@ import (
 
 const domain = "valid-mailgun-domain"
 const apiKey = "valid-mailgun-api-key" //nolint:gosec // This is a test
+
+var server *mocks.Server
+
+// Setup and shutdown the mailgun mock server for the entire test suite
+func TestMain(m *testing.M) {
+	server = mocks.NewServer()
+	defer server.Stop()
+	os.Exit(m.Run())
+}
 
 func TestMailgun(t *testing.T) {
 	m := mailgun.NewMailgun(apiKey)
