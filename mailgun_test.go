@@ -23,6 +23,9 @@ var server *mocks.Server
 func TestMain(m *testing.M) {
 	server = mocks.NewServer()
 	defer server.Stop()
+	// TODO: os.Exit will exit, and `defer server.Stop()` will not run
+	// switch to testify suite
+	//nolint:gocritic // ignored till switched to testify suite
 	os.Exit(m.Run())
 }
 
