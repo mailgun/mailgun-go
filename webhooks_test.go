@@ -1,16 +1,11 @@
 package mailgun_test
 
 import (
-	"bytes"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
-	"mime/multipart"
-	"net/http"
-	"net/url"
-	"strings"
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
@@ -100,36 +95,6 @@ func TestVerifyWebhookSignature(t *testing.T) {
 			t.Errorf("VerifyWebhookSignature should return '%v' but got '%v'", v, verified)
 		}
 	}
-}
-
-func buildFormRequest(ctx context.Context, fields map[string]string) *http.Request {
-	values := url.Values{}
-
-	for k, v := range fields {
-		values.Add(k, v)
-	}
-
-	r := strings.NewReader(values.Encode())
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/", r)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	return req
-}
-
-func buildMultipartFormRequest(ctx context.Context, fields map[string]string) *http.Request {
-	buf := &bytes.Buffer{}
-	writer := multipart.NewWriter(buf)
-
-	for k, v := range fields {
-		_ = writer.WriteField(k, v)
-	}
-
-	writer.Close()
-
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, "/", buf)
-	req.Header.Set("Content-type", writer.FormDataContentType())
-
-	return req
 }
 
 func getSignatureFields(key string, signed bool) map[string]string {

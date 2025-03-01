@@ -171,13 +171,11 @@ func (ei *EventIterator) fetch(ctx context.Context, url string) error {
 
 // EventPoller maintains the state necessary for polling events
 type EventPoller struct {
-	it            *EventIterator
-	opts          ListEventOptions
-	thresholdTime time.Time
-	beginTime     time.Time
-	sleepUntil    time.Time
-	mg            Mailgun
-	err           error
+	it        *EventIterator
+	opts      ListEventOptions
+	beginTime time.Time
+	mg        Mailgun
+	err       error
 }
 
 // PollEvents polls the events api and return new events as they occur

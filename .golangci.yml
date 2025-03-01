@@ -18,11 +18,11 @@ linters:
     - gocyclo
     - noctx
     - gomodguard
+    - unused
     - nolintlint
 
 # TODO:
 #    - stylecheck # TODO(v6): enable
-#    - unused
 
 linters-settings:
   gocritic:

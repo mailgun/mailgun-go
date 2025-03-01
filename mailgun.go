@@ -260,7 +260,6 @@ type MailgunImpl struct {
 	apiKey            string
 	webhookSigningKey string
 	client            *http.Client
-	baseURL           string
 	overrideHeaders   map[string]string
 }
 

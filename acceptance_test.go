@@ -3,7 +3,6 @@ package mailgun
 import (
 	"fmt"
 	"os"
-	"testing"
 )
 
 // Return the variable missing which caused the test to be skipped
@@ -14,13 +13,4 @@ func SkipNetworkTest() string {
 		}
 	}
 	return ""
-}
-
-func spendMoney(t *testing.T, tFunc func()) {
-	ok := os.Getenv("MG_SPEND_MONEY")
-	if ok != "" {
-		tFunc()
-	} else {
-		t.Log("Money spending not allowed, not running function.")
-	}
 }
