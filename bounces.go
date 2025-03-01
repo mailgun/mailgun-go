@@ -7,11 +7,6 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-type bouncesListResponse struct {
-	Items  []mtypes.Bounce `json:"items"`
-	Paging mtypes.Paging   `json:"paging"`
-}
-
 // ListBounces returns a complete set of bounces logged against the sender's domain, if any.
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
@@ -28,13 +23,13 @@ func (mg *MailgunImpl) ListBounces(domain string, opts *ListOptions) *BouncesIte
 	url, err := r.generateUrlWithParameters()
 	return &BouncesIterator{
 		mg:                  mg,
-		bouncesListResponse: bouncesListResponse{Paging: mtypes.Paging{Next: url, First: url}},
+		BouncesListResponse: mtypes.BouncesListResponse{Paging: mtypes.Paging{Next: url, First: url}},
 		err:                 err,
 	}
 }
 
 type BouncesIterator struct {
-	bouncesListResponse
+	mtypes.BouncesListResponse
 	mg  Mailgun
 	err error
 }
@@ -124,7 +119,7 @@ func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
 	r.setClient(ci.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
 
-	return getResponseFromJSON(ctx, r, &ci.bouncesListResponse)
+	return getResponseFromJSON(ctx, r, &ci.BouncesListResponse)
 }
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.

@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"crypto/rand"
@@ -294,4 +294,8 @@ func randomEmail(prefix, domain string) string {
 type okResp struct {
 	ID      string `json:"id,omitempty"`
 	Message string `json:"message"`
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }

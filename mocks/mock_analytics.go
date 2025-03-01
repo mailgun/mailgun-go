@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -6,6 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
+
+const metricsEndpoint = "analytics/metrics"
 
 func (ms *mockServer) addAnalyticsRoutes(r chi.Router) {
 	r.Post("/v1/"+metricsEndpoint, ms.listMetrics)

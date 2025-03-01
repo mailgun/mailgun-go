@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -54,7 +54,7 @@ func (ms *mockServer) listCredentials(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	toJSON(w, credentialsListResponse{
+	toJSON(w, mtypes.CredentialsListResponse{
 		Items:      results,
 		TotalCount: len(results),
 	})

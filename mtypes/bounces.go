@@ -12,3 +12,8 @@ type Bounce struct {
 	// human readable reason why
 	Error string `json:"error"`
 }
+
+type BouncesListResponse struct {
+	Items  []Bounce `json:"items"`
+	Paging Paging   `json:"paging"`
+}

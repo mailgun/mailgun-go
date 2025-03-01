@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
@@ -17,7 +18,7 @@ func (ms *mockServer) addEventRoutes(r chi.Router) {
 		tags            = []string{"tag1", "tag2"}
 		recipients      = []string{"one@mailgun.test", "two@mailgun.test"}
 		recipientDomain = "mailgun.test"
-		timeStamp       = TimeToFloat(time.Now().UTC())
+		timeStamp       = mailgun.TimeToFloat(time.Now().UTC())
 		ipAddress       = "192.168.1.1"
 		message         = events.Message{Headers: events.MessageHeaders{MessageID: "1234"}}
 		clientInfo      = events.ClientInfo{

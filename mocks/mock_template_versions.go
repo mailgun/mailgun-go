@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"fmt"

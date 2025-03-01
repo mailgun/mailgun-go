@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"encoding/json"
@@ -12,34 +12,29 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-func (ms *mockServer) addBouncesRoutes(r chi.Router) {
-	r.Get("/{domain}/bounces", ms.listBounces)
-	r.Get("/{domain}/bounces/{address}", ms.getBounce)
-	r.Delete("/{domain}/bounces/{address}", ms.deleteBounce)
-	r.Delete("/{domain}/bounces", ms.deleteBouncesList)
-	r.Post("/{domain}/bounces", ms.createBounce)
+func (ms *mockServer) addComplaintsRoutes(r chi.Router) {
+	r.Get("/{domain}/complaints", ms.listComplaints)
+	r.Get("/{domain}/complaints/{address}", ms.getComplaint)
+	r.Delete("/{domain}/complaints/{address}", ms.deleteComplaint)
+	r.Post("/{domain}/complaints", ms.createComplaint)
 
-	ms.bounces = append(ms.bounces, mtypes.Bounce{
+	ms.complaints = append(ms.complaints, mtypes.Complaint{
 		CreatedAt: mtypes.RFC2822Time(time.Now()),
-		Error:     "invalid address",
-		Code:      "INVALID",
 		Address:   "foo@mailgun.test",
 	})
 
-	ms.bounces = append(ms.bounces, mtypes.Bounce{
+	ms.complaints = append(ms.complaints, mtypes.Complaint{
 		CreatedAt: mtypes.RFC2822Time(time.Now()),
-		Error:     "non existing address",
-		Code:      "NOT_EXIST",
 		Address:   "alice@example.com",
 	})
 }
 
-func (ms *mockServer) listBounces(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) listComplaints(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
 	var idx []string
-	for _, t := range ms.bounces {
+	for _, t := range ms.complaints {
 		idx = append(idx, t.Address)
 	}
 
@@ -60,19 +55,19 @@ func (ms *mockServer) listBounces(w http.ResponseWriter, r *http.Request) {
 	}
 	start, end := pageOffsets(idx, page, pivot, limit)
 	var nextAddress, prevAddress string
-	var results []mtypes.Bounce
+	var results []mtypes.Complaint
 
 	if start != end {
-		results = ms.bounces[start:end]
+		results = ms.complaints[start:end]
 		nextAddress = results[len(results)-1].Address
 		prevAddress = results[0].Address
 	} else {
-		results = []mtypes.Bounce{}
+		results = []mtypes.Complaint{}
 		nextAddress = pivot
 		prevAddress = pivot
 	}
 
-	toJSON(w, bouncesListResponse{
+	toJSON(w, mtypes.ComplaintsResponse{
 		Paging: mtypes.Paging{
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
@@ -93,25 +88,25 @@ func (ms *mockServer) listBounces(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *mockServer) getBounce(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) getComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	for _, bounce := range ms.bounces {
-		if bounce.Address == chi.URLParam(r, "address") {
-			toJSON(w, bounce)
+	for _, complaint := range ms.complaints {
+		if complaint.Address == chi.URLParam(r, "address") {
+			toJSON(w, complaint)
 			return
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte("{\"message\": \"Address not found in bounces table\"}"))
+	w.Write([]byte("{\"message\": \"Address not found in complaints table\"}"))
 }
 
-func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) createComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var bounces []mtypes.Bounce
+	var complaints []mtypes.Complaint
 	if r.Header.Get("Content-Type") == "application/json" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -120,7 +115,7 @@ func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = json.Unmarshal(body, &bounces)
+		err = json.Unmarshal(body, &complaints)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(fmt.Sprintf("{\"message\": \"Invalid json: %s\"}", err.Error())))
@@ -133,9 +128,6 @@ func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		bounceError := r.FormValue("error")
-		code := r.FormValue("code")
-
 		address := r.FormValue("address")
 		if len(address) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
@@ -143,55 +135,46 @@ func (ms *mockServer) createBounce(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		bounces = append(bounces, mtypes.Bounce{Address: address, Code: code, Error: bounceError})
+		complaints = append(complaints, mtypes.Complaint{Address: address, CreatedAt: mtypes.RFC2822Time(time.Now())})
 	}
 
-	for _, bounce := range bounces {
+	for _, complaint := range complaints {
 		var addressExist bool
-		for _, existingBounce := range ms.bounces {
-			if existingBounce.Address == bounce.Address {
+		for _, existingComplaint := range ms.complaints {
+			if existingComplaint.Address == complaint.Address {
 				addressExist = true
 			}
 		}
 
 		if !addressExist {
-			ms.bounces = append(ms.bounces, bounce)
+			complaint.CreatedAt = mtypes.RFC2822Time(time.Now())
+			ms.complaints = append(ms.complaints, complaint)
 		}
 	}
 
 	toJSON(w, map[string]any{
-		"message": "Address has been added to the bounces table",
-		"address": fmt.Sprint(bounces),
+		"message": "Address has been added to the complaints table",
+		"address": fmt.Sprint(complaints),
 	})
 }
 
-func (ms *mockServer) deleteBounce(w http.ResponseWriter, r *http.Request) {
+func (ms *mockServer) deleteComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	for i, bounce := range ms.bounces {
-		if bounce.Address == chi.URLParam(r, "address") {
-			ms.bounces = append(ms.bounces[:i], ms.bounces[i+1:len(ms.bounces)]...)
+	for i, complaint := range ms.complaints {
+		if complaint.Address == chi.URLParam(r, "address") {
+			ms.complaints = append(ms.complaints[:i], ms.complaints[i+1:len(ms.complaints)]...)
 
 			toJSON(w, map[string]any{
-				"message": "Bounce has been removed",
+				"message": "Complaint has been removed",
 			})
 			return
 		}
 	}
 
 	toJSON(w, map[string]any{
-		"message": "Address not found in bounces table",
+		"message": "Address not found in complaints table",
 	})
-}
-
-func (ms *mockServer) deleteBouncesList(w http.ResponseWriter, r *http.Request) {
-	defer ms.mutex.Unlock()
-	ms.mutex.Lock()
-
-	ms.bounces = []mtypes.Bounce{}
-
-	toJSON(w, map[string]any{
-		"message": "All bounces has been deleted",
-	})
+	return
 }

@@ -1,4 +1,4 @@
-package mailgun
+package mocks
 
 import (
 	"net/http"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v4"
 	"github.com/mailgun/mailgun-go/v4/events"
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
@@ -33,7 +34,7 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 	case "stored@mailgun.test":
 		stored := new(events.Stored)
 		stored.Name = events.EventStored
-		stored.Timestamp = TimeToFloat(time.Now().UTC())
+		stored.Timestamp = mailgun.TimeToFloat(time.Now().UTC())
 		stored.ID = id
 		stored.Storage.URL = ms.URL() + "/v3/se.storage.url/messages/" + id
 		stored.Storage.Key = id
@@ -57,7 +58,7 @@ func (ms *mockServer) createMessages(w http.ResponseWriter, r *http.Request) {
 		accepted := new(events.Accepted)
 		accepted.Name = events.EventAccepted
 		accepted.ID = id
-		accepted.Timestamp = TimeToFloat(time.Now().UTC())
+		accepted.Timestamp = mailgun.TimeToFloat(time.Now().UTC())
 		accepted.Message.Headers.From = r.FormValue("from")
 		accepted.Message.Headers.To = r.FormValue("to")
 		accepted.Message.Headers.MessageID = accepted.ID

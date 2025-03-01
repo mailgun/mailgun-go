@@ -6,15 +6,16 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v4/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var server mailgun.MockServer
+var server mocks.MockServer
 
 // Setup and shutdown the mailgun mock server for the entire test suite
 func TestMain(m *testing.M) {
-	server = mailgun.NewMockServer()
+	server = mocks.NewMockServer()
 	defer server.Stop()
 	os.Exit(m.Run())
 }

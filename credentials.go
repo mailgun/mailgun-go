@@ -8,12 +8,6 @@ import (
 	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
-type credentialsListResponse struct {
-	// is -1 if Next() or First() have not been called
-	TotalCount int                 `json:"total_count"`
-	Items      []mtypes.Credential `json:"items"`
-}
-
 // ErrEmptyParam is returned when a required parameter is missing.
 var ErrEmptyParam = errors.New("empty or illegal parameter")
 
@@ -30,13 +24,13 @@ func (mg *MailgunImpl) ListCredentials(domain string, opts *ListOptions) *Creden
 	return &CredentialsIterator{
 		mg:                      mg,
 		url:                     generateCredentialsUrl(mg, domain, ""),
-		credentialsListResponse: credentialsListResponse{TotalCount: -1},
+		CredentialsListResponse: mtypes.CredentialsListResponse{TotalCount: -1},
 		limit:                   limit,
 	}
 }
 
 type CredentialsIterator struct {
-	credentialsListResponse
+	mtypes.CredentialsListResponse
 
 	limit  int
 	mg     Mailgun
@@ -165,7 +159,7 @@ func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error
 		r.addParameter("limit", strconv.Itoa(limit))
 	}
 
-	return getResponseFromJSON(ctx, r, &ri.credentialsListResponse)
+	return getResponseFromJSON(ctx, r, &ri.CredentialsListResponse)
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.
