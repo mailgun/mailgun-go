@@ -38,7 +38,7 @@ var EventNames = map[string]func() Event{
 func new_(e any) func() Event {
 	typ := reflect.TypeOf(e)
 	return func() Event {
-		//nolint:revive // unchecked-type-assertion: TODO: switch to e.(Event)?
+		//nolint:revive // unchecked-type-assertion: TODO: return error?
 		return reflect.New(typ).Interface().(Event)
 	}
 }
