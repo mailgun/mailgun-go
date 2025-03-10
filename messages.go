@@ -900,13 +900,16 @@ func (m *PlainMessage) IsValid() bool {
 		return false
 	}
 
-	if m.From() == "" {
-		return false
+	if m.Template() != "" {
+		// m.text or m.html not needed if template is supplied.
+		//
+		// From is not required if sending with a template that has a pre-set From header,
+		// but it will override it if provided.
+		return true
 	}
 
-	if m.Template() != "" {
-		// m.text or m.html not needed if template is supplied
-		return true
+	if m.From() == "" {
+		return false
 	}
 
 	if m.Text() == "" && m.HTML() == "" {
