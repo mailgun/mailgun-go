@@ -122,7 +122,7 @@ type TrackingOptions struct {
 	TrackingOpens  bool
 }
 
-// Specific abstracts the common characteristics between plain text and MIME messages.
+// The Specific abstracts the common characteristics between plain text and MIME messages.
 type Specific interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
 	AddCC(string)
