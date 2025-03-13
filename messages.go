@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
@@ -111,13 +113,6 @@ type MimeMessage struct {
 	CommonMessage
 
 	body io.ReadCloser
-}
-
-// TODO(v5): return from Send()
-// TODO(v5): move to mtypes?
-type SendMessageResponse struct {
-	Message string `json:"message"`
-	ID      string `json:"id"`
 }
 
 // TrackingOptions contains fields relevant to tracking.
@@ -693,7 +688,7 @@ func (mg *Client) Send(ctx context.Context, m SendableMessage) (mes, id string, 
 		r.addHeader(k, v)
 	}
 
-	var response SendMessageResponse
+	var response mtypes.SendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &response)
 	if err == nil {
 		mes = response.Message
