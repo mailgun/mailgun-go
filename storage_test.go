@@ -20,20 +20,20 @@ func TestStorage(t *testing.T) {
 	var ctx = context.Background()
 
 	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 
-	t.Logf("New Email: %s ID: %s\n", msg, id)
+	t.Logf("New Email: %s ID: %s\n", resp.Message, resp.ID)
 
-	url, err := findStoredMessageURL(mg, strings.Trim(id, "<>"))
+	url, err := findStoredMessageURL(mg, strings.Trim(resp.ID, "<>"))
 	require.NoError(t, err)
 
-	resp, err := mg.GetStoredMessage(ctx, url)
+	stored, err := mg.GetStoredMessage(ctx, url)
 	require.NoError(t, err)
 
-	assert.Equal(t, "Subject", resp.Subject)
-	assert.Equal(t, "root@"+testDomain, resp.From)
-	assert.Equal(t, "stored@"+testDomain, resp.Recipients)
+	assert.Equal(t, "Subject", stored.Subject)
+	assert.Equal(t, "root@"+testDomain, stored.From)
+	assert.Equal(t, "stored@"+testDomain, stored.Recipients)
 
 	_, err = mg.ReSend(ctx, url, "resend@"+testDomain)
 	require.NoError(t, err)

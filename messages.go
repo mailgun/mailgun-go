@@ -644,40 +644,42 @@ type SendableMessage interface {
 //	}
 //
 // See the public mailgun documentation for all possible return codes and error messages
-func (mg *Client) Send(ctx context.Context, m SendableMessage) (mes, id string, err error) {
+func (mg *Client) Send(ctx context.Context, m SendableMessage) (mtypes.SendMessageResponse, error) {
+	var response mtypes.SendMessageResponse
+
 	if m.Domain() == "" {
-		err = errors.New("you must provide a valid domain before calling Send()")
-		return "", "", err
+		err := errors.New("you must provide a valid domain before calling Send()")
+		return response, err
 	}
 
 	invalidChars := ":&'@(),!?#;%+=<>"
 	if i := strings.ContainsAny(m.Domain(), invalidChars); i {
-		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
-		return "", "", err
+		err := fmt.Errorf("you called Send() with a domain that contains invalid characters")
+		return response, err
 	}
 
 	if mg.apiKey == "" {
-		err = errors.New("you must provide a valid api-key before calling Send()")
-		return "", "", err
+		err := errors.New("you must provide a valid api-key before calling Send()")
+		return response, err
 	}
 
 	if !isValid(m) {
-		err = ErrInvalidMessage
-		return "", "", err
+		err := ErrInvalidMessage
+		return response, err
 	}
 
 	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
-		err = errors.New("STO can only be used on a per-message basis")
-		return "", "", err
+		err := errors.New("STO can only be used on a per-message basis")
+		return response, err
 	}
 	payload := NewFormDataPayload()
 
 	m.AddValues(payload)
 
 	// TODO: make (CommonMessage).AddValues()?
-	err = addMessageValues(payload, m)
+	err := addMessageValues(payload, m)
 	if err != nil {
-		return "", "", err
+		return response, err
 	}
 
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, m.Endpoint(), m.Domain()))
@@ -688,14 +690,9 @@ func (mg *Client) Send(ctx context.Context, m SendableMessage) (mes, id string, 
 		r.addHeader(k, v)
 	}
 
-	var response mtypes.SendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &response)
-	if err == nil {
-		mes = response.Message
-		id = response.ID
-	}
 
-	return mes, id, err
+	return response, err
 }
 
 func addMessageValues(dst *FormDataPayload, src SendableMessage) error {

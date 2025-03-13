@@ -29,7 +29,6 @@ Date: Thu, 6 Mar 2014 00:37:52 +0000
 Testing some Mailgun MIME awesomeness!
 `
 	templateText  = "Greetings %recipient.name%!  Your reserved seat is at table %recipient.table%."
-	exampleDomain = "testDomain"
 	exampleAPIKey = "testAPIKey"
 )
 
@@ -58,9 +57,9 @@ func TestSendMGPlain(t *testing.T) {
 
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendPlain:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendPlain:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -77,9 +76,9 @@ func TestSendMGPlainWithTracking(t *testing.T) {
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetTracking(true)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendPlainWithTracking:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendPlainWithTracking:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -96,9 +95,9 @@ func TestSendMGPlainAt(t *testing.T) {
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetDeliveryTime(time.Now().Add(5 * time.Minute))
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendPlainAt:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendPlainAt:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -116,9 +115,9 @@ func TestSendMGSTO(t *testing.T) {
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		err = m.SetSTOPeriod("24h")
 		require.NoError(t, err)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendMGSTO:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendMGSTO:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -135,9 +134,9 @@ func TestSendMGHtml(t *testing.T) {
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendHtml:MSG(" + resp.Message + "),ID(" + resp.Message + ")")
 	})
 }
 
@@ -155,9 +154,9 @@ func TestSendMGAMPHtml(t *testing.T) {
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText, toUser)
 		m.SetHTML(exampleHtml)
 		m.SetAmpHTML(exampleAMPHtml)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendHtml:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -174,9 +173,9 @@ func TestSendMGTracking(t *testing.T) {
 		ctx := context.Background()
 		m := mailgun.NewMessage(fromUser, exampleSubject, exampleText+"Tracking!\n", toUser)
 		m.SetTracking(false)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendTracking:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendTracking:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -199,9 +198,9 @@ func TestSendMGTrackingClicksHtmlOnly(t *testing.T) {
 			TrackingOpens:  true,
 		}
 		m.SetTrackingOptions(&options)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendHtml:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendHtml:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -223,9 +222,9 @@ func TestSendMGTag(t *testing.T) {
 		require.NoError(t, err)
 		err = m.AddTag("BlortTag")
 		require.NoError(t, err)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendTag:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendTag:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -241,9 +240,9 @@ func TestSendMGMIME(t *testing.T) {
 
 		ctx := context.Background()
 		m := mailgun.NewMIMEMessage(os.Getenv("MG_DOMAIN"), io.NopCloser(strings.NewReader(exampleMime)), toUser)
-		msg, id, err := mg.Send(ctx, m)
+		resp, err := mg.Send(ctx, m)
 		require.NoError(t, err)
-		t.Log("TestSendMIME:MSG(" + msg + "),ID(" + id + ")")
+		t.Log("TestSendMIME:MSG(" + resp.Message + "),ID(" + resp.ID + ")")
 	})
 }
 
@@ -284,7 +283,7 @@ func TestSendMGBatchRecipientVariables(t *testing.T) {
 			"table": 42,
 		})
 		require.NoError(t, err)
-		_, _, err = mg.Send(ctx, m)
+		_, err = mg.Send(ctx, m)
 		require.NoError(t, err)
 	})
 }
@@ -317,10 +316,10 @@ func TestSendMGOffline(t *testing.T) {
 	ctx := context.Background()
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestSendMGSeparateDomain(t *testing.T) {
@@ -353,10 +352,10 @@ func TestSendMGSeparateDomain(t *testing.T) {
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
 	m.AddDomain(signingDomain)
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestSendMGMessageVariables(t *testing.T) {
@@ -414,10 +413,10 @@ func TestSendMGMessageVariables(t *testing.T) {
 	err = m.AddTemplateVariable("templateVariable", exampleTemplateVariable)
 	require.NoError(t, err)
 
-	msg, id, err := mg.Send(context.Background(), m)
+	resp, err := mg.Send(context.Background(), m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestAddRecipientsError(t *testing.T) {
@@ -479,7 +478,7 @@ func TestSendDomainError(t *testing.T) {
 
 		m := mailgun.NewMessage(c.domain, fromUser, exampleSubject, exampleText, "test@test.com")
 
-		_, _, err = mg.Send(ctx, m)
+		_, err = mg.Send(ctx, m)
 		if c.isValid {
 			require.NoError(t, err)
 		} else {
@@ -505,7 +504,7 @@ func TestSendEOFError(t *testing.T) {
 	require.NoError(t, err)
 
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText, toUser)
-	_, _, err = mg.Send(context.Background(), m)
+	_, err = mg.Send(context.Background(), m)
 	require.NotNil(t, err)
 	// TODO(vtopc): do not compare strings, use errors.Is or errors.As:
 	require.Contains(t, err.Error(), "remote server prematurely closed connection: Post ")
@@ -532,19 +531,19 @@ func TestHasRecipient(t *testing.T) {
 
 	// No recipient
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText)
-	_, _, err = mg.Send(context.Background(), m)
+	_, err = mg.Send(context.Background(), m)
 	require.EqualError(t, err, "message not valid")
 
 	// Provided Bcc
 	m = mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText)
 	m.AddBCC(recipient)
-	_, _, err = mg.Send(context.Background(), m)
+	_, err = mg.Send(context.Background(), m)
 	require.NoError(t, err)
 
 	// Provided cc
 	m = mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, exampleText)
 	m.AddCC(recipient)
-	_, _, err = mg.Send(context.Background(), m)
+	_, err = mg.Send(context.Background(), m)
 	require.NoError(t, err)
 }
 
@@ -610,10 +609,10 @@ func TestAddOverrideHeader(t *testing.T) {
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestOnBehalfOfSubaccount(t *testing.T) {
@@ -648,10 +647,10 @@ func TestOnBehalfOfSubaccount(t *testing.T) {
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestSendTLSOptions(t *testing.T) {
@@ -686,10 +685,10 @@ func TestSendTLSOptions(t *testing.T) {
 	m.SetRequireTLS(true)
 	m.SetSkipVerification(true)
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestSendTemplate(t *testing.T) {
@@ -717,10 +716,10 @@ func TestSendTemplate(t *testing.T) {
 	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)
 	m.SetTemplate(templateName)
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestSendTemplateOptions(t *testing.T) {
@@ -754,10 +753,10 @@ func TestSendTemplateOptions(t *testing.T) {
 	m.SetTemplateRenderText(true)
 	m.SetTemplateVersion(templateVersionTag)
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestSendableMessageIface(t *testing.T) {
