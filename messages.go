@@ -593,8 +593,7 @@ func (m *CommonMessage) Headers() map[string]string {
 // ErrInvalidMessage is returned by `Send()` when the `mailgun.CommonMessage` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
 
-// TODO(v5): rename to Message?
-type SendableMessage interface {
+type Message interface {
 	Domain() string
 	To() []string
 	Tags() []string
@@ -644,7 +643,7 @@ type SendableMessage interface {
 //	}
 //
 // See the public mailgun documentation for all possible return codes and error messages
-func (mg *Client) Send(ctx context.Context, m SendableMessage) (mtypes.SendMessageResponse, error) {
+func (mg *Client) Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error) {
 	var response mtypes.SendMessageResponse
 
 	if m.Domain() == "" {
@@ -695,7 +694,7 @@ func (mg *Client) Send(ctx context.Context, m SendableMessage) (mtypes.SendMessa
 	return response, err
 }
 
-func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
+func addMessageValues(dst *FormDataPayload, src Message) error {
 	addMessageOptions(dst, src)
 	addMessageHeaders(dst, src)
 
@@ -709,7 +708,7 @@ func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
 	return nil
 }
 
-func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
+func addMessageOptions(dst *FormDataPayload, src Message) {
 	for _, to := range src.To() {
 		dst.addValue("to", to)
 	}
@@ -756,7 +755,7 @@ func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func addMessageHeaders(dst *FormDataPayload, src SendableMessage) {
+func addMessageHeaders(dst *FormDataPayload, src Message) {
 	if src.Headers() != nil {
 		for header, value := range src.Headers() {
 			dst.addValue("h:"+header, value)
@@ -764,7 +763,7 @@ func addMessageHeaders(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
+func addMessageVariables(dst *FormDataPayload, src Message) error {
 	if src.Variables() != nil {
 		for variable, value := range src.Variables() {
 			dst.addValue("v:"+variable, value)
@@ -788,7 +787,7 @@ func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
 	return nil
 }
 
-func addMessageAttachment(dst *FormDataPayload, src SendableMessage) {
+func addMessageAttachment(dst *FormDataPayload, src Message) {
 	if src.Attachments() != nil {
 		for _, attachment := range src.Attachments() {
 			dst.addFile("attachment", attachment)
@@ -863,7 +862,7 @@ func trueFalse(b bool) string {
 
 // isValid returns true if, and only if,
 // a CommonMessage instance is sufficiently initialized to send via the Mailgun interface.
-func isValid(m SendableMessage) bool {
+func isValid(m Message) bool {
 	if m == nil {
 		return false
 	}

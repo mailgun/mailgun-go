@@ -762,5 +762,5 @@ func TestSendTemplateOptions(t *testing.T) {
 func TestSendableMessageIface(t *testing.T) {
 	m := mailgun.NewMessage(domain, fromUser, exampleSubject, exampleText)
 
-	assert.Implements(t, (*mailgun.SendableMessage)(nil), m)
+	assert.Implements(t, (*mailgun.Message)(nil), m)
 }
