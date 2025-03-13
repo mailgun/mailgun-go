@@ -663,7 +663,7 @@ func DeleteMailingList(apiKey string) error {
 	return mg.DeleteMailingList(ctx, "list@example.com")
 }
 
-func ResendMessage(domain, apiKey string) (string, string, error) {
+func ResendMessage(domain, apiKey string) (mtypes.SendMessageResponse, error) {
 	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)

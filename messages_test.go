@@ -570,14 +570,14 @@ func TestResendStored(t *testing.T) {
 	err := mg.SetAPIBase(srv.URL)
 	require.NoError(t, err)
 
-	_, _, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
+	_, err = mg.ReSend(context.Background(), srv.URL+"/v3/some-url")
 	require.NotNil(t, err)
 	require.EqualError(t, err, "must provide at least one recipient")
 
-	msg, id, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
+	resp, err := mg.ReSend(context.Background(), srv.URL+"/v3/some-url", toUser)
 	require.NoError(t, err)
-	assert.Equal(t, exampleMessage, msg)
-	assert.Equal(t, exampleID, id)
+	assert.Equal(t, exampleMessage, resp.Message)
+	assert.Equal(t, exampleID, resp.ID)
 }
 
 func TestAddOverrideHeader(t *testing.T) {

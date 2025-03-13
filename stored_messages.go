@@ -20,8 +20,9 @@ func (mg *Client) GetStoredMessage(ctx context.Context, url string) (mtypes.Stor
 }
 
 // ReSend given a storage id resend the stored message to the specified recipients
-// TODO(v5): return SendMessageResponse
-func (mg *Client) ReSend(ctx context.Context, url string, recipients ...string) (msg, id string, err error) {
+func (mg *Client) ReSend(ctx context.Context, url string, recipients ...string) (mtypes.SendMessageResponse, error) {
+	var resp mtypes.SendMessageResponse
+
 	r := newHTTPRequest(url)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -29,20 +30,19 @@ func (mg *Client) ReSend(ctx context.Context, url string, recipients ...string) 
 	payload := NewFormDataPayload()
 
 	if len(recipients) == 0 {
-		return "", "", errors.New("must provide at least one recipient")
+		return resp, errors.New("must provide at least one recipient")
 	}
 
 	for _, to := range recipients {
 		payload.addValue("to", to)
 	}
 
-	var resp mtypes.SendMessageResponse
-	err = postResponseFromJSON(ctx, r, payload, &resp)
+	err := postResponseFromJSON(ctx, r, payload, &resp)
 	if err != nil {
-		return "", "", err
+		return resp, err
 	}
 
-	return resp.Message, resp.ID, nil
+	return resp, nil
 }
 
 // GetStoredMessageRaw retrieves the raw MIME body of a received e-mail message.

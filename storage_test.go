@@ -35,7 +35,7 @@ func TestStorage(t *testing.T) {
 	assert.Equal(t, "root@"+testDomain, resp.From)
 	assert.Equal(t, "stored@"+testDomain, resp.Recipients)
 
-	_, _, err = mg.ReSend(ctx, url, "resend@"+testDomain)
+	_, err = mg.ReSend(ctx, url, "resend@"+testDomain)
 	require.NoError(t, err)
 }
 
