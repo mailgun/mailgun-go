@@ -74,7 +74,7 @@ linters-settings:
 
   revive:
     rules:
-      # TODO(v5): enable:
+      # TODO(v6): enable:
       #      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#argument-limit
       #      - name: argument-limit
       #        severity: warning
