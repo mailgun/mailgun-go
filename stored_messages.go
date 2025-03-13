@@ -19,7 +19,7 @@ func (mg *Client) GetStoredMessage(ctx context.Context, url string) (mtypes.Stor
 	return response, err
 }
 
-// ReSend given a storage id resend the stored message to the specified recipients
+// ReSend given a storage url resend the stored message to the specified recipients
 func (mg *Client) ReSend(ctx context.Context, url string, recipients ...string) (mtypes.SendMessageResponse, error) {
 	var resp mtypes.SendMessageResponse
 
