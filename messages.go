@@ -115,7 +115,7 @@ type MimeMessage struct {
 
 // TODO(v5): return from Send()
 // TODO(v5): move to mtypes?
-type sendMessageResponse struct {
+type SendMessageResponse struct {
 	Message string `json:"message"`
 	ID      string `json:"id"`
 }
@@ -693,7 +693,7 @@ func (mg *Client) Send(ctx context.Context, m SendableMessage) (mes, id string, 
 		r.addHeader(k, v)
 	}
 
-	var response sendMessageResponse
+	var response SendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &response)
 	if err == nil {
 		mes = response.Message

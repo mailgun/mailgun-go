@@ -36,7 +36,7 @@ func (mg *Client) ReSend(ctx context.Context, url string, recipients ...string) 
 		payload.addValue("to", to)
 	}
 
-	var resp sendMessageResponse
+	var resp SendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &resp)
 	if err != nil {
 		return "", "", err
