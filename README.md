@@ -53,13 +53,13 @@ func main() {
 	defer cancel()
 
 	// Send the message with a 10-second timeout
-	resp, id, err := mg.Send(ctx, message)
+	resp, err := mg.Send(ctx, message)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+	fmt.Printf("ID: %s Resp: %s\n", resp.ID, resp.Message)
 }
 ```
 
@@ -306,13 +306,13 @@ func main() {
 	defer cancel()
 
 	// Send the message with a 10-second timeout
-	resp, id, err := mg.Send(ctx, message)
+	resp, err := mg.Send(ctx, message)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+	fmt.Printf("ID: %s Resp: %s\n", resp.ID, resp.Message)
 }
 ```
 
@@ -361,12 +361,12 @@ func main() {
 	defer cancel()
 
 	// Send the message with a 10-second timeout
-	resp, id, err := mg.Send(ctx, message)
+	resp, err := mg.Send(ctx, message)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+	fmt.Printf("ID: %s Resp: %s\n", resp.ID, resp.Message)
 }
 ```
 
