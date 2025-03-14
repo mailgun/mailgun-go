@@ -83,6 +83,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 // Debug set true to write the HTTP requests in curl for to stdout
@@ -262,6 +264,8 @@ type Mailgun interface {
 	UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
 	DeleteTemplateVersion(ctx context.Context, templateName, tag string) error
 	ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator
+
+	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (mtypes.ValidateEmailResponse, error)
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
