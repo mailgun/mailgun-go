@@ -66,7 +66,7 @@ func (mg *Client) GetExportLink(ctx context.Context, id string) (string, error) 
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	r.addHeader("User-Agent", MailgunGoUserAgent)
+	r.addHeader("User-Agent", UserAgent)
 
 	req, err := r.NewRequest(ctx, http.MethodGet, nil)
 	if err != nil {

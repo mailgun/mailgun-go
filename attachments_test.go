@@ -38,11 +38,11 @@ func TestMultipleAttachments(t *testing.T) {
 	m.AddAttachment(createAttachment(t))
 	m.AddAttachment(createAttachment(t))
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 
-	id = strings.Trim(id, "<>")
-	t.Logf("New Email: %s ID: %s\n", msg, id)
+	id := strings.Trim(resp.ID, "<>")
+	t.Logf("New Email: %s ID: %s\n", resp.Message, id)
 
 	e, err := findAcceptedMessage(mg, id)
 	require.NoError(t, err)

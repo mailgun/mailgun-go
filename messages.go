@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
@@ -113,13 +115,6 @@ type MimeMessage struct {
 	body io.ReadCloser
 }
 
-// TODO(v5): return from Send()
-// TODO(v5): move to mtypes?
-type sendMessageResponse struct {
-	Message string `json:"message"`
-	ID      string `json:"id"`
-}
-
 // TrackingOptions contains fields relevant to tracking.
 type TrackingOptions struct {
 	Tracking       bool
@@ -127,7 +122,7 @@ type TrackingOptions struct {
 	TrackingOpens  bool
 }
 
-// Specific abstracts the common characteristics between plain text and MIME messages.
+// The Specific abstracts the common characteristics between plain text and MIME messages.
 type Specific interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
 	AddCC(string)
@@ -598,8 +593,7 @@ func (m *CommonMessage) Headers() map[string]string {
 // ErrInvalidMessage is returned by `Send()` when the `mailgun.CommonMessage` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
 
-// TODO(v5): rename to Message?
-type SendableMessage interface {
+type Message interface {
 	Domain() string
 	To() []string
 	Tags() []string
@@ -649,40 +643,42 @@ type SendableMessage interface {
 //	}
 //
 // See the public mailgun documentation for all possible return codes and error messages
-func (mg *Client) Send(ctx context.Context, m SendableMessage) (mes, id string, err error) {
+func (mg *Client) Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error) {
+	var response mtypes.SendMessageResponse
+
 	if m.Domain() == "" {
-		err = errors.New("you must provide a valid domain before calling Send()")
-		return "", "", err
+		err := errors.New("you must provide a valid domain before calling Send()")
+		return response, err
 	}
 
 	invalidChars := ":&'@(),!?#;%+=<>"
 	if i := strings.ContainsAny(m.Domain(), invalidChars); i {
-		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
-		return "", "", err
+		err := fmt.Errorf("you called Send() with a domain that contains invalid characters")
+		return response, err
 	}
 
 	if mg.apiKey == "" {
-		err = errors.New("you must provide a valid api-key before calling Send()")
-		return "", "", err
+		err := errors.New("you must provide a valid api-key before calling Send()")
+		return response, err
 	}
 
 	if !isValid(m) {
-		err = ErrInvalidMessage
-		return "", "", err
+		err := ErrInvalidMessage
+		return response, err
 	}
 
 	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
-		err = errors.New("STO can only be used on a per-message basis")
-		return "", "", err
+		err := errors.New("STO can only be used on a per-message basis")
+		return response, err
 	}
 	payload := NewFormDataPayload()
 
 	m.AddValues(payload)
 
 	// TODO: make (CommonMessage).AddValues()?
-	err = addMessageValues(payload, m)
+	err := addMessageValues(payload, m)
 	if err != nil {
-		return "", "", err
+		return response, err
 	}
 
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, m.Endpoint(), m.Domain()))
@@ -693,17 +689,12 @@ func (mg *Client) Send(ctx context.Context, m SendableMessage) (mes, id string, 
 		r.addHeader(k, v)
 	}
 
-	var response sendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &response)
-	if err == nil {
-		mes = response.Message
-		id = response.ID
-	}
 
-	return mes, id, err
+	return response, err
 }
 
-func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
+func addMessageValues(dst *FormDataPayload, src Message) error {
 	addMessageOptions(dst, src)
 	addMessageHeaders(dst, src)
 
@@ -717,7 +708,7 @@ func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
 	return nil
 }
 
-func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
+func addMessageOptions(dst *FormDataPayload, src Message) {
 	for _, to := range src.To() {
 		dst.addValue("to", to)
 	}
@@ -764,7 +755,7 @@ func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func addMessageHeaders(dst *FormDataPayload, src SendableMessage) {
+func addMessageHeaders(dst *FormDataPayload, src Message) {
 	if src.Headers() != nil {
 		for header, value := range src.Headers() {
 			dst.addValue("h:"+header, value)
@@ -772,7 +763,7 @@ func addMessageHeaders(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
+func addMessageVariables(dst *FormDataPayload, src Message) error {
 	if src.Variables() != nil {
 		for variable, value := range src.Variables() {
 			dst.addValue("v:"+variable, value)
@@ -796,7 +787,7 @@ func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
 	return nil
 }
 
-func addMessageAttachment(dst *FormDataPayload, src SendableMessage) {
+func addMessageAttachment(dst *FormDataPayload, src Message) {
 	if src.Attachments() != nil {
 		for _, attachment := range src.Attachments() {
 			dst.addFile("attachment", attachment)
@@ -871,7 +862,7 @@ func trueFalse(b bool) string {
 
 // isValid returns true if, and only if,
 // a CommonMessage instance is sufficiently initialized to send via the Mailgun interface.
-func isValid(m SendableMessage) bool {
+func isValid(m Message) bool {
 	if m == nil {
 		return false
 	}

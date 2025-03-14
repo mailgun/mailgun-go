@@ -433,7 +433,7 @@ func ListDomainIPS(domain, apiKey string) ([]mtypes.IPAddress, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.ListDomainIPS(ctx, domain)
+	return mg.ListDomainIPs(ctx, domain)
 }
 
 func GetDomainTracking(domain, apiKey string) (mtypes.DomainTracking, error) {
@@ -489,7 +489,7 @@ func ListIPS(domain, apiKey string) ([]mtypes.IPAddress, error) {
 
 	// Pass 'true' as the first parameter to only return dedicated ips,
 	// pass 'true' as the second parameter to only return enabled ips.
-	return mg.ListIPS(ctx, true, true)
+	return mg.ListIPs(ctx, true, true)
 }
 
 func GetTagLimits(domain, apiKey string) (mtypes.TagLimits, error) {
@@ -664,7 +664,7 @@ func DeleteMailingList(apiKey string) error {
 	return mg.DeleteMailingList(ctx, "list@example.com")
 }
 
-func ResendMessage(domain, apiKey string) (string, string, error) {
+func ResendMessage(domain, apiKey string) (mtypes.SendMessageResponse, error) {
 	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -691,8 +691,8 @@ func SendComplexMessage(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendWithConnectionOptions(domain, apiKey string) (string, error) {
@@ -711,8 +711,8 @@ func SendWithConnectionOptions(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendInlineImage(domain, apiKey string) (string, error) {
@@ -732,8 +732,8 @@ func SendInlineImage(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendMessageNoTracking(domain, apiKey string) (string, error) {
@@ -750,8 +750,8 @@ func SendMessageNoTracking(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendMimeMessage(domain, apiKey string) (string, error) {
@@ -766,8 +766,8 @@ func SendMimeMessage(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendScheduledMessage(domain, apiKey string) (string, error) {
@@ -784,8 +784,8 @@ func SendScheduledMessage(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendSimpleMessage(domain, apiKey string) (string, error) {
@@ -801,8 +801,8 @@ func SendSimpleMessage(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendTaggedMessage(domain, apiKey string) (string, error) {
@@ -823,8 +823,8 @@ func SendTaggedMessage(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func SendTemplateMessage(domain, apiKey string) (string, error) {
@@ -852,8 +852,8 @@ func SendTemplateMessage(domain, apiKey string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	_, id, err := mg.Send(ctx, m)
-	return id, err
+	resp, err := mg.Send(ctx, m)
+	return resp.ID, err
 }
 
 func UpdateDomainConnection(domain, apiKey string) error {
@@ -936,8 +936,8 @@ func SendMessageWithTemplate(domain, apiKey string) error {
 	m.AddVariable("title", "Hello Templates")
 	m.AddVariable("body", "Body of the message")
 
-	_, id, err := mg.Send(ctx, m)
-	fmt.Printf("Queued: %s", id)
+	resp, err := mg.Send(ctx, m)
+	fmt.Printf("Queued: %s", resp.ID)
 	return err
 }
 
