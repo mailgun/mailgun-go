@@ -237,6 +237,8 @@ type Mailgun interface {
 	// Deprecated: use ListIPs instead
 	ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error)
 	GetIP(ctx context.Context, ip string) (IPAddress, error)
+	ListDomainIPs(ctx context.Context) ([]IPAddress, error)
+
 	ListDomainIPS(ctx context.Context) ([]IPAddress, error)
 	AddDomainIP(ctx context.Context, ip string) error
 	DeleteDomainIP(ctx context.Context, ip string) error

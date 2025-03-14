@@ -432,7 +432,7 @@ func ListDomainIPS(domain, apiKey string) ([]mailgun.IPAddress, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.ListDomainIPS(ctx)
+	return mg.ListDomainIPs(ctx)
 }
 
 func GetDomainTracking(domain, apiKey string) (mailgun.DomainTracking, error) {

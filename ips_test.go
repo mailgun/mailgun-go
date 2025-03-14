@@ -36,7 +36,7 @@ func TestListIPS(t *testing.T) {
 	assert.Equal(t, "luna.mailgun.net", ip.RDNS)
 }
 
-func TestDomainIPS(t *testing.T) {
+func TestDomainIPs(t *testing.T) {
 	mg := mailgun.NewMailgun(testDomain, testKey)
 	mg.SetAPIBase(server.URL())
 
@@ -44,7 +44,7 @@ func TestDomainIPS(t *testing.T) {
 	err := mg.AddDomainIP(ctx, "192.172.1.1")
 	require.NoError(t, err)
 
-	list, err := mg.ListDomainIPS(ctx)
+	list, err := mg.ListDomainIPs(ctx)
 	require.NoError(t, err)
 
 	require.Len(t, list, 1)
@@ -53,7 +53,7 @@ func TestDomainIPS(t *testing.T) {
 	err = mg.DeleteDomainIP(ctx, "192.172.1.1")
 	require.NoError(t, err)
 
-	list, err = mg.ListDomainIPS(ctx)
+	list, err = mg.ListDomainIPs(ctx)
 	require.NoError(t, err)
 
 	require.Len(t, list, 0)

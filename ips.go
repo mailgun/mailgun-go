@@ -72,8 +72,8 @@ func (mg *MailgunImpl) GetIP(ctx context.Context, ip string) (IPAddress, error) 
 	return resp, err
 }
 
-// ListDomainIPS returns a list of IPs currently assigned to the specified domain.
-func (mg *MailgunImpl) ListDomainIPS(ctx context.Context) ([]IPAddress, error) {
+// ListDomainIPs returns a list of IPs currently assigned to the specified domain.
+func (mg *MailgunImpl) ListDomainIPs(ctx context.Context) ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, domainsEndpoint) + "/" + mg.domain + "/ips")
 	r.setClient(mg.Client())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -87,6 +87,12 @@ func (mg *MailgunImpl) ListDomainIPS(ctx context.Context) ([]IPAddress, error) {
 		result = append(result, IPAddress{IP: ip})
 	}
 	return result, nil
+}
+
+// ListDomainIPS returns a list of IPs currently assigned to the specified domain.
+// Deprecated: use ListDomainIPs instead.
+func (mg *MailgunImpl) ListDomainIPS(ctx context.Context) ([]IPAddress, error) {
+	return mg.ListDomainIPs(ctx)
 }
 
 // Assign a dedicated IP to the domain specified.
