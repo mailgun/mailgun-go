@@ -18,7 +18,31 @@ type okResp struct {
 	Message string `json:"message"`
 }
 
+// ListIPs returns a list of IPs assigned to your account
+func (mg *MailgunImpl) ListIPs(ctx context.Context, dedicated, enabled bool) ([]IPAddress, error) {
+	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint))
+	r.setClient(mg.Client())
+	if dedicated {
+		r.addParameter("dedicated", "true")
+	}
+	if enabled {
+		r.addParameter("enabled", "true")
+	}
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	var resp ipAddressListResponse
+	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
+		return nil, err
+	}
+	var result []IPAddress
+	for _, ip := range resp.Items {
+		result = append(result, IPAddress{IP: ip})
+	}
+	return result, nil
+}
+
 // ListIPS returns a list of IPs assigned to your account
+// Deprecated: use ListIPs instead
 func (mg *MailgunImpl) ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error) {
 	r := newHTTPRequest(generatePublicApiUrl(mg, ipsEndpoint))
 	r.setClient(mg.Client())
