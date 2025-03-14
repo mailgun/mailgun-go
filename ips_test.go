@@ -15,7 +15,7 @@ func TestListIPS(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	list, err := mg.ListIPS(ctx, false)
+	list, err := mg.ListIPS(ctx, false, false)
 	require.NoError(t, err)
 	require.Len(t, list, 2)
 

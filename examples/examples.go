@@ -487,8 +487,9 @@ func ListIPS(domain, apiKey string) ([]mtypes.IPAddress, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	// Pass 'true' to only return dedicated ips
-	return mg.ListIPS(ctx, true)
+	// Pass 'true' as the first parameter to only return dedicated ips,
+	// pass 'true' as the second parameter to only return enabled ips.
+	return mg.ListIPS(ctx, true, true)
 }
 
 func GetTagLimits(domain, apiKey string) (mtypes.TagLimits, error) {
