@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestListIPS(t *testing.T) {
+func TestListIPs(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
@@ -27,7 +27,7 @@ func TestListIPS(t *testing.T) {
 	assert.Equal(t, "luna.mailgun.net", ip.RDNS)
 }
 
-func TestDomainIPS(t *testing.T) {
+func TestDomainIPs(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)

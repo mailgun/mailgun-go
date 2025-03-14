@@ -195,7 +195,7 @@ type CreateDomainOptions struct {
 	Wildcard           bool
 	ForceDKIMAuthority bool
 	DKIMKeySize        int
-	IPS                []string
+	IPs                []string
 	WebScheme          string
 }
 
@@ -226,8 +226,8 @@ func (mg *Client) CreateDomain(ctx context.Context, name string, opts *CreateDom
 		if opts.DKIMKeySize != 0 {
 			payload.addValue("dkim_key_size", strconv.Itoa(opts.DKIMKeySize))
 		}
-		if len(opts.IPS) != 0 {
-			payload.addValue("ips", strings.Join(opts.IPS, ","))
+		if len(opts.IPs) != 0 {
+			payload.addValue("ips", strings.Join(opts.IPs, ","))
 		}
 		if opts.Password != "" {
 			payload.addValue("smtp_password", opts.Password)
