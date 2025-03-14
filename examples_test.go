@@ -66,12 +66,12 @@ func ExampleMailgun_Send_constructed() {
 	m.SetTracking(true)
 	m.SetDeliveryTime(time.Now().Add(24 * time.Hour))
 	m.SetHTML("<html><body><h1>Testing some Mailgun Awesomeness!!</h1></body></html>")
-	_, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	log.Printf("Message id=%s", id)
+	log.Printf("Message id=%s", resp.ID)
 }
 
 func ExampleMailgun_Send_mime() {
@@ -90,12 +90,12 @@ Testing some Mailgun MIME awesomeness!
 
 	mg := mailgun.NewMailgun("my_api_key")
 	m := mailgun.NewMIMEMessage("example.com", io.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
-	_, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	log.Printf("Message id=%s", id)
+	log.Printf("Message id=%s", resp.ID)
 }
 
 func ExampleMailgun_ListRoutes() {

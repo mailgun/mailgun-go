@@ -90,10 +90,10 @@ func TestEventPoller(t *testing.T) {
 
 	// Send an email
 	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "user@"+testDomain)
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 
-	t.Logf("New Email: %s ID: %s\n", msg, id)
+	t.Logf("New Email: %s ID: %s\n", resp.Message, resp.ID)
 
 	var accepted *events.Accepted
 	for e := range eventChan {
@@ -101,7 +101,7 @@ func TestEventPoller(t *testing.T) {
 		case *events.Accepted:
 			t.Logf("Accepted Event: %s - %v", event.Message.Headers.MessageID, event.GetTimestamp())
 			// If we find our accepted email event
-			if id == ("<" + event.Message.Headers.MessageID + ">") {
+			if resp.ID == ("<" + event.Message.Headers.MessageID + ">") {
 				accepted = event
 				cancel()
 			}

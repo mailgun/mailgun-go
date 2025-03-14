@@ -134,8 +134,8 @@ type Mailgun interface {
 	AddOverrideHeader(k string, v string)
 
 	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
-	Send(ctx context.Context, m SendableMessage) (mes string, id string, err error)
-	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
+	Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error)
+	ReSend(ctx context.Context, url string, recipients ...string) (mtypes.SendMessageResponse, error)
 
 	ListBounces(domain string, opts *ListOptions) *BouncesIterator
 	GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error)

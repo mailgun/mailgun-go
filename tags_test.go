@@ -32,7 +32,7 @@ func TestTags(t *testing.T) {
 
 	ctx := context.Background()
 	// Create an email with some tags attached
-	_, _, err = mg.Send(ctx, msg)
+	_, err = mg.Send(ctx, msg)
 	require.NoError(t, err)
 
 	// Wait for the tag to show up

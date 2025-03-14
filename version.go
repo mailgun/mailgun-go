@@ -2,4 +2,4 @@ package mailgun
 
 // Version of current release
 // TODO(vtopc): automate this
-const Version = "5.0.0-rc1"
+const Version = "5.0.0"

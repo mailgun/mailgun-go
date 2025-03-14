@@ -73,7 +73,7 @@ func ParseEvents(raw []RawJSON) ([]Event, error) {
 	return result, nil
 }
 
-// Parse converts raw bytes data into an event struct. Can accept events.RawJSON as input
+// ParseEvent converts raw bytes data into an event struct. Can accept events.RawJSON as input
 func ParseEvent(raw []byte) (Event, error) {
 	// Try to recognize the event first.
 	var e EventName
