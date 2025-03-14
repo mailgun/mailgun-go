@@ -433,7 +433,7 @@ func ListDomainIPS(domain, apiKey string) ([]mtypes.IPAddress, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	return mg.ListDomainIPS(ctx, domain)
+	return mg.ListDomainIPs(ctx, domain)
 }
 
 func GetDomainTracking(domain, apiKey string) (mtypes.DomainTracking, error) {
@@ -489,7 +489,7 @@ func ListIPS(domain, apiKey string) ([]mtypes.IPAddress, error) {
 
 	// Pass 'true' as the first parameter to only return dedicated ips,
 	// pass 'true' as the second parameter to only return enabled ips.
-	return mg.ListIPS(ctx, true, true)
+	return mg.ListIPs(ctx, true, true)
 }
 
 func GetTagLimits(domain, apiKey string) (mtypes.TagLimits, error) {

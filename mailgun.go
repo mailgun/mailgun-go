@@ -216,9 +216,9 @@ type Mailgun interface {
 	ListEvents(domain string, opts *ListEventOptions) *EventIterator
 	PollEvents(domain string, opts *ListEventOptions) *EventPoller
 
-	ListIPS(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error)
+	ListIPs(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error)
 	GetIP(ctx context.Context, ip string) (mtypes.IPAddress, error)
-	ListDomainIPS(ctx context.Context, domain string) ([]mtypes.IPAddress, error)
+	ListDomainIPs(ctx context.Context, domain string) ([]mtypes.IPAddress, error)
 	AddDomainIP(ctx context.Context, domain, ip string) error
 	DeleteDomainIP(ctx context.Context, domain, ip string) error
 

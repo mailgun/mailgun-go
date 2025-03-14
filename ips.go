@@ -7,7 +7,7 @@ import (
 )
 
 // ListIPS returns a list of IPs assigned to your account
-func (mg *Client) ListIPS(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error) {
+func (mg *Client) ListIPs(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, ipsEndpoint))
 	r.setClient(mg.HTTPClient())
 	if dedicated {
@@ -40,7 +40,7 @@ func (mg *Client) GetIP(ctx context.Context, ip string) (mtypes.IPAddress, error
 }
 
 // ListDomainIPS returns a list of IPs currently assigned to the specified domain.
-func (mg *Client) ListDomainIPS(ctx context.Context, domain string) ([]mtypes.IPAddress, error) {
+func (mg *Client) ListDomainIPs(ctx context.Context, domain string) ([]mtypes.IPAddress, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/ips")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
