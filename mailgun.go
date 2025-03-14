@@ -167,6 +167,7 @@ type Mailgun interface {
 	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
 	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
+	// Deprecated: Use VerifyAndReturnDomain instead.
 	VerifyDomain(ctx context.Context, name string) (string, error)
 	VerifyAndReturnDomain(ctx context.Context, name string) (DomainResponse, error)
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
