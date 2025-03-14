@@ -153,7 +153,7 @@ type Mailgun interface {
 	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
 	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
-	VerifyDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
+	VerifyAndReturnDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
 
 	UpdateDomainConnection(ctx context.Context, domain string, dc mtypes.DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (mtypes.DomainConnection, error)
