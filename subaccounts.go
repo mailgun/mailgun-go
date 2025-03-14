@@ -211,15 +211,21 @@ func (mg *MailgunImpl) CreateSubaccount(ctx context.Context, subaccountName stri
 	return resp, err
 }
 
-// SubaccountDetails retrieves detailed information about subaccount using subaccountId.
-func (mg *MailgunImpl) SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error) {
-	r := newHTTPRequest(generateSubaccountsApiUrl(mg) + "/" + subaccountId)
+// GetSubaccount retrieves detailed information about subaccount using subaccountID.
+func (mg *MailgunImpl) GetSubaccount(ctx context.Context, subaccountID string) (SubaccountResponse, error) {
+	r := newHTTPRequest(generateSubaccountsApiUrl(mg) + "/" + subaccountID)
 	r.setClient(mg.client)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	var resp SubaccountResponse
 	err := getResponseFromJSON(ctx, r, &resp)
 	return resp, err
+}
+
+// SubaccountDetails retrieves detailed information about subaccount using subaccountId.
+// Deprecated: Use GetSubaccount instead.
+func (mg *MailgunImpl) SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error) {
+	return mg.GetSubaccount(ctx, subaccountId)
 }
 
 // EnableSubaccount instructs Mailgun to enable subaccount.
