@@ -40,7 +40,7 @@ type DomainsIterator struct {
 	err    error
 }
 
-// If an error occurred during iteration `Err()` will return non nil
+// Err if an error occurred during iteration `Err()` will return non nil
 func (ri *DomainsIterator) Err() error {
 	return ri.err
 }
@@ -175,7 +175,7 @@ func (mg *Client) GetDomain(ctx context.Context, domain string, _ *GetDomainOpti
 	return resp, err
 }
 
-func (mg *Client) VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
+func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain + "/verify")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -195,7 +195,7 @@ type CreateDomainOptions struct {
 	Wildcard           bool
 	ForceDKIMAuthority bool
 	DKIMKeySize        int
-	IPS                []string
+	IPs                []string
 	WebScheme          string
 }
 
@@ -226,8 +226,8 @@ func (mg *Client) CreateDomain(ctx context.Context, name string, opts *CreateDom
 		if opts.DKIMKeySize != 0 {
 			payload.addValue("dkim_key_size", strconv.Itoa(opts.DKIMKeySize))
 		}
-		if len(opts.IPS) != 0 {
-			payload.addValue("ips", strings.Join(opts.IPS, ","))
+		if len(opts.IPs) != 0 {
+			payload.addValue("ips", strings.Join(opts.IPs, ","))
 		}
 		if opts.Password != "" {
 			payload.addValue("smtp_password", opts.Password)

@@ -153,7 +153,7 @@ type Mailgun interface {
 	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
 	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
-	VerifyDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
+	VerifyAndReturnDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
 
 	UpdateDomainConnection(ctx context.Context, domain string, dc mtypes.DomainConnection) error
 	GetDomainConnection(ctx context.Context, domain string) (mtypes.DomainConnection, error)
@@ -216,9 +216,9 @@ type Mailgun interface {
 	ListEvents(domain string, opts *ListEventOptions) *EventIterator
 	PollEvents(domain string, opts *ListEventOptions) *EventPoller
 
-	ListIPS(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error)
+	ListIPs(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error)
 	GetIP(ctx context.Context, ip string) (mtypes.IPAddress, error)
-	ListDomainIPS(ctx context.Context, domain string) ([]mtypes.IPAddress, error)
+	ListDomainIPs(ctx context.Context, domain string) ([]mtypes.IPAddress, error)
 	AddDomainIP(ctx context.Context, domain, ip string) error
 	DeleteDomainIP(ctx context.Context, domain, ip string) error
 
