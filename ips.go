@@ -7,11 +7,14 @@ import (
 )
 
 // ListIPS returns a list of IPs assigned to your account
-func (mg *Client) ListIPS(ctx context.Context, dedicated bool) ([]mtypes.IPAddress, error) {
+func (mg *Client) ListIPS(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, ipsEndpoint))
 	r.setClient(mg.HTTPClient())
 	if dedicated {
 		r.addParameter("dedicated", "true")
+	}
+	if enabled {
+		r.addParameter("enabled", "true")
 	}
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -53,7 +56,7 @@ func (mg *Client) ListDomainIPS(ctx context.Context, domain string) ([]mtypes.IP
 	return result, nil
 }
 
-// Assign a dedicated IP to the domain specified.
+// AddDomainIP Assign a dedicated IP to the domain specified.
 func (mg *Client) AddDomainIP(ctx context.Context, domain, ip string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/ips")
 	r.setClient(mg.HTTPClient())
@@ -65,7 +68,7 @@ func (mg *Client) AddDomainIP(ctx context.Context, domain, ip string) error {
 	return err
 }
 
-// Unassign an IP from the domain specified.
+// DeleteDomainIP Unassign an IP from the domain specified.
 func (mg *Client) DeleteDomainIP(ctx context.Context, domain, ip string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/ips/" + ip)
 	r.setClient(mg.HTTPClient())
