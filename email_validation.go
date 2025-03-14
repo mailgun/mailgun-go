@@ -95,6 +95,7 @@ type EmailValidatorImpl struct {
 // * For ValidateEmail use private key
 //
 // * For ParseAddresses use public key
+// Deprecated: use NewMailgun instead.
 func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 	isPublicKey := false
 
@@ -117,6 +118,7 @@ func NewEmailValidator(apiKey string) *EmailValidatorImpl {
 // * For ValidateEmail set MG_API_KEY
 //
 // * For ParseAddresses set MG_PUBLIC_API_KEY
+// Deprecated: use NewMailgunFromEnv instead.
 func NewEmailValidatorFromEnv() (*EmailValidatorImpl, error) {
 	apiKey := os.Getenv("MG_PUBLIC_API_KEY")
 	if apiKey == "" {
@@ -167,7 +169,8 @@ func (m *EmailValidatorImpl) getAddressURL(endpoint string) string {
 }
 
 // ValidateEmail performs various checks on the email address provided to ensure it's correctly formatted.
-// It may also be used to break an email address into its sub-components. If user has set the
+// It may also be used to break an email address into its sub-components.
+// Deprecated: use (*MailgunImpl) ValidateEmail instead.
 func (m *EmailValidatorImpl) ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (EmailVerification, error) {
 	if m.isPublicKey {
 		return EmailVerification{}, errors.New("ValidateEmail: public key is not supported anymore, use private key")

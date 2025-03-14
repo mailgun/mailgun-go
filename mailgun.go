@@ -83,6 +83,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v4/mtypes"
 )
 
 // Debug set true to write the HTTP requests in curl for to stdout
@@ -167,6 +169,7 @@ type Mailgun interface {
 	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
 	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
+	// Deprecated: Use VerifyAndReturnDomain instead.
 	VerifyDomain(ctx context.Context, name string) (string, error)
 	VerifyAndReturnDomain(ctx context.Context, name string) (DomainResponse, error)
 	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
@@ -234,11 +237,11 @@ type Mailgun interface {
 	PollEvents(*ListEventOptions) *EventPoller
 
 	ListIPs(ctx context.Context, dedicated, enabled bool) ([]IPAddress, error)
-	// Deprecated: use ListIPs instead
+	// Deprecated: use ListIPs instead.
 	ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error)
 	GetIP(ctx context.Context, ip string) (IPAddress, error)
 	ListDomainIPs(ctx context.Context) ([]IPAddress, error)
-
+	// Deprecated: use ListDomainIPs instead.
 	ListDomainIPS(ctx context.Context) ([]IPAddress, error)
 	AddDomainIP(ctx context.Context, ip string) error
 	DeleteDomainIP(ctx context.Context, ip string) error
@@ -262,8 +265,12 @@ type Mailgun interface {
 	DeleteTemplateVersion(ctx context.Context, templateName, tag string) error
 	ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator
 
+	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (mtypes.ValidateEmailResponse, error)
+
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
+	GetSubaccount(ctx context.Context, subaccountID string) (SubaccountResponse, error)
+	// Deprecated: use GetSubaccount instead.
 	SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error)
 	EnableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
 	DisableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
