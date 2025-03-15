@@ -177,20 +177,20 @@ import (
 // Your plan should include email validations.
 // Use your Mailgun API key. You can find the Mailgun API keys in your Account Menu, under "Settings":
 // (https://app.mailgun.com/settings/api_security)
-var apiKey string = "your-api-key"
+var apiKey = "your-api-key"
 
 func main() {
 	// Create an instance of the Validator
-	v := mailgun.NewEmailValidator(apiKey)
+	mg := mailgun.NewMailgun("your-private-key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	email, err := v.ValidateEmail(ctx, "recipient@example.com", false)
+	email, err := mg.ValidateEmail(ctx, "recipient@example.com", false)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Valid: %t\n", email.IsValid)
+	fmt.Printf("Risk: %t\n", email.Risk)
 }
 ```
 
