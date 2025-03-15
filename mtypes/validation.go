@@ -13,13 +13,13 @@ type ValidateEmailResponse struct {
 	// Indicates whether Mailgun thinks the address is an email distribution list.
 	IsRoleAddress bool `json:"is_role_address"`
 
-	// A list of potential reasons why a specific validation may be unsuccessful. (Available in the v4 response)
+	// A list of potential reasons why a specific validation may be unsuccessful.
 	Reason []string `json:"reason"`
 
 	// Result
 	Result string `json:"result"`
 
-	// Risk assessment for the provided email.
+	// Risk assessment for the provided email: low/medium/high/unknown.
 	Risk string `json:"risk"`
 
 	LastSeen int64 `json:"last_seen,omitempty"`

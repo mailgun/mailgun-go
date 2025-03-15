@@ -130,6 +130,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 func main() {
@@ -176,20 +177,20 @@ import (
 // Your plan should include email validations.
 // Use your Mailgun API key. You can find the Mailgun API keys in your Account Menu, under "Settings":
 // (https://app.mailgun.com/settings/api_security)
-var apiKey string = "your-api-key"
+var apiKey = "your-api-key"
 
 func main() {
 	// Create an instance of the Validator
-	v := mailgun.NewEmailValidator(apiKey)
+	mg := mailgun.NewMailgun("your-private-key")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	email, err := v.ValidateEmail(ctx, "recipient@example.com", false)
+	email, err := mg.ValidateEmail(ctx, "recipient@example.com", false)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Valid: %t\n", email.IsValid)
+	fmt.Printf("Risk: %t\n", email.Risk)
 }
 ```
 
@@ -205,6 +206,7 @@ import (
 
 	"github.com/mailgun/mailgun-go/v5"
 	"github.com/mailgun/mailgun-go/v5/events"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 func main() {
@@ -214,7 +216,7 @@ func main() {
 	mg.SetWebhookSigningKey("webhook-signing-key")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var payload mailgun.WebhookPayload
+		var payload mtypes.WebhookPayload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			fmt.Printf("decode JSON error: %s", err)
 			w.WriteHeader(http.StatusNotAcceptable)
@@ -237,7 +239,7 @@ func main() {
 		fmt.Printf("Verified Signature\n")
 
 		// Parse the event provided by the webhook payload
-		e, err := mailgun.ParseEvent(payload.EventData)
+		e, err := events.ParseEvent(payload.EventData)
 		if err != nil {
 			fmt.Printf("parse event error: %s\n", err)
 			return
@@ -307,7 +309,6 @@ func main() {
 
 	// Send the message with a 10-second timeout
 	resp, err := mg.Send(ctx, message)
-
 	if err != nil {
 		log.Fatal(err)
 	}
