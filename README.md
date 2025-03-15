@@ -206,6 +206,7 @@ import (
 
 	"github.com/mailgun/mailgun-go/v5"
 	"github.com/mailgun/mailgun-go/v5/events"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 func main() {
@@ -215,7 +216,7 @@ func main() {
 	mg.SetWebhookSigningKey("webhook-signing-key")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var payload mailgun.WebhookPayload
+		var payload mtypes.WebhookPayload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			fmt.Printf("decode JSON error: %s", err)
 			w.WriteHeader(http.StatusNotAcceptable)
@@ -238,7 +239,7 @@ func main() {
 		fmt.Printf("Verified Signature\n")
 
 		// Parse the event provided by the webhook payload
-		e, err := mailgun.ParseEvent(payload.EventData)
+		e, err := events.ParseEvent(payload.EventData)
 		if err != nil {
 			fmt.Printf("parse event error: %s\n", err)
 			return
@@ -308,7 +309,6 @@ func main() {
 
 	// Send the message with a 10-second timeout
 	resp, err := mg.Send(ctx, message)
-
 	if err != nil {
 		log.Fatal(err)
 	}
