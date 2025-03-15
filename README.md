@@ -130,6 +130,7 @@ import (
 	"time"
 
 	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 func main() {
