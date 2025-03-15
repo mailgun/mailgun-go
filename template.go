@@ -4,37 +4,14 @@ import (
 	"context"
 	"errors"
 	"strconv"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
-
-type TemplateEngine string
-
-// Used by CreateTemplate() and AddTemplateVersion() to specify the template engine
-const (
-	TemplateEngineHandlebars = TemplateEngine("handlebars")
-	TemplateEngineGo         = TemplateEngine("go")
-)
-
-type Template struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	CreatedAt   RFC2822Time     `json:"createdAt"`
-	Version     TemplateVersion `json:"version,omitempty"`
-}
-
-type templateResp struct {
-	Item    Template `json:"template"`
-	Message string   `json:"message"`
-}
-
-type templateListResp struct {
-	Items  []Template `json:"items"`
-	Paging Paging     `json:"paging"`
-}
 
 // Create a new template which can be used to attach template versions to
-func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) CreateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -59,7 +36,7 @@ func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) e
 		payload.addValue("tag", template.Version.Tag)
 	}
 
-	var resp templateResp
+	var resp mtypes.TemplateResp
 	if err := postResponseFromJSON(ctx, r, payload, &resp); err != nil {
 		return err
 	}
@@ -68,28 +45,28 @@ func (mg *MailgunImpl) CreateTemplate(ctx context.Context, template *Template) e
 }
 
 // GetTemplate gets a template given the template name
-func (mg *MailgunImpl) GetTemplate(ctx context.Context, name string) (Template, error) {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+func (mg *Client) GetTemplate(ctx context.Context, domain, name string) (mtypes.Template, error) {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	r.addParameter("active", "yes")
 
-	var resp templateResp
+	var resp mtypes.TemplateResp
 	err := getResponseFromJSON(ctx, r, &resp)
 	if err != nil {
-		return Template{}, err
+		return mtypes.Template{}, err
 	}
 	return resp.Item, nil
 }
 
 // Update the name and description of a template
-func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, template *Template) error {
+func (mg *Client) UpdateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
 	if template.Name == "" {
 		return errors.New("UpdateTemplate() Template.Name cannot be empty")
 	}
 
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + template.Name)
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + template.Name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 
@@ -100,7 +77,7 @@ func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, template *Template) e
 		p.addValue("description", template.Description)
 	}
 
-	var resp templateResp
+	var resp mtypes.TemplateResp
 	err := putResponseFromJSON(ctx, r, p, &resp)
 	if err != nil {
 		return err
@@ -110,16 +87,16 @@ func (mg *MailgunImpl) UpdateTemplate(ctx context.Context, template *Template) e
 }
 
 // Delete a template given a template name
-func (mg *MailgunImpl) DeleteTemplate(ctx context.Context, name string) error {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+func (mg *Client) DeleteTemplate(ctx context.Context, domain, name string) error {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 type TemplatesIterator struct {
-	templateListResp
+	mtypes.ListTemplateResp
 	mg  Mailgun
 	err error
 }
@@ -130,9 +107,9 @@ type ListTemplateOptions struct {
 }
 
 // List all available templates
-func (mg *MailgunImpl) ListTemplates(opts *ListTemplateOptions) *TemplatesIterator {
-	r := newHTTPRequest(generateApiUrl(mg, templatesEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
@@ -145,7 +122,7 @@ func (mg *MailgunImpl) ListTemplates(opts *ListTemplateOptions) *TemplatesIterat
 	url, err := r.generateUrlWithParameters()
 	return &TemplatesIterator{
 		mg:               mg,
-		templateListResp: templateListResp{Paging: Paging{Next: url, First: url}},
+		ListTemplateResp: mtypes.ListTemplateResp{Paging: mtypes.Paging{Next: url, First: url}},
 		err:              err,
 	}
 }
@@ -158,7 +135,7 @@ func (ti *TemplatesIterator) Err() error {
 // Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ti *TemplatesIterator) Next(ctx context.Context, items *[]Template) bool {
+func (ti *TemplatesIterator) Next(ctx context.Context, items *[]mtypes.Template) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -166,7 +143,7 @@ func (ti *TemplatesIterator) Next(ctx context.Context, items *[]Template) bool {
 	if ti.err != nil {
 		return false
 	}
-	cpy := make([]Template, len(ti.Items))
+	cpy := make([]mtypes.Template, len(ti.Items))
 	copy(cpy, ti.Items)
 	*items = cpy
 
@@ -176,7 +153,7 @@ func (ti *TemplatesIterator) Next(ctx context.Context, items *[]Template) bool {
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ti *TemplatesIterator) First(ctx context.Context, items *[]Template) bool {
+func (ti *TemplatesIterator) First(ctx context.Context, items *[]mtypes.Template) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -184,7 +161,7 @@ func (ti *TemplatesIterator) First(ctx context.Context, items *[]Template) bool 
 	if ti.err != nil {
 		return false
 	}
-	cpy := make([]Template, len(ti.Items))
+	cpy := make([]mtypes.Template, len(ti.Items))
 	copy(cpy, ti.Items)
 	*items = cpy
 	return true
@@ -194,7 +171,7 @@ func (ti *TemplatesIterator) First(ctx context.Context, items *[]Template) bool 
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ti *TemplatesIterator) Last(ctx context.Context, items *[]Template) bool {
+func (ti *TemplatesIterator) Last(ctx context.Context, items *[]mtypes.Template) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -202,7 +179,7 @@ func (ti *TemplatesIterator) Last(ctx context.Context, items *[]Template) bool {
 	if ti.err != nil {
 		return false
 	}
-	cpy := make([]Template, len(ti.Items))
+	cpy := make([]mtypes.Template, len(ti.Items))
 	copy(cpy, ti.Items)
 	*items = cpy
 	return true
@@ -211,7 +188,7 @@ func (ti *TemplatesIterator) Last(ctx context.Context, items *[]Template) bool {
 // Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ti *TemplatesIterator) Previous(ctx context.Context, items *[]Template) bool {
+func (ti *TemplatesIterator) Previous(ctx context.Context, items *[]mtypes.Template) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -222,7 +199,7 @@ func (ti *TemplatesIterator) Previous(ctx context.Context, items *[]Template) bo
 	if ti.err != nil {
 		return false
 	}
-	cpy := make([]Template, len(ti.Items))
+	cpy := make([]mtypes.Template, len(ti.Items))
 	copy(cpy, ti.Items)
 	*items = cpy
 
@@ -232,8 +209,8 @@ func (ti *TemplatesIterator) Previous(ctx context.Context, items *[]Template) bo
 func (ti *TemplatesIterator) fetch(ctx context.Context, url string) error {
 	ti.Items = nil
 	r := newHTTPRequest(url)
-	r.setClient(ti.mg.Client())
+	r.setClient(ti.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ti.mg.APIKey())
 
-	return getResponseFromJSON(ctx, r, &ti.templateListResp)
+	return getResponseFromJSON(ctx, r, &ti.ListTemplateResp)
 }

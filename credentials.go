@@ -2,28 +2,17 @@ package mailgun
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"strconv"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
-// A Credential structure describes a principle allowed to send or receive mail at the domain.
-type Credential struct {
-	CreatedAt RFC2822Time `json:"created_at"`
-	Login     string      `json:"login"`
-	Password  string      `json:"password"`
-}
-
-type credentialsListResponse struct {
-	// is -1 if Next() or First() have not been called
-	TotalCount int          `json:"total_count"`
-	Items      []Credential `json:"items"`
-}
-
-// Returned when a required parameter is missing.
-var ErrEmptyParam = fmt.Errorf("empty or illegal parameter")
+// ErrEmptyParam is returned when a required parameter is missing.
+var ErrEmptyParam = errors.New("empty or illegal parameter")
 
 // ListCredentials returns the (possibly zero-length) list of credentials associated with your domain.
-func (mg *MailgunImpl) ListCredentials(opts *ListOptions) *CredentialsIterator {
+func (mg *Client) ListCredentials(domain string, opts *ListOptions) *CredentialsIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
@@ -34,14 +23,14 @@ func (mg *MailgunImpl) ListCredentials(opts *ListOptions) *CredentialsIterator {
 	}
 	return &CredentialsIterator{
 		mg:                      mg,
-		url:                     generateCredentialsUrl(mg, ""),
-		credentialsListResponse: credentialsListResponse{TotalCount: -1},
+		url:                     generateCredentialsUrl(mg, domain, ""),
+		CredentialsListResponse: mtypes.CredentialsListResponse{TotalCount: -1},
 		limit:                   limit,
 	}
 }
 
 type CredentialsIterator struct {
-	credentialsListResponse
+	mtypes.CredentialsListResponse
 
 	limit  int
 	mg     Mailgun
@@ -63,7 +52,7 @@ func (ri *CredentialsIterator) Offset() int {
 // Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) Next(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -73,7 +62,7 @@ func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bo
 		return false
 	}
 
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	if len(ri.Items) == 0 {
@@ -86,7 +75,7 @@ func (ri *CredentialsIterator) Next(ctx context.Context, items *[]Credential) bo
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) First(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -94,7 +83,7 @@ func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) b
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	ri.offset = len(ri.Items)
@@ -105,7 +94,7 @@ func (ri *CredentialsIterator) First(ctx context.Context, items *[]Credential) b
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) Last(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -123,7 +112,7 @@ func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bo
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	return true
@@ -132,7 +121,7 @@ func (ri *CredentialsIterator) Last(ctx context.Context, items *[]Credential) bo
 // Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential) bool {
+func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]mtypes.Credential) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -150,7 +139,7 @@ func (ri *CredentialsIterator) Previous(ctx context.Context, items *[]Credential
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Credential, len(ri.Items))
+	cpy := make([]mtypes.Credential, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 
@@ -161,7 +150,7 @@ func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error
 	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
-	r.setClient(ri.mg.Client())
+	r.setClient(ri.mg.HTTPClient())
 
 	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
@@ -170,16 +159,16 @@ func (ri *CredentialsIterator) fetch(ctx context.Context, skip, limit int) error
 		r.addParameter("limit", strconv.Itoa(limit))
 	}
 
-	return getResponseFromJSON(ctx, r, &ri.credentialsListResponse)
+	return getResponseFromJSON(ctx, r, &ri.CredentialsListResponse)
 }
 
 // CreateCredential attempts to create associate a new principle with your domain.
-func (mg *MailgunImpl) CreateCredential(ctx context.Context, login, password string) error {
+func (mg *Client) CreateCredential(ctx context.Context, domain, login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, ""))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateCredentialsUrl(mg, domain, ""))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("login", login)
@@ -189,12 +178,12 @@ func (mg *MailgunImpl) CreateCredential(ctx context.Context, login, password str
 }
 
 // ChangeCredentialPassword attempts to alter the indicated credential's password.
-func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, login, password string) error {
+func (mg *Client) ChangeCredentialPassword(ctx context.Context, domain, login, password string) error {
 	if (login == "") || (password == "") {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, login))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateCredentialsUrl(mg, domain, login))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("password", password)
@@ -203,12 +192,12 @@ func (mg *MailgunImpl) ChangeCredentialPassword(ctx context.Context, login, pass
 }
 
 // DeleteCredential attempts to remove the indicated principle from the domain.
-func (mg *MailgunImpl) DeleteCredential(ctx context.Context, login string) error {
+func (mg *Client) DeleteCredential(ctx context.Context, domain, login string) error {
 	if login == "" {
 		return ErrEmptyParam
 	}
-	r := newHTTPRequest(generateCredentialsUrl(mg, login))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateCredentialsUrl(mg, domain, login))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err

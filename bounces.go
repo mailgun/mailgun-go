@@ -3,40 +3,17 @@ package mailgun
 import (
 	"context"
 	"strconv"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
-
-// Bounce aggregates data relating to undeliverable messages to a specific intended recipient,
-// identified by Address.
-type Bounce struct {
-	// The time at which Mailgun detected the bounce.
-	CreatedAt RFC2822Time `json:"created_at"`
-	// Code provides the SMTP error code that caused the bounce
-	Code string `json:"code"`
-	// Address the bounce is for
-	Address string `json:"address"`
-	// human readable reason why
-	Error string `json:"error"`
-}
-
-type Paging struct {
-	First    string `json:"first,omitempty"`
-	Next     string `json:"next,omitempty"`
-	Previous string `json:"previous,omitempty"`
-	Last     string `json:"last,omitempty"`
-}
-
-type bouncesListResponse struct {
-	Items  []Bounce `json:"items"`
-	Paging Paging   `json:"paging"`
-}
 
 // ListBounces returns a complete set of bounces logged against the sender's domain, if any.
 // The results include the total number of bounces (regardless of skip or limit settings),
 // and the slice of bounces specified, if successful.
 // Note that the length of the slice may be smaller than the total number of bounces.
-func (mg *MailgunImpl) ListBounces(opts *ListOptions) *BouncesIterator {
-	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) ListBounces(domain string, opts *ListOptions) *BouncesIterator {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
 		if opts.Limit != 0 {
@@ -46,18 +23,18 @@ func (mg *MailgunImpl) ListBounces(opts *ListOptions) *BouncesIterator {
 	url, err := r.generateUrlWithParameters()
 	return &BouncesIterator{
 		mg:                  mg,
-		bouncesListResponse: bouncesListResponse{Paging: Paging{Next: url, First: url}},
+		BouncesListResponse: mtypes.BouncesListResponse{Paging: mtypes.Paging{Next: url, First: url}},
 		err:                 err,
 	}
 }
 
 type BouncesIterator struct {
-	bouncesListResponse
+	mtypes.BouncesListResponse
 	mg  Mailgun
 	err error
 }
 
-// If an error occurred during iteration `Err()` will return non nil
+// Err if an error occurred during iteration `Err()` will return non nil
 func (ci *BouncesIterator) Err() error {
 	return ci.err
 }
@@ -65,7 +42,7 @@ func (ci *BouncesIterator) Err() error {
 // Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) Next(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -73,7 +50,7 @@ func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 
@@ -83,7 +60,7 @@ func (ci *BouncesIterator) Next(ctx context.Context, items *[]Bounce) bool {
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) First(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -91,7 +68,7 @@ func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 	return true
@@ -101,7 +78,7 @@ func (ci *BouncesIterator) First(ctx context.Context, items *[]Bounce) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) Last(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -109,7 +86,7 @@ func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 	return true
@@ -118,7 +95,7 @@ func (ci *BouncesIterator) Last(ctx context.Context, items *[]Bounce) bool {
 // Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
+func (ci *BouncesIterator) Previous(ctx context.Context, items *[]mtypes.Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
@@ -129,7 +106,7 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
 	if ci.err != nil {
 		return false
 	}
-	cpy := make([]Bounce, len(ci.Items))
+	cpy := make([]mtypes.Bounce, len(ci.Items))
 	copy(cpy, ci.Items)
 	*items = cpy
 
@@ -139,19 +116,19 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]Bounce) bool {
 func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
 	ci.Items = nil
 	r := newHTTPRequest(url)
-	r.setClient(ci.mg.Client())
+	r.setClient(ci.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
 
-	return getResponseFromJSON(ctx, r, &ci.bouncesListResponse)
+	return getResponseFromJSON(ctx, r, &ci.BouncesListResponse)
 }
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
-func (mg *MailgunImpl) GetBounce(ctx context.Context, address string) (Bounce, error) {
-	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)
-	r.setClient(mg.Client())
+func (mg *Client) GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error) {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var response Bounce
+	var response mtypes.Bounce
 	err := getResponseFromJSON(ctx, r, &response)
 	return response, err
 }
@@ -172,9 +149,9 @@ func (mg *MailgunImpl) GetBounce(ctx context.Context, address string) (Bounce, e
 //
 // Note that both code and error exist as strings, even though
 // code will report as a number.
-func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, bounceError string) error {
-	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) AddBounce(ctx context.Context, domain, address, code, bounceError string) error {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
@@ -190,9 +167,9 @@ func (mg *MailgunImpl) AddBounce(ctx context.Context, address, code, bounceError
 }
 
 // Add Bounces adds a list of bounces to the bounce list
-func (mg *MailgunImpl) AddBounces(ctx context.Context, bounces []Bounce) error {
-	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) AddBounces(ctx context.Context, domain string, bounces []mtypes.Bounce) error {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newJSONEncodedPayload(bounces)
@@ -202,18 +179,18 @@ func (mg *MailgunImpl) AddBounces(ctx context.Context, bounces []Bounce) error {
 }
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
-func (mg *MailgunImpl) DeleteBounce(ctx context.Context, address string) error {
-	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint) + "/" + address)
-	r.setClient(mg.Client())
+func (mg *Client) DeleteBounce(ctx context.Context, domain, address string) error {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // DeleteBounceList removes all bounces in the bounce list
-func (mg *MailgunImpl) DeleteBounceList(ctx context.Context) error {
-	r := newHTTPRequest(generateApiUrl(mg, bouncesEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) DeleteBounceList(ctx context.Context, domain string) error {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err

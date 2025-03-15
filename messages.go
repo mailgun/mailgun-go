@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // MaxNumberOfRecipients represents the largest batch of recipients that Mailgun can support in a single API call.
@@ -19,21 +21,19 @@ const MaxNumberOfRecipients = 1000
 // MaxNumberOfTags represents the maximum number of tags that can be added for a message
 const MaxNumberOfTags = 3
 
-// Message structures contain both the message text and the envelope for an e-mail message.
-// TODO(v5): rename to CommonMessage and remove Specific
-type Message struct {
-	to                []string
-	tags              []string
-	campaigns         []string
-	dkim              *bool
-	deliveryTime      time.Time
-	stoPeriod         string
-	attachments       []string
-	readerAttachments []ReaderAttachment
-	inlines           []string
-	readerInlines     []ReaderAttachment
-	bufferAttachments []BufferAttachment
-
+// CommonMessage structures contain both the message text and the envelope for an e-mail message.
+type CommonMessage struct {
+	domain             string
+	to                 []string
+	tags               []string
+	dkim               *bool
+	deliveryTime       time.Time
+	stoPeriod          string
+	attachments        []string
+	readerAttachments  []ReaderAttachment
+	inlines            []string
+	readerInlines      []ReaderAttachment
+	bufferAttachments  []BufferAttachment
 	nativeSend         bool
 	testMode           bool
 	tracking           *bool
@@ -43,14 +43,10 @@ type Message struct {
 	variables          map[string]string
 	templateVariables  map[string]any
 	recipientVariables map[string]map[string]any
-	domain             string
 	templateVersionTag string
 	templateRenderText bool
-
-	requireTLS       bool
-	skipVerification bool
-
-	Specific
+	requireTLS         bool
+	skipVerification   bool
 }
 
 type ReaderAttachment struct {
@@ -67,8 +63,9 @@ type BufferAttachment struct {
 // You're expected to use various setters to set most of these attributes,
 // although from, subject, and text are set when the message is created with
 // NewMessage.
-// TODO(v5): embed CommonMessage
 type PlainMessage struct {
+	CommonMessage
+
 	from     string
 	cc       []string
 	bcc      []string
@@ -112,24 +109,20 @@ func (m *PlainMessage) Template() string {
 }
 
 // MimeMessage contains fields relevant to pre-packaged MIME messages.
-// TODO(v5): embed CommonMessage
 type MimeMessage struct {
+	CommonMessage
+
 	body io.ReadCloser
 }
 
-type sendMessageResponse struct {
-	Message string `json:"message"`
-	Id      string `json:"id"`
-}
-
-// TrackingOptions contains fields relevant to trackings.
+// TrackingOptions contains fields relevant to tracking.
 type TrackingOptions struct {
 	Tracking       bool
 	TrackingClicks string
 	TrackingOpens  bool
 }
 
-// Specific abstracts the common characteristics between regular and MIME messages.
+// The Specific abstracts the common characteristics between plain text and MIME messages.
 type Specific interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
 	AddCC(string)
@@ -142,7 +135,7 @@ type Specific interface {
 	SetHTML(string)
 
 	// SetAmpHTML If you're sending a message that isn't already MIME encoded, it will arrange to bundle
-	// an AMP-For-Email representation of your message in addition to your html & plain-text content.
+	// an AMP-For-Email representation of your message in addition to your HTML & plain-text content.
 	SetAmpHTML(string)
 
 	// AddValues invoked by Send() to add message-type-specific MIME headers for the API call
@@ -172,11 +165,6 @@ type Specific interface {
 	// SetTemplate sets the name of a template stored via the template API.
 	// See https://documentation.mailgun.com/docs/mailgun/user-manual/sending-messages/#templates
 	SetTemplate(string)
-
-	// // TODO(v5):
-	// // AddRecipient appends a receiver to the To: header of a message.
-	// // It will return an error if the limit of recipients have been exceeded for this message
-	// AddRecipient(recipient string) error
 }
 
 // NewMessage returns a new e-mail message with the simplest envelop needed to send.
@@ -188,27 +176,21 @@ type Specific interface {
 // You can do this explicitly, or implicitly, as follows:
 //
 //	// Note absence of `to` parameter(s)!
-//	m := NewMessage("me@example.com", "Help save our planet", "Hello world!")
+//	m := NewMessage("example.com", "me@example.com", "Help save our planet", "Hello world!")
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-// TODO(v5): should return PlainMessage
-func NewMessage(from, subject, text string, to ...string) *Message {
-	return &Message{
-		Specific: &PlainMessage{
-			from:    from,
-			subject: subject,
-			text:    text,
+func NewMessage(domain, from, subject, text string, to ...string) *PlainMessage {
+	return &PlainMessage{
+		CommonMessage: CommonMessage{
+			domain: domain,
+			to:     to,
 		},
-		to: to,
-	}
-}
 
-// Deprecated: use func NewMessage instead of method.
-//
-// TODO(v5): remove this method
-func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Message {
-	return NewMessage(from, subject, text, to...)
+		from:    from,
+		subject: subject,
+		text:    text,
+	}
 }
 
 // NewMIMEMessage creates a new MIME message. These messages are largely canned;
@@ -222,129 +204,118 @@ func (*MailgunImpl) NewMessage(from, subject, text string, to ...string) *Messag
 // You can do this explicitly, or implicitly, as follows:
 //
 //	// Note absence of `to` parameter(s)!
-//	m := NewMIMEMessage(body)
+//	m := NewMIMEMessage(domain, body)
 //
 // Note that you'll need to invoke the AddRecipientAndVariables or AddRecipient method
 // before sending, though.
-// TODO(v5): should return MimeMessage
-func NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
-	return &Message{
-		Specific: &MimeMessage{
-			body: body,
+func NewMIMEMessage(domain string, body io.ReadCloser, to ...string) *MimeMessage {
+	return &MimeMessage{
+		CommonMessage: CommonMessage{
+			domain: domain,
+			to:     to,
 		},
-		to: to,
+		body: body,
 	}
 }
 
-// Deprecated: use func NewMIMEMessage instead of method.
-//
-// TODO(v5): remove this method
-func (*MailgunImpl) NewMIMEMessage(body io.ReadCloser, to ...string) *Message {
-	return NewMIMEMessage(body, to...)
-}
-
-func (m *Message) Domain() string {
+func (m *CommonMessage) Domain() string {
 	return m.domain
 }
 
-func (m *Message) To() []string {
+func (m *CommonMessage) To() []string {
 	return m.to
 }
 
-func (m *Message) Tags() []string {
+func (m *CommonMessage) Tags() []string {
 	return m.tags
 }
 
-func (m *Message) Campaigns() []string {
-	return m.campaigns
-}
-
-func (m *Message) DKIM() *bool {
+func (m *CommonMessage) DKIM() *bool {
 	return m.dkim
 }
 
-func (m *Message) DeliveryTime() time.Time {
+func (m *CommonMessage) DeliveryTime() time.Time {
 	return m.deliveryTime
 }
 
-func (m *Message) STOPeriod() string {
+func (m *CommonMessage) STOPeriod() string {
 	return m.stoPeriod
 }
 
-func (m *Message) Attachments() []string {
+func (m *CommonMessage) Attachments() []string {
 	return m.attachments
 }
 
-func (m *Message) ReaderAttachments() []ReaderAttachment {
+func (m *CommonMessage) ReaderAttachments() []ReaderAttachment {
 	return m.readerAttachments
 }
 
-func (m *Message) Inlines() []string {
+func (m *CommonMessage) Inlines() []string {
 	return m.inlines
 }
 
-func (m *Message) ReaderInlines() []ReaderAttachment {
+func (m *CommonMessage) ReaderInlines() []ReaderAttachment {
 	return m.readerInlines
 }
 
-func (m *Message) BufferAttachments() []BufferAttachment {
+func (m *CommonMessage) BufferAttachments() []BufferAttachment {
 	return m.bufferAttachments
 }
 
-func (m *Message) NativeSend() bool {
+func (m *CommonMessage) NativeSend() bool {
 	return m.nativeSend
 }
 
-func (m *Message) TestMode() bool {
+func (m *CommonMessage) TestMode() bool {
 	return m.testMode
 }
 
-func (m *Message) Tracking() *bool {
+func (m *CommonMessage) Tracking() *bool {
 	return m.tracking
 }
 
-func (m *Message) TrackingClicks() *string {
+func (m *CommonMessage) TrackingClicks() *string {
 	return m.trackingClicks
 }
 
-func (m *Message) TrackingOpens() *bool {
+func (m *CommonMessage) TrackingOpens() *bool {
 	return m.trackingOpens
 }
 
-func (m *Message) Variables() map[string]string {
+func (m *CommonMessage) Variables() map[string]string {
 	return m.variables
 }
 
-func (m *Message) TemplateVariables() map[string]any {
+func (m *CommonMessage) TemplateVariables() map[string]any {
 	return m.templateVariables
 }
 
-func (m *Message) RecipientVariables() map[string]map[string]any {
+func (m *CommonMessage) RecipientVariables() map[string]map[string]any {
 	return m.recipientVariables
 }
 
-func (m *Message) TemplateVersionTag() string {
+func (m *CommonMessage) TemplateVersionTag() string {
 	return m.templateVersionTag
 }
 
-func (m *Message) TemplateRenderText() bool {
+func (m *CommonMessage) TemplateRenderText() bool {
 	return m.templateRenderText
 }
 
-func (m *Message) RequireTLS() bool {
+func (m *CommonMessage) RequireTLS() bool {
 	return m.requireTLS
 }
 
-func (m *Message) SkipVerification() bool {
+func (m *CommonMessage) SkipVerification() bool {
 	return m.skipVerification
 }
 
 // AddReaderAttachment arranges to send a file along with the e-mail message.
-// File contents are read from a io.ReadCloser.
+// File contents are read from an io.ReadCloser.
 // The filename parameter is the resulting filename of the attachment.
-// The readCloser parameter is the io.ReadCloser which reads the actual bytes to be used
+// The readCloser parameter is the io.ReadCloser that reads the actual bytes to be used
 // as the contents of the attached file.
-func (m *Message) AddReaderAttachment(filename string, readCloser io.ReadCloser) {
+func (m *CommonMessage) AddReaderAttachment(filename string, readCloser io.ReadCloser) {
 	ra := ReaderAttachment{Filename: filename, ReadCloser: readCloser}
 	m.readerAttachments = append(m.readerAttachments, ra)
 }
@@ -354,7 +325,7 @@ func (m *Message) AddReaderAttachment(filename string, readCloser io.ReadCloser)
 // The filename parameter is the resulting filename of the attachment.
 // The buffer parameter is the []byte array which contains the actual bytes to be used
 // as the contents of the attached file.
-func (m *Message) AddBufferAttachment(filename string, buffer []byte) {
+func (m *CommonMessage) AddBufferAttachment(filename string, buffer []byte) {
 	ba := BufferAttachment{Filename: filename, Buffer: buffer}
 	m.bufferAttachments = append(m.bufferAttachments, ba)
 }
@@ -362,16 +333,16 @@ func (m *Message) AddBufferAttachment(filename string, buffer []byte) {
 // AddAttachment arranges to send a file from the filesystem along with the e-mail message.
 // The attachment parameter is a filename, which must refer to a file which actually resides
 // in the local filesystem.
-func (m *Message) AddAttachment(attachment string) {
+func (m *CommonMessage) AddAttachment(attachment string) {
 	m.attachments = append(m.attachments, attachment)
 }
 
 // AddReaderInline arranges to send a file along with the e-mail message.
-// File contents are read from a io.ReadCloser.
+// File contents are read from an io.ReadCloser.
 // The filename parameter is the resulting filename of the attachment.
-// The readCloser parameter is the io.ReadCloser which reads the actual bytes to be used
+// The readCloser parameter is the io.ReadCloser that reads the actual bytes to be used
 // as the contents of the attached file.
-func (m *Message) AddReaderInline(filename string, readCloser io.ReadCloser) {
+func (m *CommonMessage) AddReaderInline(filename string, readCloser io.ReadCloser) {
 	ra := ReaderAttachment{Filename: filename, ReadCloser: readCloser}
 	m.readerInlines = append(m.readerInlines, ra)
 }
@@ -381,20 +352,20 @@ func (m *Message) AddReaderInline(filename string, readCloser io.ReadCloser) {
 // can be used to send image or font data along with an HTML-encoded message body.
 // The attachment parameter is a filename, which must refer to a file which actually resides
 // in the local filesystem.
-func (m *Message) AddInline(inline string) {
+func (m *CommonMessage) AddInline(inline string) {
 	m.inlines = append(m.inlines, inline)
 }
 
 // AddRecipient appends a receiver to the To: header of a message.
-// It will return an error if the limit of recipients have been exceeded for this message
-func (m *Message) AddRecipient(recipient string) error {
+// It will return an error if the limit of recipients has been exceeded for this message
+func (m *PlainMessage) AddRecipient(recipient string) error {
 	return m.AddRecipientAndVariables(recipient, nil)
 }
 
 // AddRecipientAndVariables appends a receiver to the To: header of a message,
 // and as well attaches a set of variables relevant for this recipient.
-// It will return an error if the limit of recipients have been exceeded for this message
-func (m *Message) AddRecipientAndVariables(r string, vars map[string]any) error {
+// It will return an error if the limit of recipients has been exceeded for this message
+func (m *PlainMessage) AddRecipientAndVariables(r string, vars map[string]any) error {
 	if m.RecipientCount() >= MaxNumberOfRecipients {
 		return fmt.Errorf("recipient limit exceeded (max %d)", MaxNumberOfRecipients)
 	}
@@ -408,32 +379,25 @@ func (m *Message) AddRecipientAndVariables(r string, vars map[string]any) error 
 	return nil
 }
 
-// RecipientCount returns the total number of recipients for the message.
-// This includes To:, Cc:, and Bcc: fields.
-//
-// NOTE: At present, this method is reliable only for non-MIME messages, as the
-// Bcc: and Cc: fields are easily accessible.
-// For MIME messages, only the To: field is considered.
-// A fix for this issue is planned for a future release.
-// For now, MIME messages are always assumed to have 10 recipients between Cc: and Bcc: fields.
-// If your MIME messages have more than 10 non-To: field recipients,
-// you may find that some recipients will not receive your e-mail.
-// It's perfectly OK, of course, for a MIME message to not have any Cc: or Bcc: recipients.
-func (m *Message) RecipientCount() int {
-	return len(m.To()) + m.Specific.RecipientCount()
+func (m *MimeMessage) AddRecipient(recipient string) error {
+	if m.RecipientCount() >= MaxNumberOfRecipients {
+		return fmt.Errorf("recipient limit exceeded (max %d)", MaxNumberOfRecipients)
+	}
+	m.to = append(m.to, recipient)
+
+	return nil
 }
 
 func (m *PlainMessage) RecipientCount() int {
-	return len(m.BCC()) + len(m.CC())
+	return len(m.To()) + len(m.BCC()) + len(m.CC())
 }
 
-func (*MimeMessage) RecipientCount() int {
-	// TODO(v5): 10 + len(m.To())
-	return 10
+func (m *MimeMessage) RecipientCount() int {
+	return 10 + len(m.To())
 }
 
 // SetReplyTo sets the receiver who should receive replies
-func (m *Message) SetReplyTo(recipient string) {
+func (m *CommonMessage) SetReplyTo(recipient string) {
 	m.AddHeader("Reply-To", recipient)
 }
 
@@ -449,24 +413,11 @@ func (m *PlainMessage) AddBCC(r string) {
 
 func (*MimeMessage) AddBCC(_ string) {}
 
-// Deprecated: use SetHTML instead.
-//
-// TODO(v5): remove this method
-func (m *Message) SetHtml(html string) {
-	m.SetHTML(html)
-}
-
 func (m *PlainMessage) SetHTML(h string) {
 	m.html = h
 }
 
 func (*MimeMessage) SetHTML(_ string) {}
-
-// Deprecated: use SetAmpHTML instead.
-// TODO(v5): remove this method
-func (m *Message) SetAMPHtml(html string) {
-	m.SetAmpHTML(html)
-}
 
 func (m *PlainMessage) SetAmpHTML(h string) {
 	m.ampHtml = h
@@ -476,7 +427,7 @@ func (*MimeMessage) SetAmpHTML(_ string) {}
 
 // AddTag attaches tags to the message.  Tags are useful for metrics gathering and event tracking purposes.
 // Refer to the Mailgun documentation for further details.
-func (m *Message) AddTag(tag ...string) error {
+func (m *CommonMessage) AddTag(tag ...string) error {
 	if len(m.Tags()) >= MaxNumberOfTags {
 		return fmt.Errorf("cannot add any new tags. Message tag limit (%d) reached", MaxNumberOfTags)
 	}
@@ -491,34 +442,28 @@ func (m *PlainMessage) SetTemplate(t string) {
 
 func (*MimeMessage) SetTemplate(_ string) {}
 
-// Deprecated: is no longer supported and is deprecated for new software.
-// TODO(v5): remove this method.
-func (m *Message) AddCampaign(campaign string) {
-	m.campaigns = append(m.Campaigns(), campaign)
-}
-
 // SetDKIM arranges to send the o:dkim header with the message, and sets its value accordingly.
 // Refer to the Mailgun documentation for more information.
-func (m *Message) SetDKIM(dkim bool) {
+func (m *CommonMessage) SetDKIM(dkim bool) {
 	m.dkim = &dkim
 }
 
-// EnableNativeSend allows the return path to match the address in the Message.Headers.From:
+// EnableNativeSend allows the return path to match the address in the CommonMessage.Headers.From:
 // field when sending from Mailgun rather than the usual bounce+ address in the return path.
-func (m *Message) EnableNativeSend() {
+func (m *CommonMessage) EnableNativeSend() {
 	m.nativeSend = true
 }
 
 // EnableTestMode allows submittal of a message, such that it will be discarded by Mailgun.
 // This facilitates testing client-side software without actually consuming e-mail resources.
-func (m *Message) EnableTestMode() {
+func (m *CommonMessage) EnableTestMode() {
 	m.testMode = true
 }
 
 // SetDeliveryTime schedules the message for transmission at the indicated time.
 // Pass nil to remove any installed schedule.
 // Refer to the Mailgun documentation for more information.
-func (m *Message) SetDeliveryTime(dt time.Time) {
+func (m *CommonMessage) SetDeliveryTime(dt time.Time) {
 	m.deliveryTime = dt
 }
 
@@ -526,7 +471,7 @@ func (m *Message) SetDeliveryTime(dt time.Time) {
 // String should be set to the number of hours in [0-9]+h format,
 // with the minimum being 24h and the maximum being 72h.
 // Refer to the Mailgun documentation for more information.
-func (m *Message) SetSTOPeriod(stoPeriod string) error {
+func (m *CommonMessage) SetSTOPeriod(stoPeriod string) error {
 	validPattern := `^([2-6][4-9]|[3-6][0-9]|7[0-2])h$`
 	// TODO(vtopc): regexp.Compile, which is called by regexp.MatchString, is a heave operation, move into global variable
 	// or just parse using time.ParseDuration().
@@ -550,17 +495,17 @@ func (m *Message) SetSTOPeriod(stoPeriod string) error {
 // Its yes/no setting is determined by the call's parameter.
 // Note that this header is not passed on to the final recipient(s).
 // Refer to the Mailgun documentation for more information.
-func (m *Message) SetTracking(tracking bool) {
+func (m *CommonMessage) SetTracking(tracking bool) {
 	m.tracking = &tracking
 }
 
 // SetTrackingClicks information is found in the Mailgun documentation.
-func (m *Message) SetTrackingClicks(trackingClicks bool) {
+func (m *CommonMessage) SetTrackingClicks(trackingClicks bool) {
 	m.trackingClicks = ptr(yesNo(trackingClicks))
 }
 
 // SetTrackingOptions sets the o:tracking, o:tracking-clicks and o:tracking-opens at once.
-func (m *Message) SetTrackingOptions(options *TrackingOptions) {
+func (m *CommonMessage) SetTrackingOptions(options *TrackingOptions) {
 	m.tracking = &options.Tracking
 
 	m.trackingClicks = &options.TrackingClicks
@@ -569,32 +514,32 @@ func (m *Message) SetTrackingOptions(options *TrackingOptions) {
 }
 
 // SetRequireTLS information is found in the Mailgun documentation.
-func (m *Message) SetRequireTLS(b bool) {
+func (m *CommonMessage) SetRequireTLS(b bool) {
 	m.requireTLS = b
 }
 
 // SetSkipVerification information is found in the Mailgun documentation.
-func (m *Message) SetSkipVerification(b bool) {
+func (m *CommonMessage) SetSkipVerification(b bool) {
 	m.skipVerification = b
 }
 
 // SetTrackingOpens information is found in the Mailgun documentation.
-func (m *Message) SetTrackingOpens(trackingOpens bool) {
+func (m *CommonMessage) SetTrackingOpens(trackingOpens bool) {
 	m.trackingOpens = &trackingOpens
 }
 
 // SetTemplateVersion information is found in the Mailgun documentation.
-func (m *Message) SetTemplateVersion(tag string) {
+func (m *CommonMessage) SetTemplateVersion(tag string) {
 	m.templateVersionTag = tag
 }
 
 // SetTemplateRenderText information is found in the Mailgun documentation.
-func (m *Message) SetTemplateRenderText(render bool) {
+func (m *CommonMessage) SetTemplateRenderText(render bool) {
 	m.templateRenderText = render
 }
 
 // AddHeader allows you to send custom MIME headers with the message.
-func (m *Message) AddHeader(header, value string) {
+func (m *CommonMessage) AddHeader(header, value string) {
 	if m.headers == nil {
 		m.headers = make(map[string]string)
 	}
@@ -604,7 +549,7 @@ func (m *Message) AddHeader(header, value string) {
 // AddVariable lets you associate a set of variables with messages you send,
 // which Mailgun can use to, in essence, complete form-mail.
 // Refer to the Mailgun documentation for more information.
-func (m *Message) AddVariable(variable string, value any) error {
+func (m *CommonMessage) AddVariable(variable string, value any) error {
 	if m.variables == nil {
 		m.variables = make(map[string]string)
 	}
@@ -627,7 +572,7 @@ func (m *Message) AddVariable(variable string, value any) error {
 // AddTemplateVariable adds a template variable to the map of template variables, replacing the variable if it is already there.
 // This is used for server-side message templates and can nest arbitrary values. At send time, the resulting map will be converted into
 // a JSON string and sent as a header in the X-Mailgun-Variables header.
-func (m *Message) AddTemplateVariable(variable string, value any) error {
+func (m *CommonMessage) AddTemplateVariable(variable string, value any) error {
 	if m.templateVariables == nil {
 		m.templateVariables = make(map[string]any)
 	}
@@ -636,31 +581,22 @@ func (m *Message) AddTemplateVariable(variable string, value any) error {
 }
 
 // AddDomain allows you to use a separate domain for the type of messages you are sending.
-func (m *Message) AddDomain(domain string) {
+func (m *CommonMessage) AddDomain(domain string) {
 	m.domain = domain
 }
 
-// Headers retrieves the http headers associated with this message
-func (m *Message) Headers() map[string]string {
+// Headers retrieve the http headers associated with this message
+func (m *CommonMessage) Headers() map[string]string {
 	return m.headers
 }
 
-// Deprecated: use func Headers() instead.
-// TODO(v5): remove this method, it violates https://go.dev/doc/effective_go#Getters
-func (m *Message) GetHeaders() map[string]string {
-	return m.headers
-}
-
-// ErrInvalidMessage is returned by `Send()` when the `mailgun.Message` struct is incomplete
+// ErrInvalidMessage is returned by `Send()` when the `mailgun.CommonMessage` struct is incomplete
 var ErrInvalidMessage = errors.New("message not valid")
 
-type SendableMessage interface {
+type Message interface {
 	Domain() string
 	To() []string
 	Tags() []string
-	// Deprecated: is no longer supported and is deprecated for new software.
-	// TODO(v5): remove this method
-	Campaigns() []string
 	DKIM() *bool
 	DeliveryTime() time.Time
 	STOPeriod() string
@@ -686,12 +622,12 @@ type SendableMessage interface {
 	Specific
 }
 
-// Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
+// Send attempts to queue a message (see PlainMessage, MimeMessage and its methods) for delivery.
 // It returns the Mailgun server response, which consists of two components:
 //   - A human-readable status message, typically "Queued. Thank you."
 //   - A Message ID, which is the id used to track the queued message. The message id is useful
 //     when contacting support to report an issue with a specific message or to relate a
-//     delivered, accepted or failed event back to specific message.
+//     delivered, accepted or failed event back to a specific message.
 //
 // The status and message ID are only returned if no error occurred.
 //
@@ -707,74 +643,58 @@ type SendableMessage interface {
 //	}
 //
 // See the public mailgun documentation for all possible return codes and error messages
-// TODO(v5): switch m to SendableMessage interface - https://bryanftan.medium.com/accept-interfaces-return-structs-in-go-d4cab29a301b
-func (mg *MailgunImpl) Send(ctx context.Context, m *Message) (mes, id string, err error) {
-	if mg.domain == "" {
-		err = errors.New("you must provide a valid domain before calling Send()")
-		return "", "", err
+func (mg *Client) Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error) {
+	var response mtypes.SendMessageResponse
+
+	if m.Domain() == "" {
+		err := errors.New("you must provide a valid domain before calling Send()")
+		return response, err
 	}
 
 	invalidChars := ":&'@(),!?#;%+=<>"
-	if i := strings.ContainsAny(mg.domain, invalidChars); i {
-		err = fmt.Errorf("you called Send() with a domain that contains invalid characters")
-		return "", "", err
+	if i := strings.ContainsAny(m.Domain(), invalidChars); i {
+		err := fmt.Errorf("you called Send() with a domain that contains invalid characters")
+		return response, err
 	}
 
 	if mg.apiKey == "" {
-		err = errors.New("you must provide a valid api-key before calling Send()")
-		return "", "", err
+		err := errors.New("you must provide a valid api-key before calling Send()")
+		return response, err
 	}
 
 	if !isValid(m) {
-		err = ErrInvalidMessage
-		return "", "", err
+		err := ErrInvalidMessage
+		return response, err
 	}
 
 	if m.STOPeriod() != "" && m.RecipientCount() > 1 {
-		err = errors.New("STO can only be used on a per-message basis")
-		return "", "", err
+		err := errors.New("STO can only be used on a per-message basis")
+		return response, err
 	}
 	payload := NewFormDataPayload()
 
-	m.Specific.AddValues(payload)
+	m.AddValues(payload)
 
-	err = addMessageValues(payload, m)
+	// TODO: make (CommonMessage).AddValues()?
+	err := addMessageValues(payload, m)
 	if err != nil {
-		return "", "", err
+		return response, err
 	}
 
-	// TODO(v5): remove due for domain agnostic API:
-	if m.Domain() == "" {
-		m.domain = mg.Domain()
-	}
-
-	r := newHTTPRequest(generateApiUrlWithDomain(mg, m.Endpoint(), m.Domain()))
-	r.setClient(mg.Client())
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, m.Endpoint(), m.Domain()))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	// Override any HTTP headers if provided
 	for k, v := range mg.overrideHeaders {
 		r.addHeader(k, v)
 	}
 
-	var response sendMessageResponse
 	err = postResponseFromJSON(ctx, r, payload, &response)
-	if err == nil {
-		mes = response.Message
-		id = response.Id
-	}
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	if r.capturedCurlOutput != "" {
-		mg.mu.Lock()
-		defer mg.mu.Unlock()
-		mg.capturedCurlOutput = r.capturedCurlOutput
-	}
-
-	return mes, id, err
+	return response, err
 }
 
-func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
+func addMessageValues(dst *FormDataPayload, src Message) error {
 	addMessageOptions(dst, src)
 	addMessageHeaders(dst, src)
 
@@ -788,17 +708,13 @@ func addMessageValues(dst *FormDataPayload, src SendableMessage) error {
 	return nil
 }
 
-func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
+func addMessageOptions(dst *FormDataPayload, src Message) {
 	for _, to := range src.To() {
 		dst.addValue("to", to)
 	}
 
 	for _, tag := range src.Tags() {
 		dst.addValue("o:tag", tag)
-	}
-	for _, campaign := range src.Campaigns() {
-		// TODO(v5): deprecated - https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Messages/
-		dst.addValue("o:campaign", campaign)
 	}
 	if src.DKIM() != nil {
 		dst.addValue("o:dkim", yesNo(*src.DKIM()))
@@ -839,7 +755,7 @@ func addMessageOptions(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func addMessageHeaders(dst *FormDataPayload, src SendableMessage) {
+func addMessageHeaders(dst *FormDataPayload, src Message) {
 	if src.Headers() != nil {
 		for header, value := range src.Headers() {
 			dst.addValue("h:"+header, value)
@@ -847,7 +763,7 @@ func addMessageHeaders(dst *FormDataPayload, src SendableMessage) {
 	}
 }
 
-func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
+func addMessageVariables(dst *FormDataPayload, src Message) error {
 	if src.Variables() != nil {
 		for variable, value := range src.Variables() {
 			dst.addValue("v:"+variable, value)
@@ -856,7 +772,7 @@ func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
 	if src.TemplateVariables() != nil {
 		variableString, err := json.Marshal(src.TemplateVariables())
 		if err == nil {
-			// the map was marshalled as json so add it
+			// the map was marshaled as JSON so add it
 			dst.addValue("h:X-Mailgun-Variables", string(variableString))
 		}
 	}
@@ -871,7 +787,7 @@ func addMessageVariables(dst *FormDataPayload, src SendableMessage) error {
 	return nil
 }
 
-func addMessageAttachment(dst *FormDataPayload, src SendableMessage) {
+func addMessageAttachment(dst *FormDataPayload, src Message) {
 	if src.Attachments() != nil {
 		for _, attachment := range src.Attachments() {
 			dst.addFile("attachment", attachment)
@@ -945,8 +861,8 @@ func trueFalse(b bool) string {
 }
 
 // isValid returns true if, and only if,
-// a Message instance is sufficiently initialized to send via the Mailgun interface.
-func isValid(m SendableMessage) bool {
+// a CommonMessage instance is sufficiently initialized to send via the Mailgun interface.
+func isValid(m Message) bool {
 	if m == nil {
 		return false
 	}
@@ -960,10 +876,6 @@ func isValid(m SendableMessage) bool {
 	}
 
 	if !validateStringList(m.Tags(), false) {
-		return false
-	}
-
-	if !validateStringList(m.Campaigns(), false) || len(m.Campaigns()) > 3 {
 		return false
 	}
 

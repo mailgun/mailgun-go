@@ -4,14 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLimits(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 	limits, err := mg.GetTagLimits(ctx, testDomain)

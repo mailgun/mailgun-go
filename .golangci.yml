@@ -18,11 +18,11 @@ linters:
     - gocyclo
     - noctx
     - gomodguard
+    - unused
     - nolintlint
 
 # TODO:
-#    - stylecheck # TODO(v5): enable
-#    - unused
+#    - stylecheck # TODO(v6): enable
 
 linters-settings:
   gocritic:
@@ -33,10 +33,9 @@ linters-settings:
       - performance
       - style
     disabled-checks:
-      - singleCaseSwitch
-      - hugeParam # TODO(v5): enable?
+      - singleCaseSwitch # redundant
+      - hugeParam # TODO(v6): allocations critical; enable?
       - sprintfQuotedString # noisy # TODO: enable
-      - exitAfterDefer # TODO: enable?
 
   errcheck:
     # List of functions to exclude from checking, where each entry is a single function to exclude.
@@ -75,7 +74,7 @@ linters-settings:
 
   revive:
     rules:
-      # TODO(v5): enable:
+      # TODO(v6): enable:
       #      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#argument-limit
       #      - name: argument-limit
       #        severity: warning
@@ -462,7 +461,8 @@ linters-settings:
         disabled: false
         exclude: [""]
 
-      # TODO(v5): enable:
+      # Rule panics
+      # TODO: enable after the fix
       #      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#var-naming
       #      - name: var-naming
       #        severity: warning

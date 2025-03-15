@@ -7,20 +7,23 @@ import (
 	"time"
 
 	"github.com/mailgun/errors"
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTemplateCRUD(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
 	findTemplate := func(name string) bool {
-		it := mg.ListTemplates(nil)
+		it := mg.ListTemplates(testDomain, nil)
 
-		var page []mailgun.Template
+		var page []mtypes.Template
 		for it.Next(ctx, &page) {
 			for _, template := range page {
 				if template.Name == name {
@@ -38,13 +41,13 @@ func TestTemplateCRUD(t *testing.T) {
 		UpdatedDesc = "Mailgun-Go Test Updated Description"
 	)
 
-	tmpl := mailgun.Template{
+	tmpl := mtypes.Template{
 		Name:        Name,
 		Description: Description,
 	}
 
 	// Create a template
-	require.NoError(t, mg.CreateTemplate(ctx, &tmpl))
+	require.NoError(t, mg.CreateTemplate(ctx, testDomain, &tmpl))
 	assert.Equal(t, strings.ToLower(Name), tmpl.Name)
 	assert.Equal(t, Description, tmpl.Description)
 
@@ -56,23 +59,23 @@ func TestTemplateCRUD(t *testing.T) {
 
 	// Update the description
 	tmpl.Description = UpdatedDesc
-	require.NoError(t, mg.UpdateTemplate(ctx, &tmpl))
+	require.NoError(t, mg.UpdateTemplate(ctx, testDomain, &tmpl))
 
 	// Ensure update took
-	updated, err := mg.GetTemplate(ctx, tmpl.Name)
+	updated, err := mg.GetTemplate(ctx, testDomain, tmpl.Name)
 	require.NoError(t, err)
 
 	assert.Equal(t, UpdatedDesc, updated.Description)
 
 	// Delete the template
-	require.NoError(t, mg.DeleteTemplate(ctx, tmpl.Name))
+	require.NoError(t, mg.DeleteTemplate(ctx, testDomain, tmpl.Name))
 }
 
 func waitForTemplate(mg mailgun.Mailgun, id string) error {
 	ctx := context.Background()
 	var attempts int
 	for attempts <= 5 {
-		_, err := mg.GetTemplate(ctx, id)
+		_, err := mg.GetTemplate(ctx, testDomain, id)
 		if err != nil {
 			if mailgun.GetStatusFromErr(err) == 404 {
 				time.Sleep(time.Second * 2)

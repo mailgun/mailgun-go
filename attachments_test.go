@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,22 +26,23 @@ func createAttachment(t *testing.T) string {
 }
 
 func TestMultipleAttachments(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	var ctx = context.Background()
 
-	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "attachment@"+testDomain)
+	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "attachment@"+testDomain)
 
 	// Add 2 attachments
 	m.AddAttachment(createAttachment(t))
 	m.AddAttachment(createAttachment(t))
 
-	msg, id, err := mg.Send(ctx, m)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 
-	id = strings.Trim(id, "<>")
-	t.Logf("New Email: %s Id: %s\n", msg, id)
+	id := strings.Trim(resp.ID, "<>")
+	t.Logf("New Email: %s ID: %s\n", resp.Message, id)
 
 	e, err := findAcceptedMessage(mg, id)
 	require.NoError(t, err)
@@ -56,9 +57,9 @@ func TestMultipleAttachments(t *testing.T) {
 }
 
 func findAcceptedMessage(mg mailgun.Mailgun, id string) (*events.Accepted, error) {
-	it := mg.ListEvents(nil)
+	it := mg.ListEvents(testDomain, nil)
 
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Next(context.Background(), &page) {
 		for _, event := range page {
 			if event.GetName() == events.EventAccepted && event.GetID() == id {

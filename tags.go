@@ -4,20 +4,9 @@ import (
 	"context"
 	"net/url"
 	"strconv"
-	"time"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
-
-type Tag struct {
-	Value       string     `json:"tag"`
-	Description string     `json:"description"`
-	FirstSeen   *time.Time `json:"first-seen,omitempty"`
-	LastSeen    *time.Time `json:"last-seen,omitempty"`
-}
-
-type tagsResponse struct {
-	Items  []Tag  `json:"items"`
-	Paging Paging `json:"paging"`
-}
 
 type ListTagOptions struct {
 	// Restrict the page size to this limit
@@ -27,20 +16,20 @@ type ListTagOptions struct {
 }
 
 // DeleteTag removes all counters for a particular tag, including the tag itself.
-func (mg *MailgunImpl) DeleteTag(ctx context.Context, tag string) error {
-	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
-	r.setClient(mg.Client())
+func (mg *Client) DeleteTag(ctx context.Context, domain, tag string) error {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // GetTag retrieves metadata about the tag from the api
-func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
-	r := newHTTPRequest(generateApiUrl(mg, tagsEndpoint) + "/" + tag)
-	r.setClient(mg.Client())
+func (mg *Client) GetTag(ctx context.Context, domain, tag string) (mtypes.Tag, error) {
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, tagsEndpoint, domain) + "/" + tag)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var tagItem Tag
+	var tagItem mtypes.Tag
 	err := getResponseFromJSON(ctx, r, &tagItem)
 	return tagItem, err
 }
@@ -57,8 +46,8 @@ func (mg *MailgunImpl) GetTag(ctx context.Context, tag string) (Tag, error) {
 //	if it.Err() != nil {
 //		log.Fatal(it.Err())
 //	}
-func (mg *MailgunImpl) ListTags(opts *ListTagOptions) *TagIterator {
-	req := newHTTPRequest(generateApiUrl(mg, tagsEndpoint))
+func (mg *Client) ListTags(domain string, opts *ListTagOptions) *TagIterator {
+	req := newHTTPRequest(generateApiV3UrlWithDomain(mg, tagsEndpoint, domain))
 	if opts != nil {
 		if opts.Limit != 0 {
 			req.addParameter("limit", strconv.Itoa(opts.Limit))
@@ -70,20 +59,20 @@ func (mg *MailgunImpl) ListTags(opts *ListTagOptions) *TagIterator {
 
 	uri, err := req.generateUrlWithParameters()
 	return &TagIterator{
-		tagsResponse: tagsResponse{Paging: Paging{Next: uri, First: uri}},
+		TagsResponse: mtypes.TagsResponse{Paging: mtypes.Paging{Next: uri, First: uri}},
 		err:          err,
 		mg:           mg,
 	}
 }
 
 type TagIterator struct {
-	tagsResponse
+	mtypes.TagsResponse
 	mg  Mailgun
 	err error
 }
 
 // Next returns the next page in the list of tags
-func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
+func (ti *TagIterator) Next(ctx context.Context, items *[]mtypes.Tag) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -102,7 +91,7 @@ func (ti *TagIterator) Next(ctx context.Context, items *[]Tag) bool {
 }
 
 // Previous returns the previous page in the list of tags
-func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
+func (ti *TagIterator) Previous(ctx context.Context, items *[]mtypes.Tag) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -125,7 +114,7 @@ func (ti *TagIterator) Previous(ctx context.Context, items *[]Tag) bool {
 }
 
 // First returns the first page in the list of tags
-func (ti *TagIterator) First(ctx context.Context, items *[]Tag) bool {
+func (ti *TagIterator) First(ctx context.Context, items *[]mtypes.Tag) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -138,7 +127,7 @@ func (ti *TagIterator) First(ctx context.Context, items *[]Tag) bool {
 }
 
 // Last returns the last page in the list of tags
-func (ti *TagIterator) Last(ctx context.Context, items *[]Tag) bool {
+func (ti *TagIterator) Last(ctx context.Context, items *[]mtypes.Tag) bool {
 	if ti.err != nil {
 		return false
 	}
@@ -158,9 +147,9 @@ func (ti *TagIterator) Err() error {
 func (ti *TagIterator) fetch(ctx context.Context, uri string) error {
 	ti.Items = nil
 	req := newHTTPRequest(uri)
-	req.setClient(ti.mg.Client())
+	req.setClient(ti.mg.HTTPClient())
 	req.setBasicAuth(basicAuthUser, ti.mg.APIKey())
-	return getResponseFromJSON(ctx, req, &ti.tagsResponse)
+	return getResponseFromJSON(ctx, req, &ti.TagsResponse)
 }
 
 func canFetchPage(slug string) bool {

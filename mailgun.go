@@ -28,7 +28,7 @@
 //
 // For example, the following iterates over all pages of events 100 items at a time
 //
-//	mg := mailgun.NewMailgun("your-domain.com", "your-api-key")
+//	mg := mailgun.NewMailgun("your-api-key")
 //	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
 //
 //	// The entire operation should not take longer than 30 seconds
@@ -78,35 +78,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
-	"sync"
+	"strconv"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4/mtypes"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 // Debug set true to write the HTTP requests in curl for to stdout
 var Debug = false
 
-// CaptureCurlOutput if true, will capture the curl request of the last Send()
-// can be retrieved by calling GetCurlOutput()
-var CaptureCurlOutput = false
-
-// RedactCurlAuth will redact the authentication header when CaptureCurlOutput is
-// used.
-var RedactCurlAuth = false
-
 const (
-	// Base Url the library uses to contact mailgun. Use SetAPIBase() to override
-	APIBase              = "https://api.mailgun.net/v3"
-	APIBaseUS            = APIBase
-	APIBaseEU            = "https://api.eu.mailgun.net/v3"
+	// APIBase - base URL the library uses to contact mailgun. Use SetAPIBase() to override
+	APIBase   = "https://api.mailgun.net"
+	APIBaseUS = APIBase
+	APIBaseEU = "https://api.eu.mailgun.net"
+
+	basicAuthUser = "api"
+
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
-	statsTotalEndpoint   = "stats/total"
 	metricsEndpoint      = "analytics/metrics"
 	domainsEndpoint      = "domains"
 	tagsEndpoint         = "tags"
@@ -117,11 +110,11 @@ const (
 	exportsEndpoint      = "exports"
 	webhooksEndpoint     = "webhooks"
 	listsEndpoint        = "lists"
-	basicAuthUser        = "api"
 	templatesEndpoint    = "templates"
 	accountsEndpoint     = "accounts"
 	subaccountsEndpoint  = "subaccounts"
-	OnBehalfOfHeader     = "X-Mailgun-On-Behalf-Of"
+
+	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
 )
 
 // Mailgun defines the supported subset of the Mailgun API.
@@ -134,193 +127,166 @@ const (
 // determine the currently supported feature set.
 type Mailgun interface {
 	APIBase() string
-	Domain() string
 	APIKey() string
-	Client() *http.Client
-	SetClient(client *http.Client)
-	SetAPIBase(url string)
+	HTTPClient() *http.Client
+	SetHTTPClient(client *http.Client)
+	SetAPIBase(url string) error
 	AddOverrideHeader(k string, v string)
-	GetCurlOutput() string
 
-	// Send attempts to queue a message (see Message, NewMessage, and its methods) for delivery.
-	// TODO(v5): switch m to SendableMessage interface
-	Send(ctx context.Context, m *Message) (mes string, id string, err error)
-	ReSend(ctx context.Context, id string, recipients ...string) (string, string, error)
-	// Deprecated: use func NewMessage instead of method.
-	NewMessage(from, subject, text string, to ...string) *Message
-	// Deprecated: use func NewMIMEMessage instead of method.
-	NewMIMEMessage(body io.ReadCloser, to ...string) *Message
+	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
+	Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error)
+	ReSend(ctx context.Context, url string, recipients ...string) (mtypes.SendMessageResponse, error)
 
-	ListBounces(opts *ListOptions) *BouncesIterator
-	GetBounce(ctx context.Context, address string) (Bounce, error)
-	AddBounce(ctx context.Context, address, code, err string) error
-	DeleteBounce(ctx context.Context, address string) error
-	DeleteBounceList(ctx context.Context) error
+	ListBounces(domain string, opts *ListOptions) *BouncesIterator
+	GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error)
+	AddBounce(ctx context.Context, domain, address, code, err string) error
+	DeleteBounce(ctx context.Context, domain, address string) error
+	DeleteBounceList(ctx context.Context, domain string) error
 
 	ListMetrics(opts MetricsOptions) (*MetricsIterator, error)
 
-	// Deprecated: Use ListMetrics instead.
-	GetStats(ctx context.Context, events []string, opts *GetStatOptions) ([]Stats, error)
-	GetTag(ctx context.Context, tag string) (Tag, error)
-	DeleteTag(ctx context.Context, tag string) error
-	ListTags(*ListTagOptions) *TagIterator
+	GetTag(ctx context.Context, domain, tag string) (mtypes.Tag, error)
+	DeleteTag(ctx context.Context, domain, tag string) error
+	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
-	ListDomains(opts *ListOptions) *DomainsIterator
-	GetDomain(ctx context.Context, domain string) (DomainResponse, error)
-	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (DomainResponse, error)
+	ListDomains(opts *ListDomainsOptions) *DomainsIterator
+	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
+	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
 	DeleteDomain(ctx context.Context, name string) error
-	// Deprecated: Use VerifyAndReturnDomain instead.
-	VerifyDomain(ctx context.Context, name string) (string, error)
-	VerifyAndReturnDomain(ctx context.Context, name string) (DomainResponse, error)
-	UpdateDomainConnection(ctx context.Context, domain string, dc DomainConnection) error
-	GetDomainConnection(ctx context.Context, domain string) (DomainConnection, error)
-	GetDomainTracking(ctx context.Context, domain string) (DomainTracking, error)
+	VerifyAndReturnDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
+
+	UpdateDomainConnection(ctx context.Context, domain string, dc mtypes.DomainConnection) error
+	GetDomainConnection(ctx context.Context, domain string) (mtypes.DomainConnection, error)
+
+	GetDomainTracking(ctx context.Context, domain string) (mtypes.DomainTracking, error)
 	UpdateClickTracking(ctx context.Context, domain, active string) error
 	UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error
 	UpdateOpenTracking(ctx context.Context, domain, active string) error
 
-	GetStoredMessage(ctx context.Context, url string) (StoredMessage, error)
-	GetStoredMessageRaw(ctx context.Context, id string) (StoredMessageRaw, error)
+	UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error
+
+	GetStoredMessage(ctx context.Context, url string) (mtypes.StoredMessage, error)
+	GetStoredMessageRaw(ctx context.Context, id string) (mtypes.StoredMessageRaw, error)
 	GetStoredAttachment(ctx context.Context, url string) ([]byte, error)
 
-	// Deprecated
-	GetStoredMessageForURL(ctx context.Context, url string) (StoredMessage, error)
-	// Deprecated
-	GetStoredMessageRawForURL(ctx context.Context, url string) (StoredMessageRaw, error)
+	ListCredentials(domain string, opts *ListOptions) *CredentialsIterator
+	CreateCredential(ctx context.Context, domain, login, password string) error
+	ChangeCredentialPassword(ctx context.Context, domain, login, password string) error
+	DeleteCredential(ctx context.Context, domain, login string) error
 
-	ListCredentials(opts *ListOptions) *CredentialsIterator
-	CreateCredential(ctx context.Context, login, password string) error
-	ChangeCredentialPassword(ctx context.Context, login, password string) error
-	DeleteCredential(ctx context.Context, login string) error
+	ListUnsubscribes(domain string, opts *ListOptions) *UnsubscribesIterator
+	GetUnsubscribe(ctx context.Context, domain, address string) (mtypes.Unsubscribe, error)
+	CreateUnsubscribe(ctx context.Context, domain, address, tag string) error
+	CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []mtypes.Unsubscribe) error
+	DeleteUnsubscribe(ctx context.Context, domain, address string) error
+	DeleteUnsubscribeWithTag(ctx context.Context, domain, a, t string) error
 
-	ListUnsubscribes(opts *ListOptions) *UnsubscribesIterator
-	GetUnsubscribe(ctx context.Context, address string) (Unsubscribe, error)
-	CreateUnsubscribe(ctx context.Context, address, tag string) error
-	CreateUnsubscribes(ctx context.Context, unsubscribes []Unsubscribe) error
-	DeleteUnsubscribe(ctx context.Context, address string) error
-	DeleteUnsubscribeWithTag(ctx context.Context, a, t string) error
-
-	ListComplaints(opts *ListOptions) *ComplaintsIterator
-	GetComplaint(ctx context.Context, address string) (Complaint, error)
-	CreateComplaint(ctx context.Context, address string) error
-	DeleteComplaint(ctx context.Context, address string) error
+	ListComplaints(domain string, opts *ListOptions) *ComplaintsIterator
+	GetComplaint(ctx context.Context, domain, address string) (mtypes.Complaint, error)
+	CreateComplaint(ctx context.Context, domain, address string) error
+	CreateComplaints(ctx context.Context, domain string, addresses []string) error
+	DeleteComplaint(ctx context.Context, domain, address string) error
 
 	ListRoutes(opts *ListOptions) *RoutesIterator
-	GetRoute(ctx context.Context, address string) (Route, error)
-	CreateRoute(ctx context.Context, address Route) (Route, error)
+	GetRoute(ctx context.Context, address string) (mtypes.Route, error)
+	CreateRoute(ctx context.Context, address mtypes.Route) (mtypes.Route, error)
 	DeleteRoute(ctx context.Context, address string) error
-	UpdateRoute(ctx context.Context, address string, r Route) (Route, error)
+	UpdateRoute(ctx context.Context, address string, r mtypes.Route) (mtypes.Route, error)
 
-	ListWebhooks(ctx context.Context) (map[string][]string, error)
-	CreateWebhook(ctx context.Context, kind string, url []string) error
-	DeleteWebhook(ctx context.Context, kind string) error
-	GetWebhook(ctx context.Context, kind string) ([]string, error)
-	UpdateWebhook(ctx context.Context, kind string, url []string) error
-	VerifyWebhookRequest(req *http.Request) (verified bool, err error)
-	VerifyWebhookSignature(sig Signature) (verified bool, err error)
+	ListWebhooks(ctx context.Context, domain string) (map[string][]string, error)
+	CreateWebhook(ctx context.Context, domain, kind string, url []string) error
+	DeleteWebhook(ctx context.Context, domain, kind string) error
+	GetWebhook(ctx context.Context, domain, kind string) ([]string, error)
+	UpdateWebhook(ctx context.Context, domain, kind string, url []string) error
+	VerifyWebhookSignature(sig mtypes.Signature) (verified bool, err error)
 
 	ListMailingLists(opts *ListOptions) *ListsIterator
-	CreateMailingList(ctx context.Context, address MailingList) (MailingList, error)
+	CreateMailingList(ctx context.Context, address mtypes.MailingList) (mtypes.MailingList, error)
 	DeleteMailingList(ctx context.Context, address string) error
-	GetMailingList(ctx context.Context, address string) (MailingList, error)
-	UpdateMailingList(ctx context.Context, address string, ml MailingList) (MailingList, error)
+	GetMailingList(ctx context.Context, address string) (mtypes.MailingList, error)
+	UpdateMailingList(ctx context.Context, address string, ml mtypes.MailingList) (mtypes.MailingList, error)
 
 	ListMembers(address string, opts *ListOptions) *MemberListIterator
-	GetMember(ctx context.Context, MemberAddr, listAddr string) (Member, error)
-	CreateMember(ctx context.Context, merge bool, addr string, prototype Member) error
+	GetMember(ctx context.Context, MemberAddr, listAddr string) (mtypes.Member, error)
+	CreateMember(ctx context.Context, merge bool, addr string, prototype mtypes.Member) error
 	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []any) error
-	UpdateMember(ctx context.Context, Member, list string, prototype Member) (Member, error)
+	UpdateMember(ctx context.Context, Member, list string, prototype mtypes.Member) (mtypes.Member, error)
 	DeleteMember(ctx context.Context, Member, list string) error
 
-	ListEventsWithDomain(opts *ListEventOptions, domain string) *EventIterator
-	ListEvents(*ListEventOptions) *EventIterator
-	PollEvents(*ListEventOptions) *EventPoller
+	ListEvents(domain string, opts *ListEventOptions) *EventIterator
+	PollEvents(domain string, opts *ListEventOptions) *EventPoller
 
-	ListIPs(ctx context.Context, dedicated, enabled bool) ([]IPAddress, error)
-	// Deprecated: use ListIPs instead.
-	ListIPS(ctx context.Context, dedicated bool) ([]IPAddress, error)
-	GetIP(ctx context.Context, ip string) (IPAddress, error)
-	ListDomainIPs(ctx context.Context) ([]IPAddress, error)
-	// Deprecated: use ListDomainIPs instead.
-	ListDomainIPS(ctx context.Context) ([]IPAddress, error)
-	AddDomainIP(ctx context.Context, ip string) error
-	DeleteDomainIP(ctx context.Context, ip string) error
+	ListIPs(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error)
+	GetIP(ctx context.Context, ip string) (mtypes.IPAddress, error)
+	ListDomainIPs(ctx context.Context, domain string) ([]mtypes.IPAddress, error)
+	AddDomainIP(ctx context.Context, domain, ip string) error
+	DeleteDomainIP(ctx context.Context, domain, ip string) error
 
-	ListExports(ctx context.Context, url string) ([]Export, error)
-	GetExport(ctx context.Context, id string) (Export, error)
+	ListExports(ctx context.Context, url string) ([]mtypes.Export, error)
+	GetExport(ctx context.Context, id string) (mtypes.Export, error)
 	GetExportLink(ctx context.Context, id string) (string, error)
 	CreateExport(ctx context.Context, url string) error
 
-	GetTagLimits(ctx context.Context, domain string) (TagLimits, error)
+	GetTagLimits(ctx context.Context, domain string) (mtypes.TagLimits, error)
 
-	CreateTemplate(ctx context.Context, template *Template) error
-	GetTemplate(ctx context.Context, name string) (Template, error)
-	UpdateTemplate(ctx context.Context, template *Template) error
-	DeleteTemplate(ctx context.Context, name string) error
-	ListTemplates(opts *ListTemplateOptions) *TemplatesIterator
+	CreateTemplate(ctx context.Context, domain string, template *mtypes.Template) error
+	GetTemplate(ctx context.Context, domain, name string) (mtypes.Template, error)
+	UpdateTemplate(ctx context.Context, domain string, template *mtypes.Template) error
+	DeleteTemplate(ctx context.Context, domain, name string) error
+	ListTemplates(domain string, opts *ListTemplateOptions) *TemplatesIterator
 
-	AddTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
-	GetTemplateVersion(ctx context.Context, templateName, tag string) (TemplateVersion, error)
-	UpdateTemplateVersion(ctx context.Context, templateName string, version *TemplateVersion) error
-	DeleteTemplateVersion(ctx context.Context, templateName, tag string) error
-	ListTemplateVersions(templateName string, opts *ListOptions) *TemplateVersionsIterator
+	AddTemplateVersion(ctx context.Context, domain, templateName string, version *mtypes.TemplateVersion) error
+	GetTemplateVersion(ctx context.Context, domain, templateName, tag string) (mtypes.TemplateVersion, error)
+	UpdateTemplateVersion(ctx context.Context, domain, templateName string, version *mtypes.TemplateVersion) error
+	DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error
+	ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator
 
 	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (mtypes.ValidateEmailResponse, error)
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
-	CreateSubaccount(ctx context.Context, subaccountName string) (SubaccountResponse, error)
-	GetSubaccount(ctx context.Context, subaccountID string) (SubaccountResponse, error)
-	// Deprecated: use GetSubaccount instead.
-	SubaccountDetails(ctx context.Context, subaccountId string) (SubaccountResponse, error)
-	EnableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
-	DisableSubaccount(ctx context.Context, subaccountId string) (SubaccountResponse, error)
+	CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error)
+	GetSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
+	EnableSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
+	DisableSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
 
-	SetOnBehalfOfSubaccount(subaccountId string)
+	SetOnBehalfOfSubaccount(subaccountID string)
 	RemoveOnBehalfOfSubaccount()
 }
 
-// MailgunImpl bundles data needed by a large number of methods in order to interact with the Mailgun API.
-// Colloquially, we refer to instances of this structure as "clients."
-type MailgunImpl struct {
+// Client bundles data needed by a large number of methods in order to interact with the Mailgun API.
+type Client struct {
 	apiBase           string
-	domain            string
 	apiKey            string
 	webhookSigningKey string
 	client            *http.Client
-	baseURL           string
 	overrideHeaders   map[string]string
-
-	mu                 sync.RWMutex
-	capturedCurlOutput string
 }
 
-// NewMailGun creates a new client instance.
-func NewMailgun(domain, apiKey string) *MailgunImpl {
-	return &MailgunImpl{
+// NewMailgun creates a new client instance.
+func NewMailgun(apiKey string) *Client {
+	return &Client{
 		apiBase: APIBase,
-		domain:  domain,
 		apiKey:  apiKey,
 		client:  http.DefaultClient,
 	}
 }
 
 // NewMailgunFromEnv returns a new Mailgun client using the environment variables
-// MG_API_KEY, MG_DOMAIN, MG_URL, and MG_WEBHOOK_SIGNING_KEY
-func NewMailgunFromEnv() (*MailgunImpl, error) {
+// MG_API_KEY, MG_URL, and MG_WEBHOOK_SIGNING_KEY
+func NewMailgunFromEnv() (*Client, error) {
 	apiKey := os.Getenv("MG_API_KEY")
 	if apiKey == "" {
 		return nil, errors.New("required environment variable MG_API_KEY not defined")
 	}
-	domain := os.Getenv("MG_DOMAIN")
-	if domain == "" {
-		return nil, errors.New("required environment variable MG_DOMAIN not defined")
-	}
 
-	mg := NewMailgun(domain, apiKey)
+	mg := NewMailgun(apiKey)
 
 	url := os.Getenv("MG_URL")
 	if url != "" {
-		mg.SetAPIBase(url)
+		err := mg.SetAPIBase(url)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	webhookSigningKey := os.Getenv("MG_WEBHOOK_SIGNING_KEY")
@@ -332,52 +298,43 @@ func NewMailgunFromEnv() (*MailgunImpl, error) {
 }
 
 // APIBase returns the API Base URL configured for this client.
-func (mg *MailgunImpl) APIBase() string {
+func (mg *Client) APIBase() string {
 	return mg.apiBase
 }
 
-// Domain returns the domain configured for this client.
-func (mg *MailgunImpl) Domain() string {
-	return mg.domain
-}
-
-// ApiKey returns the API key configured for this client.
-func (mg *MailgunImpl) APIKey() string {
+// APIKey returns the API key configured for this client.
+func (mg *Client) APIKey() string {
 	return mg.apiKey
 }
 
-// Client returns the HTTP client configured for this client.
-func (mg *MailgunImpl) Client() *http.Client {
+// HTTPClient returns the HTTP client configured for this client.
+func (mg *Client) HTTPClient() *http.Client {
 	return mg.client
 }
 
-// SetClient updates the HTTP client for this client.
-func (mg *MailgunImpl) SetClient(c *http.Client) {
+// SetHTTPClient updates the HTTP client for this client.
+func (mg *Client) SetHTTPClient(c *http.Client) {
 	mg.client = c
 }
 
 // WebhookSigningKey returns the webhook signing key configured for this client
-func (mg *MailgunImpl) WebhookSigningKey() string {
-	key := mg.webhookSigningKey
-	if key == "" {
-		return mg.APIKey()
-	}
-	return key
+func (mg *Client) WebhookSigningKey() string {
+	return mg.webhookSigningKey
 }
 
 // SetWebhookSigningKey updates the webhook signing key for this client
-func (mg *MailgunImpl) SetWebhookSigningKey(webhookSigningKey string) {
+func (mg *Client) SetWebhookSigningKey(webhookSigningKey string) {
 	mg.webhookSigningKey = webhookSigningKey
 }
 
 // SetOnBehalfOfSubaccount sets X-Mailgun-On-Behalf-Of header to SUBACCOUNT_ACCOUNT_ID in order to perform API request
 // on behalf of subaccount.
-func (mg *MailgunImpl) SetOnBehalfOfSubaccount(subaccountId string) {
+func (mg *Client) SetOnBehalfOfSubaccount(subaccountId string) {
 	mg.AddOverrideHeader(OnBehalfOfHeader, subaccountId)
 }
 
 // RemoveOnBehalfOfSubaccount remove X-Mailgun-On-Behalf-Of header for primary usage.
-func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
+func (mg *Client) RemoveOnBehalfOfSubaccount() {
 	delete(mg.overrideHeaders, OnBehalfOfHeader)
 }
 
@@ -390,77 +347,83 @@ func (mg *MailgunImpl) RemoveOnBehalfOfSubaccount() {
 //	mg.SetAPIBase(mailgun.APIBaseUS)
 //
 //	// Set a custom base API
-//	mg.SetAPIBase("https://localhost/v3")
-func (mg *MailgunImpl) SetAPIBase(address string) {
+//	mg.SetAPIBase("https://localhost")
+func (mg *Client) SetAPIBase(address string) error {
+	if invalidURL.MatchString(address) {
+		return errors.New(`APIBase must not contain a version; SetAPIBase("https://host")`)
+	}
+
 	mg.apiBase = address
+	return nil
 }
 
 // AddOverrideHeader allows the user to specify additional headers that will be included in the HTTP request
 // This is mostly useful for testing the Mailgun API hosted at a different endpoint.
-func (mg *MailgunImpl) AddOverrideHeader(k, v string) {
+func (mg *Client) AddOverrideHeader(k, v string) {
 	if mg.overrideHeaders == nil {
 		mg.overrideHeaders = make(map[string]string)
 	}
 	mg.overrideHeaders[k] = v
 }
 
-// GetCurlOutput will retrieve the output of the last Send() request as a curl command.
-// mailgun.CaptureCurlOutput must be set to true
-// This is mostly useful for testing the Mailgun API hosted at a different endpoint.
-func (mg *MailgunImpl) GetCurlOutput() string {
-	mg.mu.RLock()
-	defer mg.mu.RUnlock()
-
-	return mg.capturedCurlOutput
+// ListOptions used by List methods to specify what list parameters to send to the mailgun API
+type ListOptions struct {
+	Limit int
 }
 
-// generateApiUrl renders a URL for an API endpoint using the domain and endpoint name.
-func generateApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/%s/%s", m.APIBase(), m.Domain(), endpoint)
+// TimeToFloat given time.Time{} return a float64 as given in mailgun event timestamps
+func TimeToFloat(t time.Time) float64 {
+	return float64(t.Unix()) + (float64(t.Nanosecond()/int(time.Microsecond)) / float64(1000000))
 }
 
-// generateApiUrlWithDomain renders a URL for an API endpoint using a separate domain and endpoint name.
-func generateApiUrlWithDomain(m Mailgun, endpoint, domain string) string {
-	return fmt.Sprintf("%s/%s/%s", m.APIBase(), domain, endpoint)
+// TODO(vtopc): sort all these generate URL functions(some are generateApi...Url, other are generate...ApiUrl)
+
+func generateApiUrlWithDomain(m Mailgun, version int, endpoint, domain string) string {
+	return fmt.Sprintf("%s/v%d/%s/%s", m.APIBase(), version, domain, endpoint)
+}
+
+// generateApiV3UrlWithDomain renders a URL for an API endpoint using the domain and endpoint name.
+func generateApiV3UrlWithDomain(m Mailgun, endpoint, domain string) string {
+	return generateApiUrlWithDomain(m, 3, endpoint, domain)
 }
 
 // generateMemberApiUrl renders a URL relevant for specifying mailing list members.
 // The address parameter refers to the mailing list in question.
 func generateMemberApiUrl(m Mailgun, endpoint, address string) string {
-	return fmt.Sprintf("%s/%s/%s/members", m.APIBase(), endpoint, address)
+	return fmt.Sprintf("%s/v3/%s/%s/members", m.APIBase(), endpoint, address)
 }
 
-// generateApiUrlWithTarget works as generateApiUrl,
+// generateApiV3UrlWithTarget works as generateApiV3UrlWithDomain
 // but consumes an additional resource parameter called 'target'.
-func generateApiUrlWithTarget(m Mailgun, endpoint, target string) string {
+func generateApiV3UrlWithTarget(m Mailgun, endpoint, domain, target string) string {
 	tail := ""
 	if target != "" {
 		tail = fmt.Sprintf("/%s", target)
 	}
-	return fmt.Sprintf("%s%s", generateApiUrl(m, endpoint), tail)
+	return fmt.Sprintf("%s%s", generateApiV3UrlWithDomain(m, endpoint, domain), tail)
 }
 
-// generateDomainApiUrl renders a URL as generateApiUrl, but
+// generateV3DomainsApiUrl renders a URL as generateApiV3UrlWithDomain, but
 // addresses a family of functions which have a non-standard URL structure.
 // Most URLs consume a domain in the 2nd position, but some endpoints
 // require the word "domains" to be there instead.
-func generateDomainApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/domains/%s/%s", m.APIBase(), m.Domain(), endpoint)
+func generateV3DomainsApiUrl(m Mailgun, endpoint, domain string) string {
+	return fmt.Sprintf("%s/v3/domains/%s/%s", m.APIBase(), domain, endpoint)
 }
 
-// generateCredentialsUrl renders a URL as generateDomainApiUrl,
+// generateCredentialsUrl renders a URL as generateV3DomainsApiUrl,
 // but focuses on the SMTP credentials family of API functions.
-func generateCredentialsUrl(m Mailgun, login string) string {
+func generateCredentialsUrl(m Mailgun, domain, login string) string {
 	tail := ""
 	if login != "" {
 		tail = fmt.Sprintf("/%s", login)
 	}
-	return generateDomainApiUrl(m, fmt.Sprintf("credentials%s", tail))
+	return generateV3DomainsApiUrl(m, fmt.Sprintf("credentials%s", tail), domain)
 }
 
-// generatePublicApiUrl works as generateApiUrl, except that generatePublicApiUrl has no need for the domain.
-func generatePublicApiUrl(m Mailgun, endpoint string) string {
-	return fmt.Sprintf("%s/%s", m.APIBase(), endpoint)
+// generateApiUrl returns domain agnostic URL.
+func generateApiUrl(m Mailgun, version int, endpoint string) string {
+	return fmt.Sprintf("%s/v%d/%s", m.APIBase(), version, endpoint)
 }
 
 // formatMailgunTime translates a timestamp into a human-readable form.
@@ -470,4 +433,9 @@ func formatMailgunTime(t time.Time) string {
 
 func ptr[T any](v T) *T {
 	return &v
+}
+
+// TODO(vtopc): remove boolToString and use strconv.FormatBool() directly.
+func boolToString(b bool) string {
+	return strconv.FormatBool(b)
 }

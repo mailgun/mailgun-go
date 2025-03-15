@@ -6,30 +6,9 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
-
-// A Route structure contains information on a configured or to-be-configured route.
-// When creating a new route, the SDK only uses a subset of the fields of this structure.
-// In particular, CreatedAt and ID are meaningless in this context, and will be ignored.
-// Only Priority, Description, Expression, and Actions need be provided.
-type Route struct {
-	// The Priority field indicates how soon the route works relative to other configured routes.
-	// Routes of equal priority are consulted in chronological order.
-	Priority int `json:"priority,omitempty"`
-	// The Description field provides a human-readable description for the route.
-	// Mailgun ignores this field except to provide the description when viewing the Mailgun web control panel.
-	Description string `json:"description,omitempty"`
-	// The Expression field lets you specify a pattern to match incoming messages against.
-	Expression string `json:"expression,omitempty"`
-	// The Actions field contains strings specifying what to do
-	// with any message which matches the provided expression.
-	Actions []string `json:"actions,omitempty"`
-
-	// The CreatedAt field provides a time-stamp for when the route came into existence.
-	CreatedAt RFC2822Time `json:"created_at,omitempty"`
-	// ID field provides a unique identifier for this route.
-	Id string `json:"id,omitempty"`
-}
 
 // ForwardedMessage represents the payload the server will get on match
 // You can use ExtractForwardRoute() to extract PostForm into the struct, or you can use only the struct and parse the form manually
@@ -94,19 +73,8 @@ func ExtractForwardedMessage(formValues url.Values) ForwardedMessage {
 	return forwardedMessage
 }
 
-type routesListResponse struct {
-	// is -1 if Next() or First() have not been called
-	TotalCount int     `json:"total_count"`
-	Items      []Route `json:"items"`
-}
-
-type createRouteResp struct {
-	Message string `json:"message"`
-	Route   `json:"route"`
-}
-
 // ListRoutes allows you to iterate through a list of routes returned by the API
-func (mg *MailgunImpl) ListRoutes(opts *ListOptions) *RoutesIterator {
+func (mg *Client) ListRoutes(opts *ListOptions) *RoutesIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
@@ -118,14 +86,14 @@ func (mg *MailgunImpl) ListRoutes(opts *ListOptions) *RoutesIterator {
 
 	return &RoutesIterator{
 		mg:                 mg,
-		url:                generatePublicApiUrl(mg, routesEndpoint),
-		routesListResponse: routesListResponse{TotalCount: -1},
+		url:                generateApiUrl(mg, 3, routesEndpoint),
+		RoutesListResponse: mtypes.RoutesListResponse{TotalCount: -1},
 		limit:              limit,
 	}
 }
 
 type RoutesIterator struct {
-	routesListResponse
+	mtypes.RoutesListResponse
 
 	limit  int
 	mg     Mailgun
@@ -147,7 +115,7 @@ func (ri *RoutesIterator) Offset() int {
 // Next retrieves the next page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
+func (ri *RoutesIterator) Next(ctx context.Context, items *[]mtypes.Route) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -157,7 +125,7 @@ func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
 		return false
 	}
 
-	cpy := make([]Route, len(ri.Items))
+	cpy := make([]mtypes.Route, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	if len(ri.Items) == 0 {
@@ -170,7 +138,7 @@ func (ri *RoutesIterator) Next(ctx context.Context, items *[]Route) bool {
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ri *RoutesIterator) First(ctx context.Context, items *[]Route) bool {
+func (ri *RoutesIterator) First(ctx context.Context, items *[]mtypes.Route) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -178,7 +146,7 @@ func (ri *RoutesIterator) First(ctx context.Context, items *[]Route) bool {
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Route, len(ri.Items))
+	cpy := make([]mtypes.Route, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	ri.offset = len(ri.Items)
@@ -189,7 +157,7 @@ func (ri *RoutesIterator) First(ctx context.Context, items *[]Route) bool {
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ri *RoutesIterator) Last(ctx context.Context, items *[]Route) bool {
+func (ri *RoutesIterator) Last(ctx context.Context, items *[]mtypes.Route) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -207,7 +175,7 @@ func (ri *RoutesIterator) Last(ctx context.Context, items *[]Route) bool {
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Route, len(ri.Items))
+	cpy := make([]mtypes.Route, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 	return true
@@ -216,7 +184,7 @@ func (ri *RoutesIterator) Last(ctx context.Context, items *[]Route) bool {
 // Previous retrieves the previous page of items from the api. Returns false when there
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
+func (ri *RoutesIterator) Previous(ctx context.Context, items *[]mtypes.Route) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -234,7 +202,7 @@ func (ri *RoutesIterator) Previous(ctx context.Context, items *[]Route) bool {
 	if ri.err != nil {
 		return false
 	}
-	cpy := make([]Route, len(ri.Items))
+	cpy := make([]mtypes.Route, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
 
@@ -245,7 +213,7 @@ func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
 	ri.Items = nil
 	r := newHTTPRequest(ri.url)
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
-	r.setClient(ri.mg.Client())
+	r.setClient(ri.mg.HTTPClient())
 
 	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
@@ -254,16 +222,16 @@ func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
 		r.addParameter("limit", strconv.Itoa(limit))
 	}
 
-	return getResponseFromJSON(ctx, r, &ri.routesListResponse)
+	return getResponseFromJSON(ctx, r, &ri.RoutesListResponse)
 }
 
 // CreateRoute installs a new route for your domain.
 // The route structure you provide serves as a template, and
 // only a subset of the fields influence the operation.
 // See the Route structure definition for more details.
-func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignored Route, err error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) CreateRoute(ctx context.Context, prototype mtypes.Route) (_ignored mtypes.Route, err error) {
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("priority", strconv.Itoa(prototype.Priority))
@@ -272,7 +240,7 @@ func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignor
 	for _, action := range prototype.Actions {
 		p.addValue("action", action)
 	}
-	var resp createRouteResp
+	var resp mtypes.CreateRouteResp
 	if err := postResponseFromJSON(ctx, r, p, &resp); err != nil {
 		return _ignored, err
 	}
@@ -283,26 +251,26 @@ func (mg *MailgunImpl) CreateRoute(ctx context.Context, prototype Route) (_ignor
 // DeleteRoute removes the specified route from your domain's configuration.
 // To avoid ambiguity, Mailgun identifies the route by unique ID.
 // See the Route structure definition and the Mailgun API documentation for more details.
-func (mg *MailgunImpl) DeleteRoute(ctx context.Context, id string) error {
-	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint) + "/" + id)
-	r.setClient(mg.Client())
+func (mg *Client) DeleteRoute(ctx context.Context, id string) error {
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint) + "/" + id)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // GetRoute retrieves the complete route definition associated with the unique route ID.
-func (mg *MailgunImpl) GetRoute(ctx context.Context, id string) (Route, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint) + "/" + id)
-	r.setClient(mg.Client())
+func (mg *Client) GetRoute(ctx context.Context, id string) (mtypes.Route, error) {
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint) + "/" + id)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	var envelope struct {
-		Message string `json:"message"`
-		*Route  `json:"route"`
+		Message       string `json:"message"`
+		*mtypes.Route `json:"route"`
 	}
 	err := getResponseFromJSON(ctx, r, &envelope)
 	if err != nil {
-		return Route{}, err
+		return mtypes.Route{}, err
 	}
 
 	return *envelope.Route, err
@@ -311,9 +279,9 @@ func (mg *MailgunImpl) GetRoute(ctx context.Context, id string) (Route, error) {
 // UpdateRoute provides an "in-place" update of the specified route.
 // Only those route fields which are non-zero or non-empty are updated.
 // All other fields remain as-is.
-func (mg *MailgunImpl) UpdateRoute(ctx context.Context, id string, route Route) (Route, error) {
-	r := newHTTPRequest(generatePublicApiUrl(mg, routesEndpoint) + "/" + id)
-	r.setClient(mg.Client())
+func (mg *Client) UpdateRoute(ctx context.Context, id string, route mtypes.Route) (mtypes.Route, error) {
+	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint) + "/" + id)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	if route.Priority != 0 {
@@ -332,7 +300,7 @@ func (mg *MailgunImpl) UpdateRoute(ctx context.Context, id string, route Route) 
 	}
 	// For some reason, this API function just returns a bare Route on success.
 	// Unsure why this is the case; it seems like it ought to be a bug.
-	var envelope Route
+	var envelope mtypes.Route
 	err := putResponseFromJSON(ctx, r, p, &envelope)
 	return envelope, err
 }

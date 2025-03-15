@@ -1,16 +1,16 @@
 # Mailgun with Go
 
-[![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go/v4)
+[![GoDoc](https://godoc.org/github.com/mailgun/mailgun-go?status.svg)](https://godoc.org/github.com/mailgun/mailgun-go/v5)
 [![Build Status](https://github.com/mailgun/mailgun-go/workflows/CI/badge.svg)](https://github.com/mailgun/mailgun-go/actions/workflows/main.yml?query=branch%3Amaster)
 
-Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/en/latest/api_reference.html).
+Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https://documentation.mailgun.com/).
 
 ## Installation
 
 If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
-include the `/v4` at the end of your import paths
+include the `/v5` at the end of your import paths
 ```bash
-$ go get github.com/mailgun/mailgun-go/v4
+$ go get github.com/mailgun/mailgun-go/v5
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your available domain names can be found here:
@@ -36,10 +36,10 @@ var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
-	
-	//When you have an EU-domain, you must specify the endpoint:
-	//mg.SetAPIBase("https://api.eu.mailgun.net/v3")
+	mg := mailgun.NewMailgun(privateAPIKey)
+
+	// When you have an EU domain, you must specify the endpoint:
+	// err := mg.SetAPIBase(mailgun.APIBaseEU)
 
 	sender := "sender@example.com"
 	subject := "Fancy subject!"
@@ -47,19 +47,19 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mailgun.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, body, recipient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
 	// Send the message with a 10-second timeout
-	resp, id, err := mg.Send(ctx, message)
+	resp, err := mg.Send(ctx, message)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+	fmt.Printf("ID: %s Resp: %s\n", resp.ID, resp.Message)
 }
 ```
 
@@ -72,18 +72,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
+	mg := mailgun.NewMailgun("your-private-key")
 
-	it := mg.ListEvents(&mailgun.ListEventOptions{Limit: 100})
+	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
 
-	var page []mailgun.Event
+	var page []events.Event
 
 	// The entire operation should not take longer than 30 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -129,18 +129,18 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-domain.com", "your-private-key")
+	mg := mailgun.NewMailgun("your-private-key")
 
 	begin := time.Now().Add(time.Second * -3)
 
 	// Very short poll interval
-	it := mg.PollEvents(&mailgun.ListEventOptions{
+	it := mg.PollEvents("your-domain.com", &mailgun.ListEventOptions{
 		// Only events with a timestamp after this date/time will be returned
 		Begin: begin,
 		// How often we poll the api for new events
@@ -151,7 +151,7 @@ func main() {
 	defer cancel()
 
 	// Poll until our email event arrives
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Poll(ctx, &page) {
 		for _, e := range page {
 			log.Printf("Got an event: %q (%q)", e.GetName(), e.GetID())
@@ -170,7 +170,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your plan should include email validations.
@@ -203,18 +203,17 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 )
 
 func main() {
 	// You can find the Private API Key in your Account Menu, under "Settings":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
+	mg := mailgun.NewMailgun("private-api-key")
 	mg.SetWebhookSigningKey("webhook-signing-key")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
 		var payload mailgun.WebhookPayload
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			fmt.Printf("decode JSON error: %s", err)
@@ -271,7 +270,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your available domain names can be found here:
@@ -284,13 +283,13 @@ var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
+	mg := mailgun.NewMailgun(privateAPIKey)
 
 	sender := "sender@example.com"
 	subject := "HTML email!"
 	recipient := "recipient@example.com"
 
-	message := mailgun.NewMessage(sender, subject, "", recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, "", recipient)
 	body := `
 <html>
 <body>
@@ -306,14 +305,14 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	// Send the message with a 10 second timeout
-	resp, id, err := mg.Send(ctx, message)
+	// Send the message with a 10-second timeout
+	resp, err := mg.Send(ctx, message)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+	fmt.Printf("ID: %s Resp: %s\n", resp.ID, resp.Message)
 }
 ```
 
@@ -330,7 +329,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 )
 
 // Your available domain names can be found here:
@@ -343,7 +342,7 @@ var privateAPIKey = "your-private-key"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(yourDomain, privateAPIKey)
+	mg := mailgun.NewMailgun(privateAPIKey)
 
 	sender := "sender@example.com"
 	subject := "Fancy subject!"
@@ -351,7 +350,7 @@ func main() {
 	recipient := "recipient@example.com"
 
 	// The message object allows you to add attachments and Bcc recipients
-	message := mailgun.NewMessage(sender, subject, body, recipient)
+	message := mailgun.NewMessage(yourDomain, sender, subject, body, recipient)
 	message.SetTemplate("passwordReset")
 	err := message.AddTemplateVariable("passwordResetLink", "some link to your site unique to your user")
 	if err != nil {
@@ -362,12 +361,12 @@ func main() {
 	defer cancel()
 
 	// Send the message with a 10-second timeout
-	resp, id, err := mg.Send(ctx, message)
+	resp, err := mg.Send(ctx, message)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+	fmt.Printf("ID: %s Resp: %s\n", resp.ID, resp.Message)
 }
 ```
 
@@ -379,7 +378,7 @@ and click on the "Go" button at the top of the page.
 European customers will need to change the default API Base to access your domains
 
 ```go
-mg := mailgun.NewMailgun("your-domain.com", "private-api-key")
+mg := mailgun.NewMailgun("private-api-key")
 mg.SetAPIBase(mailgun.APIBaseEU)
 ```
 
@@ -390,7 +389,6 @@ mg.SetAPIBase(mailgun.APIBaseEU)
 To run the tests various environment variables must be set. These are:
 
 * `MG_DOMAIN` is the domain name - this is a value registered in the Mailgun admin interface.
-* `MG_PUBLIC_API_KEY` is the Public Validation API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/settings/api_security)
 * `MG_API_KEY` is the Private API key - you can get this value from the Mailgun [security page](https://app.mailgun.com/settings/api_security)
 * `MG_EMAIL_TO` is the email address used in various sending tests.
 

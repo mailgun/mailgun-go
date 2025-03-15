@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/mailgun/errors"
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,9 +19,11 @@ const (
 )
 
 func TestTags(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
-	msg := mailgun.NewMessage(fromUser, exampleSubject, exampleText, "test@example.com")
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	msg := mailgun.NewMessage(testDomain, fromUser, exampleSubject, exampleText, "test@example.com")
 	require.NoError(t, msg.AddTag("newsletter"))
 	require.NoError(t, msg.AddTag("homer"))
 	require.NoError(t, msg.AddTag("bart"))
@@ -29,37 +32,37 @@ func TestTags(t *testing.T) {
 
 	ctx := context.Background()
 	// Create an email with some tags attached
-	_, _, err := mg.Send(ctx, msg)
+	_, err = mg.Send(ctx, msg)
 	require.NoError(t, err)
 
 	// Wait for the tag to show up
 	require.NoError(t, waitForTag(mg, "newsletter"))
 
 	// Should return a list of available tags
-	it := mg.ListTags(nil)
-	var page []mailgun.Tag
+	it := mg.ListTags(testDomain, nil)
+	var page []mtypes.Tag
 	for it.Next(ctx, &page) {
 		require.True(t, len(page) != 0)
 	}
 	require.NoError(t, it.Err())
 
 	// Should return a limited list of available tags
-	cursor := mg.ListTags(&mailgun.ListTagOptions{Limit: 1})
+	cursor := mg.ListTags(testDomain, &mailgun.ListTagOptions{Limit: 1})
 
-	var tags []mailgun.Tag
+	var tags []mtypes.Tag
 	for cursor.Next(ctx, &tags) {
 		require.Len(t, tags, 1)
 	}
 	require.NoError(t, cursor.Err())
 
-	err = mg.DeleteTag(ctx, "newsletter")
+	err = mg.DeleteTag(ctx, testDomain, "newsletter")
 	require.NoError(t, err)
 
-	tag, err := mg.GetTag(ctx, "homer")
+	tag, err := mg.GetTag(ctx, testDomain, "homer")
 	require.NoError(t, err)
 	assert.Equal(t, "homer", tag.Value)
 
-	_, err = mg.GetTag(ctx, "i-dont-exist")
+	_, err = mg.GetTag(ctx, testDomain, "i-dont-exist")
 	require.NotNil(t, err)
 	assert.Equal(t, 404, mailgun.GetStatusFromErr(err))
 }
@@ -68,7 +71,7 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 	ctx := context.Background()
 	var attempts int
 	for attempts <= 5 {
-		_, err := mg.GetTag(ctx, tag)
+		_, err := mg.GetTag(ctx, testDomain, tag)
 		if err != nil {
 			if mailgun.GetStatusFromErr(err) == 404 {
 				time.Sleep(time.Second * 2)
@@ -86,9 +89,11 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 }
 
 func TestDeleteTag(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
 	ctx := context.Background()
 
-	require.NoError(t, mg.DeleteTag(ctx, "newsletter"))
+	require.NoError(t, mg.DeleteTag(ctx, testDomain, "newsletter"))
 }

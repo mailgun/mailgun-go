@@ -6,43 +6,44 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mailgun/mailgun-go/v4"
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStorage(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-	mg.SetAPIBase(server.URL())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	var ctx = context.Background()
 
-	m := mailgun.NewMessage("root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
-	msg, id, err := mg.Send(ctx, m)
+	m := mailgun.NewMessage(testDomain, "root@"+testDomain, "Subject", "Text Body", "stored@"+testDomain)
+	resp, err := mg.Send(ctx, m)
 	require.NoError(t, err)
 
-	t.Logf("New Email: %s Id: %s\n", msg, id)
+	t.Logf("New Email: %s ID: %s\n", resp.Message, resp.ID)
 
-	url, err := findStoredMessageURL(mg, strings.Trim(id, "<>"))
+	url, err := findStoredMessageURL(mg, strings.Trim(resp.ID, "<>"))
 	require.NoError(t, err)
 
-	resp, err := mg.GetStoredMessage(ctx, url)
+	stored, err := mg.GetStoredMessage(ctx, url)
 	require.NoError(t, err)
 
-	assert.Equal(t, "Subject", resp.Subject)
-	assert.Equal(t, "root@"+testDomain, resp.From)
-	assert.Equal(t, "stored@"+testDomain, resp.Recipients)
+	assert.Equal(t, "Subject", stored.Subject)
+	assert.Equal(t, "root@"+testDomain, stored.From)
+	assert.Equal(t, "stored@"+testDomain, stored.Recipients)
 
-	_, _, err = mg.ReSend(ctx, url, "resend@"+testDomain)
+	_, err = mg.ReSend(ctx, url, "resend@"+testDomain)
 	require.NoError(t, err)
 }
 
 // Tries to locate the first stored event type, returning the associated stored message key.
 func findStoredMessageURL(mg mailgun.Mailgun, id string) (string, error) {
-	it := mg.ListEvents(nil)
+	it := mg.ListEvents(testDomain, nil)
 
-	var page []mailgun.Event
+	var page []events.Event
 	for it.Next(context.Background(), &page) {
 		for _, event := range page {
 			if event.GetName() == events.EventStored && event.GetID() == id {

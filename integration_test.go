@@ -6,10 +6,12 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,13 +22,22 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	opts := mailgun.MetricsOptions{
-		End:      mailgun.RFC2822Time(time.Now().UTC()),
+	domain := os.Getenv("MG_DOMAIN")
+	require.NotEmpty(t, domain)
+
+	opts := mtypes.MetricsRequest{
+		End:      mtypes.RFC2822Time(time.Now().UTC()),
 		Duration: "30d",
-		Pagination: mailgun.MetricsPagination{
+		Pagination: mtypes.MetricsPagination{
 			Limit: 10,
 		},
 	}
+	// filter by domain
+	opts.Filter.BoolGroupAnd = []mtypes.MetricsFilterPredicate{{
+		Attribute:     "domain",
+		Comparator:    "=",
+		LabeledValues: []mtypes.MetricsLabeledValue{{Label: domain, Value: domain}},
+	}}
 
 	iter, err := mg.ListMetrics(opts)
 	require.NoError(t, err)
@@ -36,7 +47,7 @@ func TestIntegrationMailgunImpl_ListMetrics(t *testing.T) {
 	defer cancel()
 
 	for i := 0; i < 2; i++ {
-		var resp mailgun.MetricsResponse
+		var resp mtypes.MetricsResponse
 		more := iter.Next(ctx, &resp)
 		if iter.Err() != nil {
 			require.NoError(t, err)
@@ -67,11 +78,14 @@ func TestIntegrationWebhooksCRUD(t *testing.T) {
 		require.NoError(t, err)
 	}
 
+	domain := os.Getenv("MG_DOMAIN")
+	require.NotEmpty(t, domain)
+
 	const name = "permanent_fail"
 	ctx := context.Background()
 	urls := []string{"https://example.com/1", "https://example.com/2"}
 
-	err = mg.DeleteWebhook(ctx, name)
+	err = mg.DeleteWebhook(ctx, domain, name)
 	if err != nil {
 		// 200 or 404 is expected
 		status := mailgun.GetStatusFromErr(err)
@@ -81,18 +95,18 @@ func TestIntegrationWebhooksCRUD(t *testing.T) {
 
 	defer func() {
 		// Cleanup
-		_ = mg.DeleteWebhook(ctx, name)
+		_ = mg.DeleteWebhook(ctx, domain, name)
 	}()
 
 	// Act
 
-	err = mg.CreateWebhook(ctx, name, urls)
+	err = mg.CreateWebhook(ctx, domain, name, urls)
 	require.NoError(t, err)
 	time.Sleep(3 * time.Second)
 
 	// Assert
 
-	gotUrls, err := mg.GetWebhook(ctx, name)
+	gotUrls, err := mg.GetWebhook(ctx, domain, name)
 	require.NoError(t, err)
 	t.Logf("Webhooks: %v", urls)
 	assert.ElementsMatch(t, urls, gotUrls)

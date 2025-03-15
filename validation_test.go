@@ -4,17 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mailgun/mailgun-go/v4"
+	"github.com/mailgun/mailgun-go/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestValidateEmail(t *testing.T) {
-	mg := mailgun.NewMailgun(testDomain, testKey)
-
-	// TODO(v5): switch to:
-	// mg.SetAPIBase(server.URL())
-	mg.SetAPIBase(server.URL4())
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
 
 	ctx := context.Background()
 

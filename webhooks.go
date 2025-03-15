@@ -10,32 +10,18 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"net/http"
 
-	"github.com/mailgun/mailgun-go/v4/events"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
-
-type UrlOrUrls struct {
-	Urls []string `json:"urls"`
-	Url  string   `json:"url"`
-}
-
-type WebHooksListResponse struct {
-	Webhooks map[string]UrlOrUrls `json:"webhooks"`
-}
-
-type WebHookResponse struct {
-	Webhook UrlOrUrls `json:"webhook"`
-}
 
 // ListWebhooks returns the complete set of webhooks configured for your domain.
 // Note that a zero-length mapping is not an error.
-func (mg *MailgunImpl) ListWebhooks(ctx context.Context) (map[string][]string, error) {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) ListWebhooks(ctx context.Context, domain string) (map[string][]string, error) {
+	r := newHTTPRequest(generateV3DomainsApiUrl(mg, webhooksEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var body WebHooksListResponse
+	var body mtypes.WebHooksListResponse
 	err := getResponseFromJSON(ctx, r, &body)
 	if err != nil {
 		return nil, err
@@ -54,9 +40,9 @@ func (mg *MailgunImpl) ListWebhooks(ctx context.Context) (map[string][]string, e
 }
 
 // CreateWebhook installs a new webhook for your domain.
-func (mg *MailgunImpl) CreateWebhook(ctx context.Context, id string, urls []string) error {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint))
-	r.setClient(mg.Client())
+func (mg *Client) CreateWebhook(ctx context.Context, domain, id string, urls []string) error {
+	r := newHTTPRequest(generateV3DomainsApiUrl(mg, webhooksEndpoint, domain))
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	p.addValue("id", id)
@@ -68,20 +54,20 @@ func (mg *MailgunImpl) CreateWebhook(ctx context.Context, id string, urls []stri
 }
 
 // DeleteWebhook removes the specified webhook from your domain's configuration.
-func (mg *MailgunImpl) DeleteWebhook(ctx context.Context, name string) error {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+func (mg *Client) DeleteWebhook(ctx context.Context, domain, name string) error {
+	r := newHTTPRequest(generateV3DomainsApiUrl(mg, webhooksEndpoint, domain) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }
 
 // GetWebhook retrieves the currently assigned webhook URL associated with the provided type of webhook.
-func (mg *MailgunImpl) GetWebhook(ctx context.Context, name string) ([]string, error) {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+func (mg *Client) GetWebhook(ctx context.Context, domain, name string) ([]string, error) {
+	r := newHTTPRequest(generateV3DomainsApiUrl(mg, webhooksEndpoint, domain) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	var body WebHookResponse
+	var body mtypes.WebHookResponse
 	if err := getResponseFromJSON(ctx, r, &body); err != nil {
 		return nil, err
 	}
@@ -96,9 +82,9 @@ func (mg *MailgunImpl) GetWebhook(ctx context.Context, name string) ([]string, e
 }
 
 // UpdateWebhook replaces one webhook setting for another.
-func (mg *MailgunImpl) UpdateWebhook(ctx context.Context, name string, urls []string) error {
-	r := newHTTPRequest(generateDomainApiUrl(mg, webhooksEndpoint) + "/" + name)
-	r.setClient(mg.Client())
+func (mg *Client) UpdateWebhook(ctx context.Context, domain, name string, urls []string) error {
+	r := newHTTPRequest(generateV3DomainsApiUrl(mg, webhooksEndpoint, domain) + "/" + name)
+	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
 	for _, url := range urls {
@@ -108,22 +94,14 @@ func (mg *MailgunImpl) UpdateWebhook(ctx context.Context, name string, urls []st
 	return err
 }
 
-// Represents the signature portion of the webhook POST body
-type Signature struct {
-	TimeStamp string `json:"timestamp"`
-	Token     string `json:"token"`
-	Signature string `json:"signature"`
-}
+// VerifyWebhookSignature - use this method to parse the webhook signature given as JSON in the webhook response
+func (mg *Client) VerifyWebhookSignature(sig mtypes.Signature) (verified bool, err error) {
+	webhookSigningKey := mg.WebhookSigningKey()
+	if webhookSigningKey == "" {
+		return false, fmt.Errorf("webhook signing key is not set")
+	}
 
-// Represents the JSON payload provided when a Webhook is called by mailgun
-type WebhookPayload struct {
-	Signature Signature      `json:"signature"`
-	EventData events.RawJSON `json:"event-data"`
-}
-
-// Use this method to parse the webhook signature given as JSON in the webhook response
-func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err error) {
-	h := hmac.New(sha256.New, []byte(mg.WebhookSigningKey()))
+	h := hmac.New(sha256.New, []byte(webhookSigningKey))
 
 	_, err = io.WriteString(h, sig.TimeStamp)
 	if err != nil {
@@ -136,33 +114,6 @@ func (mg *MailgunImpl) VerifyWebhookSignature(sig Signature) (verified bool, err
 
 	calculatedSignature := h.Sum(nil)
 	signature, err := hex.DecodeString(sig.Signature)
-	if err != nil {
-		return false, err
-	}
-	if len(calculatedSignature) != len(signature) {
-		return false, nil
-	}
-
-	return subtle.ConstantTimeCompare(signature, calculatedSignature) == 1, nil
-}
-
-// Deprecated: Please use the VerifyWebhookSignature() to parse the latest
-// version of WebHooks from mailgun
-func (mg *MailgunImpl) VerifyWebhookRequest(req *http.Request) (verified bool, err error) {
-	h := hmac.New(sha256.New, []byte(mg.WebhookSigningKey()))
-
-	_, err = io.WriteString(h, req.FormValue("timestamp"))
-	if err != nil {
-		return false, err
-	}
-
-	_, err = io.WriteString(h, req.FormValue("token"))
-	if err != nil {
-		return false, err
-	}
-
-	calculatedSignature := h.Sum(nil)
-	signature, err := hex.DecodeString(req.FormValue("signature"))
 	if err != nil {
 		return false, err
 	}
