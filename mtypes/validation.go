@@ -19,7 +19,7 @@ type ValidateEmailResponse struct {
 	// Result
 	Result string `json:"result"`
 
-	// Risk assessment for the provided email.
+	// Risk assessment for the provided email: low/medium/high/unknown.
 	Risk string `json:"risk"`
 
 	LastSeen int64 `json:"last_seen,omitempty"`
