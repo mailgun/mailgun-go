@@ -8,7 +8,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-// All events returned by the EventIterator conform to this interface
+// Event - all events returned by the EventIterator conform to this interface
 type Event interface {
 	GetName() string
 	SetName(name string)
@@ -18,7 +18,7 @@ type Event interface {
 	SetID(id string)
 }
 
-// A list of all JSON event types returned by the /events API
+// EventNames - a list of all JSON event types returned by the /events API
 var EventNames = map[string]func() Event{
 	"accepted":                 new_(Accepted{}),
 	"clicked":                  new_(Clicked{}),
@@ -60,7 +60,7 @@ func parseResponse(raw []byte) ([]Event, error) {
 	return result, nil
 }
 
-// Given a slice of events.RawJSON events return a slice of Event for each parsed event
+// ParseEvents given a slice of events.RawJSON events return a slice of Event for each parsed event
 func ParseEvents(raw []RawJSON) ([]Event, error) {
 	var result []Event
 	for _, value := range raw {
