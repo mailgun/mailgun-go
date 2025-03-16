@@ -51,8 +51,9 @@ lint: $(GOLINT)
 #	sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
 #	oapi-codegen -config $(TYPES_PATH)/validate_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
 #	rm -rf $(TYPES_PATH)/redocly-mailgun
-.PHONY: get-gen-models
-get-gen-models: gen-models
+# TODO(vtopc): patch array types with `x-go-type-skip-optional-pointer: true`? Or `*[]` -> `[]`?
+.PHONY: get-and-gen-models
+get-and-gen-models: gen-models
 	# inboxready
 	cd $(TYPES_PATH) && git clone --depth 1 git@github.com:mailgun/redocly-mailgun.git
 	sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-final.yaml
@@ -61,3 +62,5 @@ get-gen-models: gen-models
 gen-models:
 	# generate inboxready models
 	oapi-codegen -config $(TYPES_PATH)/inboxready_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-final.yaml
+	# patch slices(`*[]` -> `[]`)
+	sed -i '' 's/\*\[\]/\[\]/' $(TYPES_PATH)/inboxready/model.gen.go

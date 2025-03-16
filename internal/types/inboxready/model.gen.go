@@ -43,15 +43,15 @@ type GithubComMailgunAlertsInternalAPISettingsResponse struct {
 		EventType string `json:"event_type"`
 
 		// ID The unique identifier for the alert settings record.
-		ID *[]int32 `json:"id,omitempty"`
+		ID []int32 `json:"id,omitempty"`
 
 		// Settings This object contains channel-specific settings.
 		Settings struct {
 			// ChannelIDs For slack channel
-			ChannelIDs *[]string `json:"channel_ids,omitempty"`
+			ChannelIDs []string `json:"channel_ids,omitempty"`
 
 			// Emails For email channel
-			Emails *[]string `json:"emails,omitempty"`
+			Emails []string `json:"emails,omitempty"`
 
 			// URL For webhook channel.
 			URL *string `json:"url,omitempty"`
@@ -77,8 +77,8 @@ type GithubComMailgunAlertsInternalAPITestEmailRequest struct {
 // GithubComMailgunAlertsInternalAPITestSlackRequest defines model for github.com-mailgun-alerts-internal-api-TestSlackRequest.
 type GithubComMailgunAlertsInternalAPITestSlackRequest struct {
 	// ChannelIDs If omitted would be taken from the event settings
-	ChannelIDs *[]string `json:"channel_ids,omitempty"`
-	EventType  string    `json:"event_type"`
+	ChannelIDs []string `json:"channel_ids,omitempty"`
+	EventType  string   `json:"event_type"`
 }
 
 // GithubComMailgunAlertsInternalAPITestWebhookRequest defines model for github.com-mailgun-alerts-internal-api-TestWebhookRequest.
@@ -98,10 +98,10 @@ type GithubComMailgunAlertsInternalAPIMutateEventSettingReq struct {
 	// Settings The details pertaining to the specified channel. Please note that the contents of this object differ per channel type.
 	Settings struct {
 		// ChannelIDs For slack channel
-		ChannelIDs *[]string `json:"channel_ids,omitempty"`
+		ChannelIDs []string `json:"channel_ids,omitempty"`
 
 		// Emails For email channel
-		Emails *[]string `json:"emails,omitempty"`
+		Emails []string `json:"emails,omitempty"`
 
 		// URL For webhook channel.
 		URL *string `json:"url,omitempty"`
@@ -120,15 +120,15 @@ type GithubComMailgunAlertsInternalSettingsEventSettings struct {
 	EventType string `json:"event_type"`
 
 	// ID The unique identifier for the alert settings record.
-	ID *[]int32 `json:"id,omitempty"`
+	ID []int32 `json:"id,omitempty"`
 
 	// Settings This object contains channel-specific settings.
 	Settings struct {
 		// ChannelIDs For slack channel
-		ChannelIDs *[]string `json:"channel_ids,omitempty"`
+		ChannelIDs []string `json:"channel_ids,omitempty"`
 
 		// Emails For email channel
-		Emails *[]string `json:"emails,omitempty"`
+		Emails []string `json:"emails,omitempty"`
 
 		// URL For webhook channel.
 		URL *string `json:"url,omitempty"`
