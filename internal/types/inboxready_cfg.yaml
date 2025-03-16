@@ -12,3 +12,5 @@ output-options:
   include-tags:
     - Alerts
   name-normalizer: ToCamelCaseWithInitialisms
+  additional-initialisms:
+    - IDs

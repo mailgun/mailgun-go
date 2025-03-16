@@ -40,7 +40,7 @@ lint: $(GOLINT)
 	$(GOLINT) run
 
 # TODO(Go1.24): move into tools of go.mod(https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#for-go-124)?
-# go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+# go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.2-0.20241128130830-b07f7ea6d520
 #
 # mailgun/api-reference/openapi-final.yaml fails due to interface{} fields
 #	# generate mailgun models
