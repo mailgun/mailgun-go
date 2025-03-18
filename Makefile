@@ -53,7 +53,10 @@ lint: $(GOLINT)
 #	rm -rf $(TYPES_PATH)/redocly-mailgun
 # TODO(vtopc): patch array types with `x-go-type-skip-optional-pointer: true`? Or `*[]` -> `[]`?
 .PHONY: get-and-gen-models
-get-and-gen-models: gen-models
+get-and-gen-models: get-openapi gen-models
+
+.PHONY: get-openapi
+get-openapi:
 	# inboxready
 	cd $(TYPES_PATH) && git clone --depth 1 git@github.com:mailgun/redocly-mailgun.git
 	sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-final.yaml

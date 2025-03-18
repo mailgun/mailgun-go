@@ -18,11 +18,7 @@ type GithubComMailgunAlertsInternalAPIListAlertsEventsResp struct {
 
 // GithubComMailgunAlertsInternalAPIListSlackChannelsResp defines model for github.com-mailgun-alerts-internal-api-ListSlackChannelsResp.
 type GithubComMailgunAlertsInternalAPIListSlackChannelsResp struct {
-	Items []struct {
-		ID         string `json:"id"`
-		IsArchived bool   `json:"is_archived"`
-		Name       string `json:"name"`
-	} `json:"items"`
+	Items []GithubComMailgunAlertsInternalAPISlackChannel `json:"items"`
 }
 
 // GithubComMailgunAlertsInternalAPIResetWebhooksSigningKeyResp defines model for github.com-mailgun-alerts-internal-api-ResetWebhooksSigningKeyResp.
@@ -32,33 +28,9 @@ type GithubComMailgunAlertsInternalAPIResetWebhooksSigningKeyResp struct {
 
 // GithubComMailgunAlertsInternalAPISettingsResponse defines model for github.com-mailgun-alerts-internal-api-SettingsResponse.
 type GithubComMailgunAlertsInternalAPISettingsResponse struct {
-	Events []struct {
-		// Channel The delivery channel for the alert.
-		Channel string `json:"channel"`
-
-		// DisabledAt Read only. When present
-		DisabledAt *time.Time `json:"disabled_at,omitempty"`
-
-		// EventType The event type that is alerted on.
-		EventType string `json:"event_type"`
-
-		// ID The unique identifier for the alert settings record.
-		ID []int32 `json:"id,omitempty"`
-
-		// Settings This object contains channel-specific settings.
-		Settings struct {
-			// ChannelIDs For slack channel
-			ChannelIDs []string `json:"channel_ids,omitempty"`
-
-			// Emails For email channel
-			Emails []string `json:"emails,omitempty"`
-
-			// URL For webhook channel.
-			URL *string `json:"url,omitempty"`
-		} `json:"settings"`
-	} `json:"events"`
-	Slack    GithubComMailgunAlertsInternalSettingsSlack    `json:"slack"`
-	Webhooks GithubComMailgunAlertsInternalSettingsWebhooks `json:"webhooks"`
+	Events   []GithubComMailgunAlertsInternalSettingsEventSettings `json:"events"`
+	Slack    GithubComMailgunAlertsInternalSettingsSlack           `json:"slack"`
+	Webhooks GithubComMailgunAlertsInternalSettingsWebhooks        `json:"webhooks"`
 }
 
 // GithubComMailgunAlertsInternalAPISlackChannel defines model for github.com-mailgun-alerts-internal-api-SlackChannel.
@@ -96,16 +68,19 @@ type GithubComMailgunAlertsInternalAPIMutateEventSettingReq struct {
 	EventType string `json:"event_type"`
 
 	// Settings The details pertaining to the specified channel. Please note that the contents of this object differ per channel type.
-	Settings struct {
-		// ChannelIDs For slack channel
-		ChannelIDs []string `json:"channel_ids,omitempty"`
+	Settings GithubComMailgunAlertsInternalSettingsChannelSettings `json:"settings"`
+}
 
-		// Emails For email channel
-		Emails []string `json:"emails,omitempty"`
+// GithubComMailgunAlertsInternalSettingsChannelSettings defines model for github.com-mailgun-alerts-internal-settings-ChannelSettings.
+type GithubComMailgunAlertsInternalSettingsChannelSettings struct {
+	// ChannelIDs For slack channel
+	ChannelIDs []string `json:"channel_ids,omitempty"`
 
-		// URL For webhook channel.
-		URL *string `json:"url,omitempty"`
-	} `json:"settings"`
+	// Emails For email channel
+	Emails []string `json:"emails,omitempty"`
+
+	// URL For webhook channel.
+	URL *string `json:"url,omitempty"`
 }
 
 // GithubComMailgunAlertsInternalSettingsEventSettings defines model for github.com-mailgun-alerts-internal-settings-EventSettings.
@@ -123,16 +98,7 @@ type GithubComMailgunAlertsInternalSettingsEventSettings struct {
 	ID []int32 `json:"id,omitempty"`
 
 	// Settings This object contains channel-specific settings.
-	Settings struct {
-		// ChannelIDs For slack channel
-		ChannelIDs []string `json:"channel_ids,omitempty"`
-
-		// Emails For email channel
-		Emails []string `json:"emails,omitempty"`
-
-		// URL For webhook channel.
-		URL *string `json:"url,omitempty"`
-	} `json:"settings"`
+	Settings GithubComMailgunAlertsInternalSettingsChannelSettings `json:"settings"`
 }
 
 // GithubComMailgunAlertsInternalSettingsSlack defines model for github.com-mailgun-alerts-internal-settings-Slack.
