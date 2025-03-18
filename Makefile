@@ -38,19 +38,28 @@ $(GOLINT):
 lint: $(GOLINT)
 	$(GOLINT) run
 
-# go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-#
-# mailgun/api-reference/openapi-final.yaml fails due to interface{} fields
+
 #	# generate mailgun models
 #	cd $(TYPES_PATH)/redocly-mailgun/docs/mailgun/api-reference/ && sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' openapi-final.yaml
 #	oapi-codegen -config $(TYPES_PATH)/mailgun_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/mailgun/api-reference/openapi-final.yaml
+#
+# Currently, the ValidateEmailResponse is described here better, than in the OpenAPI documentation.
+.PHONY: get-and-gen-models
+get-and-gen-models: get-openapi gen-models
+
+.PHONY: get-openapi
+get-openapi:
+	# inboxready
+	cd $(TYPES_PATH) && git clone --depth 1 git@github.com:mailgun/redocly-mailgun.git
+
+# https://github.com/OpenAPITools/openapi-generator
+# brew install openapi-generator
 .PHONY: gen-models
 gen-models:
-	cd $(TYPES_PATH) && git clone --depth 1 git@github.com:mailgun/redocly-mailgun.git
 	# generate inboxready models
-	sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-final.yaml
-	oapi-codegen -config $(TYPES_PATH)/inboxready_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-final.yaml
-	# generate validate models
-	sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
-	oapi-codegen -config $(TYPES_PATH)/validate_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
-	rm -rf $(TYPES_PATH)/redocly-mailgun
+	openapi-generator generate \
+		-i $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-final.yaml \
+		-g go \
+		-o $(TYPES_PATH)/inboxready/ \
+		--package-name inboxready \
+		--skip-validate-spec
