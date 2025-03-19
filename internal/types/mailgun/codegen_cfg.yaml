@@ -4,3 +4,12 @@ output: ./internal/types/mailgun/model.gen.go
 generate:
   models: true
   client: false
+
+compatibility:
+  disable-required-readonly-as-pointer: true
+
+output-options:
+  name-normalizer: ToCamelCaseWithInitialisms
+  additional-initialisms:
+    - IDs
+    - IPs

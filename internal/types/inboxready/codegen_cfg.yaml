@@ -4,3 +4,14 @@ output: ./internal/types/inboxready/model.gen.go
 generate:
   models: true
   client: false
+
+compatibility:
+  disable-required-readonly-as-pointer: true
+
+output-options:
+  include-tags:
+    - Alerts
+  name-normalizer: ToCamelCaseWithInitialisms
+  additional-initialisms:
+    - IDs
+    - IPs
