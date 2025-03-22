@@ -13,6 +13,99 @@ const (
 	BasicAuthScopes = "basicAuth.Scopes"
 )
 
+// InboxReadyGithubComMailgunInboxreadyAPIAddDomainResponse defines model for Inbox_Ready_github.com-mailgun-inboxready-api-AddDomainResponse.
+type InboxReadyGithubComMailgunInboxreadyAPIAddDomainResponse struct {
+	Domain  InboxReadyGithubComMailgunInboxreadyModelDomain `json:"domain"`
+	Message string                                          `json:"message"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyAPICreateIPAddressReq defines model for Inbox_Ready_github.com-mailgun-inboxready-api-CreateIPAddressReq.
+type InboxReadyGithubComMailgunInboxreadyAPICreateIPAddressReq struct {
+	Description string `json:"description"`
+	IP          string `json:"ip"`
+	IPPool      string `json:"ip_pool"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyAPIDeleteDomainResponse defines model for Inbox_Ready_github.com-mailgun-inboxready-api-DeleteDomainResponse.
+type InboxReadyGithubComMailgunInboxreadyAPIDeleteDomainResponse struct {
+	Message string `json:"message"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyAPIDomainListResponse defines model for Inbox_Ready_github.com-mailgun-inboxready-api-DomainListResponse.
+type InboxReadyGithubComMailgunInboxreadyAPIDomainListResponse struct {
+	Items  []InboxReadyGithubComMailgunInboxreadyModelDomain              `json:"items"`
+	Paging *InboxReadyGithubComMailgunScaffoldHttpapiPagingPagingResponse `json:"paging,omitempty"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyAPIInboxReadyVerifyDomainResponse defines model for Inbox_Ready_github.com-mailgun-inboxready-api-InboxReadyVerifyDomainResponse.
+type InboxReadyGithubComMailgunInboxreadyAPIInboxReadyVerifyDomainResponse struct {
+	Message string `json:"message"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyAPIListIPAddressesResp defines model for Inbox_Ready_github.com-mailgun-inboxready-api-ListIPAddressesResp.
+type InboxReadyGithubComMailgunInboxreadyAPIListIPAddressesResp struct {
+	Items []InboxReadyGithubComMailgunInboxreadyClientsMedicIPAddress `json:"items"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyAPIUpdateIPAddressReq defines model for Inbox_Ready_github.com-mailgun-inboxready-api-UpdateIPAddressReq.
+type InboxReadyGithubComMailgunInboxreadyAPIUpdateIPAddressReq struct {
+	Description string `json:"description"`
+	IPPool      string `json:"ip_pool"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyClientsMedicBlacklist defines model for Inbox_Ready_github.com-mailgun-inboxready-clients-medic-Blacklist.
+type InboxReadyGithubComMailgunInboxreadyClientsMedicBlacklist struct {
+	Comments          []string   `json:"comments"`
+	DelistRequestedAt time.Time  `json:"delist_requested_at"`
+	FirstSeen         *time.Time `json:"first_seen,omitempty"`
+	LastSeen          time.Time  `json:"last_seen"`
+	List              string     `json:"list"`
+	Name              *string    `json:"name,omitempty"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyClientsMedicIPAddress defines model for Inbox_Ready_github.com-mailgun-inboxready-clients-medic-IPAddress.
+type InboxReadyGithubComMailgunInboxreadyClientsMedicIPAddress struct {
+	Description string                                                      `json:"description"`
+	IP          string                                                      `json:"ip"`
+	IPPool      string                                                      `json:"ip_pool"`
+	Listed      []InboxReadyGithubComMailgunInboxreadyClientsMedicBlacklist `json:"listed"`
+	State       string                                                      `json:"state"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyModelDomain defines model for Inbox_Ready_github.com-mailgun-inboxready-model-Domain.
+type InboxReadyGithubComMailgunInboxreadyModelDomain struct {
+	ID        string                                            `json:"ID"`
+	CreatedAt int64                                             `json:"created_at"`
+	Name      string                                            `json:"name"`
+	Services  map[string]bool                                   `json:"services"`
+	TxtRecord string                                            `json:"txt_record"`
+	Verified  InboxReadyGithubComMailgunInboxreadyModelVerified `json:"verified"`
+}
+
+// InboxReadyGithubComMailgunInboxreadyModelVerified defines model for Inbox_Ready_github.com-mailgun-inboxready-model-Verified.
+type InboxReadyGithubComMailgunInboxreadyModelVerified struct {
+	Status     string `json:"status"`
+	VerifiedAt int64  `json:"verified_at"`
+}
+
+// InboxReadyGithubComMailgunScaffoldHttpapiGenericAPIError defines model for Inbox_Ready_github.com-mailgun-scaffold-httpapi-GenericAPIError.
+type InboxReadyGithubComMailgunScaffoldHttpapiGenericAPIError struct {
+	Reason string `json:"Reason"`
+}
+
+// InboxReadyGithubComMailgunScaffoldHttpapiGenericResponse defines model for Inbox_Ready_github.com-mailgun-scaffold-httpapi-GenericResponse.
+type InboxReadyGithubComMailgunScaffoldHttpapiGenericResponse struct {
+	Message string `json:"message"`
+}
+
+// InboxReadyGithubComMailgunScaffoldHttpapiPagingPagingResponse defines model for Inbox_Ready_github.com-mailgun-scaffold-httpapi-paging-PagingResponse.
+type InboxReadyGithubComMailgunScaffoldHttpapiPagingPagingResponse struct {
+	First    string `json:"first"`
+	Last     string `json:"last"`
+	Next     string `json:"next"`
+	Previous string `json:"previous"`
+}
+
 // GithubComMailgunAlertsInternalAPIListAlertsEventsResp defines model for github.com-mailgun-alerts-internal-api-ListAlertsEventsResp.
 type GithubComMailgunAlertsInternalAPIListAlertsEventsResp struct {
 	Events []string `json:"events"`
@@ -121,6 +214,36 @@ type GithubComMailgunScaffoldHttpapiGenericResponse struct {
 	Message string `json:"message"`
 }
 
+// DELETEV1InboxreadyDomainsParams defines parameters for DELETEV1InboxreadyDomains.
+type DELETEV1InboxreadyDomainsParams struct {
+	// Domain Domain name
+	Domain string `form:"domain" json:"domain"`
+}
+
+// GETV1InboxreadyDomainsParams defines parameters for GETV1InboxreadyDomains.
+type GETV1InboxreadyDomainsParams struct {
+	// Domain Domain name
+	Domain *string `form:"domain,omitempty" json:"domain,omitempty"`
+}
+
+// POSTV1InboxreadyDomainsParams defines parameters for POSTV1InboxreadyDomains.
+type POSTV1InboxreadyDomainsParams struct {
+	// Domain Domain name
+	Domain string `form:"domain" json:"domain"`
+}
+
+// PUTV1InboxreadyDomainsVerifyParams defines parameters for PUTV1InboxreadyDomainsVerify.
+type PUTV1InboxreadyDomainsVerifyParams struct {
+	// Domain Domain name
+	Domain string `form:"domain" json:"domain"`
+}
+
+// GETV1InboxreadyIPAddressesParams defines parameters for GETV1InboxreadyIPAddresses.
+type GETV1InboxreadyIPAddressesParams struct {
+	// Limit Limit
+	Limit *string `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // POSTV1AlertsEmailTestJSONRequestBody defines body for POSTV1AlertsEmailTest for application/json ContentType.
 type POSTV1AlertsEmailTestJSONRequestBody = GithubComMailgunAlertsInternalAPITestEmailRequest
 
@@ -138,3 +261,9 @@ type POSTV1AlertsSlackTestJSONRequestBody = GithubComMailgunAlertsInternalAPITes
 
 // POSTV1AlertsWebhooksTestJSONRequestBody defines body for POSTV1AlertsWebhooksTest for application/json ContentType.
 type POSTV1AlertsWebhooksTestJSONRequestBody = GithubComMailgunAlertsInternalAPITestWebhookRequest
+
+// POSTV1InboxreadyIPAddressesJSONRequestBody defines body for POSTV1InboxreadyIPAddresses for application/json ContentType.
+type POSTV1InboxreadyIPAddressesJSONRequestBody = InboxReadyGithubComMailgunInboxreadyAPICreateIPAddressReq
+
+// PUTV1InboxreadyIPAddressesIPJSONRequestBody defines body for PUTV1InboxreadyIPAddressesIP for application/json ContentType.
+type PUTV1InboxreadyIPAddressesIPJSONRequestBody = InboxReadyGithubComMailgunInboxreadyAPIUpdateIPAddressReq
