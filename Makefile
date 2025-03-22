@@ -69,7 +69,7 @@ convert-openapi:
 #  go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.2-0.20241128130830-b07f7ea6d520
 #
 # ValidateEmailResponse is described here better, than in the OpenAPI documentation, so we are not generating it.
-# TODO(vtopc): add gen-mailgun-models
+# TODO(v6?): add gen-mailgun-models
 .PHONY: gen-models
 gen-models: gen-inboxready-models
 
