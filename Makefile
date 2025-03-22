@@ -39,14 +39,7 @@ $(GOLINT):
 lint: $(GOLINT)
 	$(GOLINT) run
 
-# mailgun/api-reference/openapi-final.yaml fails due to interface{} fields
-#	# generate mailgun models
-#	cd $(TYPES_PATH)/redocly-mailgun/docs/mailgun/api-reference/ && sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' openapi-final.yaml
-#	oapi-codegen -config $(TYPES_PATH)/mailgun_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/mailgun/api-reference/openapi-final.yaml
-#	# generate validate models
-#	sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
-#	oapi-codegen -config $(TYPES_PATH)/validate_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
-#	rm -rf $(TYPES_PATH)/redocly-mailgun
+## Download OpenAPI 3.1 spec files and generate models
 .PHONY: get-and-gen-models
 get-and-gen-models: get-openapi convert-openapi gen-models
 
