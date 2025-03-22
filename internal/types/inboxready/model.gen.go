@@ -5,6 +5,8 @@ package inboxready
 
 import (
 	"time"
+
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 const (
@@ -95,7 +97,7 @@ type GithubComMailgunAlertsInternalSettingsEventSettings struct {
 	EventType string `json:"event_type"`
 
 	// ID The unique identifier for the alert settings record.
-	ID []int32 `json:"id,omitempty"`
+	ID *openapi_types.UUID `json:"id,omitempty"`
 
 	// Settings This object contains channel-specific settings.
 	Settings GithubComMailgunAlertsInternalSettingsChannelSettings `json:"settings"`
