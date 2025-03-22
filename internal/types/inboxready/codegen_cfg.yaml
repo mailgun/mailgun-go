@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
-package: inboxready
+package: inboxready # rename to mgo(Mailgun Optimize)?
 output: ./internal/types/inboxready/model.gen.go
 generate:
   models: true
@@ -11,6 +11,8 @@ compatibility:
 output-options:
   include-tags:
     - Alerts
+    - Domains # Blocklist Monitoring
+    - IP Blocklist Monitoring
   name-normalizer: ToCamelCaseWithInitialisms
   additional-initialisms:
     - IDs

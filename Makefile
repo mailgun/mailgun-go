@@ -39,14 +39,7 @@ $(GOLINT):
 lint: $(GOLINT)
 	$(GOLINT) run
 
-# mailgun/api-reference/openapi-final.yaml fails due to interface{} fields
-#	# generate mailgun models
-#	cd $(TYPES_PATH)/redocly-mailgun/docs/mailgun/api-reference/ && sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' openapi-final.yaml
-#	oapi-codegen -config $(TYPES_PATH)/mailgun_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/mailgun/api-reference/openapi-final.yaml
-#	# generate validate models
-#	sed -i '' 's/openapi: 3.1.0/openapi: 3.0.0/' $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
-#	oapi-codegen -config $(TYPES_PATH)/validate_cfg.yaml $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-validate-final.yaml
-#	rm -rf $(TYPES_PATH)/redocly-mailgun
+## Download OpenAPI 3.1 spec files and generate models
 .PHONY: get-and-gen-models
 get-and-gen-models: get-openapi convert-openapi gen-models
 
@@ -69,7 +62,7 @@ convert-openapi:
 #  go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.2-0.20241128130830-b07f7ea6d520
 #
 # ValidateEmailResponse is described here better, than in the OpenAPI documentation, so we are not generating it.
-# TODO(vtopc): add gen-mailgun-models
+# TODO(v6?): call gen-mailgun-models
 .PHONY: gen-models
 gen-models: gen-inboxready-models
 
@@ -82,10 +75,9 @@ gen-mailgun-models:
 	# patch maps(`*map` -> `map`)
 	sed -i '' 's/\*map/map/' $(TYPES_PATH)/mailgun/model.gen.go
 
-## Generate Mailgun Send models
+## Generate Mailgun Optimize models
 .PHONY: gen-inboxready-models
 gen-inboxready-models:
-	# generate Mailgun Optimize models
 	oapi-codegen -config $(TYPES_PATH)/inboxready/codegen_cfg.yaml $(TYPES_PATH)/inboxready/openapi_3.0.yaml
 	# TODO(vtopc): fix pointers to slices and maps with oapi-codegen's `x-go-type-skip-optional-pointer: true`?
 	# patch slices(`*[]` -> `[]`)
