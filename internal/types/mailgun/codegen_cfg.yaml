@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/HEAD/configuration-schema.json
-package: mailgun
+package: mailgun # rename to mgs(Mailgun Send)?
 output: ./internal/types/mailgun/model.gen.go
 generate:
   models: true

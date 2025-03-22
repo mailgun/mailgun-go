@@ -82,10 +82,9 @@ gen-mailgun-models:
 	# patch maps(`*map` -> `map`)
 	sed -i '' 's/\*map/map/' $(TYPES_PATH)/mailgun/model.gen.go
 
-## Generate Mailgun Send models
+## Generate Mailgun Optimize models
 .PHONY: gen-inboxready-models
 gen-inboxready-models:
-	# generate Mailgun Optimize models
 	oapi-codegen -config $(TYPES_PATH)/inboxready/codegen_cfg.yaml $(TYPES_PATH)/inboxready/openapi_3.0.yaml
 	# TODO(vtopc): fix pointers to slices and maps with oapi-codegen's `x-go-type-skip-optional-pointer: true`?
 	# patch slices(`*[]` -> `[]`)
