@@ -27,6 +27,13 @@ func TestTags(t *testing.T) {
 	require.NoError(t, msg.AddTag("newsletter"))
 	require.NoError(t, msg.AddTag("homer"))
 	require.NoError(t, msg.AddTag("bart"))
+	require.NoError(t, msg.AddTag("marge"))
+	require.NoError(t, msg.AddTag("lisa"))
+	require.NoError(t, msg.AddTag("maggie"))
+	require.NoError(t, msg.AddTag("burns"))
+	require.NoError(t, msg.AddTag("milhouse"))
+	require.NoError(t, msg.AddTag("moe"))
+	require.NoError(t, msg.AddTag("selma"))
 	require.NotNil(t, msg.AddTag("disco-steve"))
 	require.NotNil(t, msg.AddTag("newsletter"))
 

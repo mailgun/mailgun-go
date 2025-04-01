@@ -19,7 +19,7 @@ import (
 const MaxNumberOfRecipients = 1000
 
 // MaxNumberOfTags represents the maximum number of tags that can be added for a message
-const MaxNumberOfTags = 3
+const MaxNumberOfTags = 10
 
 // CommonMessage structures contain both the message text and the envelope for an e-mail message.
 type CommonMessage struct {
