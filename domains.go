@@ -278,3 +278,21 @@ func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDom
 
 	return err
 }
+
+// ListIPDomains retrieves a list of domains for the specified IP address.
+func (mg *Client) ListIPDomains(ip string, opts *ListDomainsOptions) *DomainsIterator {
+	var limit int
+	if opts != nil {
+		limit = opts.Limit
+	}
+
+	if limit == 0 {
+		limit = 100
+	}
+	return &DomainsIterator{
+		mg:                  mg,
+		url:                 generateApiUrl(mg, 3, ipsEndpoint) + "/" + ip + "/domains",
+		ListDomainsResponse: mtypes.ListDomainsResponse{TotalCount: -1},
+		limit:               limit,
+	}
+}
