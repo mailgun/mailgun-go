@@ -117,7 +117,7 @@ func TestListIPDomains(t *testing.T) {
 	ctx := context.Background()
 
 	it := mg.ListIPDomains("192.172.1.1", nil)
-	var page []mtypes.Domain
+	var page []mtypes.DomainIPs
 	for it.Next(ctx, &page) {
 		for _, d := range page {
 			t.Logf("TestListDomains: %#v\n", d)

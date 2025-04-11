@@ -146,9 +146,12 @@ func (ms *Server) listIPDomains(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	var list []mtypes.Domain
+	var list []mtypes.DomainIPs
 	for _, domain := range ms.domainList {
-		list = append(list, domain.Domain)
+		list = append(list, mtypes.DomainIPs{
+			Domain: domain.Domain.Name,
+			IPs:    ms.domainIPS,
+		})
 	}
 
 	skip := stringToInt(r.FormValue("skip"))
@@ -168,14 +171,14 @@ func (ms *Server) listIPDomains(w http.ResponseWriter, r *http.Request) {
 
 	// If we are at the end of the list
 	if skip == end {
-		toJSON(w, mtypes.ListDomainsResponse{
+		toJSON(w, mtypes.ListIPDomainsResponse{
 			TotalCount: len(list),
-			Items:      []mtypes.Domain{},
+			Items:      []mtypes.DomainIPs{},
 		})
 		return
 	}
 
-	toJSON(w, mtypes.ListDomainsResponse{
+	toJSON(w, mtypes.ListIPDomainsResponse{
 		TotalCount: len(list),
 		Items:      list[skip:end],
 	})
