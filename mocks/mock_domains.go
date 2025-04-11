@@ -99,8 +99,6 @@ func (ms *Server) addDomainRoutes(r chi.Router) {
 	r.Get("/v3/domains/{domain}/limits/tag", ms.getTagLimits)
 
 	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
-
-	r.Get("/v3/ips/{ip}/domains", ms.listIPDomains)
 }
 
 func (ms *Server) listDomains(w http.ResponseWriter, r *http.Request) {
@@ -137,48 +135,6 @@ func (ms *Server) listDomains(w http.ResponseWriter, r *http.Request) {
 	}
 
 	toJSON(w, mtypes.ListDomainsResponse{
-		TotalCount: len(list),
-		Items:      list[skip:end],
-	})
-}
-
-func (ms *Server) listIPDomains(w http.ResponseWriter, r *http.Request) {
-	defer ms.mutex.Unlock()
-	ms.mutex.Lock()
-
-	var list []mtypes.DomainIPs
-	for _, domain := range ms.domainList {
-		list = append(list, mtypes.DomainIPs{
-			Domain: domain.Domain.Name,
-			IPs:    ms.domainIPS,
-		})
-	}
-
-	skip := stringToInt(r.FormValue("skip"))
-	limit := stringToInt(r.FormValue("limit"))
-	if limit == 0 {
-		limit = 100
-	}
-
-	if skip > len(list) {
-		skip = len(list)
-	}
-
-	end := limit + skip
-	if end > len(list) {
-		end = len(list)
-	}
-
-	// If we are at the end of the list
-	if skip == end {
-		toJSON(w, mtypes.ListIPDomainsResponse{
-			TotalCount: len(list),
-			Items:      []mtypes.DomainIPs{},
-		})
-		return
-	}
-
-	toJSON(w, mtypes.ListIPDomainsResponse{
 		TotalCount: len(list),
 		Items:      list[skip:end],
 	})
