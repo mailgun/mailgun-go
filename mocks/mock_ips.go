@@ -16,6 +16,7 @@ func (ms *Server) addIPRoutes(r chi.Router) {
 		r.Post("/", ms.postDomainIPS)
 		r.Delete("/{ip}", ms.deleteDomainIPS)
 	})
+	r.Get("/ips/{ip}/domains", ms.listIPDomains)
 }
 
 func (ms *Server) listIPS(w http.ResponseWriter, _ *http.Request) {
@@ -69,4 +70,46 @@ func (ms *Server) deleteDomainIPS(w http.ResponseWriter, r *http.Request) {
 	// Not the actual error returned by the mailgun API
 	w.WriteHeader(http.StatusNotFound)
 	toJSON(w, okResp{Message: "ip not found"})
+}
+
+func (ms *Server) listIPDomains(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	var list []mtypes.DomainIPs
+	for _, domain := range ms.domainList {
+		list = append(list, mtypes.DomainIPs{
+			Domain: domain.Domain.Name,
+			IPs:    ms.domainIPS,
+		})
+	}
+
+	skip := stringToInt(r.FormValue("skip"))
+	limit := stringToInt(r.FormValue("limit"))
+	if limit == 0 {
+		limit = 100
+	}
+
+	if skip > len(list) {
+		skip = len(list)
+	}
+
+	end := limit + skip
+	if end > len(list) {
+		end = len(list)
+	}
+
+	// If we are at the end of the list
+	if skip == end {
+		toJSON(w, mtypes.ListIPDomainsResponse{
+			TotalCount: len(list),
+			Items:      []mtypes.DomainIPs{},
+		})
+		return
+	}
+
+	toJSON(w, mtypes.ListIPDomainsResponse{
+		TotalCount: len(list),
+		Items:      list[skip:end],
+	})
 }

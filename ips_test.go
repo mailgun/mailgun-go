@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -49,4 +50,23 @@ func TestDomainIPs(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, list, 0)
+}
+
+func TestListIPDomains(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	it := mg.ListIPDomains("192.172.1.1", nil)
+	var page []mtypes.DomainIPs
+	for it.Next(ctx, &page) {
+		for _, d := range page {
+			t.Logf("TestListDomains: %#v\n", d)
+		}
+	}
+	t.Logf("TestListDomains: %d domains retrieved\n", it.TotalCount)
+	require.NoError(t, it.Err())
+	assert.True(t, it.TotalCount != 0)
 }
