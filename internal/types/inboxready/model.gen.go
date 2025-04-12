@@ -74,7 +74,6 @@ type InboxReadyGithubComMailgunInboxreadyClientsMedicIPAddress struct {
 
 // InboxReadyGithubComMailgunInboxreadyModelDomain defines model for Inbox_Ready_github.com-mailgun-inboxready-model-Domain.
 type InboxReadyGithubComMailgunInboxreadyModelDomain struct {
-	ID        string                                            `json:"ID"`
 	CreatedAt int64                                             `json:"created_at"`
 	Name      string                                            `json:"name"`
 	Services  map[string]bool                                   `json:"services"`
@@ -184,7 +183,7 @@ type GithubComMailgunAlertsInternalSettingsEventSettings struct {
 	Channel string `json:"channel"`
 
 	// DisabledAt Read only. When present
-	DisabledAt *time.Time `json:"disabled_at,omitempty"`
+	DisabledAt *time.Time `json:"disabled_at"`
 
 	// EventType The event type that is alerted on.
 	EventType string `json:"event_type"`
@@ -198,10 +197,10 @@ type GithubComMailgunAlertsInternalSettingsEventSettings struct {
 
 // GithubComMailgunAlertsInternalSettingsSlack defines model for github.com-mailgun-alerts-internal-settings-Slack.
 type GithubComMailgunAlertsInternalSettingsSlack struct {
-	Scope    string `json:"scope"`
-	TeamID   string `json:"team_id"`
-	TeamName string `json:"team_name"`
-	Token    string `json:"token"`
+	Scope    *string `json:"scope"`
+	TeamID   *string `json:"team_id"`
+	TeamName *string `json:"team_name"`
+	Token    string  `json:"token"`
 }
 
 // GithubComMailgunAlertsInternalSettingsWebhooks defines model for github.com-mailgun-alerts-internal-settings-Webhooks.

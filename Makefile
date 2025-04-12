@@ -79,8 +79,8 @@ gen-mailgun-models:
 .PHONY: gen-inboxready-models
 gen-inboxready-models:
 	oapi-codegen -config $(TYPES_PATH)/inboxready/codegen_cfg.yaml $(TYPES_PATH)/inboxready/openapi_3.0.yaml
-	# TODO(vtopc): fix pointers to slices and maps with oapi-codegen's `x-go-type-skip-optional-pointer: true`?
 	# patch slices(`*[]` -> `[]`)
 	sed -i '' 's/\*\[\]/\[\]/' $(TYPES_PATH)/inboxready/model.gen.go
 	# patch maps(`*map` -> `map`)
 	sed -i '' 's/\*map/map/' $(TYPES_PATH)/inboxready/model.gen.go
+	gofmt -w $(TYPES_PATH)/inboxready/

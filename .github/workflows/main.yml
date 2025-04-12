@@ -5,6 +5,11 @@ on:
   push:
     branches: [ master, main ]
 
+# Cancels any in-flight actions if the PR is updated before jobs complete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: test
@@ -13,13 +18,13 @@ jobs:
         go-version:
           - 1.22.x
           - 1.23.x
+          # TODO: bump golangci-lint first
+          # - 1.24.x
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # for golangci-lint's -new-from-rev
 
       - name: Set up Go
         uses: actions/setup-go@v5
