@@ -83,3 +83,4 @@ gen-inboxready-models:
 	sed -i '' 's/\*\[\]/\[\]/' $(TYPES_PATH)/inboxready/model.gen.go
 	# patch maps(`*map` -> `map`)
 	sed -i '' 's/\*map/map/' $(TYPES_PATH)/inboxready/model.gen.go
+	gofmt -w $(TYPES_PATH)/inboxready/
