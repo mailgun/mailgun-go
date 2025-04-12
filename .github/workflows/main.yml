@@ -5,6 +5,11 @@ on:
   push:
     branches: [ master, main ]
 
+# Cancels any in-flight actions if the PR is updated before jobs complete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: test
