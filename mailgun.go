@@ -95,8 +95,13 @@ const (
 	APIBaseUS = APIBase
 	APIBaseEU = "https://api.eu.mailgun.net"
 
-	basicAuthUser = "api"
+	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
 
+	basicAuthUser = "api"
+)
+
+// Mailgun Send endpoints
+const (
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
@@ -113,8 +118,11 @@ const (
 	templatesEndpoint    = "templates"
 	accountsEndpoint     = "accounts"
 	subaccountsEndpoint  = "subaccounts"
+)
 
-	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
+// Mailgun Optimize endpoints
+const (
+	inboxreadyDomainsEndpoint = "/v1/inboxready/domains"
 )
 
 // Mailgun defines the supported subset of the Mailgun API.
