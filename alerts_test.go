@@ -11,6 +11,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestListAlerts(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	resp, err := mg.ListAlerts(context.Background(), nil)
+	require.NoError(t, err)
+	assert.Len(t, resp.Events, 2)
+}
+
 func TestAddAlert(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
