@@ -5,3 +5,5 @@ import (
 )
 
 type AlertsEventsResponse = inboxready.GithubComMailgunAlertsInternalAPIListAlertsEventsResp
+
+type AlertsSettingsResponse = inboxready.GithubComMailgunAlertsInternalAPISettingsResponse

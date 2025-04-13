@@ -245,6 +245,7 @@ type Mailgun interface {
 	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (mtypes.ValidateEmailResponse, error)
 
 	ListAlertsEvents(context.Context, *ListAlertEventsOptions) (*mtypes.AlertsEventsResponse, error)
+	ListAlertsSettings(ctx context.Context, _ *ListAlertEventsOptions) (*mtypes.AlertsSettingsResponse, error)
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error)
