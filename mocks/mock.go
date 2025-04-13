@@ -125,9 +125,13 @@ func NewServer() *Server {
 	r.Route("/v5", func(r chi.Router) {
 		ms.addSubaccountRoutes(r)
 	})
+
+	// self defined API version routes
+
 	ms.addDomainRoutes(r) // mix of v3 and v4
 	ms.addValidationRoutes(r)
 	ms.addAnalyticsRoutes(r)
+	ms.addAlertsRoutes(r)
 
 	// Start the server
 	ms.srv = httptest.NewServer(r)
@@ -141,6 +145,19 @@ func (ms *Server) Stop() {
 
 func (ms *Server) URL() string {
 	return ms.srv.URL
+}
+
+func (ms *Server) ok(w http.ResponseWriter, _ *http.Request) {
+	resp := okResp{
+		Message: "OK",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	toJSON(w, resp)
+}
+
+func (ms *Server) noContent(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func toJSON(w http.ResponseWriter, obj any) {

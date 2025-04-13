@@ -83,6 +83,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
@@ -243,6 +244,11 @@ type Mailgun interface {
 	ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator
 
 	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (mtypes.ValidateEmailResponse, error)
+
+	ListAlertsEvents(context.Context, *ListAlertsEventsOptions) (*mtypes.AlertsEventsResponse, error)
+	ListAlerts(context.Context, *ListAlertsOptions) (*mtypes.AlertsSettingsResponse, error)
+	AddAlert(context.Context, mtypes.AlertsEventSettingRequest) (*mtypes.AlertsEventSettingResponse, error)
+	DeleteAlert(ctx context.Context, id uuid.UUID) error
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error)
