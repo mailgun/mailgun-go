@@ -46,3 +46,12 @@ func TestAddAlert(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, wantResp, *resp)
 }
+
+func TestDeleteAlert(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	err = mg.DeleteAlert(context.Background(), uuid.New())
+	require.NoError(t, err)
+}

@@ -15,6 +15,8 @@ var alertID = uuid.MustParse("12345678-1234-5678-1234-123456789012")
 func (ms *Server) addAlertsRoutes(r chi.Router) {
 	r.Get("/v1/"+mtypes.AlertsSettingsEndpoint, ms.listAlerts)
 	r.Post("/v1/"+mtypes.AlertsSettingsEndpoint, ms.addAlert)
+	r.Delete("/v1/"+mtypes.AlertsSettingsEndpoint+
+		`/{id:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}}`, ms.ok)
 }
 
 func (ms *Server) listAlerts(w http.ResponseWriter, _ *http.Request) {
