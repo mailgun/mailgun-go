@@ -7,6 +7,7 @@ import (
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
+// TODO(vtopc): move to mtypes?
 const metricsEndpoint = "analytics/metrics"
 
 func (ms *Server) addAnalyticsRoutes(r chi.Router) {
