@@ -1,8 +1,11 @@
 package mailgun
 
+// https://documentation.mailgun.com/docs/inboxready/openapi-final/tag/Alerts/
+
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
@@ -53,4 +56,14 @@ func (mg *Client) AddAlert(ctx context.Context, req mtypes.AlertsEventSettingReq
 	}
 
 	return &resp, nil
+}
+
+func (mg *Client) DeleteAlert(ctx context.Context, id uuid.UUID) error {
+	r := newHTTPRequest(generateApiUrl(mg, mtypes.AlertsVersion, mtypes.AlertsSettingsEndpoint+"/"+id.String()))
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	r.setClient(mg.HTTPClient())
+
+	_, err := makeDeleteRequest(ctx, r)
+
+	return err
 }

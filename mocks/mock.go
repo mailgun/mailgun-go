@@ -147,6 +147,19 @@ func (ms *Server) URL() string {
 	return ms.srv.URL
 }
 
+func (ms *Server) ok(w http.ResponseWriter, _ *http.Request) {
+	resp := okResp{
+		Message: "OK",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	toJSON(w, resp)
+}
+
+func (ms *Server) noContent(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func toJSON(w http.ResponseWriter, obj any) {
 	if err := json.NewEncoder(w).Encode(obj); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
