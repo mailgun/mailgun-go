@@ -221,6 +221,9 @@ type DELETEV1InboxreadyDomainsParams struct {
 
 // GETV1InboxreadyDomainsParams defines parameters for GETV1InboxreadyDomains.
 type GETV1InboxreadyDomainsParams struct {
+	// Limit Limit
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+
 	// Domain Domain name
 	Domain *string `form:"domain,omitempty" json:"domain,omitempty"`
 }
@@ -240,7 +243,7 @@ type PUTV1InboxreadyDomainsVerifyParams struct {
 // GETV1InboxreadyIPAddressesParams defines parameters for GETV1InboxreadyIPAddresses.
 type GETV1InboxreadyIPAddressesParams struct {
 	// Limit Limit
-	Limit *string `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
 // POSTV1AlertsEmailTestJSONRequestBody defines body for POSTV1AlertsEmailTest for application/json ContentType.

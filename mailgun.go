@@ -258,6 +258,8 @@ type Mailgun interface {
 	AddAlert(context.Context, mtypes.AlertsEventSettingRequest) (*mtypes.AlertsEventSettingResponse, error)
 	DeleteAlert(ctx context.Context, id uuid.UUID) error
 
+	ListMonitoredDomains(opts ListMonitoredDomainsOptions) (*MonitoredDomainsIterator, error)
+
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error)
 	GetSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
