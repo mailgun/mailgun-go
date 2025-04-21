@@ -24,7 +24,7 @@ func (ms *Server) listAlerts(w http.ResponseWriter, _ *http.Request) {
 	resp := mtypes.AlertsSettingsResponse{
 		Events: []mtypes.AlertsEventSettingResponse{
 			{
-				Channel:   mtypes.EmailChannel,
+				Channel:   mtypes.AlertsEmailChannel,
 				EventType: "ip_listed",
 				ID:        ptr(uuid.New()),
 				Settings: mtypes.AlertsChannelSettings{
@@ -32,7 +32,7 @@ func (ms *Server) listAlerts(w http.ResponseWriter, _ *http.Request) {
 				},
 			},
 			{
-				Channel:   mtypes.WebhookChannel,
+				Channel:   mtypes.AlertsWebhookChannel,
 				EventType: "ip_delisted",
 				ID:        ptr(uuid.New()),
 				Settings: mtypes.AlertsChannelSettings{
