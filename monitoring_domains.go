@@ -14,7 +14,6 @@ import (
 type ListMonitoredDomainsOptions = inboxready.GETV1InboxreadyDomainsParams
 
 type MonitoredDomainsIterator struct {
-	mg      Mailgun
 	opts    inboxready.GETV1InboxreadyDomainsParams
 	req     *httpRequest
 	resp    inboxready.InboxReadyGithubComMailgunInboxreadyAPIDomainListResponse
