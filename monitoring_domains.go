@@ -14,7 +14,7 @@ import (
 type ListMonitoredDomainsOptions = inboxready.GETV1InboxreadyDomainsParams
 
 type MonitoredDomainsIterator struct {
-	opts    inboxready.GETV1InboxreadyDomainsParams
+	opts    ListMonitoredDomainsOptions
 	req     *httpRequest
 	resp    inboxready.InboxReadyGithubComMailgunInboxreadyAPIDomainListResponse
 	isFirst bool
