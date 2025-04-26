@@ -22,6 +22,7 @@ const MaxNumberOfRecipients = 1000
 const MaxNumberOfTags = 10
 
 // CommonMessage contains both the message text and the envelope for an e-mail message.
+// TODO(vtopc): make AddOption(key string, value string) for all `o:` options?
 type CommonMessage struct {
 	domain                   string
 	to                       []string
