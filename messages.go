@@ -21,32 +21,34 @@ const MaxNumberOfRecipients = 1000
 // MaxNumberOfTags represents the maximum number of tags that can be added for a message
 const MaxNumberOfTags = 10
 
-// CommonMessage structures contain both the message text and the envelope for an e-mail message.
+// CommonMessage contains both the message text and the envelope for an e-mail message.
+// TODO(vtopc): create AddOption(key string, value string) for `o:` options?
 type CommonMessage struct {
-	domain             string
-	to                 []string
-	tags               []string
-	dkim               *bool
-	deliveryTime       time.Time
-	stoPeriod          string
-	attachments        []string
-	readerAttachments  []ReaderAttachment
-	inlines            []string
-	readerInlines      []ReaderAttachment
-	bufferAttachments  []BufferAttachment
-	nativeSend         bool
-	testMode           bool
-	tracking           *bool
-	trackingClicks     *string
-	trackingOpens      *bool
-	headers            map[string]string
-	variables          map[string]string
-	templateVariables  map[string]any
-	recipientVariables map[string]map[string]any
-	templateVersionTag string
-	templateRenderText bool
-	requireTLS         bool
-	skipVerification   bool
+	domain                   string
+	to                       []string
+	tags                     []string
+	dkim                     *bool
+	deliveryTime             time.Time
+	stoPeriod                string
+	attachments              []string
+	readerAttachments        []ReaderAttachment
+	inlines                  []string
+	readerInlines            []ReaderAttachment
+	bufferAttachments        []BufferAttachment
+	nativeSend               bool
+	testMode                 bool
+	tracking                 *bool
+	trackingClicks           *string
+	trackingOpens            *bool
+	trackingPixelLocationTop *string
+	headers                  map[string]string
+	variables                map[string]string
+	templateVariables        map[string]any
+	recipientVariables       map[string]map[string]any
+	templateVersionTag       string
+	templateRenderText       bool
+	requireTLS               bool
+	skipVerification         bool
 }
 
 type ReaderAttachment struct {
@@ -117,9 +119,10 @@ type MimeMessage struct {
 
 // TrackingOptions contains fields relevant to tracking.
 type TrackingOptions struct {
-	Tracking       bool
-	TrackingClicks string
-	TrackingOpens  bool
+	Tracking                 bool
+	TrackingClicks           string
+	TrackingOpens            bool
+	TrackingPixelLocationTop string
 }
 
 // The Specific abstracts the common characteristics between plain text and MIME messages.
@@ -280,6 +283,10 @@ func (m *CommonMessage) TrackingClicks() *string {
 
 func (m *CommonMessage) TrackingOpens() *bool {
 	return m.trackingOpens
+}
+
+func (m *CommonMessage) TrackingPixelLocationTop() *string {
+	return m.trackingPixelLocationTop
 }
 
 func (m *CommonMessage) Variables() map[string]string {
@@ -504,13 +511,15 @@ func (m *CommonMessage) SetTrackingClicks(trackingClicks bool) {
 	m.trackingClicks = ptr(yesNo(trackingClicks))
 }
 
-// SetTrackingOptions sets the o:tracking, o:tracking-clicks and o:tracking-opens at once.
+// SetTrackingOptions sets o:tracking, o:tracking-clicks, o:tracking-pixel-location-top, and o:tracking-opens at once.
 func (m *CommonMessage) SetTrackingOptions(options *TrackingOptions) {
 	m.tracking = &options.Tracking
-
 	m.trackingClicks = &options.TrackingClicks
-
 	m.trackingOpens = &options.TrackingOpens
+
+	if options.TrackingPixelLocationTop != "" {
+		m.trackingPixelLocationTop = &options.TrackingPixelLocationTop
+	}
 }
 
 // SetRequireTLS information is found in the Mailgun documentation.
@@ -610,6 +619,7 @@ type Message interface {
 	Tracking() *bool
 	TrackingClicks() *string
 	TrackingOpens() *bool
+	TrackingPixelLocationTop() *string
 	Headers() map[string]string
 	Variables() map[string]string
 	TemplateVariables() map[string]any
@@ -739,6 +749,9 @@ func addMessageOptions(dst *FormDataPayload, src Message) {
 	}
 	if src.TrackingOpens() != nil {
 		dst.addValue("o:tracking-opens", yesNo(*src.TrackingOpens()))
+	}
+	if src.TrackingPixelLocationTop() != nil {
+		dst.addValue("o:tracking-pixel-location-top", *src.TrackingPixelLocationTop())
 	}
 	if src.RequireTLS() {
 		dst.addValue("o:require-tls", trueFalse(src.RequireTLS()))

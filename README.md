@@ -10,10 +10,11 @@ Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https:
 If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
 include the `/v5` at the end of your import paths
 ```bash
-$ go get github.com/mailgun/mailgun-go/v5
+go get github.com/mailgun/mailgun-go/v5
 ```
 
 ## Usage
+### Send a message
 ```go
 package main
 
@@ -63,7 +64,7 @@ func main() {
 }
 ```
 
-## Get Events
+### Get Events
 ```go
 package main
 
@@ -119,7 +120,7 @@ func main() {
 }
 ```
 
-## Event Polling
+### Event Polling
 The mailgun library has built-in support for polling the events api
 ```go
 package main
@@ -162,7 +163,7 @@ func main() {
 }
 ```
 
-# Email Validations
+### Email Validations
 ```go
 package main
 
@@ -194,7 +195,7 @@ func main() {
 }
 ```
 
-## Webhook Handling
+### Webhook Handling
 ```go
 package main
 
@@ -261,7 +262,7 @@ func main() {
 }
 ```
 
-## Sending HTML templates
+### Sending HTML templates
 
 ```go
 package main
@@ -317,7 +318,7 @@ func main() {
 }
 ```
 
-## Using Templates
+### Using Templates
 
 Templates enable you to create message templates on your Mailgun account and then populate the data variables at send-time. This allows you to have your layout and design managed on the server and handle the data on the client. The template variables are added as a JSON stringified `X-Mailgun-Variables` header. For example, if you have a template to send a password reset link, you could do the following:
 
@@ -375,7 +376,7 @@ The official mailgun documentation includes examples using this library. Go
 [here](https://documentation.mailgun.com/docs/mailgun/api-reference/)
 and click on the "Go" button at the top of the page.
 
-### EU Region
+## EU Region
 European customers will need to change the default API Base to access your domains
 
 ```go
