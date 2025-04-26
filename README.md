@@ -10,7 +10,7 @@ Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https:
 If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
 include the `/v5` at the end of your import paths
 ```bash
-$ go get github.com/mailgun/mailgun-go/v5
+go get github.com/mailgun/mailgun-go/v5
 ```
 
 ## Usage
