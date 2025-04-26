@@ -27,7 +27,7 @@ func TestAddAlert(t *testing.T) {
 	require.NoError(t, err)
 
 	req := mtypes.AlertsEventSettingRequest{
-		Channel:   mtypes.EmailChannel,
+		Channel:   mtypes.AlertsEmailChannel,
 		EventType: "ip_listed",
 		Settings: mtypes.AlertsChannelSettings{
 			Emails: []string{"mail1@example.com", "mail2@example.com"},
