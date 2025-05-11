@@ -48,6 +48,8 @@ get-openapi:
 	cd $(TYPES_PATH) && git clone --depth 1 git@github.com:mailgun/redocly-mailgun.git
 
 ## Convert openapi 3.1 to 3.0
+# this is one of the official ways to support OpenAPI 3.1:
+# https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#does-oapi-codegen-support-openapi-31
 # install openapi-down-convert:
 #  npm i -g @apiture/openapi-down-convert
 .PHONY: convert-openapi
