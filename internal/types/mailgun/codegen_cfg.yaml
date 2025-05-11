@@ -9,6 +9,7 @@ compatibility:
   disable-required-readonly-as-pointer: true
 
 output-options:
+  prefer-skip-optional-pointer-on-container-types: true
   name-normalizer: ToCamelCaseWithInitialisms
   additional-initialisms:
     - IDs
