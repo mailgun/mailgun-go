@@ -105,6 +105,6 @@ func TestDomainVerify(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err = mg.VerifyAndReturnDomain(ctx, testDomain)
+	_, err = mg.VerifyDomain(ctx, testDomain)
 	require.NoError(t, err)
 }

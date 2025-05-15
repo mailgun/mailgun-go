@@ -12,6 +12,12 @@ const (
 
 type SpamAction string
 
+type ListDomainsResponse struct {
+	// is -1 if Next() or First() have not been called
+	TotalCount int      `json:"total_count"`
+	Items      []Domain `json:"items"`
+}
+
 // A Domain structure holds information about a domain used when sending mail.
 type Domain struct {
 	CreatedAt                  RFC2822Time `json:"created_at"`
