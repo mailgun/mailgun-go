@@ -175,7 +175,9 @@ func (mg *Client) GetDomain(ctx context.Context, domain string, _ *GetDomainOpti
 	return resp, err
 }
 
-func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
+// VerifyDomain verifies the domains DNS records (includes A, CNAME, SPF,
+// DKIM and MX records) to ensure the domain is ready and able to send.
+func (mg *Client) VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain + "/verify")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -184,6 +186,14 @@ func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mty
 	var resp mtypes.GetDomainResponse
 	err := putResponseFromJSON(ctx, r, payload, &resp)
 	return resp, err
+}
+
+// VerifyAndReturnDomain verifies the domains DNS records (includes A, CNAME, SPF,
+// DKIM and MX records) to ensure the domain is ready and able to send.
+// Deprecated: use VerifyDomain instead.
+// TODO(v6): remove this method
+func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
+	return mg.VerifyDomain(ctx, domain)
 }
 
 // CreateDomainOptions - optional parameters when creating a domain
