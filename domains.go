@@ -175,7 +175,9 @@ func (mg *Client) GetDomain(ctx context.Context, domain string, _ *GetDomainOpti
 	return resp, err
 }
 
-func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
+// VerifyDomain verifies the domains DNS records (includes A, CNAME, SPF,
+// DKIM and MX records) to ensure the domain is ready and able to send.
+func (mg *Client) VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain + "/verify")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -184,6 +186,14 @@ func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mty
 	var resp mtypes.GetDomainResponse
 	err := putResponseFromJSON(ctx, r, payload, &resp)
 	return resp, err
+}
+
+// VerifyAndReturnDomain verifies the domains DNS records (includes A, CNAME, SPF,
+// DKIM and MX records) to ensure the domain is ready and able to send.
+// Deprecated: use VerifyDomain instead.
+// TODO(v6): remove this method
+func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
+	return mg.VerifyDomain(ctx, domain)
 }
 
 // CreateDomainOptions - optional parameters when creating a domain
@@ -205,13 +215,13 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *Client) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error) {
+func (mg *Client) CreateDomain(ctx context.Context, domain string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
-	payload.addValue("name", name)
+	payload.addValue("name", domain)
 
 	if opts != nil {
 		if opts.SpamAction != "" {
@@ -242,8 +252,8 @@ func (mg *Client) CreateDomain(ctx context.Context, name string, opts *CreateDom
 }
 
 // DeleteDomain instructs Mailgun to dispose of the named domain name
-func (mg *Client) DeleteDomain(ctx context.Context, name string) error {
-	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + name)
+func (mg *Client) DeleteDomain(ctx context.Context, domain string) error {
+	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -252,14 +262,15 @@ func (mg *Client) DeleteDomain(ctx context.Context, name string) error {
 
 // UpdateDomainOptions options for updating a domain
 type UpdateDomainOptions struct {
-	WebScheme string
-	WebPrefix string
+	WebScheme        string
+	WebPrefix        string
+	RequireTLS       *bool
+	SkipVerification *bool
 }
 
 // UpdateDomain updates a domain's attributes.
-// Currently only the web_scheme update is supported, spam_action and wildcard are to be added.
-func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
-	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + name)
+func (mg *Client) UpdateDomain(ctx context.Context, domain string, opts *UpdateDomainOptions) error {
+	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -270,7 +281,13 @@ func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDom
 			payload.addValue("web_scheme", opts.WebScheme)
 		}
 		if opts.WebPrefix != "" {
-			payload.addValue("web_prefix", opts.WebScheme)
+			payload.addValue("web_prefix", opts.WebPrefix)
+		}
+		if opts.RequireTLS != nil {
+			payload.addValue("require_tls", boolToString(*opts.RequireTLS))
+		}
+		if opts.SkipVerification != nil {
+			payload.addValue("skip_verification", boolToString(*opts.SkipVerification))
 		}
 	}
 

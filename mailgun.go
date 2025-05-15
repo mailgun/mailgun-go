@@ -152,12 +152,17 @@ type Mailgun interface {
 
 	ListDomains(opts *ListDomainsOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
-	CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
-	DeleteDomain(ctx context.Context, name string) error
-	VerifyAndReturnDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
+	CreateDomain(ctx context.Context, domain string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
+	VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error)
+	UpdateDomain(ctx context.Context, domain string, opts *UpdateDomainOptions) error
+	DeleteDomain(ctx context.Context, domain string) error
+	// Deprecated: use VerifyDomain instead.
+	VerifyAndReturnDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error)
 	ListIPDomains(ip string, opts *ListIPDomainOptions) *IPDomainsIterator
 
+	// Deprecated: use UpdateDomain instead
 	UpdateDomainConnection(ctx context.Context, domain string, dc mtypes.DomainConnection) error
+	// Deprecated: use GetDomain instead
 	GetDomainConnection(ctx context.Context, domain string) (mtypes.DomainConnection, error)
 
 	GetDomainTracking(ctx context.Context, domain string) (mtypes.DomainTracking, error)
