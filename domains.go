@@ -252,12 +252,13 @@ func (mg *Client) DeleteDomain(ctx context.Context, name string) error {
 
 // UpdateDomainOptions options for updating a domain
 type UpdateDomainOptions struct {
-	WebScheme string
-	WebPrefix string
+	WebScheme        string
+	WebPrefix        string
+	RequireTLS       *bool
+	SkipVerification *bool
 }
 
 // UpdateDomain updates a domain's attributes.
-// Currently only the web_scheme update is supported, spam_action and wildcard are to be added.
 func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + name)
 	r.setClient(mg.HTTPClient())
@@ -271,6 +272,12 @@ func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDom
 		}
 		if opts.WebPrefix != "" {
 			payload.addValue("web_prefix", opts.WebScheme)
+		}
+		if opts.RequireTLS != nil {
+			payload.addValue("require_tls", boolToString(*opts.RequireTLS))
+		}
+		if opts.SkipVerification != nil {
+			payload.addValue("skip_verification", boolToString(*opts.SkipVerification))
 		}
 	}
 

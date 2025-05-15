@@ -157,7 +157,9 @@ type Mailgun interface {
 	VerifyAndReturnDomain(ctx context.Context, name string) (mtypes.GetDomainResponse, error)
 	ListIPDomains(ip string, opts *ListIPDomainOptions) *IPDomainsIterator
 
+	// Deprecated: use UpdateDomain instead
 	UpdateDomainConnection(ctx context.Context, domain string, dc mtypes.DomainConnection) error
+	// Deprecated: use GetDomain instead
 	GetDomainConnection(ctx context.Context, domain string) (mtypes.DomainConnection, error)
 
 	GetDomainTracking(ctx context.Context, domain string) (mtypes.DomainTracking, error)
