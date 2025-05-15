@@ -281,7 +281,7 @@ func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDom
 			payload.addValue("web_scheme", opts.WebScheme)
 		}
 		if opts.WebPrefix != "" {
-			payload.addValue("web_prefix", opts.WebScheme)
+			payload.addValue("web_prefix", opts.WebPrefix)
 		}
 		if opts.RequireTLS != nil {
 			payload.addValue("require_tls", boolToString(*opts.RequireTLS))
