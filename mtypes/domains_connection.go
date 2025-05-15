@@ -1,6 +1,6 @@
 package mtypes
 
-// TODO(v6): remove
+// TODO(v6): remove this file
 
 type DomainConnectionResponse struct {
 	Connection DomainConnection `json:"connection"`
