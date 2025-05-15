@@ -215,13 +215,13 @@ type CreateDomainOptions struct {
 // The spamAction domain must be one of Delete, Tag, or Disabled.
 // The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
 // and as different domains if false.
-func (mg *Client) CreateDomain(ctx context.Context, name string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error) {
+func (mg *Client) CreateDomain(ctx context.Context, domain string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
 	payload := newUrlEncodedPayload()
-	payload.addValue("name", name)
+	payload.addValue("name", domain)
 
 	if opts != nil {
 		if opts.SpamAction != "" {
@@ -252,8 +252,8 @@ func (mg *Client) CreateDomain(ctx context.Context, name string, opts *CreateDom
 }
 
 // DeleteDomain instructs Mailgun to dispose of the named domain name
-func (mg *Client) DeleteDomain(ctx context.Context, name string) error {
-	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + name)
+func (mg *Client) DeleteDomain(ctx context.Context, domain string) error {
+	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -269,8 +269,8 @@ type UpdateDomainOptions struct {
 }
 
 // UpdateDomain updates a domain's attributes.
-func (mg *Client) UpdateDomain(ctx context.Context, name string, opts *UpdateDomainOptions) error {
-	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + name)
+func (mg *Client) UpdateDomain(ctx context.Context, domain string, opts *UpdateDomainOptions) error {
+	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
