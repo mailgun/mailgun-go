@@ -96,8 +96,13 @@ const (
 	APIBaseUS = APIBase
 	APIBaseEU = "https://api.eu.mailgun.net"
 
-	basicAuthUser = "api"
+	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
 
+	basicAuthUser = "api"
+)
+
+// Mailgun Send endpoints
+const (
 	messagesEndpoint     = "messages"
 	mimeMessagesEndpoint = "messages.mime"
 	bouncesEndpoint      = "bounces"
@@ -114,8 +119,6 @@ const (
 	templatesEndpoint    = "templates"
 	accountsEndpoint     = "accounts"
 	subaccountsEndpoint  = "subaccounts"
-
-	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
 )
 
 // Mailgun defines the supported subset of the Mailgun API.
@@ -254,6 +257,8 @@ type Mailgun interface {
 	ListAlerts(context.Context, *ListAlertsOptions) (*mtypes.AlertsSettingsResponse, error)
 	AddAlert(context.Context, mtypes.AlertsEventSettingRequest) (*mtypes.AlertsEventSettingResponse, error)
 	DeleteAlert(ctx context.Context, id uuid.UUID) error
+
+	ListMonitoredDomains(opts ListMonitoredDomainsOptions) (*MonitoredDomainsIterator, error)
 
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error)

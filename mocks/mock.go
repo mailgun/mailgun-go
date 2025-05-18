@@ -132,6 +132,7 @@ func NewServer() *Server {
 	ms.addValidationRoutes(r)
 	ms.addAnalyticsRoutes(r)
 	ms.addAlertsRoutes(r)
+	ms.addInboxreadyDomainsRoutes(r)
 
 	// Start the server
 	ms.srv = httptest.NewServer(r)

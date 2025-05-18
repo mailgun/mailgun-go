@@ -47,7 +47,9 @@ get-and-gen-models: get-openapi convert-openapi gen-models
 get-openapi:
 	cd $(TYPES_PATH) && git clone --depth 1 git@github.com:mailgun/redocly-mailgun.git
 
-## Convert openapi 3.1 to 3.0
+## Downgrade openapi 3.1 to 3.0
+# this is one of the official ways to support OpenAPI 3.1:
+# https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#does-oapi-codegen-support-openapi-31
 # install openapi-down-convert:
 #  npm i -g @apiture/openapi-down-convert
 .PHONY: convert-openapi
@@ -59,7 +61,7 @@ convert-openapi:
 
 # TODO(Go1.24): move into tools of go.mod(https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#for-go-124)?
 # install oapi-codegen:
-#  go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.2-0.20241128130830-b07f7ea6d520
+#  go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.2-0.20250511101814-8ea9351bbd3e
 #
 # ValidateEmailResponse is described here better, than in the OpenAPI documentation, so we are not generating it.
 # TODO(v6?): call gen-mailgun-models
@@ -70,17 +72,8 @@ gen-models: gen-inboxready-models
 .PHONY: gen-mailgun-models
 gen-mailgun-models:
 	oapi-codegen -config $(TYPES_PATH)/mailgun/codegen_cfg.yaml $(TYPES_PATH)/mailgun/openapi_3.0.yaml
-	# patch slices(`*[]` -> `[]`)
-	sed -i '' 's/\*\[\]/\[\]/' $(TYPES_PATH)/mailgun/model.gen.go
-	# patch maps(`*map` -> `map`)
-	sed -i '' 's/\*map/map/' $(TYPES_PATH)/mailgun/model.gen.go
 
 ## Generate Mailgun Optimize models
 .PHONY: gen-inboxready-models
 gen-inboxready-models:
 	oapi-codegen -config $(TYPES_PATH)/inboxready/codegen_cfg.yaml $(TYPES_PATH)/inboxready/openapi_3.0.yaml
-	# patch slices(`*[]` -> `[]`)
-	sed -i '' 's/\*\[\]/\[\]/' $(TYPES_PATH)/inboxready/model.gen.go
-	# patch maps(`*map` -> `map`)
-	sed -i '' 's/\*map/map/' $(TYPES_PATH)/inboxready/model.gen.go
-	gofmt -w $(TYPES_PATH)/inboxready/

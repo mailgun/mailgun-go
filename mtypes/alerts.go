@@ -12,9 +12,9 @@ const (
 
 // channels
 const (
-	EmailChannel   = "email"
-	WebhookChannel = "webhook"
-	SlackChannel   = "slack"
+	AlertsEmailChannel   = "email"
+	AlertsWebhookChannel = "webhook"
+	AlertsSlackChannel   = "slack"
 )
 
 type AlertsEventsResponse = inboxready.GithubComMailgunAlertsInternalAPIListAlertsEventsResp
