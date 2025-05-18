@@ -121,11 +121,6 @@ const (
 	subaccountsEndpoint  = "subaccounts"
 )
 
-// Mailgun Optimize endpoints
-const (
-	inboxreadyDomainsEndpoint = "/v1/inboxready/domains"
-)
-
 // Mailgun defines the supported subset of the Mailgun API.
 // The Mailgun API may contain additional features which have been deprecated since writing this SDK.
 // This SDK only covers currently supported interface endpoints.

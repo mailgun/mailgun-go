@@ -4,7 +4,10 @@ import (
 	"github.com/mailgun/mailgun-go/v5/internal/types/inboxready"
 )
 
-const MonitoredDomainVersion = 1
+const (
+	InboxreadyDomainsVersion  = 1
+	InboxreadyDomainsEndpoint = "inboxready/domains"
+)
 
 type MonitoredDomain = inboxready.InboxReadyGithubComMailgunInboxreadyModelDomain
 
