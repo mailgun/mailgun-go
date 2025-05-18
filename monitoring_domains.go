@@ -28,7 +28,7 @@ func (mg *Client) ListMonitoredDomains(opts ListMonitoredDomainsOptions) (*Monit
 		opts.Limit = ptr(10)
 	}
 
-	req := newHTTPRequest(generateApiUrl(mg, 1, inboxreadyDomainsEndpoint))
+	req := newHTTPRequest(generateApiUrl(mg, mtypes.MonitoredDomainVersion, inboxreadyDomainsEndpoint))
 	req.addParameter("limit", strconv.Itoa(*opts.Limit))
 	req.setClient(mg.HTTPClient())
 	req.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -86,6 +86,32 @@ func (iter *MonitoredDomainsIterator) fetch(ctx context.Context,
 	return &resp, nil
 }
 
-// TODO:
-// AddDomainToMonitoring
-// DeleteMonitoredDomain
+// AddDomainToMonitoring adds a single domain to an account
+func (mg *Client) AddDomainToMonitoring(ctx context.Context, opts mtypes.AddDomainToMonitoringOptions,
+) (*mtypes.AddDomainToMonitoringResponse, error) {
+	req := newHTTPRequest(generateApiUrl(mg, mtypes.MonitoredDomainVersion, inboxreadyDomainsEndpoint))
+	req.setBasicAuth(basicAuthUser, mg.APIKey())
+	req.setClient(mg.HTTPClient())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("domain", opts.Domain)
+
+	var resp mtypes.AddDomainToMonitoringResponse
+	if err := postResponseFromJSON(ctx, req, payload, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+// DeleteMonitoredDomain deletes a single domain from an account
+func (mg *Client) DeleteMonitoredDomain(ctx context.Context, opts mtypes.DeleteMonitoredDomainOptions,
+) error {
+	req := newHTTPRequest(generateApiUrl(mg, mtypes.MonitoredDomainVersion, inboxreadyDomainsEndpoint))
+	req.setBasicAuth(basicAuthUser, mg.APIKey())
+	req.setClient(mg.HTTPClient())
+	req.addParameter("domain", opts.Domain)
+
+	_, err := makeDeleteRequest(ctx, req)
+	return err
+}
