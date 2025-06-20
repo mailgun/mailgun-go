@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -124,7 +125,7 @@ func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
 func (mg *Client) GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error) {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.PathEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -180,7 +181,7 @@ func (mg *Client) AddBounces(ctx context.Context, domain string, bounces []mtype
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
 func (mg *Client) DeleteBounce(ctx context.Context, domain, address string) error {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.PathEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
