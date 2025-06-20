@@ -73,7 +73,7 @@ func TestAddDelBounces(t *testing.T) {
 	}
 
 	// Compute an e-mail address for our Bounce.
-	exampleEmail := fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain)
+	exampleEmail := fmt.Sprintf("%s+alias@%s", strings.ToLower(randomString(8, "bounce")), domain)
 
 	// Add the bounce for our address.
 	err = mg.AddBounce(ctx, testDomain, exampleEmail, "550", "TestAddDelBounces-generated error")
@@ -141,12 +141,12 @@ func TestAddDelBounceList(t *testing.T) {
 	bounces := []mtypes.Bounce{
 		{
 			Code:    "550",
-			Address: fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain),
+			Address: fmt.Sprintf("%s+alias@%s", strings.ToLower(randomString(8, "bounce")), domain),
 			Error:   "TestAddDelBounces-generated error",
 		},
 		{
 			Code:      "550",
-			Address:   fmt.Sprintf("%s@%s", strings.ToLower(randomString(8, "bounce")), domain),
+			Address:   fmt.Sprintf("%s+alias@%s", strings.ToLower(randomString(8, "bounce")), domain),
 			Error:     "TestAddDelBounces-generated error",
 			CreatedAt: createdAt,
 		},
