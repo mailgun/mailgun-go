@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -20,10 +21,10 @@ func (mg *Client) ListBounces(domain string, opts *ListOptions) *BouncesIterator
 			r.addParameter("limit", strconv.Itoa(opts.Limit))
 		}
 	}
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	return &BouncesIterator{
 		mg:                  mg,
-		BouncesListResponse: mtypes.BouncesListResponse{Paging: mtypes.Paging{Next: url, First: url}},
+		BouncesListResponse: mtypes.BouncesListResponse{Paging: mtypes.Paging{Next: uri, First: uri}},
 		err:                 err,
 	}
 }
@@ -113,9 +114,9 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]mtypes.Bounce)
 	return len(ci.Items) != 0
 }
 
-func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
+func (ci *BouncesIterator) fetch(ctx context.Context, uri string) error {
 	ci.Items = nil
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 	r.setClient(ci.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
 
@@ -124,7 +125,7 @@ func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
 func (mg *Client) GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error) {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.PathEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -180,7 +181,7 @@ func (mg *Client) AddBounces(ctx context.Context, domain string, bounces []mtype
 
 // DeleteBounce removes all bounces associted with the provided e-mail address.
 func (mg *Client) DeleteBounce(ctx context.Context, domain, address string) error {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + address)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.PathEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
