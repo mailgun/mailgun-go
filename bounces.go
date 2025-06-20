@@ -21,10 +21,10 @@ func (mg *Client) ListBounces(domain string, opts *ListOptions) *BouncesIterator
 			r.addParameter("limit", strconv.Itoa(opts.Limit))
 		}
 	}
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	return &BouncesIterator{
 		mg:                  mg,
-		BouncesListResponse: mtypes.BouncesListResponse{Paging: mtypes.Paging{Next: url, First: url}},
+		BouncesListResponse: mtypes.BouncesListResponse{Paging: mtypes.Paging{Next: uri, First: uri}},
 		err:                 err,
 	}
 }
@@ -114,9 +114,9 @@ func (ci *BouncesIterator) Previous(ctx context.Context, items *[]mtypes.Bounce)
 	return len(ci.Items) != 0
 }
 
-func (ci *BouncesIterator) fetch(ctx context.Context, url string) error {
+func (ci *BouncesIterator) fetch(ctx context.Context, uri string) error {
 	ci.Items = nil
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 	r.setClient(ci.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
 
