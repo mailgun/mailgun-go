@@ -24,7 +24,8 @@ func TestListIPs(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, list[0].IP, ip.IP)
-	assert.True(t, ip.Dedicated)
+	assert.True(t, list[0].IsOnWarmup)
+	assert.False(t, list[1].IsOnWarmup)
 	assert.Equal(t, "luna.mailgun.net", ip.RDNS)
 }
 

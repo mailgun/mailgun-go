@@ -21,8 +21,13 @@ func (ms *Server) addIPRoutes(r chi.Router) {
 
 func (ms *Server) listIPS(w http.ResponseWriter, _ *http.Request) {
 	toJSON(w, mtypes.IPAddressListResponse{
-		TotalCount: 2,
-		Items:      []string{"172.0.0.1", "192.168.1.1"},
+		TotalCount:        2,
+		Items:             []string{"172.0.0.1", "192.168.1.1"},
+		AssignableToPools: []string{"172.0.0.1", "192.168.1.1"},
+		Details: []mtypes.IPAddressListResponseDetail{
+			{IP: "172.0.0.1", IsOnWarmup: true},
+			{IP: "192.168.1.1"},
+		},
 	})
 }
 
