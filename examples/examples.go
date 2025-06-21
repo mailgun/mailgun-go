@@ -481,7 +481,7 @@ func GetIP(domain, apiKey string) (mtypes.IPAddress, error) {
 	return mg.GetIP(ctx, "127.0.0.1")
 }
 
-func ListIPS(domain, apiKey string) ([]mtypes.IPAddress, error) {
+func ListIPS(domain, apiKey string) ([]mtypes.IPAddressState, error) {
 	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
