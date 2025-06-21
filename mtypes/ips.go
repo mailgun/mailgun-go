@@ -1,8 +1,21 @@
 package mtypes
 
 type IPAddressListResponse struct {
-	TotalCount int      `json:"total_count"`
-	Items      []string `json:"items"`
+	TotalCount        int                           `json:"total_count"`
+	Items             []string                      `json:"items"`
+	Details           []IPAddressListResponseDetail `json:"details"`
+	AssignableToPools []string                      `json:"assignable_to_pools,omitempty"`
+}
+
+type IPAddressListResponseDetail struct {
+	IP         string `json:"ip"`
+	IsOnWarmup bool   `json:"is_on_warmup,omitempty"`
+}
+
+type IPAddressState struct {
+	IP                string `json:"ip"`
+	AssignableToPools bool   `json:"assignable_to_pools,omitempty"`
+	IsOnWarmup        bool   `json:"is_on_warmup"`
 }
 
 type IPAddress struct {

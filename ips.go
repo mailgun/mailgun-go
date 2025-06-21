@@ -2,13 +2,14 @@ package mailgun
 
 import (
 	"context"
+	"slices"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
-// ListIPs returns a list of IPs assigned to your account
-func (mg *Client) ListIPs(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddress, error) {
+// ListIPs returns a list of IPs assigned to your account, including their warmup and assignable to pools status if applicable.
+func (mg *Client) ListIPs(ctx context.Context, dedicated, enabled bool) ([]mtypes.IPAddressState, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, ipsEndpoint))
 	r.setClient(mg.HTTPClient())
 	if dedicated {
@@ -23,9 +24,13 @@ func (mg *Client) ListIPs(ctx context.Context, dedicated, enabled bool) ([]mtype
 	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
 		return nil, err
 	}
-	var result []mtypes.IPAddress
+	var result []mtypes.IPAddressState
 	for _, ip := range resp.Items {
-		result = append(result, mtypes.IPAddress{IP: ip})
+		assignableToPools := slices.Index(resp.AssignableToPools, ip) != -1
+		detailsIndex := slices.IndexFunc(resp.Details, func(d mtypes.IPAddressListResponseDetail) bool { return d.IP == ip })
+		isOnWarmup := resp.Details[detailsIndex].IsOnWarmup
+		ipState := mtypes.IPAddressState{IP: ip, AssignableToPools: assignableToPools, IsOnWarmup: isOnWarmup}
+		result = append(result, ipState)
 	}
 	return result, nil
 }
