@@ -12,16 +12,12 @@ type IPAddressListResponseDetail struct {
 	IsOnWarmup bool   `json:"is_on_warmup,omitempty"`
 }
 
-type IPAddressState struct {
-	IP                string `json:"ip"`
-	AssignableToPools bool   `json:"assignable_to_pools,omitempty"`
-	IsOnWarmup        bool   `json:"is_on_warmup"`
-}
-
 type IPAddress struct {
-	IP        string `json:"ip"`
-	RDNS      string `json:"rdns"`
-	Dedicated bool   `json:"dedicated"`
+	IP                string `json:"ip"`                            // Always present
+	RDNS              string `json:"rdns,omitempty"`                // Filled by GetIP
+	Dedicated         bool   `json:"dedicated,omitempty"`           // Filled by GetIP
+	AssignableToPools bool   `json:"assignable_to_pools,omitempty"` // Filled by ListIPS
+	IsOnWarmup        bool   `json:"is_on_warmup,omitempty"`        // Filled by ListIPS
 }
 
 type ListIPDomainsResponse struct {
