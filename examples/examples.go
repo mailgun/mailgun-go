@@ -1087,3 +1087,15 @@ func ListTemplateVersions(domain, apiKey string) ([]mtypes.TemplateVersion, erro
 	}
 	return result, nil
 }
+
+func ListAPIKeys(domain, kind, apiKey string) ([]mtypes.APIKey, error) {
+	mg := mailgun.NewMailgun(apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.ListAPIKeys(ctx, &mailgun.ListAPIKeysOptions{
+		DomainName: domain,
+		Kind:       kind,
+	})
+}
