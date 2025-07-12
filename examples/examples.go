@@ -1099,3 +1099,14 @@ func ListAPIKeys(domain, kind, apiKey string) ([]mtypes.APIKey, error) {
 		Kind:       kind,
 	})
 }
+
+func CreateAPIKey(role, apiKey string) (mtypes.APIKey, error) {
+	mg := mailgun.NewMailgun(apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.CreateAPIKey(ctx, role, &mailgun.CreateAPIKeyOptions{
+		Description: "Example API key",
+	})
+}

@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAPIKeys(t *testing.T) {
+func TestListAPIKeys(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
@@ -15,5 +15,17 @@ func TestAPIKeys(t *testing.T) {
 	ctx := context.Background()
 	list, err := mg.ListAPIKeys(ctx, nil)
 	require.NoError(t, err)
-	require.Len(t, list, 0)
+	require.Len(t, list, 2)
+}
+
+func TestCreateAPIKeys(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	key, err := mg.CreateAPIKey(ctx, "basic", nil)
+	require.NoError(t, err)
+	require.Equal(t, "1", key.ID)
+	require.Equal(t, "basic", key.Role)
 }

@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
@@ -9,6 +10,16 @@ import (
 type ListAPIKeysOptions struct {
 	DomainName string
 	Kind       string
+}
+
+type CreateAPIKeyOptions struct {
+	Description string
+	DomainName  string
+	Email       string
+	Expiration  uint64
+	Kind        string
+	UserId      string
+	UserName    string
 }
 
 func (mg *Client) ListAPIKeys(ctx context.Context, opts *ListAPIKeysOptions) ([]mtypes.APIKey, error) {
@@ -26,7 +37,7 @@ func (mg *Client) ListAPIKeys(ctx context.Context, opts *ListAPIKeysOptions) ([]
 		}
 	}
 
-	var resp mtypes.APIKeyList
+	var resp mtypes.GetAPIKeyListResponse
 	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
 		return nil, err
 	}
@@ -36,4 +47,47 @@ func (mg *Client) ListAPIKeys(ctx context.Context, opts *ListAPIKeysOptions) ([]
 		result = append(result, item)
 	}
 	return result, nil
+}
+
+func (mg *Client) CreateAPIKey(ctx context.Context, role string, opts *CreateAPIKeyOptions) (mtypes.APIKey, error) {
+	r := newHTTPRequest(generateApiUrl(mg, mtypes.APIKeysVersion, mtypes.APIKeysEndpoint))
+	r.setClient(mg.HTTPClient())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("role", role)
+
+	if opts != nil {
+		if opts.Description != "" {
+			payload.addValue("description", opts.Description)
+		}
+
+		if opts.DomainName != "" {
+			payload.addValue("domain_name", opts.DomainName)
+		}
+
+		if opts.Email != "" {
+			payload.addValue("email", opts.Email)
+		}
+
+		if opts.Expiration != 0 {
+			payload.addValue("expiration", strconv.FormatUint(opts.Expiration, 10))
+		}
+
+		if opts.Kind != "" {
+			payload.addValue("kind", opts.Kind)
+		}
+
+		if opts.UserId != "" {
+			payload.addValue("user_id", opts.UserId)
+		}
+
+		if opts.UserName != "" {
+			payload.addValue("user_name", opts.UserName)
+		}
+	}
+
+	var resp mtypes.CreateAPIKeyResponse
+	err := postResponseFromJSON(ctx, r, payload, &resp)
+	return resp.Key, err
 }

@@ -6,8 +6,12 @@ const (
 	APIKeysVersion            = 1
 )
 
-type APIKeyList struct {
+type GetAPIKeyListResponse struct {
 	Items []APIKey `json:"items"`
+}
+
+type CreateAPIKeyResponse struct {
+	Key APIKey `json:"key"`
 }
 
 type APIKey struct {
