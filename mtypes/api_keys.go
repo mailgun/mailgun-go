@@ -18,6 +18,11 @@ type DeleteAPIKeyResponse struct {
 	Message string `json:"message"`
 }
 
+type RegeneratePublicAPIKeyResponse struct {
+	Key     string `json:"key"`
+	Message string `json:"message"`
+}
+
 type APIKey struct {
 	ID             string      `json:"id"`
 	Description    string      `json:"description"`

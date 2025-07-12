@@ -1119,3 +1119,12 @@ func DeleteAPIKey(id, apiKey string) (string, error) {
 
 	return mg.DeleteAPIKey(ctx, id)
 }
+
+func RegeneratePublicAPIKey(apiKey string) (mtypes.RegeneratePublicAPIKeyResponse, error) {
+	mg := mailgun.NewMailgun(apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.RegeneratePublicAPIKey(ctx)
+}

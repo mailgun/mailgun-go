@@ -40,3 +40,15 @@ func TestDeleteAPIKey(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "success", msg)
 }
+
+func TestRegeneratePublicAPIKey(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	resp, err := mg.RegeneratePublicAPIKey(ctx)
+	require.NoError(t, err)
+	require.Equal(t, "public-1", resp.Key)
+	require.Equal(t, "success", resp.Message)
+}
