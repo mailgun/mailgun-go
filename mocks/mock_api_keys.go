@@ -10,6 +10,7 @@ import (
 func (ms *Server) addAPIKeysRoutes(r chi.Router) {
 	r.Get("/v"+strconv.Itoa(mtypes.APIKeysVersion)+"/"+mtypes.APIKeysEndpoint, ms.listAPIKeys)
 	r.Post("/v"+strconv.Itoa(mtypes.APIKeysVersion)+"/"+mtypes.APIKeysEndpoint, ms.createAPIKey)
+	r.Delete("/v"+strconv.Itoa(mtypes.APIKeysVersion)+"/"+mtypes.APIKeysEndpoint+"/{key_id}", ms.deleteApiKey)
 }
 
 func (ms *Server) listAPIKeys(w http.ResponseWriter, _ *http.Request) {
@@ -23,6 +24,14 @@ func (ms *Server) listAPIKeys(w http.ResponseWriter, _ *http.Request) {
 func (ms *Server) createAPIKey(w http.ResponseWriter, _ *http.Request) {
 	resp := mtypes.CreateAPIKeyResponse{
 		Key: mtypes.APIKey{ID: "1", Role: "basic"},
+	}
+
+	toJSON(w, resp)
+}
+
+func (ms *Server) deleteApiKey(w http.ResponseWriter, _ *http.Request) {
+	resp := mtypes.DeleteAPIKeyResponse{
+		Message: "success",
 	}
 
 	toJSON(w, resp)

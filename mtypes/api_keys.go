@@ -14,6 +14,10 @@ type CreateAPIKeyResponse struct {
 	Key APIKey `json:"key"`
 }
 
+type DeleteAPIKeyResponse struct {
+	Message string `json:"message"`
+}
+
 type APIKey struct {
 	ID             string      `json:"id"`
 	Description    string      `json:"description"`

@@ -1110,3 +1110,12 @@ func CreateAPIKey(role, apiKey string) (mtypes.APIKey, error) {
 		Description: "Example API key",
 	})
 }
+
+func DeleteAPIKey(id, apiKey string) (string, error) {
+	mg := mailgun.NewMailgun(apiKey)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	return mg.DeleteAPIKey(ctx, id)
+}

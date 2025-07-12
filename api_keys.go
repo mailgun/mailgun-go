@@ -91,3 +91,13 @@ func (mg *Client) CreateAPIKey(ctx context.Context, role string, opts *CreateAPI
 	err := postResponseFromJSON(ctx, r, payload, &resp)
 	return resp.Key, err
 }
+
+func (mg *Client) DeleteAPIKey(ctx context.Context, id string) (string, error) {
+	r := newHTTPRequest(generateApiUrl(mg, mtypes.APIKeysVersion, mtypes.APIKeysEndpoint+"/"+id))
+	r.setClient(mg.HTTPClient())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	var resp mtypes.DeleteAPIKeyResponse
+	err := deleteResponseFromJSON(ctx, r, &resp)
+	return resp.Message, err
+}
