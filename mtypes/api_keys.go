@@ -28,13 +28,13 @@ type APIKey struct {
 	Description    string      `json:"description"`
 	Kind           string      `json:"kind"`
 	Role           string      `json:"role"`
-	CreatedAt      RFC2822Time `json:"created_at"`
-	UpdatedAt      RFC2822Time `json:"updated_at"`
+	CreatedAt      ISO8601Time `json:"created_at"`
+	UpdatedAt      ISO8601Time `json:"updated_at"`
 	DomainName     string      `json:"domain_name"`
 	Requestor      string      `json:"requestor"`
 	UserName       string      `json:"user_name"`
 	IsDisabled     bool        `json:"is_disabled"`
-	ExpiresAt      RFC2822Time `json:"expires_at"`
+	ExpiresAt      ISO8601Time `json:"expires_at"`
 	Secret         string      `json:"string"`
 	DisabledReason string      `json:"disabled_reason"`
 }
