@@ -1,10 +1,11 @@
 package mocks
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
 func (ms *Server) addAPIKeysRoutes(r chi.Router) {

@@ -2,9 +2,10 @@ package mailgun_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/mailgun/mailgun-go/v5"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestListAPIKeys(t *testing.T) {
