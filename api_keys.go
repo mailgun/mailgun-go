@@ -42,11 +42,7 @@ func (mg *Client) ListAPIKeys(ctx context.Context, opts *ListAPIKeysOptions) ([]
 		return nil, err
 	}
 
-	var result []mtypes.APIKey
-	for _, item := range resp.Items {
-		result = append(result, item)
-	}
-	return result, nil
+	return resp.Items, nil
 }
 
 func (mg *Client) CreateAPIKey(ctx context.Context, role string, opts *CreateAPIKeyOptions) (mtypes.APIKey, error) {
