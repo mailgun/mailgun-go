@@ -18,7 +18,7 @@ type CreateAPIKeyOptions struct {
 	Email       string
 	Expiration  uint64
 	Kind        string
-	UserId      string
+	UserID      string
 	UserName    string
 }
 
@@ -74,8 +74,8 @@ func (mg *Client) CreateAPIKey(ctx context.Context, role string, opts *CreateAPI
 			payload.addValue("kind", opts.Kind)
 		}
 
-		if opts.UserId != "" {
-			payload.addValue("user_id", opts.UserId)
+		if opts.UserID != "" {
+			payload.addValue("user_id", opts.UserID)
 		}
 
 		if opts.UserName != "" {
