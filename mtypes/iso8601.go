@@ -41,12 +41,10 @@ func (t *ISO8601Time) UnmarshalJSON(s []byte) error {
 	}
 
 	var err1 error
-	parsedTime, err1 := time.Parse(ISO8601Format, q)
+	*t, err1 = NewISO8601Time(q)
 	if err1 != nil {
 		return errors.Errorf("%s", err1)
 	}
-
-	*t = ISO8601Time{parsedTime}
 
 	return nil
 }
