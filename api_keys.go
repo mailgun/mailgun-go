@@ -88,14 +88,13 @@ func (mg *Client) CreateAPIKey(ctx context.Context, role string, opts *CreateAPI
 	return resp.Key, err
 }
 
-func (mg *Client) DeleteAPIKey(ctx context.Context, id string) (string, error) {
+func (mg *Client) DeleteAPIKey(ctx context.Context, id string) error {
 	r := newHTTPRequest(generateApiUrl(mg, mtypes.APIKeysVersion, mtypes.APIKeysEndpoint+"/"+id))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	var resp mtypes.DeleteAPIKeyResponse
-	err := deleteResponseFromJSON(ctx, r, &resp)
-	return resp.Message, err
+	_, err := makeDeleteRequest(ctx, r)
+	return err
 }
 
 func (mg *Client) RegeneratePublicAPIKey(ctx context.Context) (mtypes.RegeneratePublicAPIKeyResponse, error) {

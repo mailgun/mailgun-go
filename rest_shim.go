@@ -113,20 +113,6 @@ func putResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v any) 
 	return response.parseFromJSON(v)
 }
 
-// deleteResponseFromJSON shim performs a DELETE request, checking for a positive outcome.
-// See simplehttp.DeleteResponseFromJSON for more details.
-func deleteResponseFromJSON(ctx context.Context, r *httpRequest, v any) error {
-	r.addHeader("User-Agent", UserAgent)
-	response, err := r.makeDeleteRequest(ctx)
-	if err != nil {
-		return err
-	}
-	if notGood(response.Code, expected) {
-		return newError(http.MethodDelete, r.URL, expected, response)
-	}
-	return response.parseFromJSON(v)
-}
-
 // makeGetRequest shim performs a GET request, checking for a positive outcome.
 // See simplehttp.MakeGetRequest for more details.
 func makeGetRequest(ctx context.Context, r *httpRequest) (*httpResponse, error) {

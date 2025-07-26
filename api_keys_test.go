@@ -37,9 +37,8 @@ func TestDeleteAPIKey(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	msg, err := mg.DeleteAPIKey(ctx, "1")
+	err = mg.DeleteAPIKey(ctx, "1")
 	require.NoError(t, err)
-	require.Equal(t, "success", msg)
 }
 
 func TestRegeneratePublicAPIKey(t *testing.T) {

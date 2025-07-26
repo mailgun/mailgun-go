@@ -1111,7 +1111,7 @@ func CreateAPIKey(role, apiKey string) (mtypes.APIKey, error) {
 	})
 }
 
-func DeleteAPIKey(id, apiKey string) (string, error) {
+func DeleteAPIKey(id, apiKey string) error {
 	mg := mailgun.NewMailgun(apiKey)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
