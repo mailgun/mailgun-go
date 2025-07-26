@@ -16,7 +16,7 @@ type CreateAPIKeyOptions struct {
 	Description string
 	DomainName  string
 	Email       string
-	Expiration  uint64
+	Expiration  uint64 // The key's lifetime in seconds.
 	Kind        string
 	UserID      string
 	UserName    string
