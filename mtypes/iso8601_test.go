@@ -24,7 +24,7 @@ func TestUnmarshalISO8601Time(t *testing.T) {
 			name:    "ISO8601",
 			s:       `{"created_at":"2011/10/13T18:02:00"}`,
 			wantErr: false,
-			want:    Req{CreatedAt: ISO8601Time(time.Date(2011, 10, 13, 18, 2, 0, 0, time.UTC))},
+			want:    Req{CreatedAt: ISO8601Time{time.Date(2011, 10, 13, 18, 2, 0, 0, time.UTC)}},
 		},
 	}
 
@@ -36,7 +36,7 @@ func TestUnmarshalISO8601Time(t *testing.T) {
 				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			require.True(t, time.Time(tt.want.CreatedAt).Equal(time.Time(req.CreatedAt)),
+			require.True(t, tt.want.CreatedAt.Equal(req.CreatedAt.Time),
 				fmt.Sprintf("want: %s; got: %s", tt.want.CreatedAt, req.CreatedAt))
 		})
 	}
