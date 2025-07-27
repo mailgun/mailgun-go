@@ -8,8 +8,7 @@ import (
 )
 
 // ISO8601Time Mailgun uses ISO8601 format for timestamps in the API key API endpoints ('2011/10/13T18:02:00'), but
-// by default Go's JSON package uses another format when decoding/encoding timestamps. This goes against the documentation
-// at https://documentation.mailgun.com/docs/mailgun/api-reference#date-format but here we are.
+// by default Go's JSON package uses another format when decoding/encoding timestamps.
 type ISO8601Time struct {
 	time.Time
 }
