@@ -268,6 +268,11 @@ type Mailgun interface {
 
 	SetOnBehalfOfSubaccount(subaccountID string)
 	RemoveOnBehalfOfSubaccount()
+
+	ListAPIKeys(ctx context.Context, opts *ListAPIKeysOptions) ([]mtypes.APIKey, error)
+	CreateAPIKey(ctx context.Context, role string, opts *CreateAPIKeyOptions) (mtypes.APIKey, error)
+	DeleteAPIKey(ctx context.Context, id string) error
+	RegeneratePublicAPIKey(ctx context.Context) (mtypes.RegeneratePublicAPIKeyResponse, error)
 }
 
 // Client bundles data needed by a large number of methods in order to interact with the Mailgun API.

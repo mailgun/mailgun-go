@@ -37,6 +37,7 @@ type Server struct {
 	subaccountList   []mtypes.Subaccount
 	webhooks         mtypes.WebHooksListResponse
 	mutex            sync.Mutex
+	apiKeysList      []mtypes.APIKey
 }
 
 func (ms *Server) DomainIPS() []string {
@@ -99,6 +100,12 @@ func (ms *Server) SubaccountList() []mtypes.Subaccount {
 	return ms.subaccountList
 }
 
+func (ms *Server) APIKeysList() []mtypes.APIKey {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+	return ms.apiKeysList
+}
+
 // NewServer creates a new instance of the mailgun API mock server
 func NewServer() *Server {
 	ms := Server{}
@@ -133,6 +140,7 @@ func NewServer() *Server {
 	ms.addAnalyticsRoutes(r)
 	ms.addAlertsRoutes(r)
 	ms.addInboxreadyDomainsRoutes(r)
+	ms.addAPIKeysRoutes(r)
 
 	// Start the server
 	ms.srv = httptest.NewServer(r)
