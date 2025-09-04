@@ -198,7 +198,7 @@ func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mty
 
 // CreateDomainOptions - optional parameters when creating a domain
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/POST-v4-domains
-// TODO(vtopc): support all fields
+// TODO(DE-1599): support all fields
 type CreateDomainOptions struct {
 	Password           string
 	SpamAction         mtypes.SpamAction
