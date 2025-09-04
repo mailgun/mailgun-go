@@ -51,7 +51,8 @@ type DNSRecord struct {
 }
 
 type GetDomainResponse struct {
-	Domain              Domain      `json:"domain"`
-	ReceivingDNSRecords []DNSRecord `json:"receiving_dns_records"`
-	SendingDNSRecords   []DNSRecord `json:"sending_dns_records"`
+	Domain                     Domain      `json:"domain"`
+	ReceivingDNSRecords        []DNSRecord `json:"receiving_dns_records"`
+	SendingDNSRecords          []DNSRecord `json:"sending_dns_records"`
+	UseAutomaticSenderSecurity bool        `json:"use_automatic_sender_security"`
 }

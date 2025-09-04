@@ -200,13 +200,14 @@ func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mty
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/POST-v4-domains
 // TODO(DE-1599): support all fields
 type CreateDomainOptions struct {
-	Password           string
-	SpamAction         mtypes.SpamAction
-	Wildcard           bool
-	ForceDKIMAuthority bool
-	DKIMKeySize        int
-	IPs                []string
-	WebScheme          string
+	Password                   string
+	SpamAction                 mtypes.SpamAction
+	Wildcard                   bool
+	ForceDKIMAuthority         bool
+	DKIMKeySize                int
+	IPs                        []string
+	WebScheme                  string
+	UseAutomaticSenderSecurity bool
 }
 
 // CreateDomain instructs Mailgun to create a new domain for your account.
@@ -245,6 +246,9 @@ func (mg *Client) CreateDomain(ctx context.Context, domain string, opts *CreateD
 		if opts.WebScheme != "" {
 			payload.addValue("web_scheme", opts.WebScheme)
 		}
+		if opts.UseAutomaticSenderSecurity {
+			payload.addValue("use_automatic_sender_security", boolToString(opts.UseAutomaticSenderSecurity))
+		}
 	}
 	var resp mtypes.GetDomainResponse
 	err := postResponseFromJSON(ctx, r, payload, &resp)
@@ -262,10 +266,11 @@ func (mg *Client) DeleteDomain(ctx context.Context, domain string) error {
 
 // UpdateDomainOptions options for updating a domain
 type UpdateDomainOptions struct {
-	WebScheme        string
-	WebPrefix        string
-	RequireTLS       *bool
-	SkipVerification *bool
+	WebScheme                  string
+	WebPrefix                  string
+	RequireTLS                 *bool
+	SkipVerification           *bool
+	UseAutomaticSenderSecurity *bool
 }
 
 // UpdateDomain updates a domain's attributes.
@@ -288,6 +293,9 @@ func (mg *Client) UpdateDomain(ctx context.Context, domain string, opts *UpdateD
 		}
 		if opts.SkipVerification != nil {
 			payload.addValue("skip_verification", boolToString(*opts.SkipVerification))
+		}
+		if opts.UseAutomaticSenderSecurity != nil {
+			payload.addValue("use_automatic_sender_security", boolToString(*opts.UseAutomaticSenderSecurity))
 		}
 	}
 
