@@ -125,7 +125,7 @@ func (ci *BouncesIterator) fetch(ctx context.Context, uri string) error {
 
 // GetBounce retrieves a single bounce record, if any exist, for the given recipient address.
 func (mg *Client) GetBounce(ctx context.Context, domain, address string) (mtypes.Bounce, error) {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.PathEscape(address))
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.QueryEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -167,7 +167,7 @@ func (mg *Client) AddBounce(ctx context.Context, domain, address, code, bounceEr
 	return err
 }
 
-// Add Bounces adds a list of bounces to the bounce list
+// AddBounces adds a list of bounces to the bounce list
 func (mg *Client) AddBounces(ctx context.Context, domain string, bounces []mtypes.Bounce) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
@@ -179,9 +179,9 @@ func (mg *Client) AddBounces(ctx context.Context, domain string, bounces []mtype
 	return err
 }
 
-// DeleteBounce removes all bounces associted with the provided e-mail address.
+// DeleteBounce removes all bounces associated with the provided e-mail address.
 func (mg *Client) DeleteBounce(ctx context.Context, domain, address string) error {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.PathEscape(address))
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, bouncesEndpoint, domain) + "/" + url.QueryEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)

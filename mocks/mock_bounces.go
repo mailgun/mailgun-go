@@ -97,8 +97,15 @@ func (ms *Server) getBounce(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		msg := fmt.Sprintf("invalid format for parameter 'address': %s", err)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+
 	for _, bounce := range ms.bounces {
-		if bounce.Address == chi.URLParam(r, "address") {
+		if bounce.Address == address {
 			toJSON(w, bounce)
 			return
 		}
@@ -169,8 +176,15 @@ func (ms *Server) deleteBounce(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		msg := fmt.Sprintf("invalid format for parameter 'address': %s", err)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+
 	for i, bounce := range ms.bounces {
-		if bounce.Address == chi.URLParam(r, "address") {
+		if bounce.Address == address {
 			ms.bounces = append(ms.bounces[:i], ms.bounces[i+1:len(ms.bounces)]...)
 
 			toJSON(w, map[string]any{
