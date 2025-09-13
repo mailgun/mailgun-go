@@ -117,9 +117,9 @@ func (ci *ComplaintsIterator) Previous(ctx context.Context, items *[]mtypes.Comp
 	return len(ci.Items) != 0
 }
 
-func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {
+func (ci *ComplaintsIterator) fetch(ctx context.Context, uri string) error {
 	ci.Items = nil
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 	r.setClient(ci.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
 
