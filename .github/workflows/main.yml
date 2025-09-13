@@ -42,6 +42,7 @@ jobs:
       - name: nilaway
         run: make nilaway
 
+      # TODO(vtopc): move into separate job:
       - name: lint
         run: make lint
 
