@@ -92,8 +92,15 @@ func (ms *Server) getComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		msg := fmt.Sprintf("invalid format for parameter 'address': %s", err)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+
 	for _, complaint := range ms.complaints {
-		if complaint.Address == chi.URLParam(r, "address") {
+		if complaint.Address == address {
 			toJSON(w, complaint)
 			return
 		}
@@ -162,8 +169,15 @@ func (ms *Server) deleteComplaint(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		msg := fmt.Sprintf("invalid format for parameter 'address': %s", err)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+
 	for i, complaint := range ms.complaints {
-		if complaint.Address == chi.URLParam(r, "address") {
+		if complaint.Address == address {
 			ms.complaints = append(ms.complaints[:i], ms.complaints[i+1:len(ms.complaints)]...)
 
 			toJSON(w, map[string]any{

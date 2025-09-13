@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -23,10 +24,10 @@ func (mg *Client) ListComplaints(domain string, opts *ListOptions) *ComplaintsIt
 			r.addParameter("limit", strconv.Itoa(opts.Limit))
 		}
 	}
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	return &ComplaintsIterator{
 		mg:                 mg,
-		ComplaintsResponse: mtypes.ComplaintsResponse{Paging: mtypes.Paging{Next: url, First: url}},
+		ComplaintsResponse: mtypes.ComplaintsResponse{Paging: mtypes.Paging{Next: uri, First: uri}},
 		err:                err,
 	}
 }
@@ -128,7 +129,7 @@ func (ci *ComplaintsIterator) fetch(ctx context.Context, url string) error {
 // GetComplaint returns a single complaint record filed by a recipient at the email address provided.
 // If no complaint exists, the Complaint instance returned will be empty.
 func (mg *Client) GetComplaint(ctx context.Context, domain, address string) (mtypes.Complaint, error) {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain) + "/" + address)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain) + "/" + url.QueryEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -168,7 +169,7 @@ func (mg *Client) CreateComplaints(ctx context.Context, domain string, addresses
 // DeleteComplaint removes a previously registered e-mail address from the list of people who complained
 // of receiving spam from your domain.
 func (mg *Client) DeleteComplaint(ctx context.Context, domain, address string) error {
-	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain) + "/" + address)
+	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, complaintsEndpoint, domain) + "/" + url.QueryEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
