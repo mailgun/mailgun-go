@@ -339,7 +339,7 @@ linters-settings:
         disabled: false
         exclude: [""]
         arguments:
-          - maxLength: 2
+          - maxLength: 4
 
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#redefines-builtin-id
       - name: redefines-builtin-id
