@@ -30,13 +30,15 @@ func (e *UnexpectedResponseError) Error() string {
 
 // newError creates a new error condition to be returned.
 func newError(method, url string, expected []int, got *httpResponse) error {
-	return &UnexpectedResponseError{
+	apiErr := &UnexpectedResponseError{
 		Expected: expected,
 		Actual:   got.Code,
 		Method:   method,
 		URL:      url,
 		Data:     got.Data,
 	}
+
+	return apiErr
 }
 
 // GetStatusFromErr extracts the http status code from error object
