@@ -114,7 +114,7 @@ func makeDeleteRequest(ctx context.Context, r *httpRequest) (*httpResponse, erro
 	return rsp, err
 }
 
-// Extract the http status code from error object
+// GetStatusFromErr extracts the http status code from error object
 func GetStatusFromErr(err error) int {
 	obj, ok := err.(*UnexpectedResponseError)
 	if !ok {
