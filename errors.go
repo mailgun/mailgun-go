@@ -1,6 +1,7 @@
 package mailgun
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -36,4 +37,14 @@ func newError(method, url string, expected []int, got *httpResponse) error {
 		URL:      url,
 		Data:     got.Data,
 	}
+}
+
+// GetStatusFromErr extracts the http status code from error object
+func GetStatusFromErr(err error) int {
+	var obj *UnexpectedResponseError
+	if errors.As(err, &obj) {
+		return obj.Actual
+	}
+
+	return -1
 }
