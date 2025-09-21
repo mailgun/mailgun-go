@@ -641,7 +641,7 @@ type Message interface {
 //
 // The status and message ID are only returned if no error occurred.
 //
-// Error returns can be of type `error` which wrap internal and standard
+// Returned error can be of type `error` which wrap internal and standard
 // Go errors like `url.Error`. The error can also be of type
 // mailgun.UnexpectedResponseError which contains the error returned by the mailgun API.
 //
