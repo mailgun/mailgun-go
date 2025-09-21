@@ -26,7 +26,6 @@ func notGood(needle int, haystack []int) bool {
 var expected = []int{200, 202, 204}
 
 // makeRequest shim performs a generic request, checking for a positive outcome.
-// See simplehttp.MakeRequest for more details.
 func makeRequest(ctx context.Context, r *httpRequest, method string, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", UserAgent)
 	rsp, err := r.makeRequest(ctx, method, p)
@@ -37,7 +36,6 @@ func makeRequest(ctx context.Context, r *httpRequest, method string, p payload) 
 }
 
 // getResponseFromJSON shim performs a GET request, checking for a positive outcome.
-// See simplehttp.GetResponseFromJSON for more details.
 func getResponseFromJSON(ctx context.Context, r *httpRequest, v any) error {
 	r.addHeader("User-Agent", UserAgent)
 	response, err := r.makeGetRequest(ctx)
@@ -51,7 +49,6 @@ func getResponseFromJSON(ctx context.Context, r *httpRequest, v any) error {
 }
 
 // postResponseFromJSON shim performs a POST request, checking for a positive outcome.
-// See simplehttp.PostResponseFromJSON for more details.
 func postResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v any) error {
 	r.addHeader("User-Agent", UserAgent)
 	response, err := r.makePostRequest(ctx, p)
@@ -65,7 +62,6 @@ func postResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v any)
 }
 
 // putResponseFromJSON shim performs a PUT request, checking for a positive outcome.
-// See simplehttp.PutResponseFromJSON for more details.
 func putResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v any) error {
 	r.addHeader("User-Agent", UserAgent)
 	response, err := r.makePutRequest(ctx, p)
@@ -79,7 +75,6 @@ func putResponseFromJSON(ctx context.Context, r *httpRequest, p payload, v any) 
 }
 
 // makeGetRequest shim performs a GET request, checking for a positive outcome.
-// See simplehttp.MakeGetRequest for more details.
 func makeGetRequest(ctx context.Context, r *httpRequest) (*httpResponse, error) {
 	r.addHeader("User-Agent", UserAgent)
 	rsp, err := r.makeGetRequest(ctx)
@@ -90,7 +85,6 @@ func makeGetRequest(ctx context.Context, r *httpRequest) (*httpResponse, error) 
 }
 
 // makePostRequest shim performs a POST request, checking for a positive outcome.
-// See simplehttp.MakePostRequest for more details.
 func makePostRequest(ctx context.Context, r *httpRequest, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", UserAgent)
 	rsp, err := r.makePostRequest(ctx, p)
@@ -101,7 +95,6 @@ func makePostRequest(ctx context.Context, r *httpRequest, p payload) (*httpRespo
 }
 
 // makePutRequest shim performs a PUT request, checking for a positive outcome.
-// See simplehttp.MakePutRequest for more details.
 func makePutRequest(ctx context.Context, r *httpRequest, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", UserAgent)
 	rsp, err := r.makePutRequest(ctx, p)
@@ -112,7 +105,6 @@ func makePutRequest(ctx context.Context, r *httpRequest, p payload) (*httpRespon
 }
 
 // makeDeleteRequest shim performs a DELETE request, checking for a positive outcome.
-// See simplehttp.MakeDeleteRequest for more details.
 func makeDeleteRequest(ctx context.Context, r *httpRequest) (*httpResponse, error) {
 	r.addHeader("User-Agent", UserAgent)
 	rsp, err := r.makeDeleteRequest(ctx)
