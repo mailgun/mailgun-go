@@ -2,7 +2,6 @@ package mailgun
 
 import (
 	"context"
-	"errors"
 	"net/http"
 )
 
