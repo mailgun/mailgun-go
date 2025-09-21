@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"errors"
 	"net/http"
 )
 
@@ -116,9 +117,10 @@ func makeDeleteRequest(ctx context.Context, r *httpRequest) (*httpResponse, erro
 
 // GetStatusFromErr extracts the http status code from error object
 func GetStatusFromErr(err error) int {
-	obj, ok := err.(*UnexpectedResponseError)
-	if !ok {
-		return -1
+	var obj *UnexpectedResponseError
+	if errors.As(err, &obj) {
+		return obj.Actual
 	}
-	return obj.Actual
+
+	return -1
 }
