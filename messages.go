@@ -645,13 +645,6 @@ type Message interface {
 // golang errors like `url.Error`. The error can also be of type
 // mailgun.UnexpectedResponseError which contains the error returned by the mailgun API.
 //
-//	mailgun.UnexpectedResponseError {
-//	  URL:      "https://api.mailgun.com/v3/messages",
-//	  Expected: 200,
-//	  Actual:   400,
-//	  Data:     "Domain not found: example.com",
-//	}
-//
 // See the public mailgun documentation for all possible return codes and error messages
 func (mg *Client) Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error) {
 	var response mtypes.SendMessageResponse
