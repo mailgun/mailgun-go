@@ -15,6 +15,7 @@ type UnexpectedResponseError struct {
 	Method   string
 	URL      string
 	Data     []byte
+	Header   http.Header
 }
 
 // String() converts the error into a human-readable, logfmt-compliant string.
@@ -52,6 +53,7 @@ func newError(method, url string, expected []int, got *httpResponse) error {
 		Method:   method,
 		URL:      url,
 		Data:     got.Data,
+		Header:   got.Header,
 	}
 
 	if apiErr.Actual == http.StatusTooManyRequests {
