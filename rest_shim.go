@@ -28,7 +28,7 @@ var expected = []int{200, 202, 204}
 // doRequest shim performs a generic request, checking for a positive outcome.
 func doRequest(ctx context.Context, r *httpRequest, method string, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", UserAgent)
-	rsp, err := r.makeRequest(ctx, method, p)
+	rsp, err := r.do(ctx, method, p)
 	if (err == nil) && notGood(rsp.Code, expected) {
 		return rsp, newError(method, r.URL, expected, rsp)
 	}
