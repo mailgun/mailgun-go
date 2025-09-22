@@ -29,8 +29,9 @@ type httpRequest struct {
 }
 
 type httpResponse struct {
-	Code int
-	Data []byte
+	Code   int
+	Data   []byte
+	Header http.Header
 }
 
 type payload interface {
@@ -351,7 +352,8 @@ func (r *httpRequest) do(ctx context.Context, method string, payload payload) (*
 	defer resp.Body.Close()
 
 	response := httpResponse{
-		Code: resp.StatusCode,
+		Code:   resp.StatusCode,
+		Header: resp.Header,
 	}
 
 	responseBody, err := io.ReadAll(resp.Body)
