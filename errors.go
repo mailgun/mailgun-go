@@ -33,15 +33,15 @@ func (e *UnexpectedResponseError) Error() string {
 	return e.String()
 }
 
-type RateLimitError struct {
+type RateLimitedError struct {
 	Err error
 }
 
-func (e *RateLimitError) Error() string {
-	return fmt.Sprintf("RateLimitError: %v", e.Err)
+func (e *RateLimitedError) Error() string {
+	return fmt.Sprintf("RateLimitedError: %v", e.Err)
 }
 
-func (e *RateLimitError) Unwrap() error {
+func (e *RateLimitedError) Unwrap() error {
 	return e.Err
 }
 
@@ -57,7 +57,7 @@ func newError(method, url string, expected []int, got *httpResponse) error {
 	}
 
 	if apiErr.Actual == http.StatusTooManyRequests {
-		return &RateLimitError{Err: apiErr}
+		return &RateLimitedError{Err: apiErr}
 	}
 
 	return apiErr

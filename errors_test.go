@@ -44,7 +44,7 @@ func Test_newError(t *testing.T) {
 			uri:          uri,
 			expected:     expected,
 			httpResponse: httpResponse{Code: 429, Data: []byte("Too Many Requests")},
-			wantErr: &RateLimitError{
+			wantErr: &RateLimitedError{
 				Err: &UnexpectedResponseError{
 					Expected: expected,
 					Actual:   429,
@@ -72,7 +72,7 @@ func TestRateLimitError(t *testing.T) {
 	err := newError("GET", "/v1/foo", []int{200, 201}, &httpResponse{Code: 429, Data: []byte("Too Many Requests")})
 
 	t.Run(".Error()", func(t *testing.T) {
-		wantErr := errors.New(`RateLimitError: UnexpectedResponseError Method=GET URL=/v1/foo ExpectedOneOf=[]int{200, 201} Got=429 Error: Too Many Requests`)
+		wantErr := errors.New(`RateLimitedError: UnexpectedResponseError Method=GET URL=/v1/foo ExpectedOneOf=[]int{200, 201} Got=429 Error: Too Many Requests`)
 
 		assert.EqualError(t, err, wantErr.Error())
 	})
