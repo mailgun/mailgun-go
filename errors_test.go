@@ -68,7 +68,7 @@ func Test_newError(t *testing.T) {
 	}
 }
 
-func TestRateLimitError(t *testing.T) {
+func TestRateLimitedError(t *testing.T) {
 	err := newError("GET", "/v1/foo", []int{200, 201}, &httpResponse{Code: 429, Data: []byte("Too Many Requests")})
 
 	t.Run(".Error()", func(t *testing.T) {
