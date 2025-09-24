@@ -67,7 +67,7 @@ func newError(method, url string, expected []int, got *httpResponse) error {
 		if reset := got.Header.Get(rateLimitResetHeader); reset != "" {
 			f, err := strconv.ParseFloat(reset, 64)
 			if err == nil {
-				t := time.Unix(int64(f), 0)
+				t := time.Unix(int64(f), 0).UTC()
 				ret.ResetAt = &t
 			}
 		}
