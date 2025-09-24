@@ -35,6 +35,6 @@ type APIKey struct {
 	UserName       string      `json:"user_name"`
 	IsDisabled     bool        `json:"is_disabled"`
 	ExpiresAt      ISO8601Time `json:"expires_at"`
-	Secret         string      `json:"string"`
+	Secret         string      `json:"secret"`
 	DisabledReason string      `json:"disabled_reason"`
 }
