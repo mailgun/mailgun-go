@@ -4,7 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 )
+
+const rateLimitResetHeader = "X-RateLimit-Reset"
 
 // UnexpectedResponseError this error will be returned whenever a Mailgun API returns an error response.
 // Your application can check the Actual field to see the actual HTTP response code returned.
@@ -34,7 +38,8 @@ func (e *UnexpectedResponseError) Error() string {
 }
 
 type RateLimitedError struct {
-	Err error
+	Err     error
+	ResetAt *time.Time // If provided, the time at which the rate limit will reset.
 }
 
 func (e *RateLimitedError) Error() string {
@@ -57,7 +62,17 @@ func newError(method, url string, expected []int, got *httpResponse) error {
 	}
 
 	if apiErr.Actual == http.StatusTooManyRequests {
-		return &RateLimitedError{Err: apiErr}
+		ret := &RateLimitedError{Err: apiErr}
+
+		if reset := got.Header.Get(rateLimitResetHeader); reset != "" {
+			f, err := strconv.ParseFloat(reset, 64)
+			if err == nil {
+				t := time.Unix(int64(f), 0)
+				ret.ResetAt = &t
+			}
+		}
+
+		return ret
 	}
 
 	return apiErr
