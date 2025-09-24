@@ -25,7 +25,7 @@ func notGood(needle int, haystack []int) bool {
 // expected denotes the expected list of known-good HTTP response codes possible from the Mailgun API.
 var expected = []int{200, 202, 204}
 
-// doRequest shim performs a generic request, checking for a positive outcome.
+// doRequest performs a generic request, checking for a positive outcome.
 func doRequest(ctx context.Context, r *httpRequest, method string, p payload) (*httpResponse, error) {
 	r.addHeader("User-Agent", UserAgent)
 	rsp, err := r.do(ctx, method, p)
