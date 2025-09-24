@@ -29,8 +29,9 @@ type httpRequest struct {
 }
 
 type httpResponse struct {
-	Code int
-	Data []byte
+	Code   int
+	Data   []byte
+	Header http.Header
 }
 
 type payload interface {
@@ -268,19 +269,19 @@ func (r *httpRequest) addHeader(name, value string) {
 }
 
 func (r *httpRequest) makeGetRequest(ctx context.Context) (*httpResponse, error) {
-	return r.makeRequest(ctx, http.MethodGet, nil)
+	return r.do(ctx, http.MethodGet, nil)
 }
 
 func (r *httpRequest) makePostRequest(ctx context.Context, payload payload) (*httpResponse, error) {
-	return r.makeRequest(ctx, http.MethodPost, payload)
+	return r.do(ctx, http.MethodPost, payload)
 }
 
 func (r *httpRequest) makePutRequest(ctx context.Context, payload payload) (*httpResponse, error) {
-	return r.makeRequest(ctx, http.MethodPut, payload)
+	return r.do(ctx, http.MethodPut, payload)
 }
 
 func (r *httpRequest) makeDeleteRequest(ctx context.Context) (*httpResponse, error) {
-	return r.makeRequest(ctx, http.MethodDelete, nil)
+	return r.do(ctx, http.MethodDelete, nil)
 }
 
 func (r *httpRequest) NewRequest(ctx context.Context, method string, payload payload) (*http.Request, error) {
@@ -328,7 +329,7 @@ func (r *httpRequest) NewRequest(ctx context.Context, method string, payload pay
 	return req, nil
 }
 
-func (r *httpRequest) makeRequest(ctx context.Context, method string, payload payload) (*httpResponse, error) {
+func (r *httpRequest) do(ctx context.Context, method string, payload payload) (*httpResponse, error) {
 	req, err := r.NewRequest(ctx, method, payload)
 	if err != nil {
 		return nil, err
@@ -351,7 +352,8 @@ func (r *httpRequest) makeRequest(ctx context.Context, method string, payload pa
 	defer resp.Body.Close()
 
 	response := httpResponse{
-		Code: resp.StatusCode,
+		Code:   resp.StatusCode,
+		Header: resp.Header,
 	}
 
 	responseBody, err := io.ReadAll(resp.Body)

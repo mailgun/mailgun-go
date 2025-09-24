@@ -641,16 +641,9 @@ type Message interface {
 //
 // The status and message ID are only returned if no error occurred.
 //
-// Error returns can be of type `error.Error` which wrap internal and standard
-// golang errors like `url.Error`. The error can also be of type
+// Returned error can be wrapped internal and standard
+// Go errors like `url.Error`. The error can also be of type
 // mailgun.UnexpectedResponseError which contains the error returned by the mailgun API.
-//
-//	mailgun.UnexpectedResponseError {
-//	  URL:      "https://api.mailgun.com/v3/messages",
-//	  Expected: 200,
-//	  Actual:   400,
-//	  Data:     "Domain not found: example.com",
-//	}
 //
 // See the public mailgun documentation for all possible return codes and error messages
 func (mg *Client) Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error) {

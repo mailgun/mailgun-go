@@ -158,7 +158,7 @@ func (ei *EventIterator) fetch(ctx context.Context, url string) error {
 	r.setClient(ei.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ei.mg.APIKey())
 
-	resp, err := makeRequest(ctx, r, http.MethodGet, nil)
+	resp, err := doRequest(ctx, r, http.MethodGet, nil)
 	if err != nil {
 		return err
 	}
