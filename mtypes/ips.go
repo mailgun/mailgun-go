@@ -12,6 +12,8 @@ type IPAddressListResponseDetail struct {
 	IsOnWarmup bool   `json:"is_on_warmup,omitempty"`
 }
 
+// IPAddress - is a response for both GetIP and ListIPS.
+// TODO(v6): split into two separate types for GetIP and ListIPS.
 type IPAddress struct {
 	IP                string `json:"ip"`                            // Always present
 	RDNS              string `json:"rdns,omitempty"`                // Filled by GetIP
