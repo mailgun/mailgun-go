@@ -38,7 +38,6 @@ func TestGetIPWarmupStatus(t *testing.T) {
 	ctx := context.Background()
 	detail, err := mg.GetIPWarmupStatus(ctx, "1.0.0.1")
 	require.NoError(t, err)
-	require.Equal(t, "1.0.0.1", detail.IP)
 	require.Len(t, detail.StageHistory, 2)
 	t.Logf("IP Warmup: %#v\n", detail)
 }

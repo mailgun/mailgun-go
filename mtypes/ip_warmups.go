@@ -21,7 +21,6 @@ type IPWarmupDetailsResponse struct {
 }
 
 type IPWarmupDetails struct {
-	IP                string                 `json:"ip"`
 	SentWithinStage   string                 `json:"sent_within_stage"`
 	Throttle          int                    `json:"throttle"`
 	StageNumber       int                    `json:"stage_number"`
