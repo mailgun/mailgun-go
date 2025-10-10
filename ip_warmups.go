@@ -56,44 +56,6 @@ func (ri *IPWarmupsIterator) First(ctx context.Context, items *[]mtypes.IPWarmup
 	return true
 }
 
-// Last retrieves the last page of items from the api.
-// Calling Last() is invalid unless you first call First() or Next()
-// Returns false if there was an error. It also sets the iterator object
-// to the last page. Use `.Err()` to retrieve the error.
-func (ri *IPWarmupsIterator) Last(ctx context.Context, items *[]mtypes.IPWarmup) bool {
-	if ri.err != nil {
-		return false
-	}
-
-	ri.err = ri.fetch(ctx, ri.Paging.Last)
-	if ri.err != nil {
-		return false
-	}
-	cpy := make([]mtypes.IPWarmup, len(ri.Items))
-	copy(cpy, ri.Items)
-	*items = cpy
-	return true
-}
-
-// Previous retrieves the previous page of items from the api. Returns false when there
-// no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
-// the error if any
-func (ri *IPWarmupsIterator) Previous(ctx context.Context, items *[]mtypes.IPWarmup) bool {
-	if ri.err != nil {
-		return false
-	}
-
-	ri.err = ri.fetch(ctx, ri.Paging.Previous)
-	if ri.err != nil {
-		return false
-	}
-	cpy := make([]mtypes.IPWarmup, len(ri.Items))
-	copy(cpy, ri.Items)
-	*items = cpy
-
-	return len(ri.Items) != 0
-}
-
 func (ri *IPWarmupsIterator) fetch(ctx context.Context, url string) error {
 	ri.Items = nil
 	r := newHTTPRequest(url)
