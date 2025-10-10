@@ -124,3 +124,21 @@ func (mg *Client) GetIPWarmupStatus(ctx context.Context, ip string) (mtypes.IPWa
 	}
 	return resp.Details, nil
 }
+
+func (mg *Client) CreateWarmupPlan(ctx context.Context, ip string) error {
+	url := generateApiUrl(mg, 3, ipWarmupsEndpoint) + "/" + ip
+	r := newHTTPRequest(url)
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	r.setClient(mg.HTTPClient())
+	_, err := makePostRequest(ctx, r, nil)
+	return err
+}
+
+func (mg *Client) CancelWarmupPlan(ctx context.Context, ip string) error {
+	url := generateApiUrl(mg, 3, ipWarmupsEndpoint) + "/" + ip
+	r := newHTTPRequest(url)
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	r.setClient(mg.HTTPClient())
+	_, err := makeDeleteRequest(ctx, r)
+	return err
+}

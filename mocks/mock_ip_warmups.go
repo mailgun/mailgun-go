@@ -11,6 +11,8 @@ import (
 func (ms *Server) addIPWarmupsRoutes(r chi.Router) {
 	r.Get("/ip_warmups", ms.listIPWarmups)
 	r.Get("/ip_warmups/{ip}", ms.getIPWarmupStatus)
+	r.Post("/ip_warmups/{ip}", ms.createWarmupPlan)
+	r.Delete("/ip_warmups/{ip}", ms.cancelWarmupPlan)
 }
 
 func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
@@ -88,4 +90,12 @@ func (ms *Server) getIPWarmupStatus(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 
+}
+
+func (ms *Server) createWarmupPlan(w http.ResponseWriter, r *http.Request) {
+	toJSON(w, okResp{Message: "success"})
+}
+
+func (ms *Server) cancelWarmupPlan(w http.ResponseWriter, r *http.Request) {
+	toJSON(w, okResp{Message: "success"})
 }

@@ -42,3 +42,21 @@ func TestGetIPWarmupStatus(t *testing.T) {
 	require.Len(t, detail.StageHistory, 2)
 	t.Logf("IP Warmup: %#v\n", detail)
 }
+
+func TestCreateWarmupPlan(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	require.NoError(t, mg.CreateWarmupPlan(ctx, "1.0.0.1"))
+}
+
+func TestCancelWarmupPlan(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	require.NoError(t, mg.CancelWarmupPlan(ctx, "1.0.0.1"))
+}
