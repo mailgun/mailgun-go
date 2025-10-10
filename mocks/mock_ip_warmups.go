@@ -10,9 +10,9 @@ import (
 
 func (ms *Server) addIPWarmupsRoutes(r chi.Router) {
 	r.Get("/ip_warmups", ms.listIPWarmups)
-	r.Get("/ip_warmups/{ip}", ms.getIPWarmupStatus)
-	r.Post("/ip_warmups/{ip}", ms.createWarmupPlan)
-	r.Delete("/ip_warmups/{ip}", ms.cancelWarmupPlan)
+	r.Get("/ip_warmups/{ip}", ms.getIPWarmup)
+	r.Post("/ip_warmups/{ip}", ms.createIPWarmup)
+	r.Delete("/ip_warmups/{ip}", ms.cancelIPWarmup)
 }
 
 func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
@@ -60,10 +60,9 @@ func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (ms *Server) getIPWarmupStatus(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) getIPWarmup(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, mtypes.IPWarmupDetailsResponse{
 		Details: mtypes.IPWarmupDetails{
-			IP:                "1.0.0.1",
 			SentWithinStage:   "20%",
 			Throttle:          78,
 			StageNumber:       2,
@@ -92,10 +91,10 @@ func (ms *Server) getIPWarmupStatus(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (ms *Server) createWarmupPlan(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) createIPWarmup(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "success"})
 }
 
-func (ms *Server) cancelWarmupPlan(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) cancelIPWarmup(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "success"})
 }

@@ -112,8 +112,8 @@ func (mg *Client) ListIPWarmups() *IPWarmupsIterator {
 	}
 }
 
-// GetIPWarmupStatus retrieves the details of a warmup in progress for the specified IP address
-func (mg *Client) GetIPWarmupStatus(ctx context.Context, ip string) (mtypes.IPWarmupDetails, error) {
+// GetIPWarmup retrieves the details of a warmup in progress for the specified IP address
+func (mg *Client) GetIPWarmup(ctx context.Context, ip string) (mtypes.IPWarmupDetails, error) {
 	url := generateApiUrl(mg, 3, ipWarmupsEndpoint) + "/" + ip
 	r := newHTTPRequest(url)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -125,7 +125,7 @@ func (mg *Client) GetIPWarmupStatus(ctx context.Context, ip string) (mtypes.IPWa
 	return resp.Details, nil
 }
 
-func (mg *Client) CreateWarmupPlan(ctx context.Context, ip string) error {
+func (mg *Client) CreateIPWarmup(ctx context.Context, ip string) error {
 	url := generateApiUrl(mg, 3, ipWarmupsEndpoint) + "/" + ip
 	r := newHTTPRequest(url)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
@@ -134,7 +134,7 @@ func (mg *Client) CreateWarmupPlan(ctx context.Context, ip string) error {
 	return err
 }
 
-func (mg *Client) CancelWarmupPlan(ctx context.Context, ip string) error {
+func (mg *Client) CancelIPWarmup(ctx context.Context, ip string) error {
 	url := generateApiUrl(mg, 3, ipWarmupsEndpoint) + "/" + ip
 	r := newHTTPRequest(url)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())

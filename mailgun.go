@@ -233,6 +233,11 @@ type Mailgun interface {
 	AddDomainIP(ctx context.Context, domain, ip string) error
 	DeleteDomainIP(ctx context.Context, domain, ip string) error
 
+	ListIPWarmups() *IPWarmupsIterator
+	GetIPWarmup(ctx context.Context, ip string) (mtypes.IPWarmupDetails, error)
+	CreateIPWarmup(ctx context.Context, ip string) error
+	CancelIPWarmup(ctx context.Context, ip string) error
+
 	ListExports(ctx context.Context, url string) ([]mtypes.Export, error)
 	GetExport(ctx context.Context, id string) (mtypes.Export, error)
 	GetExportLink(ctx context.Context, id string) (string, error)
