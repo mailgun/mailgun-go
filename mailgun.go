@@ -113,6 +113,7 @@ const (
 	unsubscribesEndpoint = "unsubscribes"
 	routesEndpoint       = "routes"
 	ipsEndpoint          = "ips"
+	ipWarmupsEndpoint    = "ip_warmups"
 	exportsEndpoint      = "exports"
 	webhooksEndpoint     = "webhooks"
 	listsEndpoint        = "lists"
