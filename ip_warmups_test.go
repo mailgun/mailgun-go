@@ -14,7 +14,7 @@ func TestListIPWarmups(t *testing.T) {
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
 
-	iter := mg.ListIPWarmups(nil)
+	iter := mg.ListIPWarmups()
 
 	ctx := context.Background()
 
@@ -28,4 +28,17 @@ func TestListIPWarmups(t *testing.T) {
 	}
 	require.NoError(t, iter.Err())
 	require.Equal(t, 2, count)
+}
+
+func TestGetIPWarmupStatus(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	detail, err := mg.GetIPWarmupStatus(ctx, "1.0.0.1")
+	require.NoError(t, err)
+	require.Equal(t, "1.0.0.1", detail.IP)
+	require.Len(t, detail.StageHistory, 2)
+	t.Logf("IP Warmup: %#v\n", detail)
 }

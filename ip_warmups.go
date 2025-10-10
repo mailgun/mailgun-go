@@ -103,15 +103,24 @@ func (ri *IPWarmupsIterator) fetch(ctx context.Context, url string) error {
 	return getResponseFromJSON(ctx, r, &ri.ListIPWarmupsResponse)
 }
 
-type ListIPWarmupsOptions struct {
-	Limit int
-}
-
-// ListIPDomains retrieves a list of domains for the specified IP address.
-func (mg *Client) ListIPWarmups(opts *ListIPWarmupsOptions) *IPWarmupsIterator {
+// ListIPWarmups retrieves a list of warmups in progress in the account
+func (mg *Client) ListIPWarmups() *IPWarmupsIterator {
 	url := generateApiUrl(mg, 3, ipWarmupsEndpoint)
 	return &IPWarmupsIterator{
 		mg:                    mg,
 		ListIPWarmupsResponse: mtypes.ListIPWarmupsResponse{Paging: mtypes.Paging{Next: url, First: url}},
 	}
+}
+
+// GetIPWarmupStatus retrieves the details of a warmup in progress for the specified IP address
+func (mg *Client) GetIPWarmupStatus(ctx context.Context, ip string) (mtypes.IPWarmupDetails, error) {
+	url := generateApiUrl(mg, 3, ipWarmupsEndpoint) + "/" + ip
+	r := newHTTPRequest(url)
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+	r.setClient(mg.HTTPClient())
+	var resp mtypes.IPWarmupDetailsResponse
+	if err := getResponseFromJSON(ctx, r, &resp); err != nil {
+		return resp.Details, err
+	}
+	return resp.Details, nil
 }

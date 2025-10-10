@@ -10,6 +10,7 @@ import (
 
 func (ms *Server) addIPWarmupsRoutes(r chi.Router) {
 	r.Get("/ip_warmups", ms.listIPWarmups)
+	r.Get("/ip_warmups/{ip}", ms.getIPWarmupStatus)
 }
 
 func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
@@ -55,4 +56,36 @@ func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
 			}),
 		},
 	})
+}
+
+func (ms *Server) getIPWarmupStatus(w http.ResponseWriter, r *http.Request) {
+	toJSON(w, mtypes.IPWarmupDetailsResponse{
+		Details: mtypes.IPWarmupDetails{
+			IP:                "1.0.0.1",
+			SentWithinStage:   "20%",
+			Throttle:          78,
+			StageNumber:       2,
+			StageStartVolume:  10000,
+			StageStartTime:    "2025-01-01T00:00:00Z",
+			StageVolumeLimit:  4000,
+			StageStartedAt:    "2025-01-01T00:00:00Z",
+			HourStartedAt:     "2025-01-01T00:00:00Z",
+			PlanStartedAt:     "2025-01-01T00:00:00Z",
+			PlanLastUpdatedAt: "2025-01-01T00:00:00Z",
+			TotalStages:       15,
+			StageHistory: []mtypes.IPWarmupStageHistory{
+				{
+					FirstUpdatedAt: "0001-01-01T00:00:00Z",
+					CompletedAt:    "2025-06-03T21:33:55.000000123Z",
+					Limit:          1000,
+				},
+				{
+					FirstUpdatedAt: "0001-01-01T00:00:00Z",
+					CompletedAt:    "2025-06-04T18:11:20.000000456Z",
+					Limit:          2000,
+				},
+			},
+		},
+	})
+
 }
