@@ -18,22 +18,22 @@ func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("page") == "" {
 		items = []mtypes.IPWarmup{
 			{
-				IP:               "172.0.0.1",
-				SentWithinStage:  "100",
-				Throttle:         100,
-				StageNumber:      1,
-				StageStartVolume: 100,
-				StageStartTime:   "2021-01-01T00:00:00Z",
-				StageVolumeLimit: 1000,
+				IP:               "1.0.0.1",
+				SentWithinStage:  "0%",
+				Throttle:         78,
+				StageNumber:      3,
+				StageStartVolume: 14000,
+				StageStartTime:   "2025-01-01T00:00:00Z",
+				StageVolumeLimit: 4000,
 			},
 			{
-				IP:               "172.0.0.2",
-				SentWithinStage:  "100",
-				Throttle:         78,
-				StageNumber:      2,
-				StageStartVolume: 1000,
-				StageStartTime:   "2021-01-01T02:00:00Z",
-				StageVolumeLimit: 10000,
+				IP:               "1.0.0.2",
+				SentWithinStage:  "25%",
+				Throttle:         90,
+				StageNumber:      4,
+				StageStartVolume: 10000,
+				StageStartTime:   "2025-01-01T00:00:00Z",
+				StageVolumeLimit: 8000,
 			},
 		}
 	}
