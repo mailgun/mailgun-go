@@ -51,11 +51,11 @@ func TestCreateIPWarmup(t *testing.T) {
 	require.NoError(t, mg.CreateIPWarmup(ctx, "1.0.0.1"))
 }
 
-func TestCancelWarmupPlan(t *testing.T) {
+func TestDeleteIPWarmup(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	require.NoError(t, mg.CancelIPWarmup(ctx, "1.0.0.1"))
+	require.NoError(t, mg.DeleteIPWarmup(ctx, "1.0.0.1"))
 }

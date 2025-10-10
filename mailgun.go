@@ -236,7 +236,7 @@ type Mailgun interface {
 	ListIPWarmups() *IPWarmupsIterator
 	GetIPWarmup(ctx context.Context, ip string) (mtypes.IPWarmupDetails, error)
 	CreateIPWarmup(ctx context.Context, ip string) error
-	CancelIPWarmup(ctx context.Context, ip string) error
+	DeleteIPWarmup(ctx context.Context, ip string) error
 
 	ListExports(ctx context.Context, url string) ([]mtypes.Export, error)
 	GetExport(ctx context.Context, id string) (mtypes.Export, error)

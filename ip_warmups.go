@@ -93,7 +93,7 @@ func (mg *Client) CreateIPWarmup(ctx context.Context, ip string) error {
 	return err
 }
 
-func (mg *Client) CancelIPWarmup(ctx context.Context, ip string) error {
+func (mg *Client) DeleteIPWarmup(ctx context.Context, ip string) error {
 	url := generateApiUrl(mg, 3, ipWarmupsEndpoint) + "/" + ip
 	r := newHTTPRequest(url)
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
