@@ -33,10 +33,7 @@ func (ri *IPWarmupsIterator) Next(ctx context.Context, items *[]mtypes.IPWarmup)
 	cpy := make([]mtypes.IPWarmup, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+	return len(ri.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
