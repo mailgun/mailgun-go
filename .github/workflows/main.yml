@@ -16,10 +16,9 @@ jobs:
     strategy:
       matrix:
         go-version:
-          - 1.22.x
+          - 1.22.x # minimum supported version(from go.mod)
           - 1.23.x
-          # TODO(vtopc): bump golangci-lint to the latest v1(v1.64.8) first:
-          # - 1.24.x
+          - 1.24.x
           # TODO(vtopc): migrate to golangci-lint to v2 first:
           # - 1.25.x
         os: [ ubuntu-latest ]
