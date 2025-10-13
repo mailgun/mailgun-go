@@ -35,6 +35,7 @@ func TestUnmarshalISO8601Time(t *testing.T) {
 			err := json.Unmarshal([]byte(tt.s), &req)
 			if tt.wantErr != nil {
 				require.Contains(t, err.Error(), tt.wantErr.Error())
+
 				return
 			}
 
