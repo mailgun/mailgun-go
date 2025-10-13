@@ -47,4 +47,4 @@ jobs:
         run: make lint
 
       - name: Test
-        run: go test -v -race -p=1 -count=1
+        run: go test ./... -v -race -p=1 -count=1
