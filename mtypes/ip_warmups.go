@@ -12,7 +12,7 @@ type IPWarmup struct {
 	Throttle         int         `json:"throttle"`
 	StageNumber      int         `json:"stage_number"`
 	StageStartVolume int         `json:"stage_start_volume"`
-	StageStartTime   RFC2822Time `json:"stage_start_time"`
+	StageStartTime   RFC3339Time `json:"stage_start_time"`
 	StageVolumeLimit int         `json:"stage_volume_limit"`
 }
 
@@ -25,18 +25,18 @@ type IPWarmupDetails struct {
 	Throttle          int                    `json:"throttle"`
 	StageNumber       int                    `json:"stage_number"`
 	StageStartVolume  int                    `json:"stage_start_volume"`
-	StageStartTime    RFC2822Time            `json:"stage_start_time"`
+	StageStartTime    RFC3339Time            `json:"stage_start_time"`
 	StageVolumeLimit  int                    `json:"stage_volume_limit"`
-	StageStartedAt    RFC2822Time            `json:"stage_started_at"`
-	HourStartedAt     RFC2822Time            `json:"hour_started_at"`
-	PlanStartedAt     RFC2822Time            `json:"plan_started_at"`
-	PlanLastUpdatedAt RFC2822Time            `json:"plan_last_updated_at"`
+	StageStartedAt    RFC3339Time            `json:"stage_started_at"`
+	HourStartedAt     RFC3339Time            `json:"hour_started_at"`
+	PlanStartedAt     RFC3339Time            `json:"plan_started_at"`
+	PlanLastUpdatedAt RFC3339Time            `json:"plan_last_updated_at"`
 	TotalStages       int                    `json:"total_stages"`
 	StageHistory      []IPWarmupStageHistory `json:"stage_history"`
 }
 
 type IPWarmupStageHistory struct {
-	FirstUpdatedAt RFC2822Time `json:"first_updated_at"`
-	CompletedAt    RFC2822Time `json:"completed_at"`
+	FirstUpdatedAt RFC3339Time `json:"first_updated_at"`
+	CompletedAt    RFC3339Time `json:"completed_at"`
 	Limit          int         `json:"limit"`
 }
