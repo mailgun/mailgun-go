@@ -3,6 +3,7 @@ package mocks
 import (
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -26,7 +27,7 @@ func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
 				Throttle:         78,
 				StageNumber:      3,
 				StageStartVolume: 14000,
-				StageStartTime:   "2025-01-01T00:00:00Z",
+				StageStartTime:   mtypes.RFC2822Time(time.Now()),
 				StageVolumeLimit: 4000,
 			},
 			{
@@ -35,7 +36,7 @@ func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
 				Throttle:         90,
 				StageNumber:      4,
 				StageStartVolume: 10000,
-				StageStartTime:   "2025-01-01T00:00:00Z",
+				StageStartTime:   mtypes.RFC2822Time(time.Now()),
 				StageVolumeLimit: 8000,
 			},
 		}
@@ -67,22 +68,22 @@ func (ms *Server) getIPWarmup(w http.ResponseWriter, r *http.Request) {
 			Throttle:          78,
 			StageNumber:       2,
 			StageStartVolume:  10000,
-			StageStartTime:    "2025-01-01T00:00:00Z",
+			StageStartTime:    mtypes.RFC2822Time(time.Now()),
 			StageVolumeLimit:  4000,
-			StageStartedAt:    "2025-01-01T00:00:00Z",
-			HourStartedAt:     "2025-01-01T00:00:00Z",
-			PlanStartedAt:     "2025-01-01T00:00:00Z",
-			PlanLastUpdatedAt: "2025-01-01T00:00:00Z",
+			StageStartedAt:    mtypes.RFC2822Time(time.Now()),
+			HourStartedAt:     mtypes.RFC2822Time(time.Now()),
+			PlanStartedAt:     mtypes.RFC2822Time(time.Now()),
+			PlanLastUpdatedAt: mtypes.RFC2822Time(time.Now()),
 			TotalStages:       15,
 			StageHistory: []mtypes.IPWarmupStageHistory{
 				{
-					FirstUpdatedAt: "0001-01-01T00:00:00Z",
-					CompletedAt:    "2025-06-03T21:33:55.000000123Z",
+					FirstUpdatedAt: mtypes.RFC2822Time(time.Now()),
+					CompletedAt:    mtypes.RFC2822Time(time.Now()),
 					Limit:          1000,
 				},
 				{
-					FirstUpdatedAt: "0001-01-01T00:00:00Z",
-					CompletedAt:    "2025-06-04T18:11:20.000000456Z",
+					FirstUpdatedAt: mtypes.RFC2822Time(time.Now()),
+					CompletedAt:    mtypes.RFC2822Time(time.Now()),
 					Limit:          2000,
 				},
 			},
