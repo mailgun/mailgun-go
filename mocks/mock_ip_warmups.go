@@ -48,14 +48,8 @@ func (ms *Server) listIPWarmups(w http.ResponseWriter, r *http.Request) {
 			First: getPageURL(r, url.Values{
 				"page": []string{"first"},
 			}),
-			Last: getPageURL(r, url.Values{
-				"page": []string{"last"},
-			}),
 			Next: getPageURL(r, url.Values{
 				"page": []string{"next"},
-			}),
-			Previous: getPageURL(r, url.Values{
-				"page": []string{"prev"},
 			}),
 		},
 	})
