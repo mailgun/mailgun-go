@@ -113,6 +113,7 @@ const (
 	unsubscribesEndpoint = "unsubscribes"
 	routesEndpoint       = "routes"
 	ipsEndpoint          = "ips"
+	ipWarmupsEndpoint    = "ip_warmups"
 	exportsEndpoint      = "exports"
 	webhooksEndpoint     = "webhooks"
 	listsEndpoint        = "lists"
@@ -231,6 +232,11 @@ type Mailgun interface {
 	ListDomainIPs(ctx context.Context, domain string) ([]mtypes.IPAddress, error)
 	AddDomainIP(ctx context.Context, domain, ip string) error
 	DeleteDomainIP(ctx context.Context, domain, ip string) error
+
+	ListIPWarmups() *IPWarmupsIterator
+	GetIPWarmup(ctx context.Context, ip string) (mtypes.IPWarmupDetails, error)
+	CreateIPWarmup(ctx context.Context, ip string) error
+	DeleteIPWarmup(ctx context.Context, ip string) error
 
 	ListExports(ctx context.Context, url string) ([]mtypes.Export, error)
 	GetExport(ctx context.Context, id string) (mtypes.Export, error)

@@ -7,7 +7,7 @@ import (
 	"github.com/mailgun/errors"
 )
 
-// RFC2822Time Mailgun uses RFC2822 format for timestamps everywhere ('Thu, 13 Oct 2011 18:02:00 +0000'), but
+// RFC2822Time Mailgun uses RFC2822 format for timestamps in most endpoints ('Thu, 13 Oct 2011 18:02:00 +0000'), but
 // by default Go's JSON package uses another format when decoding/encoding timestamps.
 // https://documentation.mailgun.com/docs/mailgun/user-manual/get-started/#date-format
 // TODO(v6): make a struct and embed time.Time to inherit all its methods.
