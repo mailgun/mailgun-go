@@ -25,7 +25,8 @@ type httpRequest struct {
 	Headers           map[string]string
 	BasicAuthUser     string
 	BasicAuthPassword string
-	Client            *http.Client
+	// TODO(vtopc): get rid of this, should be (*Client).Do(*httpRequest):
+	Client *http.Client
 }
 
 type httpResponse struct {
@@ -84,6 +85,7 @@ func (r *httpRequest) addParameter(name, value string) {
 	r.Parameters[name] = append(r.Parameters[name], value)
 }
 
+// TODO(vtopc): get rid of this, should be (*Client).Do(*httpRequest)
 func (r *httpRequest) setClient(c *http.Client) {
 	r.Client = c
 }
