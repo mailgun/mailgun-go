@@ -42,20 +42,20 @@ func TestMailingListMembers(t *testing.T) {
 	}
 
 	startCount := countMembers()
-	protoJoe := mtypes.Member{
+	memberJoe := mtypes.Member{
 		Address:    "joe@example.com",
 		Name:       "Joe Example",
 		Subscribed: mtypes.Subscribed,
 	}
-	require.NoError(t, mg.CreateMember(ctx, true, address, protoJoe))
+	require.NoError(t, mg.CreateMember(ctx, true, address, memberJoe))
 	newCount := countMembers()
 	require.False(t, newCount <= startCount)
 
 	theMember, err := mg.GetMember(ctx, "joe@example.com", address)
 	require.NoError(t, err)
-	assert.Equal(t, protoJoe.Address, theMember.Address)
-	assert.Equal(t, protoJoe.Name, theMember.Name)
-	assert.Equal(t, protoJoe.Subscribed, theMember.Subscribed)
+	assert.Equal(t, memberJoe.Address, theMember.Address)
+	assert.Equal(t, memberJoe.Name, theMember.Name)
+	assert.Equal(t, memberJoe.Subscribed, theMember.Subscribed)
 	assert.Len(t, theMember.Vars, 0)
 
 	_, err = mg.UpdateMember(ctx, "joe@example.com", address, mtypes.Member{
