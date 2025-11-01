@@ -190,7 +190,7 @@ type Mailgun interface {
 	CreateUnsubscribe(ctx context.Context, domain, address, tag string) error
 	CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []mtypes.Unsubscribe) error
 	DeleteUnsubscribe(ctx context.Context, domain, address string) error
-	DeleteUnsubscribeWithTag(ctx context.Context, domain, a, t string) error
+	DeleteUnsubscribeWithTag(ctx context.Context, domain, address, tag string) error
 
 	ListComplaints(domain string, opts *ListOptions) *ComplaintsIterator
 	GetComplaint(ctx context.Context, domain, address string) (mtypes.Complaint, error)
@@ -199,10 +199,10 @@ type Mailgun interface {
 	DeleteComplaint(ctx context.Context, domain, address string) error
 
 	ListRoutes(opts *ListOptions) *RoutesIterator
-	GetRoute(ctx context.Context, address string) (mtypes.Route, error)
-	CreateRoute(ctx context.Context, address mtypes.Route) (mtypes.Route, error)
-	DeleteRoute(ctx context.Context, address string) error
-	UpdateRoute(ctx context.Context, address string, r mtypes.Route) (mtypes.Route, error)
+	GetRoute(ctx context.Context, id string) (mtypes.Route, error)
+	CreateRoute(ctx context.Context, route mtypes.Route) (mtypes.Route, error)
+	DeleteRoute(ctx context.Context, id string) error
+	UpdateRoute(ctx context.Context, id string, r mtypes.Route) (mtypes.Route, error)
 
 	ListWebhooks(ctx context.Context, domain string) (map[string][]string, error)
 	CreateWebhook(ctx context.Context, domain, kind string, url []string) error
@@ -212,17 +212,17 @@ type Mailgun interface {
 	VerifyWebhookSignature(sig mtypes.Signature) (verified bool, err error)
 
 	ListMailingLists(opts *ListOptions) *ListsIterator
-	CreateMailingList(ctx context.Context, address mtypes.MailingList) (mtypes.MailingList, error)
+	CreateMailingList(ctx context.Context, ml mtypes.MailingList) (mtypes.MailingList, error)
 	DeleteMailingList(ctx context.Context, address string) error
 	GetMailingList(ctx context.Context, address string) (mtypes.MailingList, error)
 	UpdateMailingList(ctx context.Context, address string, ml mtypes.MailingList) (mtypes.MailingList, error)
 
-	ListMembers(address string, opts *ListOptions) *MemberListIterator
-	GetMember(ctx context.Context, MemberAddr, listAddr string) (mtypes.Member, error)
-	CreateMember(ctx context.Context, merge bool, addr string, prototype mtypes.Member) error
-	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []any) error
-	UpdateMember(ctx context.Context, Member, list string, prototype mtypes.Member) (mtypes.Member, error)
-	DeleteMember(ctx context.Context, Member, list string) error
+	ListMembers(listAddress string, opts *ListOptions) *MemberListIterator
+	GetMember(ctx context.Context, memberAddress, listAddress string) (mtypes.Member, error)
+	CreateMember(ctx context.Context, merge bool, listAddress string, member mtypes.Member) error
+	CreateMemberList(ctx context.Context, subscribed *bool, listAddress string, newMembers []any) error
+	UpdateMember(ctx context.Context, memberAddress, listAddress string, member mtypes.Member) (mtypes.Member, error)
+	DeleteMember(ctx context.Context, memberAddress, listAddress string) error
 
 	ListEvents(domain string, opts *ListEventOptions) *EventIterator
 	PollEvents(domain string, opts *ListEventOptions) *EventPoller

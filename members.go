@@ -3,6 +3,7 @@ package mailgun
 import (
 	"context"
 	"encoding/json"
+	"net/url"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -14,8 +15,8 @@ type MemberListIterator struct {
 	err error
 }
 
-func (mg *Client) ListMembers(address string, opts *ListOptions) *MemberListIterator {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, address) + "/pages")
+func (mg *Client) ListMembers(listAddress string, opts *ListOptions) *MemberListIterator {
+	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, url.QueryEscape(listAddress)) + "/pages")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	if opts != nil {
@@ -23,20 +24,21 @@ func (mg *Client) ListMembers(address string, opts *ListOptions) *MemberListIter
 			r.addParameter("limit", strconv.Itoa(opts.Limit))
 		}
 	}
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	return &MemberListIterator{
-		mg:                 mg,
-		MemberListResponse: mtypes.MemberListResponse{Paging: mtypes.Paging{Next: url, First: url}},
+		mg: mg,
+		// TODO(vtopc): why is Next and First both set to the same URL?
+		MemberListResponse: mtypes.MemberListResponse{Paging: mtypes.Paging{Next: uri, First: uri}},
 		err:                err,
 	}
 }
 
-// If an error occurred during iteration `Err()` will return non nil
+// Err if an error occurred during iteration `Err()` will return non nil
 func (li *MemberListIterator) Err() error {
 	return li.err
 }
 
-// Next retrieves the next page of items from the api. Returns false when there
+// Next retrieves the next page of items from the api. Returns false when there are
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (li *MemberListIterator) Next(ctx context.Context, items *[]mtypes.Member) bool {
@@ -102,9 +104,9 @@ func (li *MemberListIterator) Previous(ctx context.Context, items *[]mtypes.Memb
 	return len(li.Lists) != 0
 }
 
-func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
+func (li *MemberListIterator) fetch(ctx context.Context, uri string) error {
 	li.Lists = nil
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 	r.setClient(li.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 
@@ -113,14 +115,17 @@ func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
 
 // GetMember returns a complete Member structure for a member of a mailing list,
 // given only their subscription e-mail address.
-func (mg *Client) GetMember(ctx context.Context, s, l string) (mtypes.Member, error) {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
+func (mg *Client) GetMember(ctx context.Context, memberAddress, listAddress string) (mtypes.Member, error) {
+	uri := generateMemberApiUrl(mg, listsEndpoint, url.QueryEscape(listAddress)) + "/" + url.QueryEscape(memberAddress)
+	r := newHTTPRequest(uri)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
 	response, err := makeGetRequest(ctx, r)
 	if err != nil {
 		return mtypes.Member{}, err
 	}
+
 	var resp mtypes.MemberResponse
 	err = response.parseFromJSON(&resp)
 	return resp.Member, err
@@ -129,22 +134,22 @@ func (mg *Client) GetMember(ctx context.Context, s, l string) (mtypes.Member, er
 // CreateMember registers a new member of the indicated mailing list.
 // If merge is set to true, then the registration may update an existing Member's settings.
 // Otherwise, an error will occur if you attempt to add a member with a duplicate e-mail address.
-func (mg *Client) CreateMember(ctx context.Context, merge bool, addr string, prototype mtypes.Member) error {
-	vs, err := json.Marshal(prototype.Vars)
+func (mg *Client) CreateMember(ctx context.Context, merge bool, listAddress string, member mtypes.Member) error {
+	vs, err := json.Marshal(member.Vars)
 	if err != nil {
 		return err
 	}
 
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr))
+	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, url.QueryEscape(listAddress)))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := NewFormDataPayload()
 	p.addValue("upsert", yesNo(merge))
-	p.addValue("address", prototype.Address)
-	p.addValue("name", prototype.Name)
+	p.addValue("address", member.Address)
+	p.addValue("name", member.Name)
 	p.addValue("vars", string(vs))
-	if prototype.Subscribed != nil {
-		p.addValue("subscribed", yesNo(*prototype.Subscribed))
+	if member.Subscribed != nil {
+		p.addValue("subscribed", yesNo(*member.Subscribed))
 	}
 	_, err = makePostRequest(ctx, r, p)
 	return err
@@ -152,26 +157,26 @@ func (mg *Client) CreateMember(ctx context.Context, merge bool, addr string, pro
 
 // UpdateMember lets you change certain details about the indicated mailing list member.
 // Address, Name, Vars, and Subscribed fields may be changed.
-func (mg *Client) UpdateMember(ctx context.Context, s, l string, prototype mtypes.Member) (mtypes.Member, error) {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, l) + "/" + s)
+func (mg *Client) UpdateMember(ctx context.Context, memberAddress, listAddress string, member mtypes.Member) (mtypes.Member, error) {
+	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, url.QueryEscape(listAddress)) + "/" + url.QueryEscape(memberAddress))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := NewFormDataPayload()
-	if prototype.Address != "" {
-		p.addValue("address", prototype.Address)
+	if member.Address != "" {
+		p.addValue("address", member.Address)
 	}
-	if prototype.Name != "" {
-		p.addValue("name", prototype.Name)
+	if member.Name != "" {
+		p.addValue("name", member.Name)
 	}
-	if prototype.Vars != nil {
-		vs, err := json.Marshal(prototype.Vars)
+	if member.Vars != nil {
+		vs, err := json.Marshal(member.Vars)
 		if err != nil {
 			return mtypes.Member{}, err
 		}
 		p.addValue("vars", string(vs))
 	}
-	if prototype.Subscribed != nil {
-		p.addValue("subscribed", yesNo(*prototype.Subscribed))
+	if member.Subscribed != nil {
+		p.addValue("subscribed", yesNo(*member.Subscribed))
 	}
 	response, err := makePutRequest(ctx, r, p)
 	if err != nil {
@@ -185,8 +190,8 @@ func (mg *Client) UpdateMember(ctx context.Context, s, l string, prototype mtype
 }
 
 // DeleteMember removes the member from the list.
-func (mg *Client) DeleteMember(ctx context.Context, member, addr string) error {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + "/" + member)
+func (mg *Client) DeleteMember(ctx context.Context, memberAddress, listAddress string) error {
+	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, url.QueryEscape(listAddress)) + "/" + url.QueryEscape(memberAddress))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -197,13 +202,13 @@ func (mg *Client) DeleteMember(ctx context.Context, member, addr string) error {
 // in a single round-trip.
 // u indicates if the existing members should be updated or duplicates should be updated.
 // Use All to elect not to provide a default.
-// The newMembers list can take one of two JSON-encodable forms: an slice of strings, or
+// The newMembers list can take one of two JSON-encodable forms: a slice of strings, or
 // a slice of Member structures.
 // If a simple slice of strings is passed, each string refers to the member's e-mail address.
 // Otherwise, each Member needs to have at least the Address field filled out.
 // Other fields are optional, but may be set according to your needs.
-func (mg *Client) CreateMemberList(ctx context.Context, u *bool, addr string, newMembers []any) error {
-	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, addr) + ".json")
+func (mg *Client) CreateMemberList(ctx context.Context, u *bool, listAddress string, newMembers []any) error {
+	r := newHTTPRequest(generateMemberApiUrl(mg, listsEndpoint, url.QueryEscape(listAddress)) + ".json")
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := NewFormDataPayload()

@@ -42,58 +42,71 @@ func TestMailingListMembers(t *testing.T) {
 	}
 
 	startCount := countMembers()
-	protoJoe := mtypes.Member{
+	memberJoe := mtypes.Member{
 		Address:    "joe@example.com",
 		Name:       "Joe Example",
 		Subscribed: mtypes.Subscribed,
 	}
-	require.NoError(t, mg.CreateMember(ctx, true, address, protoJoe))
-	newCount := countMembers()
-	require.False(t, newCount <= startCount)
 
-	theMember, err := mg.GetMember(ctx, "joe@example.com", address)
-	require.NoError(t, err)
-	assert.Equal(t, protoJoe.Address, theMember.Address)
-	assert.Equal(t, protoJoe.Name, theMember.Name)
-	assert.Equal(t, protoJoe.Subscribed, theMember.Subscribed)
-	assert.Len(t, theMember.Vars, 0)
+	t.Run("CreateMember", func(t *testing.T) {
+		require.NoError(t, mg.CreateMember(ctx, true, address, memberJoe))
 
-	_, err = mg.UpdateMember(ctx, "joe@example.com", address, mtypes.Member{
-		Name: "Joe Cool",
+		newCount := countMembers()
+		require.False(t, newCount <= startCount)
 	})
-	require.NoError(t, err)
 
-	theMember, err = mg.GetMember(ctx, "joe@example.com", address)
-	require.NoError(t, err)
-	assert.Equal(t, "Joe Cool", theMember.Name)
-	require.NoError(t, mg.DeleteMember(ctx, "joe@example.com", address))
-	assert.Equal(t, startCount, countMembers())
+	t.Run("GetMember", func(t *testing.T) {
+		theMember, err := mg.GetMember(ctx, "joe@example.com", address)
+		require.NoError(t, err)
+		assert.Equal(t, memberJoe.Address, theMember.Address)
+		assert.Equal(t, memberJoe.Name, theMember.Name)
+		assert.Equal(t, memberJoe.Subscribed, theMember.Subscribed)
+		assert.Len(t, theMember.Vars, 0)
+	})
 
-	err = mg.CreateMemberList(ctx, nil, address, []any{
-		mtypes.Member{
-			Address:    "joe.user1@example.com",
-			Name:       "Joe's debugging account",
-			Subscribed: mtypes.Unsubscribed,
-		},
-		mtypes.Member{
-			Address:    "Joe Cool <joe.user2@example.com>",
-			Name:       "Joe's Cool Account",
-			Subscribed: mtypes.Subscribed,
-		},
-		mtypes.Member{
-			Address: "joe.user3@example.com",
-			Vars: map[string]any{
-				"packet-email": "KW9ABC @ BOGBBS-4.#NCA.CA.USA.NOAM",
+	t.Run("UpdateMember", func(t *testing.T) {
+		_, err = mg.UpdateMember(ctx, "joe@example.com", address, mtypes.Member{
+			Name: "Joe Cool",
+		})
+		require.NoError(t, err)
+
+		theMember, err := mg.GetMember(ctx, "joe@example.com", address)
+		require.NoError(t, err)
+		assert.Equal(t, "Joe Cool", theMember.Name)
+	})
+
+	t.Run("DeleteMember", func(t *testing.T) {
+		require.NoError(t, mg.DeleteMember(ctx, "joe@example.com", address))
+		assert.Equal(t, startCount, countMembers())
+	})
+
+	t.Run("CreateMemberList", func(t *testing.T) {
+		err = mg.CreateMemberList(ctx, nil, address, []any{
+			mtypes.Member{
+				Address:    "joe.user1@example.com",
+				Name:       "Joe's debugging account",
+				Subscribed: mtypes.Unsubscribed,
 			},
-		},
-	})
-	require.NoError(t, err)
+			mtypes.Member{
+				Address:    "Joe Cool <joe.user2@example.com>",
+				Name:       "Joe's Cool Account",
+				Subscribed: mtypes.Subscribed,
+			},
+			mtypes.Member{
+				Address: "joe.user3@example.com",
+				Vars: map[string]any{
+					"packet-email": "KW9ABC @ BOGBBS-4.#NCA.CA.USA.NOAM",
+				},
+			},
+		})
+		require.NoError(t, err)
 
-	theMember, err = mg.GetMember(ctx, "joe.user2@example.com", address)
-	require.NoError(t, err)
-	assert.Equal(t, "Joe's Cool Account", theMember.Name)
-	require.NotNil(t, theMember.Subscribed)
-	assert.True(t, *theMember.Subscribed)
+		theMember, err := mg.GetMember(ctx, "joe.user2@example.com", address)
+		require.NoError(t, err)
+		assert.Equal(t, "Joe's Cool Account", theMember.Name)
+		require.NotNil(t, theMember.Subscribed)
+		assert.True(t, *theMember.Subscribed)
+	})
 }
 
 func TestMailingLists(t *testing.T) {

@@ -68,7 +68,7 @@ func TestGetUnsubscribe(t *testing.T) {
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
 
-	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
+	email := randomEmail("unsubscribe", os.Getenv("MG_DOMAIN"))
 
 	ctx := context.Background()
 
@@ -88,7 +88,7 @@ func TestCreateDestroyUnsubscription(t *testing.T) {
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
 
-	email := randomEmail("unsubcribe", os.Getenv("MG_DOMAIN"))
+	email := randomEmail("unsubscribe", os.Getenv("MG_DOMAIN"))
 
 	ctx := context.Background()
 

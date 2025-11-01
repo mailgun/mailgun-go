@@ -229,20 +229,20 @@ func (ri *RoutesIterator) fetch(ctx context.Context, skip, limit int) error {
 // The route structure you provide serves as a template, and
 // only a subset of the fields influence the operation.
 // See the Route structure definition for more details.
-func (mg *Client) CreateRoute(ctx context.Context, prototype mtypes.Route) (_ignored mtypes.Route, err error) {
+func (mg *Client) CreateRoute(ctx context.Context, route mtypes.Route) (_ mtypes.Route, err error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, routesEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
-	p.addValue("priority", strconv.Itoa(prototype.Priority))
-	p.addValue("description", prototype.Description)
-	p.addValue("expression", prototype.Expression)
-	for _, action := range prototype.Actions {
+	p.addValue("priority", strconv.Itoa(route.Priority))
+	p.addValue("description", route.Description)
+	p.addValue("expression", route.Expression)
+	for _, action := range route.Actions {
 		p.addValue("action", action)
 	}
 	var resp mtypes.CreateRouteResp
 	if err := postResponseFromJSON(ctx, r, p, &resp); err != nil {
-		return _ignored, err
+		return mtypes.Route{}, err
 	}
 
 	return resp.Route, nil

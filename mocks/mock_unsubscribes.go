@@ -96,8 +96,15 @@ func (ms *Server) getUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid address"})
+		return
+	}
+
 	for _, unsubscribe := range ms.unsubscribes {
-		if unsubscribe.Address == chi.URLParam(r, "address") {
+		if unsubscribe.Address == address {
 			toJSON(w, unsubscribe)
 			return
 		}
@@ -174,9 +181,16 @@ func (ms *Server) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid address"})
+		return
+	}
+
 	var addressExist bool
 	for _, unsubscribe := range ms.unsubscribes {
-		if unsubscribe.Address == chi.URLParam(r, "address") {
+		if unsubscribe.Address == address {
 			addressExist = true
 		}
 	}
@@ -191,7 +205,7 @@ func (ms *Server) deleteUnsubscribe(w http.ResponseWriter, r *http.Request) {
 	tag := r.FormValue("tag")
 	if len(tag) == 0 {
 		for i, unsubscribe := range ms.unsubscribes {
-			if unsubscribe.Address != chi.URLParam(r, "address") {
+			if unsubscribe.Address != address {
 				continue
 			}
 			ms.unsubscribes = append(ms.unsubscribes[:i], ms.unsubscribes[i+1:len(ms.unsubscribes)]...)
