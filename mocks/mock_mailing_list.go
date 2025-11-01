@@ -98,8 +98,15 @@ func (ms *Server) getMailingList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			toJSON(w, mtypes.GetMailingListResponse{MailingList: ml.MailingList})
 			return
 		}
@@ -112,9 +119,16 @@ func (ms *Server) deleteMailingList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
 	result := ms.mailingList[:0]
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			continue
 		}
 		result = append(result, ml)
@@ -131,11 +145,18 @@ func (ms *Server) deleteMailingList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *Server) updateMailingList(w http.ResponseWriter, r *http.Request) {
-	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
+	defer ms.mutex.Unlock()
+
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
 
 	for i, d := range ms.mailingList {
-		if d.MailingList.Address == chi.URLParam(r, "address") {
+		if d.MailingList.Address == address {
 			if r.FormValue("address") != "" {
 				ms.mailingList[i].MailingList.Address = r.FormValue("address")
 			}
@@ -184,8 +205,15 @@ func (ms *Server) listMembers(w http.ResponseWriter, r *http.Request) {
 	var idx []string
 	var found bool
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			found = true
 			for _, member := range ml.Members {
 				list = append(list, member)
@@ -238,12 +266,26 @@ func (ms *Server) getMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
+	memberAddress, err := url.QueryUnescape(chi.URLParam(r, "member"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid member address"})
+		return
+	}
+
 	var found bool
 	for _, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			found = true
 			for _, member := range ml.Members {
-				if member.Address == chi.URLParam(r, "member") {
+				if member.Address == memberAddress {
 					toJSON(w, mtypes.MemberResponse{Member: member})
 					return
 				}
@@ -265,9 +307,23 @@ func (ms *Server) deleteMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
+	memberAddress, err := url.QueryUnescape(chi.URLParam(r, "member"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid member address"})
+		return
+	}
+
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			idx = i
 		}
 	}
@@ -280,7 +336,7 @@ func (ms *Server) deleteMember(w http.ResponseWriter, r *http.Request) {
 
 	result := ms.mailingList[idx].Members[:0]
 	for _, m := range ms.mailingList[idx].Members {
-		if m.Address == chi.URLParam(r, "member") {
+		if m.Address == memberAddress {
 			continue
 		}
 		result = append(result, m)
@@ -300,9 +356,23 @@ func (ms *Server) updateMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
+	memberAddress, err := url.QueryUnescape(chi.URLParam(r, "member"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid member address"})
+		return
+	}
+
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			idx = i
 		}
 	}
@@ -314,7 +384,7 @@ func (ms *Server) updateMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i, m := range ms.mailingList[idx].Members {
-		if m.Address == chi.URLParam(r, "member") {
+		if m.Address == memberAddress {
 			if r.FormValue("address") != "" {
 				ms.mailingList[idx].Members[i].Address = parseAddress(r.FormValue("address"))
 			}
@@ -340,9 +410,16 @@ func (ms *Server) createMember(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			idx = i
 		}
 	}
@@ -386,9 +463,16 @@ func (ms *Server) bulkCreate(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	address, err := url.QueryUnescape(chi.URLParam(r, "address"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		toJSON(w, okResp{Message: "invalid mailing list address"})
+		return
+	}
+
 	idx := -1
 	for i, ml := range ms.mailingList {
-		if ml.MailingList.Address == chi.URLParam(r, "address") {
+		if ml.MailingList.Address == address {
 			idx = i
 		}
 	}
