@@ -1,5 +1,7 @@
 package mailgun
 
+// TODO(vtopc): deprecate tags API in favor of new /v1/analytics/tags
+
 import (
 	"context"
 	"net/url"
