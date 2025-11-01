@@ -104,9 +104,9 @@ func (li *MemberListIterator) Previous(ctx context.Context, items *[]mtypes.Memb
 	return len(li.Lists) != 0
 }
 
-func (li *MemberListIterator) fetch(ctx context.Context, url string) error {
+func (li *MemberListIterator) fetch(ctx context.Context, uri string) error {
 	li.Lists = nil
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 	r.setClient(li.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 

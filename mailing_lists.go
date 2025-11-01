@@ -112,9 +112,9 @@ func (li *ListsIterator) Previous(ctx context.Context, items *[]mtypes.MailingLi
 	return len(li.Items) != 0
 }
 
-func (li *ListsIterator) fetch(ctx context.Context, url string) error {
+func (li *ListsIterator) fetch(ctx context.Context, uri string) error {
 	li.Items = nil
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 	r.setClient(li.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, li.mg.APIKey())
 

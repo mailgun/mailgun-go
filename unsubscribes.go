@@ -112,9 +112,9 @@ func (ci *UnsubscribesIterator) Previous(ctx context.Context, items *[]mtypes.Un
 	return len(ci.Items) != 0
 }
 
-func (ci *UnsubscribesIterator) fetch(ctx context.Context, url string) error {
+func (ci *UnsubscribesIterator) fetch(ctx context.Context, uri string) error {
 	ci.Items = nil
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 	r.setClient(ci.mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, ci.mg.APIKey())
 
