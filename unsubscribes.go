@@ -2,12 +2,13 @@ package mailgun
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
-// Fetches the list of unsubscribes
+// ListUnsubscribes fetches the list of unsubscribes
 func (mg *Client) ListUnsubscribes(domain string, opts *ListOptions) *UnsubscribesIterator {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, unsubscribesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
@@ -17,10 +18,11 @@ func (mg *Client) ListUnsubscribes(domain string, opts *ListOptions) *Unsubscrib
 			r.addParameter("limit", strconv.Itoa(opts.Limit))
 		}
 	}
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	return &UnsubscribesIterator{
-		mg:                       mg,
-		ListUnsubscribesResponse: mtypes.ListUnsubscribesResponse{Paging: mtypes.Paging{Next: url, First: url}},
+		mg: mg,
+		// TODO(vtopc): why is Next and First both set to the same URL?
+		ListUnsubscribesResponse: mtypes.ListUnsubscribesResponse{Paging: mtypes.Paging{Next: uri, First: uri}},
 		err:                      err,
 	}
 }
@@ -31,12 +33,12 @@ type UnsubscribesIterator struct {
 	err error
 }
 
-// If an error occurred during iteration `Err()` will return non nil
+// Err if an error occurred during iteration `Err()` will return non nil
 func (ci *UnsubscribesIterator) Err() error {
 	return ci.err
 }
 
-// Next retrieves the next page of items from the api. Returns false when there
+// Next retrieves the next page of items from the api. Returns false when there are
 // no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
 func (ci *UnsubscribesIterator) Next(ctx context.Context, items *[]mtypes.Unsubscribe) bool {
@@ -119,9 +121,10 @@ func (ci *UnsubscribesIterator) fetch(ctx context.Context, url string) error {
 	return getResponseFromJSON(ctx, r, &ci.ListUnsubscribesResponse)
 }
 
-// Retreives a single unsubscribe record. Can be used to check if a given address is present in the list of unsubscribed users.
+// GetUnsubscribe retrieves a single unsubscribe record.
+// Can be used to check if a given address is present in the list of unsubscribed users.
 func (mg *Client) GetUnsubscribe(ctx context.Context, domain, address string) (mtypes.Unsubscribe, error) {
-	r := newHTTPRequest(generateApiV3UrlWithTarget(mg, unsubscribesEndpoint, domain, address))
+	r := newHTTPRequest(generateApiV3UrlWithTarget(mg, unsubscribesEndpoint, domain, url.QueryEscape(address)))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
@@ -131,7 +134,7 @@ func (mg *Client) GetUnsubscribe(ctx context.Context, domain, address string) (m
 	return envelope, err
 }
 
-// Unsubscribe adds an e-mail address to the domain's unsubscription table.
+// CreateUnsubscribe adds an e-mail address to the domain's unsubscription table.
 func (mg *Client) CreateUnsubscribe(ctx context.Context, domain, address, tag string) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, unsubscribesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
@@ -144,6 +147,9 @@ func (mg *Client) CreateUnsubscribe(ctx context.Context, domain, address, tag st
 }
 
 // CreateUnsubscribes adds multiple e-mail addresses to the domain's unsubscription table.
+// TODO(vtopc): Doc says it's domain ID, not name. Rename arg to clarify.
+//
+//	https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/unsubscribe
 func (mg *Client) CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []mtypes.Unsubscribe) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, unsubscribesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
@@ -159,7 +165,7 @@ func (mg *Client) CreateUnsubscribes(ctx context.Context, domain string, unsubsc
 // If passing in an ID (discoverable from, e.g., ListUnsubscribes()), the e-mail address associated
 // with the given ID will be removed.
 func (mg *Client) DeleteUnsubscribe(ctx context.Context, domain, address string) error {
-	r := newHTTPRequest(generateApiV3UrlWithTarget(mg, unsubscribesEndpoint, domain, address))
+	r := newHTTPRequest(generateApiV3UrlWithTarget(mg, unsubscribesEndpoint, domain, url.QueryEscape(address)))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -169,11 +175,11 @@ func (mg *Client) DeleteUnsubscribe(ctx context.Context, domain, address string)
 // DeleteUnsubscribeWithTag removes the e-mail address given from the domain's unsubscription table with a matching tag.
 // If passing in an ID (discoverable from, e.g., ListUnsubscribes()), the e-mail address associated
 // with the given ID will be removed.
-func (mg *Client) DeleteUnsubscribeWithTag(ctx context.Context, domain, a, t string) error {
-	r := newHTTPRequest(generateApiV3UrlWithTarget(mg, unsubscribesEndpoint, domain, a))
+func (mg *Client) DeleteUnsubscribeWithTag(ctx context.Context, domain, address, tag string) error {
+	r := newHTTPRequest(generateApiV3UrlWithTarget(mg, unsubscribesEndpoint, domain, url.QueryEscape(address)))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
-	r.addParameter("tag", t)
+	r.addParameter("tag", tag)
 	_, err := makeDeleteRequest(ctx, r)
 	return err
 }

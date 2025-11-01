@@ -189,7 +189,7 @@ type Mailgun interface {
 	CreateUnsubscribe(ctx context.Context, domain, address, tag string) error
 	CreateUnsubscribes(ctx context.Context, domain string, unsubscribes []mtypes.Unsubscribe) error
 	DeleteUnsubscribe(ctx context.Context, domain, address string) error
-	DeleteUnsubscribeWithTag(ctx context.Context, domain, a, t string) error
+	DeleteUnsubscribeWithTag(ctx context.Context, domain, address, tag string) error
 
 	ListComplaints(domain string, opts *ListOptions) *ComplaintsIterator
 	GetComplaint(ctx context.Context, domain, address string) (mtypes.Complaint, error)
