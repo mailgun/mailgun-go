@@ -2,6 +2,7 @@ package mailgun
 
 import (
 	"context"
+	"net/url"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -23,15 +24,16 @@ func (mg *Client) ListMailingLists(opts *ListOptions) *ListsIterator {
 			r.addParameter("limit", strconv.Itoa(opts.Limit))
 		}
 	}
-	url, err := r.generateUrlWithParameters()
+	uri, err := r.generateUrlWithParameters()
 	return &ListsIterator{
-		mg:                       mg,
-		ListMailingListsResponse: mtypes.ListMailingListsResponse{Paging: mtypes.Paging{Next: url, First: url}},
+		mg: mg,
+		// TODO(vtopc): why is Next and First both set to the same URL?
+		ListMailingListsResponse: mtypes.ListMailingListsResponse{Paging: mtypes.Paging{Next: uri, First: uri}},
 		err:                      err,
 	}
 }
 
-// If an error occurred during iteration `Err()` will return non nil
+// Err if an error occurred during iteration `Err()` will return non nil
 func (li *ListsIterator) Err() error {
 	return li.err
 }
@@ -122,7 +124,7 @@ func (li *ListsIterator) fetch(ctx context.Context, url string) error {
 // CreateMailingList creates a new mailing list under your Mailgun account.
 // You need specify only the Address and Name members of the prototype;
 // Description, AccessLevel and ReplyPreference are optional.
-// If unspecified, Description remains blank,
+// If unspecified, the Description remains blank,
 // while AccessLevel defaults to Everyone
 // and ReplyPreference defaults to List.
 func (mg *Client) CreateMailingList(ctx context.Context, prototype mtypes.MailingList) (mtypes.MailingList, error) {
@@ -156,8 +158,8 @@ func (mg *Client) CreateMailingList(ctx context.Context, prototype mtypes.Mailin
 
 // DeleteMailingList removes all current members of the list, then removes the list itself.
 // Attempts to send e-mail to the list will fail subsequent to this call.
-func (mg *Client) DeleteMailingList(ctx context.Context, addr string) error {
-	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint) + "/" + addr)
+func (mg *Client) DeleteMailingList(ctx context.Context, address string) error {
+	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint) + "/" + url.QueryEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	_, err := makeDeleteRequest(ctx, r)
@@ -166,8 +168,9 @@ func (mg *Client) DeleteMailingList(ctx context.Context, addr string) error {
 
 // GetMailingList allows your application to recover the complete List structure
 // representing a mailing list, so long as you have its e-mail address.
-func (mg *Client) GetMailingList(ctx context.Context, addr string) (mtypes.MailingList, error) {
-	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint) + "/" + addr)
+// TODO(v6): rename to GetMailingListByAddress to be more explicit.
+func (mg *Client) GetMailingList(ctx context.Context, address string) (mtypes.MailingList, error) {
+	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint) + "/" + url.QueryEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	response, err := makeGetRequest(ctx, r)
@@ -187,25 +190,25 @@ func (mg *Client) GetMailingList(ctx context.Context, addr string) (mtypes.Maili
 // Be careful!  If changing the address of a mailing list,
 // e-mail sent to the old address will not succeed.
 // Make sure you account for the change accordingly.
-func (mg *Client) UpdateMailingList(ctx context.Context, addr string, prototype mtypes.MailingList) (mtypes.MailingList, error) {
-	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint) + "/" + addr)
+func (mg *Client) UpdateMailingList(ctx context.Context, address string, list mtypes.MailingList) (mtypes.MailingList, error) {
+	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint) + "/" + url.QueryEscape(address))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
-	if prototype.Address != "" {
-		p.addValue("address", prototype.Address)
+	if list.Address != "" {
+		p.addValue("address", list.Address)
 	}
-	if prototype.Name != "" {
-		p.addValue("name", prototype.Name)
+	if list.Name != "" {
+		p.addValue("name", list.Name)
 	}
-	if prototype.Description != "" {
-		p.addValue("description", prototype.Description)
+	if list.Description != "" {
+		p.addValue("description", list.Description)
 	}
-	if prototype.AccessLevel != "" {
-		p.addValue("access_level", string(prototype.AccessLevel))
+	if list.AccessLevel != "" {
+		p.addValue("access_level", string(list.AccessLevel))
 	}
-	if prototype.ReplyPreference != "" {
-		p.addValue("reply_preference", string(prototype.ReplyPreference))
+	if list.ReplyPreference != "" {
+		p.addValue("reply_preference", string(list.ReplyPreference))
 	}
 	var l mtypes.MailingList
 	response, err := makePutRequest(ctx, r, p)
