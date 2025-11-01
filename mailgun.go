@@ -198,10 +198,10 @@ type Mailgun interface {
 	DeleteComplaint(ctx context.Context, domain, address string) error
 
 	ListRoutes(opts *ListOptions) *RoutesIterator
-	GetRoute(ctx context.Context, address string) (mtypes.Route, error)
-	CreateRoute(ctx context.Context, address mtypes.Route) (mtypes.Route, error)
-	DeleteRoute(ctx context.Context, address string) error
-	UpdateRoute(ctx context.Context, address string, r mtypes.Route) (mtypes.Route, error)
+	GetRoute(ctx context.Context, id string) (mtypes.Route, error)
+	CreateRoute(ctx context.Context, route mtypes.Route) (mtypes.Route, error)
+	DeleteRoute(ctx context.Context, id string) error
+	UpdateRoute(ctx context.Context, id string, r mtypes.Route) (mtypes.Route, error)
 
 	ListWebhooks(ctx context.Context, domain string) (map[string][]string, error)
 	CreateWebhook(ctx context.Context, domain, kind string, url []string) error
