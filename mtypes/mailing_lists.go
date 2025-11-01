@@ -5,16 +5,18 @@ type AccessLevel string
 
 // A mailing list may have one of three membership modes.
 const (
-	// ReadOnly specifies that nobody, including Members, may send messages to
+	// AccessLevelReadOnly specifies that nobody, including Members, may send messages to
 	// the mailing list.  Messages distributed on such lists come from list
 	// administrator accounts only.
-	AccessLevelReadOnly = "readonly"
-	// Members specifies that only those who subscribe to the mailing list may
+	AccessLevelReadOnly AccessLevel = "readonly"
+
+	// AccessLevelMembers specifies that only those who subscribe to the mailing list may
 	// send messages.
-	AccessLevelMembers = "members"
-	// Everyone specifies that anyone and everyone may both read and submit
+	AccessLevelMembers AccessLevel = "members"
+
+	// AccessLevelEveryone specifies that anyone and everyone may both read and submit
 	// messages to the mailing list, including non-subscribers.
-	AccessLevelEveryone = "everyone"
+	AccessLevelEveryone AccessLevel = "everyone"
 )
 
 // Set where replies should go
@@ -28,9 +30,7 @@ const (
 	ReplyPreferenceSender = "sender"
 )
 
-// A List structure provides information for a mailing list.
-//
-// AccessLevel may be one of ReadOnly, Members, or Everyone.
+// MailingList a List structure provides information for a mailing list.
 type MailingList struct {
 	Address         string          `json:"address,omitempty"`
 	Name            string          `json:"name,omitempty"`

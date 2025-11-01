@@ -211,17 +211,17 @@ type Mailgun interface {
 	VerifyWebhookSignature(sig mtypes.Signature) (verified bool, err error)
 
 	ListMailingLists(opts *ListOptions) *ListsIterator
-	CreateMailingList(ctx context.Context, address mtypes.MailingList) (mtypes.MailingList, error)
+	CreateMailingList(ctx context.Context, ml mtypes.MailingList) (mtypes.MailingList, error)
 	DeleteMailingList(ctx context.Context, address string) error
 	GetMailingList(ctx context.Context, address string) (mtypes.MailingList, error)
 	UpdateMailingList(ctx context.Context, address string, ml mtypes.MailingList) (mtypes.MailingList, error)
 
-	ListMembers(address string, opts *ListOptions) *MemberListIterator
-	GetMember(ctx context.Context, MemberAddr, listAddr string) (mtypes.Member, error)
-	CreateMember(ctx context.Context, merge bool, addr string, prototype mtypes.Member) error
-	CreateMemberList(ctx context.Context, subscribed *bool, addr string, newMembers []any) error
-	UpdateMember(ctx context.Context, Member, list string, prototype mtypes.Member) (mtypes.Member, error)
-	DeleteMember(ctx context.Context, Member, list string) error
+	ListMembers(listAddress string, opts *ListOptions) *MemberListIterator
+	GetMember(ctx context.Context, memberAddress, listAddress string) (mtypes.Member, error)
+	CreateMember(ctx context.Context, merge bool, listAddress string, member mtypes.Member) error
+	CreateMemberList(ctx context.Context, subscribed *bool, listAddress string, newMembers []any) error
+	UpdateMember(ctx context.Context, memberAddress, listAddress string, member mtypes.Member) (mtypes.Member, error)
+	DeleteMember(ctx context.Context, memberAddress, listAddress string) error
 
 	ListEvents(domain string, opts *ListEventOptions) *EventIterator
 	PollEvents(domain string, opts *ListEventOptions) *EventPoller

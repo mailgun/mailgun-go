@@ -127,25 +127,25 @@ func (li *ListsIterator) fetch(ctx context.Context, url string) error {
 // If unspecified, the Description remains blank,
 // while AccessLevel defaults to Everyone
 // and ReplyPreference defaults to List.
-func (mg *Client) CreateMailingList(ctx context.Context, prototype mtypes.MailingList) (mtypes.MailingList, error) {
+func (mg *Client) CreateMailingList(ctx context.Context, list mtypes.MailingList) (mtypes.MailingList, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 	p := newUrlEncodedPayload()
-	if prototype.Address != "" {
-		p.addValue("address", prototype.Address)
+	if list.Address != "" {
+		p.addValue("address", list.Address)
 	}
-	if prototype.Name != "" {
-		p.addValue("name", prototype.Name)
+	if list.Name != "" {
+		p.addValue("name", list.Name)
 	}
-	if prototype.Description != "" {
-		p.addValue("description", prototype.Description)
+	if list.Description != "" {
+		p.addValue("description", list.Description)
 	}
-	if prototype.AccessLevel != "" {
-		p.addValue("access_level", string(prototype.AccessLevel))
+	if list.AccessLevel != "" {
+		p.addValue("access_level", string(list.AccessLevel))
 	}
-	if prototype.ReplyPreference != "" {
-		p.addValue("reply_preference", string(prototype.ReplyPreference))
+	if list.ReplyPreference != "" {
+		p.addValue("reply_preference", string(list.ReplyPreference))
 	}
 	response, err := makePostRequest(ctx, r, p)
 	if err != nil {
