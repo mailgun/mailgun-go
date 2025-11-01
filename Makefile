@@ -5,6 +5,10 @@ GOPATH=$(shell go env GOPATH)
 # TODO(vtopc): move into mtypes/internal/...?
 TYPES_PATH=./internal/types
 
+GOLANGCI_LINT_VERSION=v1.64.8
+GOLANGCI_LINT_PATH=$(GOPATH)/bin
+GOLANGCI_LINT=$(GOLANGCI_LINT_PATH)/golangci-lint
+
 NILAWAY = $(GOPATH)/bin/nilaway
 $(NILAWAY):
 	go install go.uber.org/nilaway/cmd/nilaway@latest
@@ -31,13 +35,12 @@ nilaway: $(NILAWAY)
 	$(NILAWAY) -include-pkgs="$(PACKAGE)" -test=false -exclude-errors-in-files=mocks/ ./...
 
 # linter:
-GOLINT = $(GOPATH)/bin/golangci-lint
-$(GOLINT):
-	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.61.0
+$(GOLANGCI_LINT):
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(GOLANGCI_LINT_PATH) $(GOLANGCI_LINT_VERSION)
 
 .PHONY: lint
-lint: $(GOLINT)
-	$(GOLINT) run
+lint: $(GOLANGCI_LINT)
+	$(GOLANGCI_LINT) run
 
 ## Download OpenAPI 3.1 spec files and generate models
 .PHONY: get-and-gen-models

@@ -128,6 +128,7 @@ func NewServer() *Server {
 		ms.addBouncesRoutes(r)
 		ms.addCredentialsRoutes(r)
 		ms.addTagsRoutes(r)
+		ms.addIPWarmupsRoutes(r)
 	})
 	r.Route("/v5", func(r chi.Router) {
 		ms.addSubaccountRoutes(r)
