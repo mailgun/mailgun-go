@@ -28,7 +28,6 @@ type Domain struct {
 	MailFromHost               string      `json:"mailfrom_host,omitempty"`
 	MessageTTL                 int         `json:"message_ttl,omitempty"`
 	Name                       string      `json:"name"`
-	Pod                        string      `json:"pod,omitempty"`
 	RequireTLS                 bool        `json:"require_tls"`
 	SkipVerification           bool        `json:"skip_verification"`
 	SMTPLogin                  string      `json:"smtp_login"`
