@@ -23,6 +23,7 @@ type Domain struct {
 	ArchiveTo                  string      `json:"archive_to,omitempty"`
 	CreatedAt                  RFC2822Time `json:"created_at"`
 	DKIMHost                   string      `json:"dkim_host,omitempty"`
+	EncryptIncomingMessage     bool        `json:"encrypt_incoming_message"`
 	ID                         string      `json:"id"`
 	IsDisabled                 bool        `json:"is_disabled"`
 	MailFromHost               string      `json:"mailfrom_host,omitempty"`
