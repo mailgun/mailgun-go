@@ -108,3 +108,72 @@ func TestDomainVerify(t *testing.T) {
 	_, err = mg.VerifyDomain(ctx, testDomain)
 	require.NoError(t, err)
 }
+
+func TestCreateDomainWithExtendedOptions(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Test creating domain with all extended options
+	messageTTL := 86400
+	_, err = mg.CreateDomain(ctx, "extended.mailgun.test",
+		&mailgun.CreateDomainOptions{
+			SpamAction:             mtypes.SpamActionTag,
+			Password:               "supersecret",
+			WebScheme:              "https",
+			Wildcard:               true,
+			ForceDKIMAuthority:     true,
+			DKIMKeySize:            2048,
+			ArchiveTo:              "https://archive.example.com/messages",
+			DKIMHostName:           "dkim.extended.mailgun.test",
+			DKIMSelector:           "mailgun",
+			ForceRootDKIMHost:      false,
+			EncryptIncomingMessage: true,
+			PoolID:                 "pool123",
+			RequireTLS:             true,
+			SkipVerification:       false,
+			WebPrefix:              "tracking",
+			MessageTTL:             messageTTL,
+		})
+	require.NoError(t, err)
+
+	// Clean up
+	require.NoError(t, mg.DeleteDomain(ctx, "extended.mailgun.test"))
+}
+
+func TestUpdateDomainWithExtendedOptions(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// First create a domain
+	_, err = mg.CreateDomain(ctx, "update-extended.mailgun.test",
+		&mailgun.CreateDomainOptions{SpamAction: mtypes.SpamActionTag, Password: "supersecret"})
+	require.NoError(t, err)
+
+	// Update with extended options
+	requireTLS := true
+	skipVerification := false
+	useAutoSecurity := true
+	messageTTL := 172800
+
+	err = mg.UpdateDomain(ctx, "update-extended.mailgun.test",
+		&mailgun.UpdateDomainOptions{
+			WebScheme:                  "https",
+			WebPrefix:                  "email",
+			RequireTLS:                 &requireTLS,
+			SkipVerification:           &skipVerification,
+			UseAutomaticSenderSecurity: &useAutoSecurity,
+			ArchiveTo:                  "https://archive.example.com/messages",
+			MailFromHost:               "mail.update-extended.mailgun.test",
+			MessageTTL:                 &messageTTL,
+		})
+	require.NoError(t, err)
+
+	// Clean up
+	require.NoError(t, mg.DeleteDomain(ctx, "update-extended.mailgun.test"))
+}

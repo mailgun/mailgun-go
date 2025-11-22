@@ -20,16 +20,22 @@ type ListDomainsResponse struct {
 
 // A Domain structure holds information about a domain used when sending mail.
 type Domain struct {
+	ArchiveTo                  string      `json:"archive_to,omitempty"`
 	CreatedAt                  RFC2822Time `json:"created_at"`
+	DKIMHost                   string      `json:"dkim_host,omitempty"`
 	ID                         string      `json:"id"`
 	IsDisabled                 bool        `json:"is_disabled"`
+	MailFromHost               string      `json:"mailfrom_host,omitempty"`
+	MessageTTL                 int         `json:"message_ttl,omitempty"`
 	Name                       string      `json:"name"`
+	Pod                        string      `json:"pod,omitempty"`
 	RequireTLS                 bool        `json:"require_tls"`
 	SkipVerification           bool        `json:"skip_verification"`
 	SMTPLogin                  string      `json:"smtp_login"`
 	SMTPPassword               string      `json:"smtp_password,omitempty"`
 	SpamAction                 SpamAction  `json:"spam_action"`
 	State                      string      `json:"state"`
+	SubaccountID               string      `json:"subaccount_id,omitempty"`
 	Type                       string      `json:"type"`
 	TrackingHost               string      `json:"tracking_host,omitempty"`
 	UseAutomaticSenderSecurity bool        `json:"use_automatic_sender_security"`

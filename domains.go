@@ -198,7 +198,6 @@ func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mty
 
 // CreateDomainOptions - optional parameters when creating a domain
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/POST-v4-domains
-// TODO(DE-1599): support all fields
 type CreateDomainOptions struct {
 	Password                   string
 	SpamAction                 mtypes.SpamAction
@@ -208,6 +207,16 @@ type CreateDomainOptions struct {
 	IPs                        []string
 	WebScheme                  string
 	UseAutomaticSenderSecurity bool
+	ArchiveTo                  string
+	DKIMHostName               string
+	DKIMSelector               string
+	ForceRootDKIMHost          bool
+	EncryptIncomingMessage     bool
+	PoolID                     string
+	RequireTLS                 bool
+	SkipVerification           bool
+	WebPrefix                  string
+	MessageTTL                 int
 }
 
 // CreateDomain instructs Mailgun to create a new domain for your account.
@@ -249,6 +258,36 @@ func (mg *Client) CreateDomain(ctx context.Context, domain string, opts *CreateD
 		if opts.UseAutomaticSenderSecurity {
 			payload.addValue("use_automatic_sender_security", boolToString(opts.UseAutomaticSenderSecurity))
 		}
+		if opts.ArchiveTo != "" {
+			payload.addValue("archive_to", opts.ArchiveTo)
+		}
+		if opts.DKIMHostName != "" {
+			payload.addValue("dkim_host_name", opts.DKIMHostName)
+		}
+		if opts.DKIMSelector != "" {
+			payload.addValue("dkim_selector", opts.DKIMSelector)
+		}
+		if opts.ForceRootDKIMHost {
+			payload.addValue("force_root_dkim_host", boolToString(opts.ForceRootDKIMHost))
+		}
+		if opts.EncryptIncomingMessage {
+			payload.addValue("encrypt_incoming_message", boolToString(opts.EncryptIncomingMessage))
+		}
+		if opts.PoolID != "" {
+			payload.addValue("pool_id", opts.PoolID)
+		}
+		if opts.RequireTLS {
+			payload.addValue("require_tls", boolToString(opts.RequireTLS))
+		}
+		if opts.SkipVerification {
+			payload.addValue("skip_verification", boolToString(opts.SkipVerification))
+		}
+		if opts.WebPrefix != "" {
+			payload.addValue("web_prefix", opts.WebPrefix)
+		}
+		if opts.MessageTTL != 0 {
+			payload.addValue("message_ttl", strconv.Itoa(opts.MessageTTL))
+		}
 	}
 	var resp mtypes.GetDomainResponse
 	err := postResponseFromJSON(ctx, r, payload, &resp)
@@ -271,6 +310,9 @@ type UpdateDomainOptions struct {
 	RequireTLS                 *bool
 	SkipVerification           *bool
 	UseAutomaticSenderSecurity *bool
+	ArchiveTo                  string
+	MailFromHost               string
+	MessageTTL                 *int
 }
 
 // UpdateDomain updates a domain's attributes.
@@ -296,6 +338,15 @@ func (mg *Client) UpdateDomain(ctx context.Context, domain string, opts *UpdateD
 		}
 		if opts.UseAutomaticSenderSecurity != nil {
 			payload.addValue("use_automatic_sender_security", boolToString(*opts.UseAutomaticSenderSecurity))
+		}
+		if opts.ArchiveTo != "" {
+			payload.addValue("archive_to", opts.ArchiveTo)
+		}
+		if opts.MailFromHost != "" {
+			payload.addValue("mailfrom_host", opts.MailFromHost)
+		}
+		if opts.MessageTTL != nil {
+			payload.addValue("message_ttl", strconv.Itoa(*opts.MessageTTL))
 		}
 	}
 
