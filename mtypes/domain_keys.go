@@ -1,6 +1,6 @@
 package mtypes
 
-type ListDomainKeysResponse struct {
+type ListAllDomainsKeysResponse struct {
 	TotalCount int         `json:"total_count"`
 	Items      []DomainKey `json:"items"`
 }

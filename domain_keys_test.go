@@ -9,20 +9,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestListDomainsKeys(t *testing.T) {
+func TestListAllDomainsKeys(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
 
 	ctx := context.Background()
 
-	it := mg.ListDomainKeys(nil)
+	it := mg.ListAllDomainsKeys(nil)
 	var page []mtypes.DomainKey
 	require.True(t, it.Next(ctx, &page))
 	require.NoError(t, it.Err())
 	require.Equal(t, 2, len(page))
 
-	it = mg.ListDomainKeys(&mailgun.ListDomainKeysOptions{Limit: 1})
+	it = mg.ListAllDomainsKeys(&mailgun.ListDomainKeysOptions{Limit: 1})
 	var pageWithLimit []mtypes.DomainKey
 	require.True(t, it.Next(ctx, &pageWithLimit))
 	require.NoError(t, it.Err())

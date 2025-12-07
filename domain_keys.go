@@ -11,8 +11,8 @@ type ListDomainKeysOptions struct {
 	Limit int
 }
 
-// ListDomainKeys retrieves a set of domain keys from Mailgun.
-func (mg *Client) ListDomainKeys(opts *ListDomainKeysOptions) *DomainKeysIterator {
+// ListAllDomainsKeys retrieves a set of domain keys from Mailgun.
+func (mg *Client) ListAllDomainsKeys(opts *ListDomainKeysOptions) *DomainKeysIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
@@ -22,15 +22,15 @@ func (mg *Client) ListDomainKeys(opts *ListDomainKeysOptions) *DomainKeysIterato
 		limit = 100
 	}
 	return &DomainKeysIterator{
-		mg:                     mg,
-		url:                    generateApiUrl(mg, 1, dkimEndpoint+"/keys"),
-		ListDomainKeysResponse: mtypes.ListDomainKeysResponse{TotalCount: -1},
-		limit:                  limit,
+		mg:                         mg,
+		url:                        generateApiUrl(mg, 1, dkimEndpoint+"/keys"),
+		ListAllDomainsKeysResponse: mtypes.ListAllDomainsKeysResponse{TotalCount: -1},
+		limit:                      limit,
 	}
 }
 
 type DomainKeysIterator struct {
-	mtypes.ListDomainKeysResponse
+	mtypes.ListAllDomainsKeysResponse
 
 	limit           int
 	mg              Mailgun
@@ -164,7 +164,7 @@ func (ri *DomainKeysIterator) fetch(ctx context.Context, pageUrl string, limit i
 		r.addParameter("limit", strconv.Itoa(limit))
 	}
 
-	return getResponseFromJSON(ctx, r, &ri.ListDomainKeysResponse)
+	return getResponseFromJSON(ctx, r, &ri.ListAllDomainsKeysResponse)
 }
 
 // UpdateDomainDkimSelector updates the DKIM selector for a domain

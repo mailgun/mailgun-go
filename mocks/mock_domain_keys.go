@@ -59,7 +59,7 @@ func (ms *Server) listDomainKeys(w http.ResponseWriter, r *http.Request) {
 		list = append(list, domainKey)
 	}
 
-	toJSON(w, mtypes.ListDomainKeysResponse{
+	toJSON(w, mtypes.ListAllDomainsKeysResponse{
 		TotalCount: len(list),
 		Items:      list,
 	})
