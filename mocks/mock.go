@@ -22,6 +22,7 @@ type Server struct {
 	srv *httptest.Server
 
 	domainIPS        []string
+	domainKeyList    []mtypes.DomainKey
 	domainList       []DomainContainer
 	exportList       []mtypes.Export
 	mailingList      []MailingListContainer
@@ -44,6 +45,12 @@ func (ms *Server) DomainIPS() []string {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 	return ms.domainIPS
+}
+
+func (ms *Server) DomainKeys() []mtypes.DomainKey {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+	return ms.domainKeyList
 }
 
 func (ms *Server) DomainList() []DomainContainer {
@@ -113,6 +120,10 @@ func NewServer() *Server {
 	// Add all our handlers
 	r := chi.NewRouter()
 
+	r.Route("/v1", func(r chi.Router) {
+		ms.addDomainKeysRoutes(r)
+	})
+
 	r.Route("/v3", func(r chi.Router) {
 		ms.addIPRoutes(r)
 		ms.addExportRoutes(r)
@@ -134,7 +145,7 @@ func NewServer() *Server {
 		ms.addSubaccountRoutes(r)
 	})
 
-	// self defined API version routes
+	// self-defined API version routes
 
 	ms.addDomainRoutes(r) // mix of v3 and v4
 	ms.addValidationRoutes(r)

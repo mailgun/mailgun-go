@@ -108,6 +108,7 @@ const (
 	bouncesEndpoint      = "bounces"
 	metricsEndpoint      = "analytics/metrics"
 	domainsEndpoint      = "domains"
+	dkimEndpoint         = "dkim"
 	tagsEndpoint         = "tags"
 	eventsEndpoint       = "events"
 	unsubscribesEndpoint = "unsubscribes"
