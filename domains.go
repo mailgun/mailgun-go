@@ -305,6 +305,9 @@ func (mg *Client) DeleteDomain(ctx context.Context, domain string) error {
 
 // UpdateDomainOptions options for updating a domain
 type UpdateDomainOptions struct {
+	Password                   string
+	SpamAction                 mtypes.SpamAction
+	Wildcard                   *bool
 	WebScheme                  string
 	WebPrefix                  string
 	RequireTLS                 *bool
@@ -324,6 +327,15 @@ func (mg *Client) UpdateDomain(ctx context.Context, domain string, opts *UpdateD
 	payload := newUrlEncodedPayload()
 
 	if opts != nil {
+		if opts.Password != "" {
+			payload.addValue("smtp_password", opts.Password)
+		}
+		if opts.SpamAction != "" {
+			payload.addValue("spam_action", string(opts.SpamAction))
+		}
+		if opts.Wildcard != nil {
+			payload.addValue("wildcard", boolToString(*opts.Wildcard))
+		}
 		if opts.WebScheme != "" {
 			payload.addValue("web_scheme", opts.WebScheme)
 		}
