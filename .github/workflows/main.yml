@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ master, main ]
+    branches: [ main ]
 
 # Cancels any in-flight actions if the PR is updated before jobs complete.
 concurrency:
