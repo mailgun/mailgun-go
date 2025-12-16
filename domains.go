@@ -10,9 +10,25 @@ import (
 
 type ListDomainsOptions struct {
 	Limit int
+
+	// Get only domains with a specific state.
+	State *mtypes.DomainState
+
+	// If sorting is not specified domains are returned in reverse creation date order.
+	Sort *string
+
+	// Get only domains with a specific authority.
+	Authority *string
+
+	// Search domains by the given partial or complete name. Does not support wildcards.
+	Search *string
+
+	// Search on every domain that belongs to any subaccounts under this account.
+	IncludeSubaccounts *bool
 }
 
 // ListDomains retrieves a set of domains from Mailgun.
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domains/get-v4-domains
 func (mg *Client) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
 	var limit int
 	if opts != nil {
@@ -27,6 +43,7 @@ func (mg *Client) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
 		url:                 generateApiUrl(mg, 4, domainsEndpoint),
 		ListDomainsResponse: mtypes.ListDomainsResponse{TotalCount: -1},
 		limit:               limit,
+		opts:                opts,
 	}
 }
 
@@ -34,6 +51,7 @@ type DomainsIterator struct {
 	mtypes.ListDomainsResponse
 
 	limit  int
+	opts   *ListDomainsOptions
 	mg     Mailgun
 	offset int
 	url    string
@@ -156,8 +174,28 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 	if skip != 0 {
 		r.addParameter("skip", strconv.Itoa(skip))
 	}
+
+	// TODO(vtopc): switch to opts.Limit:
 	if limit != 0 {
 		r.addParameter("limit", strconv.Itoa(limit))
+	}
+
+	if ri.opts != nil {
+		if ri.opts.State != nil {
+			r.addParameter("state", string(*ri.opts.State))
+		}
+		if ri.opts.Sort != nil {
+			r.addParameter("sort", *ri.opts.Sort)
+		}
+		if ri.opts.Authority != nil {
+			r.addParameter("authority", *ri.opts.Authority)
+		}
+		if ri.opts.Search != nil {
+			r.addParameter("search", *ri.opts.Search)
+		}
+		if ri.opts.IncludeSubaccounts != nil {
+			r.addParameter("include_subaccounts", strconv.FormatBool(*ri.opts.IncludeSubaccounts))
+		}
 	}
 
 	return getResponseFromJSON(ctx, r, &ri.ListDomainsResponse)

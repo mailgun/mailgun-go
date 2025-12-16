@@ -1,5 +1,7 @@
 package mtypes
 
+type SpamAction string
+
 // Use these to specify a spam action when creating a new domain.
 const (
 	// SpamActionTag tags the received message with headers providing a measure of its spamness.
@@ -10,7 +12,13 @@ const (
 	SpamActionDelete = SpamAction("delete")
 )
 
-type SpamAction string
+type DomainState string
+
+const (
+	DomainStateActive     = DomainState("active")
+	DomainStateUnverified = DomainState("unverified")
+	DomainStateInactive   = DomainState("inactive")
+)
 
 type ListDomainsResponse struct {
 	// is -1 if Next() or First() have not been called
