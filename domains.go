@@ -163,13 +163,31 @@ func (ri *DomainsIterator) fetch(ctx context.Context, skip, limit int) error {
 	return getResponseFromJSON(ctx, r, &ri.ListDomainsResponse)
 }
 
-type GetDomainOptions struct{}
+type GetDomainOptions struct {
+	// If set to true, domain payload will include dkim_host, mailfrom_host and pod
+	Extended *bool
+
+	// Domain payload will include sending and receiving dns records payload
+	WithDNS *bool
+}
 
 // GetDomain retrieves detailed information about the named domain.
-func (mg *Client) GetDomain(ctx context.Context, domain string, _ *GetDomainOptions) (mtypes.GetDomainResponse, error) {
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domains/get-v4-domains--name-
+func (mg *Client) GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint) + "/" + domain)
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	if opts != nil {
+		if opts.Extended != nil {
+			r.addParameter("h:extended", strconv.FormatBool(*opts.Extended))
+		}
+
+		if opts.WithDNS != nil {
+			r.addParameter("h:with_dns", strconv.FormatBool(*opts.WithDNS))
+		}
+	}
+
 	var resp mtypes.GetDomainResponse
 	err := getResponseFromJSON(ctx, r, &resp)
 	return resp, err
