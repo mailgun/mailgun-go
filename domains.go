@@ -246,7 +246,9 @@ func (mg *Client) VerifyDomain(ctx context.Context, domain string) (mtypes.GetDo
 
 // VerifyAndReturnDomain verifies the domains DNS records (includes A, CNAME, SPF,
 // DKIM and MX records) to ensure the domain is ready and able to send.
+//
 // Deprecated: use VerifyDomain instead.
+//
 // TODO(v6): remove this method
 func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error) {
 	return mg.VerifyDomain(ctx, domain)
