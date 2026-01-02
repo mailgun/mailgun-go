@@ -2,6 +2,8 @@ package mailgun
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 	"strconv"
 
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -195,6 +197,18 @@ func (mg *Client) CreateDomainKey(ctx context.Context, domain, dkimSelector stri
 	return resp, err
 }
 
+// DeleteDomainKey deletes a domain key from the given domain
+func (mg *Client) DeleteDomainKey(ctx context.Context, domain, dkimSelector string) error {
+	uri := generateDeleteDomainKeyApiUrl(dkimEndpoint, domain, dkimSelector)
+
+	r := newHTTPRequest(generateApiUrl(mg, 1, uri))
+	r.setClient(mg.HTTPClient())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	_, err := makeDeleteRequest(ctx, r)
+	return err
+}
+
 // UpdateDomainDkimSelector updates the DKIM selector for a domain
 func (mg *Client) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/dkim_selector")
@@ -205,4 +219,13 @@ func (mg *Client) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSele
 	payload.addValue("dkim_selector", dkimSelector)
 	_, err := makePutRequest(ctx, r, payload)
 	return err
+}
+
+// generateDeleteDomainKeyApiUrl renders a URL fragment relevant for deleting a domain key.
+func generateDeleteDomainKeyApiUrl(endpoint, domain, dkimSelector string) string {
+	params := url.Values{
+		"signing_domain": []string{domain},
+		"selector":       []string{dkimSelector},
+	}
+	return fmt.Sprintf("%s/keys?%s", endpoint, params.Encode())
 }

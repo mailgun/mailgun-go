@@ -42,6 +42,18 @@ func TestCreateDomainKey(t *testing.T) {
 	require.Equal(t, testDomain, domainKey.SigningDomain)
 }
 
+func TestDeleteDomainKey(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Delete Domain Key
+	err = mg.DeleteDomainKey(ctx, testDomain, "gotest")
+	require.NoError(t, err)
+}
+
 func TestUpdateDomainDkimSelector(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
