@@ -37,7 +37,7 @@ func TestCreateDomainKey(t *testing.T) {
 	ctx := context.Background()
 
 	// Create Domain Key
-	domainKey, err := mg.CreateDomainKey(ctx, testDomain, "gotest", &mailgun.CreateDomainKeyOptions{})
+	domainKey, err := mg.CreateDomainKey(ctx, testDomain, testDkimSelector, &mailgun.CreateDomainKeyOptions{})
 	require.NoError(t, err)
 	require.Equal(t, testDomain, domainKey.SigningDomain)
 }
@@ -50,7 +50,7 @@ func TestDeleteDomainKey(t *testing.T) {
 	ctx := context.Background()
 
 	// Delete Domain Key
-	err = mg.DeleteDomainKey(ctx, testDomain, "gotest")
+	err = mg.DeleteDomainKey(ctx, testDomain, testDkimSelector)
 	require.NoError(t, err)
 }
 
@@ -62,8 +62,22 @@ func TestActivateDomainKey(t *testing.T) {
 	ctx := context.Background()
 
 	// Deactivate Domain Key
-	err = mg.ActivateDomainKey(ctx, testDomain, "gotest")
+	err = mg.ActivateDomainKey(ctx, testDomain, testDkimSelector)
 	require.NoError(t, err)
+}
+
+func TestListDomainKeys(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	it := mg.ListDomainKeys(testDomain)
+	var page []mtypes.DomainKey
+	require.True(t, it.Next(ctx, &page))
+	require.NoError(t, it.Err())
+	require.Equal(t, 2, len(page))
 }
 
 func TestDeactivateDomainKey(t *testing.T) {

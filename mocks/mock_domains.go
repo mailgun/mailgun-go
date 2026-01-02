@@ -99,6 +99,7 @@ func (ms *Server) addDomainRoutes(r chi.Router) {
 	r.Get("/v3/domains/{domain}/limits/tag", ms.getTagLimits)
 
 	r.Put("/v4/domains/{domain}/keys/{dkim_selector}/activate", ms.activateDomainKey)
+	r.Get("/v4/domains/{domain}/keys", ms.listDomainKeys)
 	r.Put("/v4/domains/{domain}/keys/{dkim_selector}/deactivate", ms.deactivateDomainKey)
 	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
 }

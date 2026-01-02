@@ -18,25 +18,7 @@ type CreateDomainKeyOptions struct {
 	PEM  string
 }
 
-// ListAllDomainsKeys retrieves a set of domain keys from Mailgun.
-func (mg *Client) ListAllDomainsKeys(opts *ListDomainKeysOptions) *DomainKeysIterator {
-	var limit int
-	if opts != nil {
-		limit = opts.Limit
-	}
-
-	if limit == 0 {
-		limit = 100
-	}
-	return &DomainKeysIterator{
-		mg:                         mg,
-		url:                        generateApiUrl(mg, 1, dkimEndpoint+"/keys"),
-		ListAllDomainsKeysResponse: mtypes.ListAllDomainsKeysResponse{TotalCount: -1},
-		limit:                      limit,
-	}
-}
-
-type DomainKeysIterator struct {
+type AllDomainsKeysIterator struct {
 	mtypes.ListAllDomainsKeysResponse
 
 	limit           int
@@ -50,20 +32,50 @@ type DomainKeysIterator struct {
 	err             error
 }
 
+type DomainKeysIterator struct {
+	mtypes.ListDomainKeysResponse
+
+	mg              Mailgun
+	firstPageUrl    string
+	previousPageUrl string
+	nextPageUrl     string
+	lastPageUrl     string
+	url             string
+	err             error
+}
+
+// ListAllDomainsKeys retrieves a set of domain keys from Mailgun.
+func (mg *Client) ListAllDomainsKeys(opts *ListDomainKeysOptions) *AllDomainsKeysIterator {
+	var limit int
+	if opts != nil {
+		limit = opts.Limit
+	}
+
+	if limit == 0 {
+		limit = 100
+	}
+	return &AllDomainsKeysIterator{
+		mg:                         mg,
+		url:                        generateApiUrl(mg, 1, dkimEndpoint+"/keys"),
+		ListAllDomainsKeysResponse: mtypes.ListAllDomainsKeysResponse{TotalCount: -1},
+		limit:                      limit,
+	}
+}
+
 // Err if an error occurred during iteration `Err()` will return non nil
-func (ri *DomainKeysIterator) Err() error {
+func (ri *AllDomainsKeysIterator) Err() error {
 	return ri.err
 }
 
 // Offset returns the current offset of the iterator
-func (ri *DomainKeysIterator) Offset() int {
+func (ri *AllDomainsKeysIterator) Offset() int {
 	return ri.offset
 }
 
 // Next retrieves the next page of items from the api. Returns false when there
 // are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
+func (ri *AllDomainsKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -86,7 +98,7 @@ func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKe
 // First retrieves the first page of items from the api. Returns false if there
 // was an error. It also sets the iterator object to the first page.
 // Use `.Err()` to retrieve the error.
-func (ri *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainKey) bool {
+func (ri *AllDomainsKeysIterator) First(ctx context.Context, items *[]mtypes.DomainKey) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -105,7 +117,7 @@ func (ri *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainK
 // Calling Last() is invalid unless you first call First() or Next()
 // Returns false if there was an error. It also sets the iterator object
 // to the last page. Use `.Err()` to retrieve the error.
-func (ri *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKey) bool {
+func (ri *AllDomainsKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKey) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -132,7 +144,7 @@ func (ri *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKe
 // Previous retrieves the previous page of items from the api. Returns false when there
 // are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error if any
-func (ri *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.DomainKey) bool {
+func (ri *AllDomainsKeysIterator) Previous(ctx context.Context, items *[]mtypes.DomainKey) bool {
 	if ri.err != nil {
 		return false
 	}
@@ -157,7 +169,7 @@ func (ri *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.Doma
 	return len(ri.Items) != 0
 }
 
-func (ri *DomainKeysIterator) fetch(ctx context.Context, pageUrl string, limit int) error {
+func (ri *AllDomainsKeysIterator) fetch(ctx context.Context, pageUrl string, limit int) error {
 	ri.Items = nil
 	url := ri.url
 	if pageUrl != "" {
@@ -222,6 +234,118 @@ func (mg *Client) ActivateDomainKey(ctx context.Context, domain, dkimSelector st
 	return err
 }
 
+// ListDomainKeys retrieves a set of domain keys from Mailgun.
+func (mg *Client) ListDomainKeys(domain string) *DomainKeysIterator {
+	uri := generateListDomainKeysApiUrl(domainsEndpoint, domain)
+
+	return &DomainKeysIterator{
+		mg:                     mg,
+		url:                    generateApiUrl(mg, 4, uri),
+		ListDomainKeysResponse: mtypes.ListDomainKeysResponse{},
+	}
+}
+
+// Err if an error occurred during iteration `Err()` will return non nil
+func (ri *DomainKeysIterator) Err() error {
+	return ri.err
+}
+
+// Offset returns the current offset of the iterator
+func (ri *DomainKeysIterator) Offset() int {
+	return len(ri.Items)
+}
+
+// Next retrieves the next page of items from the api. Returns false when there
+// are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error
+func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	ri.err = ri.fetch(ctx, ri.nextPageUrl)
+	if ri.err != nil {
+		return false
+	}
+
+	cpy := make([]mtypes.DomainKey, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	if len(ri.Items) == 0 {
+		return false
+	}
+	return true
+}
+
+// First retrieves the first page of items from the api. Returns false if there
+// was an error. It also sets the iterator object to the first page.
+// Use `.Err()` to retrieve the error.
+func (ri *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	if ri.err != nil {
+		return false
+	}
+	ri.err = ri.fetch(ctx, ri.firstPageUrl)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]mtypes.DomainKey, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	return true
+}
+
+// Last retrieves the last page of items from the api.
+// Calling Last() is invalid unless you first call First() or Next()
+// Returns false if there was an error. It also sets the iterator object
+// to the last page. Use `.Err()` to retrieve the error.
+func (ri *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	ri.err = ri.fetch(ctx, ri.lastPageUrl)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]mtypes.DomainKey, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+	return true
+}
+
+// Previous retrieves the previous page of items from the api. Returns false when there
+// are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
+// the error if any
+func (ri *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	if ri.err != nil {
+		return false
+	}
+
+	ri.err = ri.fetch(ctx, ri.previousPageUrl)
+	if ri.err != nil {
+		return false
+	}
+	cpy := make([]mtypes.DomainKey, len(ri.Items))
+	copy(cpy, ri.Items)
+	*items = cpy
+
+	return len(ri.Items) != 0
+}
+
+func (ri *DomainKeysIterator) fetch(ctx context.Context, pageUrl string) error {
+	ri.Items = nil
+	url := ri.url
+	if pageUrl != "" {
+		url = pageUrl
+	}
+	r := newHTTPRequest(url)
+
+	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
+	r.setClient(ri.mg.HTTPClient())
+
+	return getResponseFromJSON(ctx, r, &ri.ListDomainKeysResponse)
+}
+
 // DeactivateDomainKey deactivates a domain key for the given domain
 func (mg *Client) DeactivateDomainKey(ctx context.Context, domain, dkimSelector string) error {
 	uri := generateDeactivateDomainKeyApiUrl(domainsEndpoint, domain, dkimSelector)
@@ -258,6 +382,11 @@ func generateDeleteDomainKeyApiUrl(endpoint, domain, dkimSelector string) string
 // generateActivateDomainKeyApiUrl renders a URL fragment relevant for deactivating a domain key
 func generateActivateDomainKeyApiUrl(endpoint, domain, dkimSelector string) string {
 	return fmt.Sprintf("%s/%s/keys/%s/activate", endpoint, domain, dkimSelector)
+}
+
+// generateListDomainKeysApiUrl renders a URL fragment relevant for listing a domain's keys
+func generateListDomainKeysApiUrl(endpoint, domain string) string {
+	return fmt.Sprintf("%s/%s/keys", endpoint, domain)
 }
 
 // generateDeactivateDomainKeyApiUrl renders a URL fragment relevant for deactivating a domain key

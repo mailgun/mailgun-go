@@ -38,12 +38,12 @@ func (ms *Server) addDomainKeysRoutes(r chi.Router) {
 		},
 	)
 
-	r.Get("/dkim/keys", ms.listDomainKeys)
+	r.Get("/dkim/keys", ms.listAllDomainsKeys)
 	r.Post("/dkim/keys", ms.createDomainKey)
 	r.Delete("/dkim/keys", ms.deleteDomainKey)
 }
 
-func (ms *Server) listDomainKeys(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) listAllDomainsKeys(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
@@ -86,6 +86,20 @@ func (ms *Server) activateDomainKey(w http.ResponseWriter, r *http.Request) {
 	ms.mutex.Lock()
 
 	toJSON(w, nil)
+}
+
+func (ms *Server) listDomainKeys(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	var list []mtypes.DomainKey
+	for _, domainKey := range ms.domainKeyList {
+		list = append(list, domainKey)
+	}
+
+	toJSON(w, mtypes.ListDomainKeysResponse{
+		Items: list,
+	})
 }
 
 func (ms *Server) deactivateDomainKey(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,10 @@ type ListAllDomainsKeysResponse struct {
 	Items      []DomainKey `json:"items"`
 }
 
+type ListDomainKeysResponse struct {
+	Items []DomainKey `json:"items"`
+}
+
 type DomainKey struct {
 	SigningDomain string    `json:"signing_domain"`
 	Selector      string    `json:"selector"`
