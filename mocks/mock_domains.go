@@ -163,17 +163,36 @@ func (ms *Server) createDomain(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	webScheme := r.FormValue("web_scheme")
+	if webScheme == "" {
+		webScheme = "http"
+	}
+
+	domain := mtypes.Domain{
+		CreatedAt:                  mtypes.RFC2822Time(time.Now()),
+		Name:                       r.FormValue("name"),
+		SMTPLogin:                  r.FormValue("smtp_login"),
+		SMTPPassword:               r.FormValue("smtp_password"),
+		Wildcard:                   stringToBool(r.FormValue("wildcard")),
+		SpamAction:                 mtypes.SpamAction(r.FormValue("spam_action")),
+		State:                      "active",
+		WebScheme:                  webScheme,
+		WebPrefix:                  r.FormValue("web_prefix"),
+		RequireTLS:                 stringToBool(r.FormValue("require_tls")),
+		SkipVerification:           stringToBool(r.FormValue("skip_verification")),
+		UseAutomaticSenderSecurity: stringToBool(r.FormValue("use_automatic_sender_security")),
+		ArchiveTo:                  r.FormValue("archive_to"),
+		DKIMHost:                   r.FormValue("dkim_host_name"),
+		EncryptIncomingMessage:     stringToBool(r.FormValue("encrypt_incoming_message")),
+		MailFromHost:               r.FormValue("mailfrom_host"),
+	}
+
+	if messageTTL := r.FormValue("message_ttl"); messageTTL != "" {
+		domain.MessageTTL = stringToInt(messageTTL)
+	}
+
 	ms.domainList = append(ms.domainList, DomainContainer{
-		Domain: mtypes.Domain{
-			CreatedAt:    mtypes.RFC2822Time(time.Now()),
-			Name:         r.FormValue("name"),
-			SMTPLogin:    r.FormValue("smtp_login"),
-			SMTPPassword: r.FormValue("smtp_password"),
-			Wildcard:     stringToBool(r.FormValue("wildcard")),
-			SpamAction:   mtypes.SpamAction(r.FormValue("spam_action")),
-			State:        "active",
-			WebScheme:    "http",
-		},
+		Domain: domain,
 	})
 	toJSON(w, okResp{Message: "Domain has been created"})
 }
@@ -182,13 +201,39 @@ func (ms *Server) updateDomain(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
-	for _, domain := range ms.domainList {
+	for i, domain := range ms.domainList {
 		if domain.Domain.Name == chi.URLParam(r, "domain") {
-			domain.Domain.WebScheme = r.FormValue("web_scheme")
+			if webScheme := r.FormValue("web_scheme"); webScheme != "" {
+				ms.domainList[i].Domain.WebScheme = webScheme
+			}
+			if webPrefix := r.FormValue("web_prefix"); webPrefix != "" {
+				ms.domainList[i].Domain.WebPrefix = webPrefix
+			}
+			if requireTLS := r.FormValue("require_tls"); requireTLS != "" {
+				ms.domainList[i].Domain.RequireTLS = stringToBool(requireTLS)
+			}
+			if skipVerification := r.FormValue("skip_verification"); skipVerification != "" {
+				ms.domainList[i].Domain.SkipVerification = stringToBool(skipVerification)
+			}
+			if useAutoSecurity := r.FormValue("use_automatic_sender_security"); useAutoSecurity != "" {
+				ms.domainList[i].Domain.UseAutomaticSenderSecurity = stringToBool(useAutoSecurity)
+			}
+			if archiveTo := r.FormValue("archive_to"); archiveTo != "" {
+				ms.domainList[i].Domain.ArchiveTo = archiveTo
+			}
+			if mailFromHost := r.FormValue("mailfrom_host"); mailFromHost != "" {
+				ms.domainList[i].Domain.MailFromHost = mailFromHost
+			}
+			if messageTTL := r.FormValue("message_ttl"); messageTTL != "" {
+				ms.domainList[i].Domain.MessageTTL = stringToInt(messageTTL)
+			}
+			toJSON(w, okResp{Message: "Domain has been updated"})
+			return
 		}
 	}
 
-	toJSON(w, okResp{Message: "Domain has been updated"})
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
 }
 
 func (ms *Server) deleteDomain(w http.ResponseWriter, r *http.Request) {

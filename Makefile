@@ -5,8 +5,8 @@ GOPATH=$(shell go env GOPATH)
 # TODO(vtopc): move into mtypes/internal/...?
 TYPES_PATH=./internal/types
 
-GOLANGCI_LINT_VERSION=v1.64.8
-GOLANGCI_LINT_PATH=$(GOPATH)/bin
+GOLANGCI_LINT_VERSION=v2.7.2
+GOLANGCI_LINT_PATH=$(GOPATH)/bin/golangci-lint-v2
 GOLANGCI_LINT=$(GOLANGCI_LINT_PATH)/golangci-lint
 
 NILAWAY = $(GOPATH)/bin/nilaway

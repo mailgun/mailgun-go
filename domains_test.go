@@ -109,3 +109,114 @@ func TestDomainVerify(t *testing.T) {
 	_, err = mg.VerifyDomain(ctx, testDomain)
 	require.NoError(t, err)
 }
+
+func TestCreateDomainWithExtendedOptions(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Test creating domain with all extended options
+	messageTTL := 86400
+	_, err = mg.CreateDomain(ctx, "extended.mailgun.test",
+		&mailgun.CreateDomainOptions{
+			SpamAction:             mtypes.SpamActionTag,
+			Password:               "supersecret",
+			WebScheme:              "https",
+			Wildcard:               true,
+			ForceDKIMAuthority:     true,
+			DKIMKeySize:            2048,
+			ArchiveTo:              "https://archive.example.com/messages",
+			DKIMHostName:           "dkim.extended.mailgun.test",
+			DKIMSelector:           "mailgun",
+			ForceRootDKIMHost:      false,
+			EncryptIncomingMessage: true,
+			PoolID:                 "pool123",
+			RequireTLS:             true,
+			SkipVerification:       false,
+			WebPrefix:              "tracking",
+			MessageTTL:             messageTTL,
+		})
+	require.NoError(t, err)
+
+	// Verify the domain was created correctly in the mock by checking the stored values
+	domains := server.DomainList()
+	var found bool
+	for _, dc := range domains {
+		if dc.Domain.Name != "extended.mailgun.test" {
+			continue
+		}
+		found = true
+		assert.Equal(t, mtypes.SpamActionTag, dc.Domain.SpamAction)
+		assert.Equal(t, "https", dc.Domain.WebScheme)
+		assert.Equal(t, true, dc.Domain.Wildcard)
+		assert.Equal(t, "https://archive.example.com/messages", dc.Domain.ArchiveTo)
+		assert.Equal(t, "dkim.extended.mailgun.test", dc.Domain.DKIMHost)
+		assert.Equal(t, true, dc.Domain.EncryptIncomingMessage)
+		assert.Equal(t, true, dc.Domain.RequireTLS)
+		assert.Equal(t, false, dc.Domain.SkipVerification)
+		assert.Equal(t, "tracking", dc.Domain.WebPrefix)
+		assert.Equal(t, 86400, dc.Domain.MessageTTL)
+		break
+	}
+	assert.True(t, found, "Domain should exist in mock server")
+
+	// Clean up
+	require.NoError(t, mg.DeleteDomain(ctx, "extended.mailgun.test"))
+}
+
+func TestUpdateDomainWithExtendedOptions(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// First create a domain
+	_, err = mg.CreateDomain(ctx, "update-extended.mailgun.test",
+		&mailgun.CreateDomainOptions{SpamAction: mtypes.SpamActionTag, Password: "supersecret"})
+	require.NoError(t, err)
+
+	// Update with extended options
+	requireTLS := true
+	skipVerification := false
+	useAutoSecurity := true
+	messageTTL := 172800
+
+	err = mg.UpdateDomain(ctx, "update-extended.mailgun.test",
+		&mailgun.UpdateDomainOptions{
+			WebScheme:                  "https",
+			WebPrefix:                  "email",
+			RequireTLS:                 &requireTLS,
+			SkipVerification:           &skipVerification,
+			UseAutomaticSenderSecurity: &useAutoSecurity,
+			ArchiveTo:                  "https://archive.example.com/messages",
+			MailFromHost:               "mail.update-extended.mailgun.test",
+			MessageTTL:                 &messageTTL,
+		})
+	require.NoError(t, err)
+
+	// Verify the domain was updated correctly in the mock by checking the stored values
+	domains := server.DomainList()
+	var found bool
+	for _, dc := range domains {
+		if dc.Domain.Name != "update-extended.mailgun.test" {
+			continue
+		}
+		found = true
+		assert.Equal(t, "https", dc.Domain.WebScheme)
+		assert.Equal(t, "email", dc.Domain.WebPrefix)
+		assert.Equal(t, true, dc.Domain.RequireTLS)
+		assert.Equal(t, false, dc.Domain.SkipVerification)
+		assert.Equal(t, true, dc.Domain.UseAutomaticSenderSecurity)
+		assert.Equal(t, "https://archive.example.com/messages", dc.Domain.ArchiveTo)
+		assert.Equal(t, "mail.update-extended.mailgun.test", dc.Domain.MailFromHost)
+		assert.Equal(t, 172800, dc.Domain.MessageTTL)
+		break
+	}
+	assert.True(t, found, "Domain should exist in mock server")
+
+	// Clean up
+	require.NoError(t, mg.DeleteDomain(ctx, "update-extended.mailgun.test"))
+}

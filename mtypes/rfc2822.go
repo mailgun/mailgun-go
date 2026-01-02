@@ -45,8 +45,7 @@ func (t *RFC2822Time) UnmarshalJSON(s []byte) error {
 		var err2 error
 		*(*time.Time)(t), err2 = time.Parse(time.RFC1123Z, q)
 		if err2 != nil {
-			// TODO(go1.20): use errors.Join:
-			return errors.Errorf("%s; %s", err1, err2)
+			return errors.Join(err1, err2)
 		}
 	}
 
