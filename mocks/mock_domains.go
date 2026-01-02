@@ -98,6 +98,7 @@ func (ms *Server) addDomainRoutes(r chi.Router) {
 	r.Put("/v3/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
 	r.Get("/v3/domains/{domain}/limits/tag", ms.getTagLimits)
 
+	r.Put("/v4/domains/{domain}/keys/{dkim_selector}/deactivate", ms.deactivateDomainKey)
 	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
 }
 

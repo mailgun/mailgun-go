@@ -74,6 +74,7 @@ func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKe
 	}
 
 	cpy := make([]mtypes.DomainKey, len(ri.Items))
+	copy(cpy, ri.Items)
 	*items = cpy
 	if len(ri.Items) == 0 {
 		return false
@@ -209,6 +210,18 @@ func (mg *Client) DeleteDomainKey(ctx context.Context, domain, dkimSelector stri
 	return err
 }
 
+// DeactivateDomainKey deactivates a domain key for the given domain
+func (mg *Client) DeactivateDomainKey(ctx context.Context, domain, dkimSelector string) error {
+	uri := generateDeactivateDomainKeyApiUrl(domainsEndpoint, domain, dkimSelector)
+
+	r := newHTTPRequest(generateApiUrl(mg, 4, uri))
+	r.setClient(mg.HTTPClient())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	_, err := makePutRequest(ctx, r, newUrlEncodedPayload())
+	return err
+}
+
 // UpdateDomainDkimSelector updates the DKIM selector for a domain
 func (mg *Client) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/dkim_selector")
@@ -228,4 +241,9 @@ func generateDeleteDomainKeyApiUrl(endpoint, domain, dkimSelector string) string
 		"selector":       []string{dkimSelector},
 	}
 	return fmt.Sprintf("%s/keys?%s", endpoint, params.Encode())
+}
+
+// generateDeactivateDomainKeyApiUrl renders a URL fragment relevant for deactivating a domain key
+func generateDeactivateDomainKeyApiUrl(endpoint, domain, dkimSelector string) string {
+	return fmt.Sprintf("%s/%s/keys/%s/deactivate", endpoint, domain, dkimSelector)
 }
