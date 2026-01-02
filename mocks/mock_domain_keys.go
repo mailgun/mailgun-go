@@ -81,6 +81,13 @@ func (ms *Server) deleteDomainKey(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, nil)
 }
 
+func (ms *Server) activateDomainKey(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	toJSON(w, nil)
+}
+
 func (ms *Server) deactivateDomainKey(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
