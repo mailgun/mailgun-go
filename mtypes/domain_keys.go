@@ -9,6 +9,12 @@ type ListDomainKeysResponse struct {
 	Items []DomainKey `json:"items"`
 }
 
+type UpdateDomainDkimAuthorityResponse struct {
+	Message           string      `json:"message"`
+	SendingDNSRecords []DNSRecord `json:"sending_dns_records"`
+	Changed           bool        `json:"changed"`
+}
+
 type DomainKey struct {
 	SigningDomain string    `json:"signing_domain"`
 	Selector      string    `json:"selector"`

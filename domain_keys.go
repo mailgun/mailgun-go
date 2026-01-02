@@ -358,6 +358,21 @@ func (mg *Client) DeactivateDomainKey(ctx context.Context, domain, dkimSelector 
 	return err
 }
 
+func (mg *Client) UpdateDomainDkimAuthority(ctx context.Context, domain string, self bool) (mtypes.UpdateDomainDkimAuthorityResponse, error) {
+	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/dkim_authority")
+	r.setClient(mg.HTTPClient())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("self", boolToString(self))
+
+	var resp mtypes.UpdateDomainDkimAuthorityResponse
+
+	err := putResponseFromJSON(ctx, r, payload, &resp)
+
+	return resp, err
+}
+
 // UpdateDomainDkimSelector updates the DKIM selector for a domain
 func (mg *Client) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error {
 	r := newHTTPRequest(generateApiUrl(mg, 3, domainsEndpoint) + "/" + domain + "/dkim_selector")

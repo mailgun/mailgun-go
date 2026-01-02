@@ -92,6 +92,18 @@ func TestDeactivateDomainKey(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestUpdateDomainDkimAuthority(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Update Domain DKIM selector
+	_, err = mg.UpdateDomainDkimAuthority(ctx, testDomain, true)
+	require.NoError(t, err)
+}
+
 func TestUpdateDomainDkimSelector(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())

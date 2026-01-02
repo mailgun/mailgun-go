@@ -80,31 +80,3 @@ func (ms *Server) deleteDomainKey(w http.ResponseWriter, r *http.Request) {
 
 	toJSON(w, nil)
 }
-
-func (ms *Server) activateDomainKey(w http.ResponseWriter, r *http.Request) {
-	defer ms.mutex.Unlock()
-	ms.mutex.Lock()
-
-	toJSON(w, nil)
-}
-
-func (ms *Server) listDomainKeys(w http.ResponseWriter, r *http.Request) {
-	defer ms.mutex.Unlock()
-	ms.mutex.Lock()
-
-	var list []mtypes.DomainKey
-	for _, domainKey := range ms.domainKeyList {
-		list = append(list, domainKey)
-	}
-
-	toJSON(w, mtypes.ListDomainKeysResponse{
-		Items: list,
-	})
-}
-
-func (ms *Server) deactivateDomainKey(w http.ResponseWriter, r *http.Request) {
-	defer ms.mutex.Unlock()
-	ms.mutex.Lock()
-
-	toJSON(w, nil)
-}
