@@ -11,6 +11,11 @@ type ListDomainKeysOptions struct {
 	Limit int
 }
 
+type CreateDomainKeyOptions struct {
+	Bits int
+	PEM  string
+}
+
 // ListAllDomainsKeys retrieves a set of domain keys from Mailgun.
 func (mg *Client) ListAllDomainsKeys(opts *ListDomainKeysOptions) *DomainKeysIterator {
 	var limit int
@@ -165,6 +170,29 @@ func (ri *DomainKeysIterator) fetch(ctx context.Context, pageUrl string, limit i
 	}
 
 	return getResponseFromJSON(ctx, r, &ri.ListAllDomainsKeysResponse)
+}
+
+// CreateDomainKey creates a domain key for the given domain
+func (mg *Client) CreateDomainKey(ctx context.Context, domain, dkimSelector string, opts *CreateDomainKeyOptions) (mtypes.DomainKey, error) {
+	r := newHTTPRequest(generateApiUrl(mg, 1, dkimEndpoint+"/keys"))
+	r.setClient(mg.HTTPClient())
+	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	payload := newUrlEncodedPayload()
+	payload.addValue("signing_domain", domain)
+	payload.addValue("selector", dkimSelector)
+
+	if opts.Bits != 0 {
+		payload.addValue("bits", strconv.Itoa(opts.Bits))
+	}
+
+	if opts.PEM != "" {
+		payload.addValue("pem", opts.PEM)
+	}
+
+	var resp mtypes.DomainKey
+	err := postResponseFromJSON(ctx, r, payload, &resp)
+	return resp, err
 }
 
 // UpdateDomainDkimSelector updates the DKIM selector for a domain

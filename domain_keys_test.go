@@ -29,6 +29,19 @@ func TestListAllDomainsKeys(t *testing.T) {
 	require.Equal(t, 1, len(pageWithLimit))
 }
 
+func TestCreateDomainKey(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Create Domain Key
+	domainKey, err := mg.CreateDomainKey(ctx, testDomain, "gotest", &mailgun.CreateDomainKeyOptions{})
+	require.NoError(t, err)
+	require.Equal(t, testDomain, domainKey.SigningDomain)
+}
+
 func TestUpdateDomainDkimSelector(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())

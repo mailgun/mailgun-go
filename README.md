@@ -373,8 +373,7 @@ func main() {
 ```
 
 The official mailgun documentation includes examples using this library. Go
-[here](https://documentation.mailgun.com/docs/mailgun/api-reference/)
-and click on the "Go" button at the top of the page.
+[here](https://documentation.mailgun.com/docs/mailgun/sdk/go_sdk).
 
 ## EU Region
 European customers will need to change the default API Base to access your domains
