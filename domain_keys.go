@@ -171,11 +171,11 @@ func (ri *AllDomainsKeysIterator) Previous(ctx context.Context, items *[]mtypes.
 
 func (ri *AllDomainsKeysIterator) fetch(ctx context.Context, pageUrl string, limit int) error {
 	ri.Items = nil
-	url := ri.url
+	uri := ri.url
 	if pageUrl != "" {
-		url = pageUrl
+		uri = pageUrl
 	}
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
 	r.setClient(ri.mg.HTTPClient())
@@ -271,10 +271,7 @@ func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKe
 	cpy := make([]mtypes.DomainKey, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	return true
+	return len(ri.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -334,11 +331,11 @@ func (ri *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.Doma
 
 func (ri *DomainKeysIterator) fetch(ctx context.Context, pageUrl string) error {
 	ri.Items = nil
-	url := ri.url
+	uri := ri.url
 	if pageUrl != "" {
-		url = pageUrl
+		uri = pageUrl
 	}
-	r := newHTTPRequest(url)
+	r := newHTTPRequest(uri)
 
 	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
 	r.setClient(ri.mg.HTTPClient())
