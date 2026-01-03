@@ -47,7 +47,7 @@ func (mg *Client) ListAllDomainsKeys(opts *ListAllDomainsKeysOptions) *AllDomain
 	}
 	return &AllDomainsKeysIterator{
 		mg:                         mg,
-		url:                        generateApiUrl(mg, 1, dkimEndpoint+"/keys"),
+		url:                        generateApiUrl(mg, 1, dkimEndpoint),
 		ListAllDomainsKeysResponse: mtypes.ListAllDomainsKeysResponse{TotalCount: -1},
 		limit:                      limit,
 	}
@@ -160,7 +160,7 @@ func (ri *AllDomainsKeysIterator) fetch(ctx context.Context, pageUrl string, lim
 
 // CreateDomainKey creates a domain key for the given domain
 func (mg *Client) CreateDomainKey(ctx context.Context, domain, dkimSelector string, opts *CreateDomainKeyOptions) (mtypes.DomainKey, error) {
-	r := newHTTPRequest(generateApiUrl(mg, 1, dkimEndpoint+"/keys"))
+	r := newHTTPRequest(generateApiUrl(mg, 1, dkimEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
