@@ -21,27 +21,18 @@ type CreateDomainKeyOptions struct {
 type AllDomainsKeysIterator struct {
 	mtypes.ListAllDomainsKeysResponse
 
-	limit           int
-	mg              Mailgun
-	offset          int
-	firstPageUrl    string
-	previousPageUrl string
-	nextPageUrl     string
-	lastPageUrl     string
-	url             string
-	err             error
+	limit int
+	mg    Mailgun
+	url   string
+	err   error
 }
 
 type DomainKeysIterator struct {
 	mtypes.ListDomainKeysResponse
 
-	mg              Mailgun
-	firstPageUrl    string
-	previousPageUrl string
-	nextPageUrl     string
-	lastPageUrl     string
-	url             string
-	err             error
+	mg  Mailgun
+	url string
+	err error
 }
 
 // ListAllDomainsKeys retrieves a set of domain keys from Mailgun.
@@ -67,11 +58,6 @@ func (ri *AllDomainsKeysIterator) Err() error {
 	return ri.err
 }
 
-// Offset returns the current offset of the iterator
-func (ri *AllDomainsKeysIterator) Offset() int {
-	return ri.offset
-}
-
 // Next retrieves the next page of items from the api. Returns false when there
 // are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
@@ -80,7 +66,7 @@ func (ri *AllDomainsKeysIterator) Next(ctx context.Context, items *[]mtypes.Doma
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.Next, ri.limit)
+	ri.err = ri.fetch(ctx, ri.Paging.Next, ri.limit)
 	if ri.err != nil {
 		return false
 	}
@@ -88,11 +74,7 @@ func (ri *AllDomainsKeysIterator) Next(ctx context.Context, items *[]mtypes.Doma
 	cpy := make([]mtypes.DomainKey, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	if len(ri.Items) == 0 {
-		return false
-	}
-	ri.offset += len(ri.Items)
-	return true
+	return len(ri.Items) != 0
 }
 
 // First retrieves the first page of items from the api. Returns false if there
@@ -102,14 +84,13 @@ func (ri *AllDomainsKeysIterator) First(ctx context.Context, items *[]mtypes.Dom
 	if ri.err != nil {
 		return false
 	}
-	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.First, ri.limit)
+	ri.err = ri.fetch(ctx, ri.Paging.First, ri.limit)
 	if ri.err != nil {
 		return false
 	}
 	cpy := make([]mtypes.DomainKey, len(ri.Items))
 	copy(cpy, ri.Items)
 	*items = cpy
-	ri.offset = len(ri.Items)
 	return true
 }
 
@@ -126,12 +107,7 @@ func (ri *AllDomainsKeysIterator) Last(ctx context.Context, items *[]mtypes.Doma
 		return false
 	}
 
-	ri.offset = ri.TotalCount - ri.limit
-	if ri.offset < 0 {
-		ri.offset = 0
-	}
-
-	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.Last, ri.limit)
+	ri.err = ri.fetch(ctx, ri.Paging.Last, ri.limit)
 	if ri.err != nil {
 		return false
 	}
@@ -153,12 +129,7 @@ func (ri *AllDomainsKeysIterator) Previous(ctx context.Context, items *[]mtypes.
 		return false
 	}
 
-	ri.offset -= ri.limit * 2
-	if ri.offset < 0 {
-		ri.offset = 0
-	}
-
-	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.Previous, ri.limit)
+	ri.err = ri.fetch(ctx, ri.Paging.Previous, ri.limit)
 	if ri.err != nil {
 		return false
 	}
@@ -250,11 +221,6 @@ func (ri *DomainKeysIterator) Err() error {
 	return ri.err
 }
 
-// Offset returns the current offset of the iterator
-func (ri *DomainKeysIterator) Offset() int {
-	return len(ri.Items)
-}
-
 // Next retrieves the next page of items from the api. Returns false when there
 // are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
@@ -263,7 +229,7 @@ func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKe
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.Next)
+	ri.err = ri.fetch(ctx, ri.Paging.Next)
 	if ri.err != nil {
 		return false
 	}
@@ -281,7 +247,7 @@ func (ri *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainK
 	if ri.err != nil {
 		return false
 	}
-	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.First)
+	ri.err = ri.fetch(ctx, ri.Paging.First)
 	if ri.err != nil {
 		return false
 	}
@@ -300,7 +266,7 @@ func (ri *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKe
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.Last)
+	ri.err = ri.fetch(ctx, ri.Paging.Last)
 	if ri.err != nil {
 		return false
 	}
@@ -318,7 +284,7 @@ func (ri *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.Doma
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.Previous)
+	ri.err = ri.fetch(ctx, ri.Paging.Previous)
 	if ri.err != nil {
 		return false
 	}

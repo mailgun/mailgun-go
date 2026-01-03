@@ -22,7 +22,7 @@ func TestListAllDomainsKeys(t *testing.T) {
 	require.NoError(t, it.Err())
 	require.Equal(t, 2, len(page))
 
-	it = mg.ListAllDomainsKeys(&mailgun.ListDomainKeysOptions{Limit: 1})
+	it = mg.ListAllDomainsKeys(&mailgun.ListAllDomainsKeysOptions{Limit: 1})
 	var pageWithLimit []mtypes.DomainKey
 	require.True(t, it.Next(ctx, &pageWithLimit))
 	require.NoError(t, it.Err())
