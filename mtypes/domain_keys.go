@@ -1,12 +1,21 @@
 package mtypes
 
+type PageUrls struct {
+	Previous string `json:"previous"`
+	First    string `json:"first"`
+	Next     string `json:"next"`
+	Last     string `json:"last"`
+}
+
 type ListAllDomainsKeysResponse struct {
 	TotalCount int         `json:"total_count"`
 	Items      []DomainKey `json:"items"`
+	Paging     PageUrls    `json:"paging"`
 }
 
 type ListDomainKeysResponse struct {
-	Items []DomainKey `json:"items"`
+	Items  []DomainKey `json:"items"`
+	Paging PageUrls    `json:"paging"`
 }
 
 type UpdateDomainDkimAuthorityResponse struct {

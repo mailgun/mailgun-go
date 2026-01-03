@@ -9,7 +9,7 @@ import (
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
-type ListDomainKeysOptions struct {
+type ListAllDomainsKeysOptions struct {
 	Limit int
 }
 
@@ -45,7 +45,7 @@ type DomainKeysIterator struct {
 }
 
 // ListAllDomainsKeys retrieves a set of domain keys from Mailgun.
-func (mg *Client) ListAllDomainsKeys(opts *ListDomainKeysOptions) *AllDomainsKeysIterator {
+func (mg *Client) ListAllDomainsKeys(opts *ListAllDomainsKeysOptions) *AllDomainsKeysIterator {
 	var limit int
 	if opts != nil {
 		limit = opts.Limit
@@ -80,7 +80,7 @@ func (ri *AllDomainsKeysIterator) Next(ctx context.Context, items *[]mtypes.Doma
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.nextPageUrl, ri.limit)
+	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.Next, ri.limit)
 	if ri.err != nil {
 		return false
 	}
@@ -102,7 +102,7 @@ func (ri *AllDomainsKeysIterator) First(ctx context.Context, items *[]mtypes.Dom
 	if ri.err != nil {
 		return false
 	}
-	ri.err = ri.fetch(ctx, ri.firstPageUrl, ri.limit)
+	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.First, ri.limit)
 	if ri.err != nil {
 		return false
 	}
@@ -131,7 +131,7 @@ func (ri *AllDomainsKeysIterator) Last(ctx context.Context, items *[]mtypes.Doma
 		ri.offset = 0
 	}
 
-	ri.err = ri.fetch(ctx, ri.lastPageUrl, ri.limit)
+	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.Last, ri.limit)
 	if ri.err != nil {
 		return false
 	}
@@ -158,7 +158,7 @@ func (ri *AllDomainsKeysIterator) Previous(ctx context.Context, items *[]mtypes.
 		ri.offset = 0
 	}
 
-	ri.err = ri.fetch(ctx, ri.previousPageUrl, ri.limit)
+	ri.err = ri.fetch(ctx, ri.ListAllDomainsKeysResponse.Paging.Previous, ri.limit)
 	if ri.err != nil {
 		return false
 	}
@@ -263,7 +263,7 @@ func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKe
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.nextPageUrl)
+	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.Next)
 	if ri.err != nil {
 		return false
 	}
@@ -281,7 +281,7 @@ func (ri *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainK
 	if ri.err != nil {
 		return false
 	}
-	ri.err = ri.fetch(ctx, ri.firstPageUrl)
+	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.First)
 	if ri.err != nil {
 		return false
 	}
@@ -300,7 +300,7 @@ func (ri *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKe
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.lastPageUrl)
+	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.Last)
 	if ri.err != nil {
 		return false
 	}
@@ -318,7 +318,7 @@ func (ri *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.Doma
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.previousPageUrl)
+	ri.err = ri.fetch(ctx, ri.ListDomainKeysResponse.Paging.Previous)
 	if ri.err != nil {
 		return false
 	}
