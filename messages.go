@@ -28,6 +28,8 @@ type CommonMessage struct {
 	to                       []string
 	tags                     []string
 	dkim                     *bool
+	secondaryDKIM            string
+	secondaryDKIMPublic      string
 	deliveryTime             time.Time
 	stoPeriod                string
 	attachments              []string
@@ -235,6 +237,14 @@ func (m *CommonMessage) Tags() []string {
 
 func (m *CommonMessage) DKIM() *bool {
 	return m.dkim
+}
+
+func (m *CommonMessage) SecondaryDKIM() string {
+	return m.secondaryDKIM
+}
+
+func (m *CommonMessage) SecondaryDKIMPublic() string {
+	return m.secondaryDKIMPublic
 }
 
 func (m *CommonMessage) DeliveryTime() time.Time {
@@ -455,6 +465,19 @@ func (m *CommonMessage) SetDKIM(dkim bool) {
 	m.dkim = &dkim
 }
 
+// SetSecondaryDKIM specifies a second domain key to sign the email with.
+// The value is formatted as signing_domain/selector, e.g. example.com/s1.
+func (m *CommonMessage) SetSecondaryDKIM(s string) {
+	m.secondaryDKIM = s
+}
+
+// SetSecondaryDKIMPublic specifies an alias of the domain key specified in o:secondary-dkim.
+// Also formatted as public_signing_domain/selector.
+// o:secondary-dkim option must also be provided.
+func (m *CommonMessage) SetSecondaryDKIMPublic(s string) {
+	m.secondaryDKIMPublic = s
+}
+
 // EnableNativeSend allows the return path to match the address in the CommonMessage.Headers.From:
 // field when sending from Mailgun rather than the usual bounce+ address in the return path.
 func (m *CommonMessage) EnableNativeSend() {
@@ -607,6 +630,8 @@ type Message interface {
 	To() []string
 	Tags() []string
 	DKIM() *bool
+	SecondaryDKIM() string
+	SecondaryDKIMPublic() string
 	DeliveryTime() time.Time
 	STOPeriod() string
 	Attachments() []string
@@ -721,6 +746,12 @@ func addMessageOptions(dst *FormDataPayload, src Message) {
 	}
 	if src.DKIM() != nil {
 		dst.addValue("o:dkim", yesNo(*src.DKIM()))
+	}
+	if src.SecondaryDKIM() != "" {
+		dst.addValue("o:secondary-dkim", src.SecondaryDKIM())
+	}
+	if src.SecondaryDKIMPublic() != "" {
+		dst.addValue("o:secondary-dkim-public", src.SecondaryDKIMPublic())
 	}
 	if !src.DeliveryTime().IsZero() {
 		dst.addValue("o:deliverytime", formatMailgunTime(src.DeliveryTime()))
