@@ -98,7 +98,11 @@ func (ms *Server) addDomainRoutes(r chi.Router) {
 	r.Put("/v3/domains/{domain}/tracking/unsubscribe", ms.updateUnsubTracking)
 	r.Get("/v3/domains/{domain}/limits/tag", ms.getTagLimits)
 
-	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDKIMSelector)
+	r.Put("/v4/domains/{domain}/keys/{dkim_selector}/activate", ms.activateDomainKey)
+	r.Get("/v4/domains/{domain}/keys", ms.listDomainKeys)
+	r.Put("/v4/domains/{domain}/keys/{dkim_selector}/deactivate", ms.deactivateDomainKey)
+	r.Put("/v3/domains/{domain}/dkim_authority", ms.updateDomainDkimAuthority)
+	r.Put("/v3/domains/{domain}/dkim_selector", ms.updateDomainDkimSelector)
 }
 
 func (ms *Server) listDomains(w http.ResponseWriter, r *http.Request) {
@@ -376,7 +380,53 @@ func (ms *Server) getTagLimits(w http.ResponseWriter, r *http.Request) {
 	toJSON(w, okResp{Message: "domain not found"})
 }
 
-func (ms *Server) updateDKIMSelector(w http.ResponseWriter, r *http.Request) {
+func (ms *Server) activateDomainKey(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	toJSON(w, nil)
+}
+
+func (ms *Server) listDomainKeys(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	var list []mtypes.DomainKey
+	for _, domainKey := range ms.domainKeyList {
+		list = append(list, domainKey)
+	}
+
+	toJSON(w, mtypes.ListDomainKeysResponse{
+		Items: list,
+	})
+}
+
+func (ms *Server) deactivateDomainKey(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	toJSON(w, nil)
+}
+
+func (ms *Server) updateDomainDkimAuthority(w http.ResponseWriter, r *http.Request) {
+	defer ms.mutex.Unlock()
+	ms.mutex.Lock()
+
+	for _, d := range ms.domainList {
+		if d.Domain.Name == chi.URLParam(r, "domain") {
+			if r.FormValue("self") == "" {
+				toJSON(w, okResp{Message: "self param required"})
+				return
+			}
+			toJSON(w, okResp{Message: "updated dkim authority"})
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	toJSON(w, okResp{Message: "domain not found"})
+}
+
+func (ms *Server) updateDomainDkimSelector(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

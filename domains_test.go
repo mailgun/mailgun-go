@@ -13,6 +13,7 @@ import (
 
 const (
 	testDomain            = "mailgun.test"
+	testDkimSelector      = "gotest"
 	testKey               = "api-fake-key"
 	testWebhookSigningKey = "webhook-signing-key"
 )

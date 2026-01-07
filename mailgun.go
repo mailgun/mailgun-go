@@ -108,6 +108,7 @@ const (
 	bouncesEndpoint      = "bounces"
 	metricsEndpoint      = "analytics/metrics"
 	domainsEndpoint      = "domains"
+	dkimEndpoint         = "dkim/keys"
 	tagsEndpoint         = "tags"
 	eventsEndpoint       = "events"
 	unsubscribesEndpoint = "unsubscribes"
@@ -174,6 +175,13 @@ type Mailgun interface {
 	UpdateUnsubscribeTracking(ctx context.Context, domain, active, htmlFooter, textFooter string) error
 	UpdateOpenTracking(ctx context.Context, domain, active string) error
 
+	ListAllDomainsKeys(opts *ListAllDomainsKeysOptions) *AllDomainsKeysIterator
+	CreateDomainKey(ctx context.Context, domain, dkimSelector string, opts *CreateDomainKeyOptions) (mtypes.DomainKey, error)
+	DeleteDomainKey(ctx context.Context, domain, dkimSelector string) error
+	ActivateDomainKey(ctx context.Context, domain, dkimSelector string) error
+	ListDomainKeys(domain string) *DomainKeysIterator
+	DeactivateDomainKey(ctx context.Context, domain, dkimSelector string) error
+	UpdateDomainDkimAuthority(ctx context.Context, domain string, self bool) (mtypes.UpdateDomainDkimAuthorityResponse, error)
 	UpdateDomainDkimSelector(ctx context.Context, domain, dkimSelector string) error
 
 	GetStoredMessage(ctx context.Context, url string) (mtypes.StoredMessage, error)

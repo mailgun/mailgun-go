@@ -5,10 +5,106 @@ import (
 	"testing"
 
 	"github.com/mailgun/mailgun-go/v5"
+	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"github.com/stretchr/testify/require"
 )
 
-func TestDomainDkimSelector(t *testing.T) {
+func TestListAllDomainsKeys(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	it := mg.ListAllDomainsKeys(nil)
+	var page []mtypes.DomainKey
+	require.True(t, it.Next(ctx, &page))
+	require.NoError(t, it.Err())
+	require.Equal(t, 2, len(page))
+
+	it = mg.ListAllDomainsKeys(&mailgun.ListAllDomainsKeysOptions{Limit: 1})
+	var pageWithLimit []mtypes.DomainKey
+	require.True(t, it.Next(ctx, &pageWithLimit))
+	require.NoError(t, it.Err())
+	require.Equal(t, 1, len(pageWithLimit))
+}
+
+func TestCreateDomainKey(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Create Domain Key
+	domainKey, err := mg.CreateDomainKey(ctx, testDomain, testDkimSelector, &mailgun.CreateDomainKeyOptions{})
+	require.NoError(t, err)
+	require.Equal(t, testDomain, domainKey.SigningDomain)
+}
+
+func TestDeleteDomainKey(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Delete Domain Key
+	err = mg.DeleteDomainKey(ctx, testDomain, testDkimSelector)
+	require.NoError(t, err)
+}
+
+func TestActivateDomainKey(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Deactivate Domain Key
+	err = mg.ActivateDomainKey(ctx, testDomain, testDkimSelector)
+	require.NoError(t, err)
+}
+
+func TestListDomainKeys(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	it := mg.ListDomainKeys(testDomain)
+	var page []mtypes.DomainKey
+	require.True(t, it.Next(ctx, &page))
+	require.NoError(t, it.Err())
+	require.Equal(t, 2, len(page))
+}
+
+func TestDeactivateDomainKey(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Deactivate Domain Key
+	err = mg.DeactivateDomainKey(ctx, testDomain, "gotest")
+	require.NoError(t, err)
+}
+
+func TestUpdateDomainDkimAuthority(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	// Update Domain DKIM selector
+	_, err = mg.UpdateDomainDkimAuthority(ctx, testDomain, true)
+	require.NoError(t, err)
+}
+
+func TestUpdateDomainDkimSelector(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
