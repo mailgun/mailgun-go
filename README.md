@@ -392,7 +392,7 @@ We are guaranteeing that there will be no breaking changes within a major versio
 List of changes are in [Release v5.0.0](https://github.com/mailgun/mailgun-go/releases/tag/v5.0.0).
 
 #### How to migrate
-1. Upgrade to [the latest v4 release](https://github.com/mailgun/mailgun-go/releases/tag/v4.23.0) first.
+1. Upgrade to [the latest v4 release (v4.23.0)](https://github.com/mailgun/mailgun-go/releases/tag/v4.23.0) first.
 1. Get rid of all deprecated code usage. 
    We recommend using [staticcheck SA1019 check](https://staticcheck.dev/docs/checks/#SA1019) for that
    (or just look for `// Deprecated:` comments in the code) and follow the recommendations there.
