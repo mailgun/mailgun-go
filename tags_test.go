@@ -2,10 +2,10 @@ package mailgun_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v5"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"github.com/stretchr/testify/assert"
@@ -92,7 +92,7 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 		return nil
 	}
 
-	return errors.Errorf("Waited to long for tag '%s' to show up", tag)
+	return fmt.Errorf("waited too long for tag '%s' to show up", tag)
 }
 
 func TestDeleteTag(t *testing.T) {

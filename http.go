@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -13,8 +14,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-
-	"github.com/mailgun/errors"
 )
 
 var invalidURL = regexp.MustCompile(`/v\d+.*`)
@@ -345,10 +344,12 @@ func (r *httpRequest) do(ctx context.Context, method string, payload payload) (*
 	if err != nil {
 		var urlErr *url.Error
 		if errors.As(err, &urlErr) && urlErr != nil && errors.Is(urlErr.Err, io.EOF) {
-			return nil, errors.Wrap(err, "remote server prematurely closed connection")
+			return nil, fmt.Errorf("remote server prematurely closed connection: %w", err)
 		}
 
-		return nil, errors.Wrap(err, "while making http request")
+		// TODO(v6): get rid of "while"/"failed to" prefixes in errors
+		// https://github.com/uber-go/guide/blob/master/style.md#error-wrapping
+		return nil, fmt.Errorf("while making http request: %w", err)
 	}
 
 	defer resp.Body.Close()
@@ -360,7 +361,9 @@ func (r *httpRequest) do(ctx context.Context, method string, payload payload) (*
 
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errors.Wrap(err, "while reading response body")
+		// TODO(v6): get rid of "while"/"failed to" prefixes in errors
+		// https://github.com/uber-go/guide/blob/master/style.md#error-wrapping
+		return nil, fmt.Errorf("while reading response body: %w", err)
 	}
 
 	response.Data = responseBody
