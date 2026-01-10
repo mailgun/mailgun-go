@@ -2,11 +2,11 @@ package mailgun_test
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v5"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 	"github.com/stretchr/testify/assert"
@@ -89,5 +89,5 @@ func waitForTemplate(mg mailgun.Mailgun, id string) error {
 		return nil
 	}
 
-	return errors.Errorf("Waited to long for template '%s' to show up", id)
+	return fmt.Errorf("waited to long for template '%s' to show up", id)
 }

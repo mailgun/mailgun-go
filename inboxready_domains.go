@@ -4,9 +4,9 @@ package mailgun
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
-	"github.com/mailgun/errors"
 	"github.com/mailgun/mailgun-go/v5/internal/types/inboxready"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
@@ -80,7 +80,7 @@ func (iter *MonitoredDomainsIterator) fetch(ctx context.Context,
 	var resp inboxready.InboxReadyGithubComMailgunInboxreadyAPIDomainListResponse
 	err = httpResp.parseFromJSON(&resp)
 	if err != nil {
-		return nil, errors.Wrap(err, "decoding response")
+		return nil, fmt.Errorf("decoding response: %w", err)
 	}
 
 	return &resp, nil

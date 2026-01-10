@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mailgun/errors"
+	"errors"
 )
 
 // RFC2822Time Mailgun uses RFC2822 format for timestamps in most endpoints ('Thu, 13 Oct 2011 18:02:00 +0000'), but
