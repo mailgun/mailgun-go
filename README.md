@@ -7,7 +7,7 @@ Go library for interacting with the [Mailgun](https://mailgun.com/) [API](https:
 
 ## Installation
 
-If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you
+If you are using [Go Modules](https://go.dev/wiki/Modules) make sure you 
 include the `/v5` at the end of your import paths
 ```bash
 go get github.com/mailgun/mailgun-go/v5
@@ -382,6 +382,25 @@ European customers will need to change the default API Base to access your domai
 mg := mailgun.NewMailgun("private-api-key")
 mg.SetAPIBase(mailgun.APIBaseEU)
 ```
+
+## Major Version Migration Notes
+We are trying to keep breaking changes to a minimum, but sometimes they are necessary.
+
+We are guaranteeing that there will be no breaking changes within a major version.
+
+### v4 to v5 Migration
+List of changes are in [Release v5.0.0](https://github.com/mailgun/mailgun-go/releases/tag/v5.0.0).
+
+#### How to migrate
+1. Upgrade to [the latest v4 release](https://github.com/mailgun/mailgun-go/releases/tag/v4.23.0) first.
+1. Get rid of all deprecated code usage. 
+   We recommend using [staticcheck SA1019 check](https://staticcheck.dev/docs/checks/#SA1019) for that
+   (or just look for `// Deprecated:` comments in the code) and follow the recommendations there.
+   This should make the major version bump go more smoothly.
+1. Update your import paths to use `/v5` at the end, e.g.
+   ```go
+   import "github.com/mailgun/mailgun-go/v5"
+   ```
 
 ## Testing
 
