@@ -92,7 +92,7 @@ func waitForTag(mg mailgun.Mailgun, tag string) error {
 		return nil
 	}
 
-	return fmt.Errorf("waited to long for tag '%s' to show up", tag)
+	return fmt.Errorf("waited too long for tag '%s' to show up", tag)
 }
 
 func TestDeleteTag(t *testing.T) {
