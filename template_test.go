@@ -89,5 +89,5 @@ func waitForTemplate(mg mailgun.Mailgun, id string) error {
 		return nil
 	}
 
-	return fmt.Errorf("waited to long for template '%s' to show up", id)
+	return fmt.Errorf("waited too long for template '%s' to show up", id)
 }
