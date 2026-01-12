@@ -20,7 +20,7 @@ type CreateDomainKeyOptions struct {
 	PEM  string
 }
 
-// AllDomainsKeysIterator list iterator for
+// AllDomainsKeysIterator is a list iterator for
 // https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v1-dkim-keys
 type AllDomainsKeysIterator struct {
 	mtypes.ListAllDomainsKeysResponse
@@ -255,7 +255,7 @@ func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.Domain
 		return false
 	}
 
-	iter.err = iter.fetch(ctx, iter.uri)
+	iter.err = iter.fetch(ctx, pageURI)
 	if iter.err != nil {
 		return false
 	}
