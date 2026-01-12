@@ -4,6 +4,7 @@ package mailgun
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -267,6 +268,27 @@ func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.Domain
 	}
 
 	return len(iter.Items) != 0
+}
+
+// First - not implemented. Use Next() instead.
+func (iter *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	iter.err = errors.New("not implemented; use Next() instead")
+
+	return false
+}
+
+// Last - not implemented. Use Next() instead.
+func (iter *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	iter.err = errors.New("not implemented; use Next() instead")
+
+	return false
+}
+
+// Previous - not implemented. Use Next() instead.
+func (iter *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	iter.err = errors.New("not implemented; use Next() instead")
+
+	return false
 }
 
 func (iter *DomainKeysIterator) fetch(ctx context.Context, uri string) error {
