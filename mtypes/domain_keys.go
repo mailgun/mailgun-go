@@ -8,7 +8,7 @@ type ListAllDomainsKeysResponse struct {
 
 type ListDomainKeysResponse struct {
 	Items  []DomainKey `json:"items"`
-	Paging Paging      `json:"paging"`
+	Paging Paging      `json:"paging"` // NOTE: API does not return this as of now.
 }
 
 type UpdateDomainDkimAuthorityResponse struct {

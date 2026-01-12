@@ -1,5 +1,7 @@
 package mailgun
 
+// TODO(vtopc): split file into domain_keys and (dkim|all|account)_keys files.
+
 import (
 	"context"
 	"fmt"
@@ -9,7 +11,7 @@ import (
 )
 
 type ListAllDomainsKeysOptions struct {
-	Limit int
+	Limit int // NOTE: currently ignored by Mailgun API
 }
 
 type CreateDomainKeyOptions struct {
@@ -17,6 +19,8 @@ type CreateDomainKeyOptions struct {
 	PEM  string
 }
 
+// AllDomainsKeysIterator list iterator for
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v1-dkim-keys
 type AllDomainsKeysIterator struct {
 	mtypes.ListAllDomainsKeysResponse
 
@@ -26,15 +30,21 @@ type AllDomainsKeysIterator struct {
 	err   error
 }
 
+// DomainKeysIterator list iterator for
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v4-domains--authority-name--keys
+//
+// TODO(vtopc): implement paging methods: First, Last and Previous when API will return paging object.
 type DomainKeysIterator struct {
 	mtypes.ListDomainKeysResponse
 
-	mg  Mailgun
-	url string
-	err error
+	mg      Mailgun
+	uri     string
+	err     error
+	isFirst bool
 }
 
 // ListAllDomainsKeys retrieves a set of domain keys from Mailgun.
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v1-dkim-keys
 func (mg *Client) ListAllDomainsKeys(opts *ListAllDomainsKeysOptions) *AllDomainsKeysIterator {
 	var limit int
 	if opts != nil {
@@ -206,107 +216,67 @@ func (mg *Client) ActivateDomainKey(ctx context.Context, domain, dkimSelector st
 }
 
 // ListDomainKeys retrieves a set of domain keys from Mailgun.
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v4-domains--authority-name--keys
 func (mg *Client) ListDomainKeys(domain string) *DomainKeysIterator {
 	uri := generateListDomainKeysApiUrl(domainsEndpoint, domain)
 
 	return &DomainKeysIterator{
 		mg:                     mg,
-		url:                    generateApiUrl(mg, 4, uri),
+		uri:                    generateApiUrl(mg, 4, uri),
 		ListDomainKeysResponse: mtypes.ListDomainKeysResponse{},
+		isFirst:                true,
 	}
 }
 
 // Err if an error occurred during iteration `Err()` will return non nil
-func (ri *DomainKeysIterator) Err() error {
-	return ri.err
+func (iter *DomainKeysIterator) Err() error {
+	return iter.err
 }
 
 // Next retrieves the next page of items from the api. Returns false when there
 // are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
 // the error
-func (ri *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
-	if ri.err != nil {
+func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	if iter.err != nil {
 		return false
 	}
 
-	ri.err = ri.fetch(ctx, ri.Paging.Next)
-	if ri.err != nil {
+	var pageURI string
+	if iter.isFirst {
+		pageURI = iter.uri
+	} else {
+		pageURI = iter.Paging.Next
+	}
+
+	if pageURI == "" {
 		return false
 	}
 
-	cpy := make([]mtypes.DomainKey, len(ri.Items))
-	copy(cpy, ri.Items)
+	iter.err = iter.fetch(ctx, iter.uri)
+	if iter.err != nil {
+		return false
+	}
+
+	cpy := make([]mtypes.DomainKey, len(iter.Items))
+	copy(cpy, iter.Items)
 	*items = cpy
-	return len(ri.Items) != 0
+	iter.isFirst = false
+
+	if iter.Paging.Next == "" { // NOTE: always empty on API as of now.
+		return false
+	}
+
+	return len(iter.Items) != 0
 }
 
-// First retrieves the first page of items from the api. Returns false if there
-// was an error. It also sets the iterator object to the first page.
-// Use `.Err()` to retrieve the error.
-func (ri *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainKey) bool {
-	if ri.err != nil {
-		return false
-	}
-	ri.err = ri.fetch(ctx, ri.Paging.First)
-	if ri.err != nil {
-		return false
-	}
-	cpy := make([]mtypes.DomainKey, len(ri.Items))
-	copy(cpy, ri.Items)
-	*items = cpy
-	return true
-}
-
-// Last retrieves the last page of items from the api.
-// Calling Last() is invalid unless you first call First() or Next()
-// Returns false if there was an error. It also sets the iterator object
-// to the last page. Use `.Err()` to retrieve the error.
-func (ri *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKey) bool {
-	if ri.err != nil {
-		return false
-	}
-
-	ri.err = ri.fetch(ctx, ri.Paging.Last)
-	if ri.err != nil {
-		return false
-	}
-	cpy := make([]mtypes.DomainKey, len(ri.Items))
-	copy(cpy, ri.Items)
-	*items = cpy
-	return true
-}
-
-// Previous retrieves the previous page of items from the api. Returns false when there
-// are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
-// the error if any
-func (ri *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.DomainKey) bool {
-	if ri.err != nil {
-		return false
-	}
-
-	ri.err = ri.fetch(ctx, ri.Paging.Previous)
-	if ri.err != nil {
-		return false
-	}
-	cpy := make([]mtypes.DomainKey, len(ri.Items))
-	copy(cpy, ri.Items)
-	*items = cpy
-
-	return len(ri.Items) != 0
-}
-
-func (ri *DomainKeysIterator) fetch(ctx context.Context, pageUrl string) error {
-	ri.Items = nil
-	uri := ri.url
-	if pageUrl != "" {
-		uri = pageUrl
-	}
+func (iter *DomainKeysIterator) fetch(ctx context.Context, uri string) error {
+	iter.Items = nil
 	r := newHTTPRequest(uri)
 
-	r.setBasicAuth(basicAuthUser, ri.mg.APIKey())
-	r.setClient(ri.mg.HTTPClient())
+	r.setBasicAuth(basicAuthUser, iter.mg.APIKey())
+	r.setClient(iter.mg.HTTPClient())
 
-	return getResponseFromJSON(ctx, r, &ri.ListDomainKeysResponse)
+	return getResponseFromJSON(ctx, r, &iter.ListDomainKeysResponse)
 }
 
 // DeactivateDomainKey deactivates a domain key for the given domain

@@ -75,7 +75,7 @@ func TestListDomainKeys(t *testing.T) {
 
 	it := mg.ListDomainKeys(testDomain)
 	var page []mtypes.DomainKey
-	require.True(t, it.Next(ctx, &page))
+	require.False(t, it.Next(ctx, &page))
 	require.NoError(t, it.Err())
 	require.Equal(t, 2, len(page))
 }
