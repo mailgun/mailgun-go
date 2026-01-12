@@ -237,7 +237,7 @@ func (iter *DomainKeysIterator) Err() error {
 }
 
 // Next retrieves the next(or first) page of items from the API.
-// Returns false when there are no more pages to retrieve or if there was an error.
+// Returns false when there are no more pages to retrieve or if there was an error or for the last page.
 // Use `.Err()` to retrieve the error.
 func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
 	if iter.err != nil {
