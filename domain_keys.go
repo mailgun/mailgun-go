@@ -40,6 +40,7 @@ type DomainKeysIterator struct {
 
 	mg      Mailgun
 	uri     string
+	domain  string
 	err     error
 	isFirst bool
 }
@@ -222,9 +223,10 @@ func (mg *Client) ListDomainKeys(domain string) *DomainKeysIterator {
 	uri := generateListDomainKeysApiUrl(domainsEndpoint, domain)
 
 	return &DomainKeysIterator{
+		ListDomainKeysResponse: mtypes.ListDomainKeysResponse{},
 		mg:                     mg,
 		uri:                    generateApiUrl(mg, 4, uri),
-		ListDomainKeysResponse: mtypes.ListDomainKeysResponse{},
+		domain:                 domain,
 		isFirst:                true,
 	}
 }
@@ -234,9 +236,9 @@ func (iter *DomainKeysIterator) Err() error {
 	return iter.err
 }
 
-// Next retrieves the next(or first) page of items from the api. Returns false when there
-// are no more pages to retrieve or if there was an error. Use `.Err()` to retrieve
-// the error
+// Next retrieves the next(or first) page of items from the API.
+// Returns false when there are no more pages to retrieve or if there was an error.
+// Use `.Err()` to retrieve the error.
 func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
 	if iter.err != nil {
 		return false
@@ -270,23 +272,38 @@ func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.Domain
 	return len(iter.Items) != 0
 }
 
-// First - not implemented. Use Next() instead.
-func (iter *DomainKeysIterator) First(_ context.Context, _ *[]mtypes.DomainKey) bool {
-	iter.err = errors.New("not implemented; use Next() instead")
+// First retrieves the first page of items from the API.
+// Returns false if there was an error.
+// Use `.Err()` to retrieve the error.
+func (iter *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainKey) bool {
+	if iter.err != nil {
+		return false
+	}
 
-	return false
+	uri := generateListDomainKeysApiUrl(domainsEndpoint, iter.domain)
+	iter.err = iter.fetch(ctx, generateApiUrl(iter.mg, 4, uri))
+	if iter.err != nil {
+		return false
+	}
+
+	cpy := make([]mtypes.DomainKey, len(iter.Items))
+	copy(cpy, iter.Items)
+	*items = cpy
+	iter.isFirst = false
+
+	return true
 }
 
-// Last - not implemented. Use Next() instead.
+// Last - not implemented on API. Use Next() instead.
 func (iter *DomainKeysIterator) Last(_ context.Context, _ *[]mtypes.DomainKey) bool {
-	iter.err = errors.New("not implemented; use Next() instead")
+	iter.err = errors.New("not implemented on API; use Next() instead")
 
 	return false
 }
 
-// Previous - not implemented. Use Next() instead.
+// Previous - not implemented on API. Use Next() instead.
 func (iter *DomainKeysIterator) Previous(_ context.Context, _ *[]mtypes.DomainKey) bool {
-	iter.err = errors.New("not implemented; use Next() instead")
+	iter.err = errors.New("not implemented on API; use Next() instead")
 
 	return false
 }
