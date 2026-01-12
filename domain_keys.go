@@ -34,7 +34,7 @@ type AllDomainsKeysIterator struct {
 // DomainKeysIterator list iterator for
 // https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v4-domains--authority-name--keys
 //
-// TODO(vtopc): implement paging methods: First, Last and Previous when API will return paging object.
+// TODO(vtopc): implement paging methods: Last and Previous when API will return paging object.
 type DomainKeysIterator struct {
 	mtypes.ListDomainKeysResponse
 
