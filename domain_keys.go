@@ -271,21 +271,21 @@ func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.Domain
 }
 
 // First - not implemented. Use Next() instead.
-func (iter *DomainKeysIterator) First(ctx context.Context, items *[]mtypes.DomainKey) bool {
+func (iter *DomainKeysIterator) First(_ context.Context, _ *[]mtypes.DomainKey) bool {
 	iter.err = errors.New("not implemented; use Next() instead")
 
 	return false
 }
 
 // Last - not implemented. Use Next() instead.
-func (iter *DomainKeysIterator) Last(ctx context.Context, items *[]mtypes.DomainKey) bool {
+func (iter *DomainKeysIterator) Last(_ context.Context, _ *[]mtypes.DomainKey) bool {
 	iter.err = errors.New("not implemented; use Next() instead")
 
 	return false
 }
 
 // Previous - not implemented. Use Next() instead.
-func (iter *DomainKeysIterator) Previous(ctx context.Context, items *[]mtypes.DomainKey) bool {
+func (iter *DomainKeysIterator) Previous(_ context.Context, _ *[]mtypes.DomainKey) bool {
 	iter.err = errors.New("not implemented; use Next() instead")
 
 	return false
