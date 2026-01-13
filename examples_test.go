@@ -17,7 +17,7 @@ import (
 )
 
 func ExampleMailgun_ValidateEmail() {
-	mg := mailgun.NewMailgun("my_api_key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -34,7 +34,7 @@ func ExampleMailgun_ValidateEmail() {
 }
 
 func ExampleMailgun_UpdateMailingList() {
-	mg := mailgun.NewMailgun("my_api_key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -50,7 +50,7 @@ func ExampleMailgun_UpdateMailingList() {
 }
 
 func ExampleMailgun_Send_constructed() {
-	mg := mailgun.NewMailgun("my_api_key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -88,7 +88,7 @@ Testing some Mailgun MIME awesomeness!
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	mg := mailgun.NewMailgun("my_api_key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 	m := mailgun.NewMIMEMessage("example.com", io.NopCloser(strings.NewReader(exampleMime)), "bargle.garf@example.com")
 	resp, err := mg.Send(ctx, m)
 	if err != nil {
@@ -99,7 +99,7 @@ Testing some Mailgun MIME awesomeness!
 }
 
 func ExampleMailgun_ListRoutes() {
-	mg := mailgun.NewMailgun("my_api_key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 

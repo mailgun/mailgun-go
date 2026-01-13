@@ -15,7 +15,7 @@ const (
 	testDomain            = "mailgun.test"
 	testDkimSelector      = "gotest"
 	testKey               = "api-fake-key"
-	testWebhookSigningKey = "webhook-signing-key"
+	testWebhookSigningKey = "WEBHOOK_SIGNING_KEY"
 )
 
 func TestListDomains(t *testing.T) {

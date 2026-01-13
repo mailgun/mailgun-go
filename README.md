@@ -15,6 +15,7 @@ go get github.com/mailgun/mailgun-go/v5
 
 ## Usage
 ### Send a message
+
 ```go
 package main
 
@@ -31,13 +32,13 @@ import (
 // (https://app.mailgun.com/app/domains)
 var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
-// You can find the Private API Key in your Account Menu, under "Settings":
+// You can find Mailgun API keys in your Account Menu, under "API Security":
 // (https://app.mailgun.com/settings/api_security)
-var privateAPIKey = "your-private-key"
+var apiKey = "MAILGUN_API_KEY"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(privateAPIKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	// When you have an EU domain, you must specify the endpoint:
 	// err := mg.SetAPIBase(mailgun.APIBaseEU)
@@ -78,9 +79,9 @@ import (
 )
 
 func main() {
-	// You can find the Private API Key in your Account Menu, under "Settings":
+	// You can find Mailgun API keys in your Account Menu, under "API Security":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-private-key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 
 	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
 
@@ -135,9 +136,9 @@ import (
 )
 
 func main() {
-	// You can find the Private API Key in your Account Menu, under "Settings":
+	// You can find Mailgun API keys in your Account Menu, under "API Security":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("your-private-key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 
 	begin := time.Now().Add(time.Second * -3)
 
@@ -178,11 +179,11 @@ import (
 // Your plan should include email validations.
 // Use your Mailgun API key. You can find the Mailgun API keys in your Account Menu, under "Settings":
 // (https://app.mailgun.com/settings/api_security)
-var apiKey = "your-api-key"
+var apiKey = "MAILGUN_API_KEY"
 
 func main() {
 	// Create an instance of the Validator
-	mg := mailgun.NewMailgun("your-private-key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -211,10 +212,10 @@ import (
 )
 
 func main() {
-	// You can find the Private API Key in your Account Menu, under "Settings":
+	// You can find Mailgun API keys in your Account Menu, under "API Security":
 	// (https://app.mailgun.com/settings/api_security)
-	mg := mailgun.NewMailgun("private-api-key")
-	mg.SetWebhookSigningKey("webhook-signing-key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
+	mg.SetWebhookSigningKey("WEBHOOK_SIGNING_KEY")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var payload mtypes.WebhookPayload
@@ -280,13 +281,13 @@ import (
 // (https://app.mailgun.com/app/domains)
 var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
-// You can find the Private API Key in your Account Menu, under "Settings":
+// You can find Mailgun API keys in your Account Menu, under "API Security":
 // (https://app.mailgun.com/settings/api_security)
-var privateAPIKey = "your-private-key"
+var apiKey = "MAILGUN_API_KEY"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(privateAPIKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	sender := "sender@example.com"
 	subject := "HTML email!"
@@ -338,13 +339,13 @@ import (
 // (https://app.mailgun.com/app/domains)
 var yourDomain = "your-domain-name" // e.g. mg.yourcompany.com
 
-// You can find the Private API Key in your Account Menu, under "Settings":
+// You can find Mailgun API keys in your Account Menu, under "API Security":
 // (https://app.mailgun.com/settings/api_security)
-var privateAPIKey = "your-private-key"
+var apiKey = "MAILGUN_API_KEY"
 
 func main() {
 	// Create an instance of the Mailgun Client
-	mg := mailgun.NewMailgun(privateAPIKey)
+	mg := mailgun.NewMailgun(apiKey)
 
 	sender := "sender@example.com"
 	subject := "Fancy subject!"
@@ -379,7 +380,7 @@ The official mailgun documentation includes examples using this library. Go
 European customers will need to change the default API Base to access your domains
 
 ```go
-mg := mailgun.NewMailgun("private-api-key")
+mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 mg.SetAPIBase(mailgun.APIBaseEU)
 ```
 
