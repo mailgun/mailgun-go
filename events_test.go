@@ -114,7 +114,7 @@ func TestEventPoller(t *testing.T) {
 }
 
 func ExampleMailgun_ListEvents() {
-	mg := mailgun.NewMailgun("your-api-key")
+	mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 	_ = mg.SetAPIBase(server.URL())
 
 	it := mg.ListEvents("your-domain.com", &mailgun.ListEventOptions{Limit: 100})
