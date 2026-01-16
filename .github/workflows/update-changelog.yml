@@ -39,9 +39,9 @@ jobs:
 
             let changelog = '';
             if (fs.existsSync(changelogPath)) {
-            changelog = fs.readFileSync(changelogPath, 'utf8');
+              changelog = fs.readFileSync(changelogPath, 'utf8');
             } else {
-            changelog = '# Changelog\n\nAll notable changes to this project will be documented in this file.\n';
+              changelog = '# Changelog\n\nAll notable changes to this project will be documented in this file.\n';
             }
 
             // Insert after the first header
