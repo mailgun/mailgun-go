@@ -33,6 +33,10 @@ jobs:
 
             const newEntry = `## [${title}] - ${date}\n${body}\n`;
 
+            console.log('----- NEW CHANGELOG ENTRY START -----');
+            console.log(newEntry);
+            console.log('----- NEW CHANGELOG ENTRY END -----');
+
             let changelog = '';
             if (fs.existsSync(changelogPath)) {
             changelog = fs.readFileSync(changelogPath, 'utf8');
