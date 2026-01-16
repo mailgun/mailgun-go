@@ -31,12 +31,7 @@ jobs:
 
             const changelogPath = 'CHANGELOG';
 
-            const newEntry = `
-## [${title}] - ${date}
-
-${body}
-  
-`;
+            const newEntry = `## [${title}] - ${date}\n${body}\n`;
 
             let changelog = '';
             if (fs.existsSync(changelogPath)) {
