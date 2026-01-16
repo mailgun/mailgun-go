@@ -1,0 +1,62 @@
+name: Update CHANGELOG from GitHub Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Update CHANGELOG
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const release = context.payload.release;
+            const tag = release.tag_name;
+            const title = release.name || tag;
+            const date = release.published_at.substring(0, 10);
+            const body = release.body || 'No release notes provided.';
+
+            const changelogPath = 'CHANGELOG';
+
+            const newEntry = `
+## [${title}] - ${date}
+
+${body}
+  
+`;
+
+            let changelog = '';
+            if (fs.existsSync(changelogPath)) {
+            changelog = fs.readFileSync(changelogPath, 'utf8');
+            } else {
+            changelog = '# Changelog\n\nAll notable changes to this project will be documented in this file.\n';
+            }
+
+            // Insert after the first header
+            const updated = changelog.replace(
+            /(#[^\n]*\n)/,
+            `$1${newEntry}`
+            );
+
+            fs.writeFileSync(changelogPath, updated);
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add CHANGELOG
+          git commit -m "chore: update changelog for ${{ github.event.release.tag_name }}"
+          git push
