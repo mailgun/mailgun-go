@@ -33,6 +33,7 @@ type AllDomainsKeysIterator struct {
 
 // DomainKeysIterator is a list iterator for
 // https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v4-domains--authority-name--keys
+//
 // TODO(v6): domain can have at most 5 domain keys, so it makes no sense to have an iterator here.
 type DomainKeysIterator struct {
 	mtypes.ListDomainKeysResponse
@@ -218,6 +219,7 @@ func (mg *Client) ActivateDomainKey(ctx context.Context, domain, dkimSelector st
 
 // ListDomainKeys retrieves a set of domain keys from Mailgun.
 // https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domain-keys/get-v4-domains--authority-name--keys
+//
 // TODO(v6): domain can have at most 5 domain keys, so it makes no sense to have an iterator here,
 //
 //	Just return []mtypes.DomainKey.
@@ -241,7 +243,7 @@ func (iter *DomainKeysIterator) Err() error {
 // Next retrieves the next(or first) page of items from the API.
 // Returns false when there are no more pages to retrieve or if there was an error.
 // Use `.Err()` to retrieve the error.
-// Domain can have at most 5 domain keys, so this will always return false after first call.
+// Domain can have at most 5 domain keys, so this will always return false on the first call.
 func (iter *DomainKeysIterator) Next(ctx context.Context, items *[]mtypes.DomainKey) bool {
 	if iter.err != nil {
 		return false
