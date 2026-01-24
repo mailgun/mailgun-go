@@ -4,6 +4,78 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2024-12-19
+### Changed
+* **BREAKING**: Move all types into `mtypes` package for better organization and type safety
+* **BREAKING**: Rename `NewMailgun()` to `New()` for consistency  
+* **BREAKING**: Remove deprecated methods and fields from v4
+* Module path updated to `/v5`
+* Improved error handling and API response types
+* See [v5.0.0 release notes](https://github.com/mailgun/mailgun-go/releases/tag/v5.0.0) and README migration guide for full details
+
+## [4.23.0] - 2024-12-05
+### Added
+* Add Analytics API support
+* Add InboxReady API support  
+* Add IP Warmups API support
+* Add Subaccounts API support
+* Add API keys management support
+* Add more comprehensive domain management features
+
+### Changed
+* Last v4 release before v5.0.0 major version bump
+* See [v4.23.0 release notes](https://github.com/mailgun/mailgun-go/releases/tag/v4.23.0)
+
+## [4.11.0] - 2023-08-08
+### Changed
+* Expose mx-host and additional fields in events.DeliveryStatus
+
+## [4.10.0] - 2023-07-27
+### Added
+* Added `web_scheme` as a primary domain attribute
+
+## [4.9.2] - 2023-07-03
+### Changed
+* Added GHA workflow to mailgun-go
+* Replace gorilla/mux with go-chi/chi/v5
+
+## [4.9.1] - 2023-06-19
+### Changed
+* Templates can set default From, no longer required when sending templated mails
+
+## [4.9.0] - 2023-06-06
+### Added
+* Added missing Total field in temporary failure stats
+* Allow setting preferred reply method to mailing lists
+* Added Send Time Optimization (STO) parameter support
+
+## [4.8.2] - 2023-02-10
+### Added
+* Add Event.ClientInfo.Bot field
+* Add support for `web_scheme` in CreateDomain
+* Add support for batch endpoints for adding bounces and complaints
+
+### Changed
+* Change inline image example
+* Fix setting template in examples
+
+## [4.8.1] - 2022-05-27
+### Changed
+* Added special case for Host headers
+
+## [4.8.0] - 2022-05-27
+### Added
+* Added CaptureCurlOutput for debugging
+
+## [4.7.0] - 2022-05-27
+### Added
+* Added AddOverrideHeader()
+
+## [4.6.2] - 2022-05-23
+### Changed
+* README improvement for EU domains
+* Changed URL validation
+
 ## [4.6.1] - 2022-03-29
 ### Changed
 * Validate domain passed to Send()
@@ -12,6 +84,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * Add a struct and a function to parse route forward hook payloads.
 * Add missing VerifyAndReturnDomain method to the interface.
+
+## [4.5.3] - 2021-08-30
+### Added
+* Added result to v4 validation response
 
 ## [4.5.2] - 2021-06-28
 ### Changed
