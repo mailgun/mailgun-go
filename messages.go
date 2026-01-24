@@ -128,7 +128,9 @@ type TrackingOptions struct {
 }
 
 // The Specific abstracts the common characteristics between plain text and MIME messages.
-// TODO(v6): remove setters and merge into Message interface.
+// TODO(v6): remove setters (except of AddValues()), as they are not used by Send(),
+//
+//	and merge into Message interface.
 type Specific interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
 	AddCC(string)
