@@ -764,3 +764,21 @@ func TestSendableMessageIface(t *testing.T) {
 
 	assert.Implements(t, (*mailgun.Message)(nil), m)
 }
+
+func TestMessageOptions(t *testing.T) {
+	const (
+		exampleDomain = "example.com"
+		toUser        = "test@example.com"
+		key           = "new-option"
+		value         = "option-value"
+	)
+
+	m := mailgun.NewMessage(exampleDomain, fromUser, exampleSubject, "", toUser)
+
+	m.AddOption(key, value)
+	options := m.Options()
+
+	require.Contains(t, options, key)
+	got := options[key]
+	assert.Equal(t, got, value)
+}
