@@ -129,7 +129,7 @@ type TrackingOptions struct {
 
 // The Specific abstracts the common characteristics between plain text and MIME messages.
 //
-// TODO(v6): remove setters (except of AddValues()), as they are not used by Send(),
+// TODO(v6): remove setters, as they are not used by Send(),
 // and merge into Message interface.
 type Specific interface {
 	// AddCC appends a receiver to the carbon-copy header of a message.
@@ -148,6 +148,8 @@ type Specific interface {
 
 	// AddValues invoked by Send() to add message-type-specific MIME headers for the API call
 	// to Mailgun.
+	//
+	// TODO(v6): Make a `Params() map[string][]string` getter instead:
 	AddValues(*FormDataPayload)
 
 	// IsValid yields true if and only if the message is valid enough for sending
