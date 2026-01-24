@@ -26,7 +26,7 @@ jobs:
 
             const release = context.payload.release;
             const tag = release.tag_name;
-            const title = tag;
+            const title = tag.replace(/^v/, '');
             const date = release.published_at.substring(0, 10);
             let body = release.body || 'No release notes provided.';
             body = body.replace(/## What's Changed/g, "### What's Changed");
