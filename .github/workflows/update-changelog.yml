@@ -31,7 +31,7 @@ jobs:
             let body = release.body || 'No release notes provided.';
             body = body.replace(/## What's Changed/g, "### What's Changed");
 
-            const changelogPath = 'CHANGELOG';
+            const changelogPath = 'CHANGELOG.md';
 
             const newEntry = `## [${title}] - ${date}\n${body}\n`;
 
