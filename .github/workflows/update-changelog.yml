@@ -27,7 +27,8 @@ jobs:
             const tag = release.tag_name;
             const title = release.name || tag;
             const date = release.published_at.substring(0, 10);
-            const body = release.body || 'No release notes provided.';
+            let body = release.body || 'No release notes provided.';
+            body = body.replace(/## What's Changed/g, "### What's Changed");
 
             const changelogPath = 'CHANGELOG';
 
