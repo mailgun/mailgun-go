@@ -3,6 +3,7 @@ name: Update CHANGELOG from GitHub Release
 on:
   release:
     types: [published]
+  workflow_dispatch: # Allow manual triggering
 
 permissions:
   contents: write
@@ -27,7 +28,8 @@ jobs:
             const tag = release.tag_name;
             const title = release.name || tag;
             const date = release.published_at.substring(0, 10);
-            const body = release.body || 'No release notes provided.';
+            let body = release.body || 'No release notes provided.';
+            body = body.replace(/## What's Changed/g, "### What's Changed");
 
             const changelogPath = 'CHANGELOG';
 
@@ -56,6 +58,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          git checkout ${{ github.event.repository.default_branch }}
           git add CHANGELOG
           git commit -m "chore: update changelog for ${{ github.event.release.tag_name }}"
           git push
