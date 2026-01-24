@@ -56,6 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          git checkout ${{ github.event.repository.default_branch }}
           git add CHANGELOG
           git commit -m "chore: update changelog for ${{ github.event.release.tag_name }}"
           git push
