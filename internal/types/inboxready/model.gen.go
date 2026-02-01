@@ -13,6 +13,13 @@ const (
 	BasicAuthScopes = "basicAuth.Scopes"
 )
 
+// Defines values for GithubComMailgunAlertsChannelsChannel.
+const (
+	Email   GithubComMailgunAlertsChannelsChannel = "email"
+	Slack   GithubComMailgunAlertsChannelsChannel = "slack"
+	Webhook GithubComMailgunAlertsChannelsChannel = "webhook"
+)
+
 // InboxReadyGithubComMailgunInboxreadyAPIAddDomainResponse defines model for Inbox_Ready_github.com-mailgun-inboxready-api-AddDomainResponse.
 type InboxReadyGithubComMailgunInboxreadyAPIAddDomainResponse struct {
 	Domain  InboxReadyGithubComMailgunInboxreadyModelDomain `json:"domain"`
@@ -94,16 +101,27 @@ type InboxReadyGithubComMailgunScaffoldHttpapiGenericAPIError struct {
 
 // InboxReadyGithubComMailgunScaffoldHttpapiGenericResponse defines model for Inbox_Ready_github.com-mailgun-scaffold-httpapi-GenericResponse.
 type InboxReadyGithubComMailgunScaffoldHttpapiGenericResponse struct {
+	// Message Response message
 	Message string `json:"message"`
 }
 
 // InboxReadyGithubComMailgunScaffoldHttpapiPagingPagingResponse defines model for Inbox_Ready_github.com-mailgun-scaffold-httpapi-paging-PagingResponse.
 type InboxReadyGithubComMailgunScaffoldHttpapiPagingPagingResponse struct {
-	First    string `json:"first"`
-	Last     string `json:"last"`
-	Next     string `json:"next"`
+	// First First page URL
+	First string `json:"first"`
+
+	// Last Last page URL
+	Last string `json:"last"`
+
+	// Next Next page URL
+	Next string `json:"next"`
+
+	// Previous Previous page URL
 	Previous string `json:"previous"`
 }
+
+// GithubComMailgunAlertsChannelsChannel Alert channel type.
+type GithubComMailgunAlertsChannelsChannel string
 
 // GithubComMailgunAlertsInternalAPIListAlertsEventsResp defines model for github.com-mailgun-alerts-internal-api-ListAlertsEventsResp.
 type GithubComMailgunAlertsInternalAPIListAlertsEventsResp struct {
@@ -112,7 +130,8 @@ type GithubComMailgunAlertsInternalAPIListAlertsEventsResp struct {
 
 // GithubComMailgunAlertsInternalAPIListSlackChannelsResp defines model for github.com-mailgun-alerts-internal-api-ListSlackChannelsResp.
 type GithubComMailgunAlertsInternalAPIListSlackChannelsResp struct {
-	Items []GithubComMailgunAlertsInternalAPISlackChannel `json:"items"`
+	Items  []GithubComMailgunAlertsInternalAPISlackChannel     `json:"items"`
+	Paging GithubComMailgunScaffoldHttpapiPagingPagingResponse `json:"paging"`
 }
 
 // GithubComMailgunAlertsInternalAPIResetWebhooksSigningKeyResp defines model for github.com-mailgun-alerts-internal-api-ResetWebhooksSigningKeyResp.
@@ -155,8 +174,8 @@ type GithubComMailgunAlertsInternalAPITestWebhookRequest struct {
 
 // GithubComMailgunAlertsInternalAPIMutateEventSettingReq defines model for github.com-mailgun-alerts-internal-api-mutateEventSettingReq.
 type GithubComMailgunAlertsInternalAPIMutateEventSettingReq struct {
-	// Channel The delivery method for the alert. Supported values include 'webhook'
-	Channel string `json:"channel"`
+	// Channel The delivery method for the alert.
+	Channel GithubComMailgunAlertsChannelsChannel `json:"channel"`
 
 	// EventType The type of event for which you would like to receive alerts.
 	EventType string `json:"event_type"`
@@ -180,12 +199,12 @@ type GithubComMailgunAlertsInternalSettingsChannelSettings struct {
 // GithubComMailgunAlertsInternalSettingsEventSettings defines model for github.com-mailgun-alerts-internal-settings-EventSettings.
 type GithubComMailgunAlertsInternalSettingsEventSettings struct {
 	// Channel The delivery channel for the alert.
-	Channel string `json:"channel"`
+	Channel GithubComMailgunAlertsChannelsChannel `json:"channel"`
 
 	// DisabledAt Read only. When present
 	DisabledAt *time.Time `json:"disabled_at"`
 
-	// EventType The event type that is alerted on.
+	// EventType The event type that is alerted on. Check GET /v1/alerts/events for possible values.
 	EventType string `json:"event_type"`
 
 	// ID The unique identifier for the alert settings record.
@@ -210,7 +229,32 @@ type GithubComMailgunAlertsInternalSettingsWebhooks struct {
 
 // GithubComMailgunScaffoldHttpapiGenericResponse defines model for github.com-mailgun-scaffold-httpapi-GenericResponse.
 type GithubComMailgunScaffoldHttpapiGenericResponse struct {
+	// Message Response message
 	Message string `json:"message"`
+}
+
+// GithubComMailgunScaffoldHttpapiPagingPagingResponse defines model for github.com-mailgun-scaffold-httpapi-paging-PagingResponse.
+type GithubComMailgunScaffoldHttpapiPagingPagingResponse struct {
+	// First First page URL
+	First string `json:"first"`
+
+	// Last Last page URL
+	Last string `json:"last"`
+
+	// Next Next page URL
+	Next string `json:"next"`
+
+	// Previous Previous page URL
+	Previous string `json:"previous"`
+}
+
+// GETV1AlertsSlackChannelsParams defines parameters for GETV1AlertsSlackChannels.
+type GETV1AlertsSlackChannelsParams struct {
+	// Page Encoded paging information, provided via 'next', 'first' links
+	Page *string `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Limits the number of items returned in a request
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
 // DELETEV1InboxreadyDomainsParams defines parameters for DELETEV1InboxreadyDomains.
