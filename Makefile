@@ -48,19 +48,24 @@ get-and-gen-models: get-openapi convert-openapi gen-models
 
 .PHONY: get-openapi
 get-openapi:
-	cd $(TYPES_PATH) && git clone --depth 1 git@github.com:mailgun/redocly-mailgun.git
+	# https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun
+	curl -o $(TYPES_PATH)/mailgun/mailgun.yaml https://documentation.mailgun.com/_spec/docs/mailgun/api-reference/send/mailgun.yaml?download
+	# https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/inboxready
+	curl -o $(TYPES_PATH)/inboxready/inboxready.yaml https://documentation.mailgun.com/_spec/docs/inboxready/api-reference/optimize/inboxready.yaml?download
 
 ## Downgrade openapi 3.1 to 3.0
 # this is one of the official ways to support OpenAPI 3.1:
 # https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#does-oapi-codegen-support-openapi-31
 # install openapi-down-convert:
 #  npm i -g @apiture/openapi-down-convert
+#
+# TODO(v6): switch to https://github.com/doordash-oss/oapi-codegen-dd instead?
 .PHONY: convert-openapi
 convert-openapi:
 	# Mailgun Send
-	openapi-down-convert --input $(TYPES_PATH)/redocly-mailgun/docs/mailgun/api-reference/openapi-final.yaml --output $(TYPES_PATH)/mailgun/openapi_3.0.yaml
+	openapi-down-convert --input $(TYPES_PATH)/mailgun/mailgun.yaml --output $(TYPES_PATH)/mailgun/openapi_3.0.yaml
 	# Mailgun Optimize
-	openapi-down-convert --input $(TYPES_PATH)/redocly-mailgun/docs/inboxready/api-reference/openapi-final.yaml --output $(TYPES_PATH)/inboxready/openapi_3.0.yaml
+	openapi-down-convert --input $(TYPES_PATH)/inboxready/inboxready.yaml --output $(TYPES_PATH)/inboxready/openapi_3.0.yaml
 
 # TODO(Go1.24): move into tools of go.mod(https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#for-go-124)?
 # install oapi-codegen:
