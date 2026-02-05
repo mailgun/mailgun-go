@@ -42,6 +42,8 @@ type NotifiedMessage struct {
 	Attachments       []mtypes.StoredAttachment // attachments
 	MessageUrl        string                    // message-url
 	Timestamp         time.Time                 // timestamp
+	Token             string                    // token
+	Signature         string                    // signature
 	MessageHeaders    map[string]string         // message-headers
 	ContentIDMap      map[string]string         // content-id-map
 }
@@ -132,6 +134,9 @@ func ExtractNotifiedMessage(formValues url.Values) NotifiedMessage {
 		timeInt = 0
 	}
 	notifiedMessage.Timestamp = time.Unix(int64(timeInt), 0)
+
+	notifiedMessage.Token = formValues.Get("token")
+	notifiedMessage.Signature = formValues.Get("signature")
 
 	headersStr := formValues.Get("message-headers")
 	headersParsed := make([][]string, 0)
