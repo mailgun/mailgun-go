@@ -37,8 +37,8 @@ type NotifiedMessage struct {
 	BodyPlain         string                    // body-plain
 	StrippedText      string                    // stripped-text
 	StrippedSignature string                    // stripped-signature
-	BodyHtml          string                    // body-html
-	StrippedHtml      string                    // stripped-html
+	BodyHTML          string                    // body-html
+	StrippedHTML      string                    // stripped-html
 	Attachments       []mtypes.StoredAttachment // attachments
 	MessageUrl        string                    // message-url
 	Timestamp         time.Time                 // timestamp
@@ -116,8 +116,8 @@ func ExtractNotifiedMessage(formValues url.Values) NotifiedMessage {
 	notifiedMessage.BodyPlain = formValues.Get("body-plain")
 	notifiedMessage.StrippedText = formValues.Get("stripped-text")
 	notifiedMessage.StrippedSignature = formValues.Get("stripped-signature")
-	notifiedMessage.BodyHtml = formValues.Get("body-html")
-	notifiedMessage.StrippedHtml = formValues.Get("stripped-html")
+	notifiedMessage.BodyHTML = formValues.Get("body-html")
+	notifiedMessage.StrippedHTML = formValues.Get("stripped-html")
 
 	attachmentsStr := formValues.Get("attachments")
 	attachmentsParsed := make([]mtypes.StoredAttachment, 0)
