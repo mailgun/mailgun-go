@@ -12,6 +12,7 @@ import (
 
 // ForwardedMessage represents the payload the server will get on match
 // You can use ExtractForwardRoute() to extract PostForm into the struct, or you can use only the struct and parse the form manually
+// Documentation: https://documentation.mailgun.com/docs/mailgun/user-manual/receive-forward-store/receive-http
 type ForwardedMessage struct {
 	BodyPlain      string            // body-plain
 	From           string            // from
@@ -28,6 +29,7 @@ type ForwardedMessage struct {
 
 // NotifiedMessage represents the payload the server will get on stored and notified
 // You can use ExtractNotifiedMessage() to extract PostForm into the struct, or you can use only the struct and parse the form manually
+// Documentation: https://documentation.mailgun.com/docs/mailgun/user-manual/receive-forward-store/storing-and-retrieving-messages
 type NotifiedMessage struct {
 	Domain            string                    // domain
 	Recipient         string                    // recipient
