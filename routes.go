@@ -42,7 +42,7 @@ type NotifiedMessage struct {
 	BodyHTML          string                    // body-html
 	StrippedHTML      string                    // stripped-html
 	Attachments       []mtypes.StoredAttachment // attachments
-	MessageUrl        string                    // message-url
+	MessageURL        string                    // message-url
 	Timestamp         time.Time                 // timestamp
 	Token             string                    // token
 	Signature         string                    // signature
@@ -128,7 +128,7 @@ func ExtractNotifiedMessage(formValues url.Values) NotifiedMessage {
 		notifiedMessage.Attachments = attachmentsParsed
 	}
 
-	notifiedMessage.MessageUrl = formValues.Get("message-url")
+	notifiedMessage.MessageURL = formValues.Get("message-url")
 
 	timestampStr := formValues.Get("timestamp")
 	timeInt, err := strconv.Atoi(timestampStr)
