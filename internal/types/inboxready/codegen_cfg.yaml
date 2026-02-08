@@ -13,7 +13,7 @@ output-options:
     - Alerts
     - Domains # Blocklist Monitoring
     - IP Blocklist Monitoring
-    # - Inbox Placement # TODO(vtopc)
+    # - Inbox Placement # TODO(vtopc): add after fixing the the issue with 3.1 to 3.0 migration: `anyOf: [{type}, null]` for nullable fields
   prefer-skip-optional-pointer-on-container-types: true
   name-normalizer: ToCamelCaseWithInitialisms
   additional-initialisms:
