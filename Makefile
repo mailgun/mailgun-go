@@ -56,6 +56,9 @@ get-openapi:
 ## Downgrade openapi 3.1 to 3.0
 # this is one of the official ways to support OpenAPI 3.1:
 # https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#does-oapi-codegen-support-openapi-31
+# but it doesn't support `anyOf: [{type}, null]` for nullable fields -
+# https://www.jvt.me/posts/2025/05/04/oapi-codegen-trick-openapi-3-1/
+#
 # install openapi-down-convert:
 #  npm i -g @apiture/openapi-down-convert
 #
