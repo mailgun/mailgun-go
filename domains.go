@@ -382,7 +382,7 @@ func (mg *Client) UpdateDomain(ctx context.Context, domain string, opts *UpdateD
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	payload := newUrlEncodedPayload()
+	payload := NewFormDataPayload()
 
 	if opts != nil {
 		if opts.Password != "" {
