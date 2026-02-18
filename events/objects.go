@@ -84,8 +84,8 @@ type DeliveryStatus struct {
 	CertificateVerified         *bool   `json:"certificate-verified,omitempty"`
 	TLS                         *bool   `json:"tls,omitempty"`
 	Utf8                        *bool   `json:"utf8,omitempty"`
-	LastCode                    int     `json:"last-code"`
-	LastMessage                 string  `json:"last-message"`
-	BounceType                  string  `json:"bounce-type"`
-	FirstDeliveryAttemptSeconds float64 `json:"first-delivery-attempt-seconds"`
+	LastCode                    int     `json:"last-code,omitempty"`
+	LastMessage                 string  `json:"last-message,omitempty"`
+	BounceType                  string  `json:"bounce-type,omitempty"`
+	FirstDeliveryAttemptSeconds float64 `json:"first-delivery-attempt-seconds,omitempty"`
 }
