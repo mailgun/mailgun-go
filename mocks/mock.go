@@ -17,6 +17,7 @@ import (
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
+// Content Types
 const (
 	contentTypeHeader            = "Content-Type"
 	multipartFormDataContentType = "multipart/form-data"
