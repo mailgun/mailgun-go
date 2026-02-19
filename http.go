@@ -115,6 +115,7 @@ func (*jsonEncodedPayload) getValues() []keyValuePair {
 	return nil
 }
 
+// newUrlEncodedPayload creates "application/x-www-form-urlencoded" request payload.
 // TODO(vtopc): misused in many places instead of NewFormDataPayload().
 func newUrlEncodedPayload() *urlEncodedPayload {
 	return &urlEncodedPayload{}
@@ -145,6 +146,7 @@ func (r *httpResponse) parseFromJSON(v any) error {
 	return json.Unmarshal(r.Data, v)
 }
 
+// NewFormDataPayload creates "multipart/form-data" request payload.
 func NewFormDataPayload() *FormDataPayload {
 	return &FormDataPayload{}
 }
