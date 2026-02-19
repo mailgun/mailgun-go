@@ -17,6 +17,12 @@ import (
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
+const (
+	contentTypeHeader            = "Content-Type"
+	multipartFormDataContentType = "multipart/form-data"
+	formURLEncodedContentType    = "application/x-www-form-urlencoded"
+)
+
 // Server is a Mailgun API mock suitable for testing
 type Server struct {
 	srv *httptest.Server
