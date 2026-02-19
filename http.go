@@ -115,6 +115,7 @@ func (*jsonEncodedPayload) getValues() []keyValuePair {
 	return nil
 }
 
+// TODO(vtopc): misused in many places instead of NewFormDataPayload().
 func newUrlEncodedPayload() *urlEncodedPayload {
 	return &urlEncodedPayload{}
 }
