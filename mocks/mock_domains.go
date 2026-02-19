@@ -161,6 +161,15 @@ func (ms *Server) getDomain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ms *Server) createDomain(w http.ResponseWriter, r *http.Request) {
+	const expectedContentType = multipartFormDataContentType
+	if !strings.HasPrefix(r.Header.Get(contentTypeHeader), expectedContentType) {
+		// NOTE: not an actual Mailgun API response, just for unit tests,
+		//  see https://github.com/mailgun/mailgun-go/pull/470 for more details.
+		w.WriteHeader(599)
+		toJSON(w, okResp{Message: "Content-Type must be " + expectedContentType})
+		return
+	}
+
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 

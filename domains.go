@@ -288,7 +288,7 @@ func (mg *Client) CreateDomain(ctx context.Context, domain string, opts *CreateD
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	payload := newUrlEncodedPayload()
+	payload := NewFormDataPayload()
 	payload.addValue("name", domain)
 
 	if opts != nil {
