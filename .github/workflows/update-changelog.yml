@@ -20,6 +20,7 @@ jobs:
       - name: Update CHANGELOG
         uses: actions/github-script@v7
         with:
+          # TODO(vtopc): update `const Version` in version.go file too.
           script: |
             const fs = require('fs');
 
