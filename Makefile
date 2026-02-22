@@ -62,6 +62,7 @@ get-openapi:
 # install openapi-down-convert:
 #  npm i -g @apiture/openapi-down-convert
 #
+# TODO(vtopc): use https://github.com/oapi-codegen/oapi-codegen-exp instead, which supports OpenAPI 3.1?
 # TODO(v6): switch to https://github.com/doordash-oss/oapi-codegen-dd instead?
 .PHONY: convert-openapi
 convert-openapi:

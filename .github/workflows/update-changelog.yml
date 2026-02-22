@@ -20,6 +20,7 @@ jobs:
       - name: Update CHANGELOG
         uses: actions/github-script@v7
         with:
+          # TODO(vtopc): update `const Version` in version.go file too.
           script: |
             const fs = require('fs');
 
@@ -53,11 +54,12 @@ jobs:
 
             fs.writeFileSync(changelogPath, updated);
 
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git checkout ${{ github.event.repository.default_branch }}
-          git add CHANGELOG.md
-          git commit -m "chore: update changelog for ${{ github.event.release.tag_name }}"
-          git push
+# TODO(vtopc): redo. Pushing to main branch is prohibited by branch protection rules.
+#      - name: Commit and push changes
+#        run: |
+#          git config user.name "github-actions"
+#          git config user.email "github-actions@github.com"
+#          git checkout ${{ github.event.repository.default_branch }}
+#          git add CHANGELOG.md
+#          git commit -m "chore: update changelog for ${{ github.event.release.tag_name }}"
+#          git push

@@ -257,8 +257,10 @@ func (mg *Client) VerifyAndReturnDomain(ctx context.Context, domain string) (mty
 // CreateDomainOptions - optional parameters when creating a domain
 // https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Domains/#tag/Domains/operation/POST-v4-domains
 type CreateDomainOptions struct {
-	Password                   string
-	SpamAction                 mtypes.SpamAction
+	Password   string
+	SpamAction mtypes.SpamAction
+	// Wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
+	// and as different domains if false.
 	Wildcard                   bool
 	ForceDKIMAuthority         bool
 	DKIMKeySize                int
@@ -278,17 +280,14 @@ type CreateDomainOptions struct {
 }
 
 // CreateDomain instructs Mailgun to create a new domain for your account.
-// The name parameter identifies the domain.
-// The smtpPassword parameter provides an access credential for the domain.
-// The spamAction domain must be one of Delete, Tag, or Disabled.
-// The wildcard parameter instructs Mailgun to treat all subdomains of this domain uniformly if true,
-// and as different domains if false.
+// The domain parameter identifies the domain.
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domains/post-v4-domains
 func (mg *Client) CreateDomain(ctx context.Context, domain string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 4, domainsEndpoint))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
-	payload := newUrlEncodedPayload()
+	payload := NewFormDataPayload()
 	payload.addValue("name", domain)
 
 	if opts != nil {
