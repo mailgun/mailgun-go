@@ -53,15 +53,15 @@ type Accepted struct {
 	Message  Message  `json:"message"`
 	Flags    Flags    `json:"flags"`
 
-	Recipient         string     `json:"recipient"`
-	RecipientDomain   string     `json:"recipient-domain"`
-	Method            string     `json:"method"`
-	OriginatingIP     string     `json:"originating-ip"`
-	APIKeyID          string     `json:"api-key-id"`
-	Tags              []string   `json:"tags"`
-	Campaigns         []Campaign `json:"campaigns"`
-	UserVariables     any        `json:"user-variables"`
-	Storage           Storage    `json:"storage"`
+	Recipient       string     `json:"recipient"`
+	RecipientDomain string     `json:"recipient-domain"`
+	Method          string     `json:"method"`
+	OriginatingIP   string     `json:"originating-ip"`
+	APIKeyID        string     `json:"api-key-id"`
+	Tags            []string   `json:"tags"`
+	Campaigns       []Campaign `json:"campaigns"`
+	UserVariables   any        `json:"user-variables"`
+	Storage         Storage    `json:"storage"`
 }
 
 type Rejected struct {
