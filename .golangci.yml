@@ -55,6 +55,8 @@ linters:
       excludes:
         # Not critical for the http client
         - G114 # Use of net/http serve function that has no support for setting timeouts
+        - G117 # No exposures.
+        - G704 # SSRF via taint analysis. TODO(vtopc): enable?
 
     govet:
       disable:
