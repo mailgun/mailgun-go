@@ -66,6 +66,7 @@ get-openapi:
 #	module declares its path as: github.com/oapi-codegen/oapi-codegen/v2
 #		but was required as: github.com/oapi-codegen/oapi-codegen-exp/v2
 # TODO(Go1.24): move into tools of go.mod(https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#for-go-124)?
+# TODO(v6): switch to https://github.com/doordash-oss/oapi-codegen-dd instead?
 # install oapi-codegen:
 #  go install github.com/oapi-codegen/oapi-codegen-exp/v2/cmd/oapi-codegen@latest
 #
