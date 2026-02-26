@@ -53,6 +53,7 @@ jobs:
 
             fs.writeFileSync(changelogPath, updated);
 
+      # TODO(vtopc): use stefanzweifel/git-auto-commit-action or peter-evans/create-pull-request instead?
       - name: Commit and push changes
         run: |
           git config user.name "github-actions"
