@@ -63,17 +63,11 @@ get-openapi:
 #  npm i -g @apiture/openapi-down-convert
 #
 # TODO(vtopc): use https://github.com/oapi-codegen/oapi-codegen-exp instead, which supports OpenAPI 3.1?
-# TODO(v6): switch to https://github.com/doordash-oss/oapi-codegen-dd instead?
-.PHONY: convert-openapi
-convert-openapi:
-	# Mailgun Send
-	openapi-down-convert --input $(TYPES_PATH)/mailgun/mailgun.yaml --output $(TYPES_PATH)/mailgun/openapi_3.0.yaml
-	# Mailgun Optimize
-	openapi-down-convert --input $(TYPES_PATH)/inboxready/inboxready.yaml --output $(TYPES_PATH)/inboxready/openapi_3.0.yaml
-
+#	module declares its path as: github.com/oapi-codegen/oapi-codegen/v2
+#		but was required as: github.com/oapi-codegen/oapi-codegen-exp/v2
 # TODO(Go1.24): move into tools of go.mod(https://github.com/oapi-codegen/oapi-codegen?tab=readme-ov-file#for-go-124)?
 # install oapi-codegen:
-#  go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.2-0.20250511101814-8ea9351bbd3e
+#  go install github.com/oapi-codegen/oapi-codegen-exp/v2/cmd/oapi-codegen@latest
 #
 # ValidateEmailResponse is described here better, than in the OpenAPI documentation, so we are not generating it.
 # TODO(v6?): call gen-mailgun-models
