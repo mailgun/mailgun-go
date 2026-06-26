@@ -34,6 +34,223 @@ func (e GithubComMailgunAlertsChannelsChannel) Valid() bool {
 	}
 }
 
+// InboxPlacementTestingGithubComMailgunScaffoldHttpapiGenericResponse defines model for Inbox_Placement_Testing_github.com-mailgun-scaffold-httpapi-GenericResponse.
+type InboxPlacementTestingGithubComMailgunScaffoldHttpapiGenericResponse struct {
+	// Message Response message
+	Message string `json:"message"`
+}
+
+// InboxPlacementTestingGithubComMailgunScaffoldHttpapiNotFoundError defines model for Inbox_Placement_Testing_github.com-mailgun-scaffold-httpapi-NotFoundError.
+type InboxPlacementTestingGithubComMailgunScaffoldHttpapiNotFoundError struct {
+	Description string `json:"Description"`
+}
+
+// InboxPlacementTestingGithubComMailgunScaffoldHttpapiResponse defines model for Inbox_Placement_Testing_github.com-mailgun-scaffold-httpapi-Response.
+type InboxPlacementTestingGithubComMailgunScaffoldHttpapiResponse map[string]map[string]interface{}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestReq defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-CreateTestReq.
+type InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestReq struct {
+	From    string            `json:"from"`
+	Headers map[string]string `json:"headers,omitempty"`
+	HTML    *string           `json:"html,omitempty"`
+
+	// ProviderFilter missing/null/[] means all providers
+	ProviderFilter []string `json:"provider_filter,omitempty"`
+
+	// SeedList Use existing Seed List. If omitted creates new Seed List
+	SeedList *string `json:"seed_list,omitempty"`
+
+	// SendingIP Used to specify an IP Address to send an email that is owned by your account
+	SendingIP *string `json:"sending_ip,omitempty"`
+
+	// SendingIPPoolID If provided the email will be delivered with an IP that belongs in that pool
+	SendingIPPoolID *string `json:"sending_ip_pool_id,omitempty"`
+	Subject         string  `json:"subject"`
+
+	// TemplateName template from Mailgun Send
+	TemplateName *string           `json:"template_name,omitempty"`
+	Variables    map[string]string `json:"variables,omitempty"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestRespLinks defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-CreateTestRespLinks.
+type InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestRespLinks struct {
+	Results string `json:"results"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalAPIListPublicProvidersResp defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-ListPublicProvidersResp.
+type InboxPlacementTestingGithubComMailgunSpyInternalAPIListPublicProvidersResp struct {
+	Items []InboxPlacementTestingGithubComMailgunSpyInternalAPIPublicProvider `json:"items"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalAPIPublicProvider defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-PublicProvider.
+type InboxPlacementTestingGithubComMailgunSpyInternalAPIPublicProvider struct {
+	CreatedAt   time.Time `json:"created_at"`
+	DisplayName string    `json:"display_name"`
+	Domain      string    `json:"domain"`
+	Region      string    `json:"region"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalAPISpyCreateTestResp defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-SpyCreateTestResp.
+type InboxPlacementTestingGithubComMailgunSpyInternalAPISpyCreateTestResp struct {
+	Links       InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestRespLinks `json:"links"`
+	MailingList string                                                                 `json:"mailing_list"`
+	ResultID    string                                                                 `json:"result_id"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelDeliveryStats defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-DeliveryStats.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelDeliveryStats struct {
+	Categories map[string]int32 `json:"categories"`
+	Delivered  int32            `json:"delivered"`
+	Inbox      int32            `json:"inbox"`
+	Missing    int32            `json:"missing"`
+	Pending    int32            `json:"pending"`
+	Provider   string           `json:"provider"`
+	Spam       int32            `json:"spam"`
+	Total      int32            `json:"total"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelExpectedMessage defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-ExpectedMessage.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelExpectedMessage struct {
+	Destination   string                                                                      `json:"destination"`
+	Dkim          *string                                                                     `json:"dkim,omitempty"`
+	Dmarc         *string                                                                     `json:"dmarc,omitempty"`
+	Email         string                                                                      `json:"email"`
+	Extensions    InboxPlacementTestingGithubComMailgunSpyInternalModelMessageExtension       `json:"extensions"`
+	Headers       []InboxPlacementTestingGithubComMailgunSpyInternalModelHeadersMessageHeader `json:"headers,omitempty"`
+	OriginatingIP string                                                                      `json:"originating_ip"`
+	Provider      string                                                                      `json:"provider"`
+	Spf           *string                                                                     `json:"spf,omitempty"`
+	State         string                                                                      `json:"state"`
+	Tags          []string                                                                    `json:"tags"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelKeyBox defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-KeyBox.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelKeyBox struct {
+	CreatedAt       time.Time                                                                     `json:"created_at"`
+	DeliveryStats   map[string]InboxPlacementTestingGithubComMailgunSpyInternalModelDeliveryStats `json:"delivery_stats,omitempty"`
+	HasResults      bool                                                                          `json:"has_results"`
+	IsAutoGenerated bool                                                                          `json:"is_auto_generated"`
+	Kid             string                                                                        `json:"kid"`
+	LastResultAt    time.Time                                                                     `json:"last_result_at"`
+	MailingList     string                                                                        `json:"mailing_list"`
+	Name            string                                                                        `json:"name"`
+
+	// PreviousMailingList List before last regen
+	PreviousMailingList string `json:"previous_mailing_list"`
+
+	// ProviderFilter [] means all providers; null means that only seed_filter is used
+	ProviderFilter []string  `json:"provider_filter"`
+	RegenAt        time.Time `json:"regen_at"`
+
+	// RegenNeeded Shows that mailing_list has to many unavailable seeds. Only for v2 Seed List.
+	RegenNeeded    bool              `json:"regen_needed"`
+	SeedFilter     string            `json:"seed_filter"`
+	SendingDomains []string          `json:"sending_domains"`
+	Tags           map[string]string `json:"tags"`
+	TargetEmail    string            `json:"target_email"`
+	UpdatedAt      time.Time         `json:"updated_at"`
+	Version        int32             `json:"version"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelMessageExtension defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-MessageExtension.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelMessageExtension struct {
+	Category string                                                                                   `json:"category"`
+	MsSpam   *InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamMicrosoftSpamEntry `json:"ms_spam,omitempty"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelResultSharingInfo defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-ResultSharingInfo.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelResultSharingInfo struct {
+	APIURL    string    `json:"api_url"`
+	Enabled   bool      `json:"enabled"`
+	ExpiresAt time.Time `json:"expires_at"`
+	ResultID  string    `json:"result_id"`
+	URL       string    `json:"url"`
+	URLID     string    `json:"url_id"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelTestResult defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-TestResult.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelTestResult struct {
+	Attributes map[string]string `json:"attributes"`
+
+	// Body Only for GET /inbox/results/{result}
+	Body          string                                                                        `json:"body"`
+	CampaignID    string                                                                        `json:"campaign_id"`
+	CreatedAt     time.Time                                                                     `json:"created_at"`
+	DeliveryStats map[string]InboxPlacementTestingGithubComMailgunSpyInternalModelDeliveryStats `json:"delivery_stats"`
+
+	// IsSpoofing Indicates whether spoofing was detected for this result.
+	IsSpoofing       *bool                                                                                      `json:"is_spoofing"`
+	KeyboxEmail      string                                                                                     `json:"keybox_email"`
+	MsSpam           *InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamMicrosoftSpamSummary `json:"ms_spam,omitempty"`
+	ResultID         string                                                                                     `json:"result_id"`
+	Rid              string                                                                                     `json:"rid"`
+	SeedResults      []InboxPlacementTestingGithubComMailgunSpyInternalModelExpectedMessage                     `json:"seed_results"`
+	SeedlistName     string                                                                                     `json:"seedlist_name"`
+	Sender           string                                                                                     `json:"sender"`
+	SharingEnabled   bool                                                                                       `json:"sharing_enabled"`
+	SharingExpiresAt time.Time                                                                                  `json:"sharing_expires_at"`
+	SharingID        string                                                                                     `json:"sharing_id"`
+	Spamassassin     InboxPlacementTestingGithubComMailgunSpyInternalNetSpamassassinResult                      `json:"spamassassin"`
+	Status           string                                                                                     `json:"status"`
+	Subject          string                                                                                     `json:"subject"`
+	UpdatedAt        time.Time                                                                                  `json:"updated_at"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamForefrontReport defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-extensions-msspam-ForefrontReport.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamForefrontReport struct {
+	Category string `json:"category"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamForefrontStats defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-extensions-msspam-ForefrontStats.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamForefrontStats struct {
+	CategoryCounts map[string]int32 `json:"category_counts"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamLevelStats defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-extensions-msspam-LevelStats.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamLevelStats struct {
+	Max  int32   `json:"max"`
+	Mean float32 `json:"mean"`
+	Min  int32   `json:"min"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamMicrosoftSpamEntry defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-extensions-msspam-MicrosoftSpamEntry.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamMicrosoftSpamEntry struct {
+	BCL             int32                                                                                `json:"bcl"`
+	ForefrontReport InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamForefrontReport `json:"forefront_report"`
+	SCL             int32                                                                                `json:"scl"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamMicrosoftSpamSummary defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-extensions-msspam-MicrosoftSpamSummary.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamMicrosoftSpamSummary struct {
+	BCL       InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamLevelStats     `json:"bcl"`
+	Count     int32                                                                               `json:"count"`
+	Forefront InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamForefrontStats `json:"forefront"`
+	SCL       InboxPlacementTestingGithubComMailgunSpyInternalModelExtensionsMsspamLevelStats     `json:"scl"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalModelHeadersMessageHeader defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-headers-MessageHeader.
+type InboxPlacementTestingGithubComMailgunSpyInternalModelHeadersMessageHeader struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalNetSpamassassinResult defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-net-spamassassin-Result.
+type InboxPlacementTestingGithubComMailgunSpyInternalNetSpamassassinResult struct {
+	IsSpam   bool                                                                  `json:"is_spam"`
+	Required float32                                                               `json:"required"`
+	Rules    []InboxPlacementTestingGithubComMailgunSpyInternalNetSpamassassinRule `json:"rules"`
+	Score    float32                                                               `json:"score"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalNetSpamassassinRule defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-net-spamassassin-Rule.
+type InboxPlacementTestingGithubComMailgunSpyInternalNetSpamassassinRule struct {
+	LongDescription  string  `json:"long_description"`
+	Name             string  `json:"name"`
+	Points           float32 `json:"points"`
+	ShortDescription string  `json:"short_description"`
+}
+
 // InboxReadyGithubComMailgunInboxreadyAPIAddDomainResponse defines model for Inbox_Ready_github.com-mailgun-inboxready-api-AddDomainResponse.
 type InboxReadyGithubComMailgunInboxreadyAPIAddDomainResponse struct {
 	Domain  InboxReadyGithubComMailgunInboxreadyModelDomain `json:"domain"`
@@ -328,6 +545,88 @@ type GETV1InboxreadyIPAddressesParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// GETV4InboxResultsParams defines parameters for GETV4InboxResults.
+type GETV4InboxResultsParams struct {
+	Sender      *string `form:"sender,omitempty" json:"sender,omitempty"`
+	Subject     *string `form:"subject,omitempty" json:"subject,omitempty"`
+	Provider    *string `form:"provider,omitempty" json:"provider,omitempty"`
+	TargetEmail *string `form:"target_email,omitempty" json:"target_email,omitempty"`
+	TimeAfter   *string `form:"time_after,omitempty" json:"time_after,omitempty"`
+	TimeBefore  *string `form:"time_before,omitempty" json:"time_before,omitempty"`
+	Cursor      *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Sort        *string `form:"sort,omitempty" json:"sort,omitempty"`
+	Offset      *int    `form:"offset,omitempty" json:"offset,omitempty"`
+	Ascending   *bool   `form:"ascending,omitempty" json:"ascending,omitempty"`
+	Limit       *int    `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GETV4InboxResultsAAttributeParams defines parameters for GETV4InboxResultsAAttribute.
+type GETV4InboxResultsAAttributeParams struct {
+	Sender      *string `form:"sender,omitempty" json:"sender,omitempty"`
+	Subject     *string `form:"subject,omitempty" json:"subject,omitempty"`
+	Provider    *string `form:"provider,omitempty" json:"provider,omitempty"`
+	TargetEmail *string `form:"target_email,omitempty" json:"target_email,omitempty"`
+	TimeAfter   *string `form:"time_after,omitempty" json:"time_after,omitempty"`
+	TimeBefore  *string `form:"time_before,omitempty" json:"time_before,omitempty"`
+	Cursor      *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Sort        *string `form:"sort,omitempty" json:"sort,omitempty"`
+	Offset      *int    `form:"offset,omitempty" json:"offset,omitempty"`
+	Ascending   *bool   `form:"ascending,omitempty" json:"ascending,omitempty"`
+	Limit       *int    `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// DELETEV4InboxResultsResultParams defines parameters for DELETEV4InboxResultsResult.
+type DELETEV4InboxResultsResultParams struct {
+	Provider *string `form:"provider,omitempty" json:"provider,omitempty"`
+}
+
+// GETV4InboxResultsResultParams defines parameters for GETV4InboxResultsResult.
+type GETV4InboxResultsResultParams struct {
+	Provider *string `form:"provider,omitempty" json:"provider,omitempty"`
+}
+
+// GETV4InboxSeedlistsParams defines parameters for GETV4InboxSeedlists.
+type GETV4InboxSeedlistsParams struct {
+	TimeAfter  *string `form:"time_after,omitempty" json:"time_after,omitempty"`
+	TimeBefore *string `form:"time_before,omitempty" json:"time_before,omitempty"`
+	Name       *string `form:"name,omitempty" json:"name,omitempty"`
+	Cursor     *string `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Sort       *string `form:"sort,omitempty" json:"sort,omitempty"`
+	Offset     *int    `form:"offset,omitempty" json:"offset,omitempty"`
+	Ascending  *bool   `form:"ascending,omitempty" json:"ascending,omitempty"`
+	Limit      *int    `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// POSTV4InboxSeedlistsParams defines parameters for POSTV4InboxSeedlists.
+type POSTV4InboxSeedlistsParams struct {
+	// SendingDomains Deprecated.
+	SendingDomains *string `form:"sending_domains,omitempty" json:"sending_domains,omitempty"`
+	Name           *string `form:"name,omitempty" json:"name,omitempty"`
+
+	// ProviderFilter Array of provider domains. Omitting means all providers.
+	ProviderFilter *string `form:"provider_filter,omitempty" json:"provider_filter,omitempty"`
+	RemoteID       *string `form:"remote_id,omitempty" json:"remote_id,omitempty"`
+}
+
+// PUTV4InboxSeedlistsAddressParams defines parameters for PUTV4InboxSeedlistsAddress.
+type PUTV4InboxSeedlistsAddressParams struct {
+	Name *string `form:"name,omitempty" json:"name,omitempty"`
+
+	// ProviderFilter Array of provider domains. Omitting means no changes.
+	ProviderFilter *string `form:"provider_filter,omitempty" json:"provider_filter,omitempty"`
+
+	// Regen Regenerate the mailing_list.
+	Regen *bool `form:"regen,omitempty" json:"regen,omitempty"`
+
+	// SendingDomains Deprecated.
+	SendingDomains *string `form:"sending_domains,omitempty" json:"sending_domains,omitempty"`
+}
+
+// PUTV4InboxSharingResultParams defines parameters for PUTV4InboxSharingResult.
+type PUTV4InboxSharingResultParams struct {
+	Enabled bool `form:"enabled" json:"enabled"`
+}
+
 // POSTV1AlertsEmailTestJSONRequestBody defines body for POSTV1AlertsEmailTest for application/json ContentType.
 type POSTV1AlertsEmailTestJSONRequestBody = GithubComMailgunAlertsInternalAPITestEmailRequest
 
@@ -351,3 +650,6 @@ type POSTV1InboxreadyIPAddressesJSONRequestBody = InboxReadyGithubComMailgunInbo
 
 // PUTV1InboxreadyIPAddressesIPJSONRequestBody defines body for PUTV1InboxreadyIPAddressesIP for application/json ContentType.
 type PUTV1InboxreadyIPAddressesIPJSONRequestBody = InboxReadyGithubComMailgunInboxreadyAPIUpdateIPAddressReq
+
+// POSTV4InboxTestsJSONRequestBody defines body for POSTV4InboxTests for application/json ContentType.
+type POSTV4InboxTestsJSONRequestBody = InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestReq
