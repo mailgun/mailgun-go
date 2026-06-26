@@ -67,7 +67,7 @@ gen-models: gen-inboxready-models
 ## Generate Mailgun Send models
 .PHONY: gen-mailgun-models
 gen-mailgun-models:
-	oapi-codegen -config $(TYPES_PATH)/mailgun/codegen_cfg.yaml $(TYPES_PATH)/mailgun/inboxready.yaml
+	oapi-codegen -config $(TYPES_PATH)/mailgun/codegen_cfg.yaml $(TYPES_PATH)/mailgun/mailgun.yaml
 
 ## Generate Mailgun Optimize models
 .PHONY: gen-inboxready-models
