@@ -19,5 +19,8 @@ output-options:
   additional-initialisms:
     - IDs
     - IPs
+    - DMARC
+    - DKIM
+    - SPF
     - BCL
     - SCL

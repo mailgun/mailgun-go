@@ -116,15 +116,15 @@ type InboxPlacementTestingGithubComMailgunSpyInternalModelExpectedMessage struct
 
 	// Destination Folder where the message was delivered.
 	Destination   string                                                                      `json:"destination"`
-	Dkim          *string                                                                     `json:"dkim,omitempty"`
-	Dmarc         *string                                                                     `json:"dmarc,omitempty"`
+	DKIM          *string                                                                     `json:"dkim,omitempty"`
+	DMARC         *string                                                                     `json:"dmarc,omitempty"`
 	Email         string                                                                      `json:"email"`
 	Extensions    *InboxPlacementTestingGithubComMailgunSpyInternalModelMessageExtension      `json:"extensions"`
 	Headers       []InboxPlacementTestingGithubComMailgunSpyInternalModelHeadersMessageHeader `json:"headers,omitempty"`
 	OriginatingIP string                                                                      `json:"originating_ip"`
 	Provider      string                                                                      `json:"provider"`
 	ReceivedAt    *time.Time                                                                  `json:"received_at"`
-	Spf           *string                                                                     `json:"spf,omitempty"`
+	SPF           *string                                                                     `json:"spf,omitempty"`
 	State         string                                                                      `json:"state"`
 	Tags          []string                                                                    `json:"tags"`
 }
