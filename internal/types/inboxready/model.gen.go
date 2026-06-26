@@ -319,7 +319,7 @@ type InboxReadyGithubComMailgunInboxreadyClientsMedicIPAddress struct {
 
 // InboxReadyGithubComMailgunInboxreadyModelDomain defines model for Inbox_Ready_github.com-mailgun-inboxready-model-Domain.
 type InboxReadyGithubComMailgunInboxreadyModelDomain struct {
-	Acid      string                                            `json:"acid"`
+	ACID      string                                            `json:"acid"`
 	CreatedAt int64                                             `json:"created_at"`
 	Name      string                                            `json:"name"`
 	Services  map[string]bool                                   `json:"services"`

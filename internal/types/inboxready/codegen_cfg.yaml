@@ -19,6 +19,7 @@ output-options:
   additional-initialisms:
     - IDs
     - IPs
+    - ACID
     - DMARC
     - DKIM
     - SPF
