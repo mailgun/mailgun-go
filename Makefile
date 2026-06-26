@@ -55,8 +55,8 @@ get-openapi:
 
 # TODO(v6): switch to https://github.com/doordash-oss/oapi-codegen-dd instead?
 #
+# TODO: switch to v2.8.0+ once released:
 # install oapi-codegen:
-# TODO: switch to v2.8.0+:
 #  go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@main
 #
 # ValidateEmailResponse is described here better, than in the OpenAPI documentation, so we are not generating it.
@@ -67,7 +67,7 @@ gen-models: gen-inboxready-models
 ## Generate Mailgun Send models
 .PHONY: gen-mailgun-models
 gen-mailgun-models:
-	oapi-codegen -config $(TYPES_PATH)/mailgun/codegen_cfg.yaml $(TYPES_PATH)/mailgun/inboxready.yaml
+	oapi-codegen -config $(TYPES_PATH)/mailgun/codegen_cfg.yaml $(TYPES_PATH)/mailgun/mailgun.yaml
 
 ## Generate Mailgun Optimize models
 .PHONY: gen-inboxready-models
