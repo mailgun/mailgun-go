@@ -55,12 +55,9 @@ get-openapi:
 
 # TODO(v6): switch to https://github.com/doordash-oss/oapi-codegen-dd instead?
 #
-# TODO(v6): use https://github.com/oapi-codegen/oapi-codegen-exp instead? which supports OpenAPI 3.1.
-#	breaking changes:
-#		- introduced new Nullable generic (instead of a pointer to the type)
-# 		- switched from github.com/oapi-codegen/runtime/types to github.com/google/uuid
 # install oapi-codegen:
-#  go install github.com/oapi-codegen/oapi-codegen-exp/experimental/cmd/oapi-codegen@latest
+# TODO: switch to v2.8.0:
+#  go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@main
 #
 # ValidateEmailResponse is described here better, than in the OpenAPI documentation, so we are not generating it.
 # TODO(v6?): call gen-mailgun-models
