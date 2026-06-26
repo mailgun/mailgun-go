@@ -40,11 +40,6 @@ type InboxPlacementTestingGithubComMailgunScaffoldHttpapiGenericResponse struct 
 	Message string `json:"message"`
 }
 
-// InboxPlacementTestingGithubComMailgunScaffoldHttpapiNotFoundError defines model for Inbox_Placement_Testing_github.com-mailgun-scaffold-httpapi-NotFoundError.
-type InboxPlacementTestingGithubComMailgunScaffoldHttpapiNotFoundError struct {
-	Description string `json:"Description"`
-}
-
 // InboxPlacementTestingGithubComMailgunScaffoldHttpapiResponse defines model for Inbox_Placement_Testing_github.com-mailgun-scaffold-httpapi-Response.
 type InboxPlacementTestingGithubComMailgunScaffoldHttpapiResponse map[string]map[string]interface{}
 
@@ -53,6 +48,9 @@ type InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestReq struct {
 	From    string            `json:"from"`
 	Headers map[string]string `json:"headers,omitempty"`
 	HTML    *string           `json:"html,omitempty"`
+
+	// MaxSeedsPerProvider Maximum number of seeds per provider. 0 means no limit.
+	MaxSeedsPerProvider *int32 `json:"max_seeds_per_provider,omitempty"`
 
 	// ProviderFilter missing/null/[] means all providers
 	ProviderFilter []string `json:"provider_filter,omitempty"`
@@ -70,6 +68,13 @@ type InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestReq struct {
 	// TemplateName template from Mailgun Send
 	TemplateName *string           `json:"template_name,omitempty"`
 	Variables    map[string]string `json:"variables,omitempty"`
+}
+
+// InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestResp defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-CreateTestResp.
+type InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestResp struct {
+	Links       InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestRespLinks `json:"links"`
+	MailingList string                                                                 `json:"mailing_list"`
+	ResultID    string                                                                 `json:"result_id"`
 }
 
 // InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestRespLinks defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-CreateTestRespLinks.
@@ -91,35 +96,34 @@ type InboxPlacementTestingGithubComMailgunSpyInternalAPIPublicProvider struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-// InboxPlacementTestingGithubComMailgunSpyInternalAPISpyCreateTestResp defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-api-SpyCreateTestResp.
-type InboxPlacementTestingGithubComMailgunSpyInternalAPISpyCreateTestResp struct {
-	Links       InboxPlacementTestingGithubComMailgunSpyInternalAPICreateTestRespLinks `json:"links"`
-	MailingList string                                                                 `json:"mailing_list"`
-	ResultID    string                                                                 `json:"result_id"`
-}
-
 // InboxPlacementTestingGithubComMailgunSpyInternalModelDeliveryStats defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-DeliveryStats.
 type InboxPlacementTestingGithubComMailgunSpyInternalModelDeliveryStats struct {
-	Categories map[string]int32 `json:"categories"`
-	Delivered  int32            `json:"delivered"`
-	Inbox      int32            `json:"inbox"`
-	Missing    int32            `json:"missing"`
-	Pending    int32            `json:"pending"`
-	Provider   string           `json:"provider"`
-	Spam       int32            `json:"spam"`
-	Total      int32            `json:"total"`
+	Categories      map[string]int32 `json:"categories"`
+	Delivered       int32            `json:"delivered"`
+	FirstReceivedAt *time.Time       `json:"first_received_at"`
+	Inbox           int32            `json:"inbox"`
+	LastReceivedAt  *time.Time       `json:"last_received_at"`
+	Missing         int32            `json:"missing"`
+	Pending         int32            `json:"pending"`
+	Provider        string           `json:"provider"`
+	Spam            int32            `json:"spam"`
+	Total           int32            `json:"total"`
 }
 
 // InboxPlacementTestingGithubComMailgunSpyInternalModelExpectedMessage defines model for Inbox_Placement_Testing_github.com-mailgun-spy-internal-model-ExpectedMessage.
 type InboxPlacementTestingGithubComMailgunSpyInternalModelExpectedMessage struct {
+	DeliveredAt *time.Time `json:"delivered_at"`
+
+	// Destination Folder where the message was delivered.
 	Destination   string                                                                      `json:"destination"`
 	Dkim          *string                                                                     `json:"dkim,omitempty"`
 	Dmarc         *string                                                                     `json:"dmarc,omitempty"`
 	Email         string                                                                      `json:"email"`
-	Extensions    InboxPlacementTestingGithubComMailgunSpyInternalModelMessageExtension       `json:"extensions"`
+	Extensions    *InboxPlacementTestingGithubComMailgunSpyInternalModelMessageExtension      `json:"extensions"`
 	Headers       []InboxPlacementTestingGithubComMailgunSpyInternalModelHeadersMessageHeader `json:"headers,omitempty"`
 	OriginatingIP string                                                                      `json:"originating_ip"`
 	Provider      string                                                                      `json:"provider"`
+	ReceivedAt    *time.Time                                                                  `json:"received_at"`
 	Spf           *string                                                                     `json:"spf,omitempty"`
 	State         string                                                                      `json:"state"`
 	Tags          []string                                                                    `json:"tags"`
@@ -134,7 +138,10 @@ type InboxPlacementTestingGithubComMailgunSpyInternalModelKeyBox struct {
 	Kid             string                                                                        `json:"kid"`
 	LastResultAt    time.Time                                                                     `json:"last_result_at"`
 	MailingList     string                                                                        `json:"mailing_list"`
-	Name            string                                                                        `json:"name"`
+
+	// MaxSeedsPerProvider Maximum number of seeds per provider. 0 means no limit.
+	MaxSeedsPerProvider int32  `json:"max_seeds_per_provider"`
+	Name                string `json:"name"`
 
 	// PreviousMailingList List before last regen
 	PreviousMailingList string `json:"previous_mailing_list"`
@@ -312,6 +319,7 @@ type InboxReadyGithubComMailgunInboxreadyClientsMedicIPAddress struct {
 
 // InboxReadyGithubComMailgunInboxreadyModelDomain defines model for Inbox_Ready_github.com-mailgun-inboxready-model-Domain.
 type InboxReadyGithubComMailgunInboxreadyModelDomain struct {
+	Acid      string                                            `json:"acid"`
 	CreatedAt int64                                             `json:"created_at"`
 	Name      string                                            `json:"name"`
 	Services  map[string]bool                                   `json:"services"`
@@ -323,11 +331,6 @@ type InboxReadyGithubComMailgunInboxreadyModelDomain struct {
 type InboxReadyGithubComMailgunInboxreadyModelVerified struct {
 	Status     string `json:"status"`
 	VerifiedAt int64  `json:"verified_at"`
-}
-
-// InboxReadyGithubComMailgunScaffoldHttpapiGenericAPIError defines model for Inbox_Ready_github.com-mailgun-scaffold-httpapi-GenericAPIError.
-type InboxReadyGithubComMailgunScaffoldHttpapiGenericAPIError struct {
-	Reason string `json:"Reason"`
 }
 
 // InboxReadyGithubComMailgunScaffoldHttpapiGenericResponse defines model for Inbox_Ready_github.com-mailgun-scaffold-httpapi-GenericResponse.
@@ -420,6 +423,9 @@ type GithubComMailgunAlertsInternalSettingsChannelSettings struct {
 	// ChannelIDs For slack channel
 	ChannelIDs []string `json:"channel_ids,omitempty"`
 
+	// DisabledChannelIDs List of disabled Slack channels.
+	DisabledChannelIDs map[string]GithubComMailgunAlertsInternalSettingsDisabledChannel `json:"disabled_channel_ids,omitempty"`
+
 	// Emails For email channel
 	Emails []string `json:"emails,omitempty"`
 
@@ -427,12 +433,21 @@ type GithubComMailgunAlertsInternalSettingsChannelSettings struct {
 	URL *string `json:"url,omitempty"`
 }
 
+// GithubComMailgunAlertsInternalSettingsDisabledChannel defines model for github.com-mailgun-alerts-internal-settings-DisabledChannel.
+type GithubComMailgunAlertsInternalSettingsDisabledChannel struct {
+	// DisabledAt When the channel was disabled.
+	DisabledAt time.Time `json:"disabled_at"`
+
+	// Reason Why the channel was disabled.
+	Reason string `json:"reason"`
+}
+
 // GithubComMailgunAlertsInternalSettingsEventSettings defines model for github.com-mailgun-alerts-internal-settings-EventSettings.
 type GithubComMailgunAlertsInternalSettingsEventSettings struct {
 	// Channel The delivery channel for the alert.
 	Channel GithubComMailgunAlertsChannelsChannel `json:"channel"`
 
-	// DisabledAt Read only. When present
+	// DisabledAt When present, the timestamp indicating when a webhook endpoint was disabled.
 	DisabledAt *time.Time `json:"disabled_at,omitempty"`
 
 	// EventType The event type that is alerted on. Check GET /v1/alerts/events for possible values.
@@ -525,6 +540,9 @@ type GETV1InboxreadyDomainsParams struct {
 
 	// Domain Domain name
 	Domain *string `form:"domain,omitempty" json:"domain,omitempty"`
+
+	// IncludeSubaccounts Include subaccounts
+	IncludeSubaccounts *bool `form:"include_subaccounts,omitempty" json:"include_subaccounts,omitempty"`
 }
 
 // POSTV1InboxreadyDomainsParams defines parameters for POSTV1InboxreadyDomains.
