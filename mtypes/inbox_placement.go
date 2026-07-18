@@ -10,6 +10,8 @@ const (
 	InboxPlacementTestsEndpoint = InboxPlacementEndpoint + "/tests"
 )
 
+// CreateInboxPlacementTestOptions request for running an inbox placement test.
+// TODO(vtopc): add account_template_name string:
 type CreateInboxPlacementTestOptions = inboxready.POSTV4InboxTestsJSONRequestBody
 
 type (
