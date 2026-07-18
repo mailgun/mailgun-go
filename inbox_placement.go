@@ -6,6 +6,8 @@ import (
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
+// CreateInboxPlacementTest runs Inbox Placement Test
+// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/inboxready/inbox-placement/post-v4-inbox-tests
 func (mg *Client) CreateInboxPlacementTest(ctx context.Context, opts mtypes.CreateInboxPlacementTestOptions,
 ) (*mtypes.CreateInboxPlacementTestResponse, error) {
 	r := newHTTPRequest(generateApiUrl(mg, mtypes.InboxPlacementVersion, mtypes.InboxPlacementTestsEndpoint))
