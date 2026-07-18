@@ -139,6 +139,11 @@ type Mailgun interface {
 	SetAPIBase(url string) error
 	AddOverrideHeader(k string, v string)
 
+	ListAPIKeys(ctx context.Context, opts *ListAPIKeysOptions) ([]mtypes.APIKey, error)
+	CreateAPIKey(ctx context.Context, role string, opts *CreateAPIKeyOptions) (mtypes.APIKey, error)
+	DeleteAPIKey(ctx context.Context, id string) error
+	RegeneratePublicAPIKey(ctx context.Context) (mtypes.RegeneratePublicAPIKeyResponse, error)
+
 	// Send attempts to queue a message (see CommonMessage, NewMessage, and its methods) for delivery.
 	Send(ctx context.Context, m Message) (mtypes.SendMessageResponse, error)
 	ReSend(ctx context.Context, url string, recipients ...string) (mtypes.SendMessageResponse, error)
@@ -274,6 +279,8 @@ type Mailgun interface {
 
 	ListMonitoredDomains(opts ListMonitoredDomainsOptions) (*MonitoredDomainsIterator, error)
 
+	CreateInboxPlacementTest(ctx context.Context, opts mtypes.CreateInboxPlacementTestOptions) (*mtypes.CreateInboxPlacementTestResponse, error)
+
 	ListSubaccounts(opts *ListSubaccountsOptions) *SubaccountsIterator
 	CreateSubaccount(ctx context.Context, subaccountName string) (mtypes.SubaccountResponse, error)
 	GetSubaccount(ctx context.Context, subaccountID string) (mtypes.SubaccountResponse, error)
@@ -282,11 +289,6 @@ type Mailgun interface {
 
 	SetOnBehalfOfSubaccount(subaccountID string)
 	RemoveOnBehalfOfSubaccount()
-
-	ListAPIKeys(ctx context.Context, opts *ListAPIKeysOptions) ([]mtypes.APIKey, error)
-	CreateAPIKey(ctx context.Context, role string, opts *CreateAPIKeyOptions) (mtypes.APIKey, error)
-	DeleteAPIKey(ctx context.Context, id string) error
-	RegeneratePublicAPIKey(ctx context.Context) (mtypes.RegeneratePublicAPIKeyResponse, error)
 }
 
 // Client bundles data needed by a large number of methods in order to interact with the Mailgun API.
