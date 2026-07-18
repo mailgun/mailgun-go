@@ -159,6 +159,7 @@ func NewServer() *Server {
 	ms.addAnalyticsRoutes(r)
 	ms.addAlertsRoutes(r)
 	ms.addInboxreadyDomainsRoutes(r)
+	ms.addInboxPlacementRoutes(r)
 	ms.addAPIKeysRoutes(r)
 
 	// Start the server
