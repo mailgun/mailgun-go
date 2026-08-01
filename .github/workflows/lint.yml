@@ -1,4 +1,4 @@
-name: CI
+name: Lint
 
 on:
   pull_request:
@@ -10,17 +10,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  GO_VERSION: 1.26.x
+
 jobs:
-  test:
-    name: test
-    strategy:
-      matrix:
-        go-version:
-          - 1.24.x # minimum supported version(from go.mod)
-          - 1.25.x
-          - 1.26.x
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,13 +24,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: ${{ env.GO_VERSION }}
           cache: true # caching and restoring go modules and build outputs
-
-      - run: go env
 
       - name: Install deps
         run: go mod download
 
-      - name: Test
-        run: go test ./... -v -race -p=1 -count=1
+      - name: nilaway
+        run: make nilaway
+
+      # TODO(vtopc): use golangci/golangci-lint-action instead:
+      - name: lint
+        run: make lint
