@@ -1,10 +1,13 @@
 name: Update CHANGELOG from GitHub Release
 
 on:
+  # all vars - https://github.com/dhimmel/dump-actions-context/blob/main/contexts/release.json
   release:
     types: [published]
 
-permissions: write-all
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   update-changelog:
@@ -27,12 +30,14 @@ jobs:
             const tag = release.tag_name;
             const title = tag.replace(/^v/, '');
             const date = release.published_at.substring(0, 10);
-            let body = release.body || 'No release notes provided.';
-            body = body.replace(/## What's Changed/g, "### What's Changed");
+            const body = (release.body || 'No release notes provided.')
+              .replace(/\r\n/g, '\n')
+              .replace(/^## What's Changed/gm, "#### Changed")
+              .trim();
 
             const changelogPath = 'CHANGELOG.md';
 
-            const newEntry = `## [${title}] - ${date}\n${body}\n`;
+            const newEntry = `### [${title}] - ${date}\n${body}\n`;
 
             console.log('----- NEW CHANGELOG ENTRY START -----');
             console.log(newEntry);
@@ -47,18 +52,21 @@ jobs:
 
             // Insert after the first header
             const updated = changelog.replace(
-            /(#[^\n]*\n)/,
+            /(##[^\n]*\n)/,
             `$1${newEntry}`
             );
 
             fs.writeFileSync(changelogPath, updated);
 
-      # TODO(vtopc): use stefanzweifel/git-auto-commit-action or peter-evans/create-pull-request instead?
-      - name: Commit and push changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git checkout ${{ github.event.repository.default_branch }}
-          git add CHANGELOG.md
-          git commit -m "chore: update changelog for ${{ github.event.release.tag_name }}"
-          git push
+      - name: Create PR
+        # Requires "Allow GitHub Actions to create and approve pull requests" to be enabled in the repository settings
+        uses: peter-evans/create-pull-request@v8.1.1
+        with:
+          base: ${{ github.event.repository.default_branch }}
+          commit-message: "Update CHANGELOG.md for ${{ github.event.release.name || github.event.release.tag_name }}"
+          branch: gha/update-changelog-${{ github.event.release.id }}
+          delete-branch: true
+          title: Update CHANGELOG.md for ${{ github.event.release.name || github.event.release.tag_name }}
+          assignees: ${{ github.event.release.author.login }}
+          body: |
+            Update CHANGELOG.md for ${{ github.event.release.name }} (${{ github.event.release.tag_name }}).
