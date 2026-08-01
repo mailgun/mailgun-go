@@ -1,10 +1,13 @@
 name: Update CHANGELOG from GitHub Release
 
 on:
+  # all vars - https://github.com/dhimmel/dump-actions-context/blob/main/contexts/release.json
   release:
     types: [published]
 
-permissions: write-all
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   update-changelog:
