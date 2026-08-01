@@ -59,10 +59,11 @@ jobs:
         # Requires "Allow GitHub Actions to create and approve pull requests" to be enabled in the repository settings
         uses: peter-evans/create-pull-request@v8.1.1
         with:
-          commit-message: "Update CHANGELOG.md for ${{ github.event.release.name }}"
-          branch: gha/update-changelog-${{ github.event.release.tag_name }}
+          base: ${{ github.event.repository.default_branch }}
+          commit-message: "Update CHANGELOG.md for ${{ github.event.release.name || github.event.release.tag_name }}"
+          branch: gha/update-changelog-${{ github.event.release.id }}
           delete-branch: true
-          title: Update CHANGELOG.md for ${{ github.event.release.name }}
+          title: Update CHANGELOG.md for ${{ github.event.release.name || github.event.release.tag_name }}
           assignees: ${{ github.event.release.author.login }}
           body: |
             Update CHANGELOG.md for ${{ github.event.release.name }} (${{ github.event.release.tag_name }}).
