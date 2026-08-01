@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 
 on:
   pull_request:
@@ -35,13 +35,6 @@ jobs:
 
       - name: Install deps
         run: go mod download
-
-      - name: nilaway
-        run: make nilaway
-
-      # TODO(vtopc): move into separate job:
-      - name: lint
-        run: make lint
 
       - name: Test
         run: go test ./... -v -race -p=1 -count=1
