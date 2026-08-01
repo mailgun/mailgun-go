@@ -29,12 +29,12 @@ jobs:
             const date = release.published_at.substring(0, 10);
             const body = (release.body || 'No release notes provided.')
               .replace(/\r\n/g, '\n')
-              .replace(/^## What's Changed/gm, "### What's Changed")
+              .replace(/^## What's Changed/gm, "#### Changed")
               .trim();
 
             const changelogPath = 'CHANGELOG.md';
 
-            const newEntry = `## [${title}] - ${date}\n${body}\n`;
+            const newEntry = `### [${title}] - ${date}\n${body}\n`;
 
             console.log('----- NEW CHANGELOG ENTRY START -----');
             console.log(newEntry);
@@ -49,7 +49,7 @@ jobs:
 
             // Insert after the first header
             const updated = changelog.replace(
-            /(#[^\n]*\n)/,
+            /(##[^\n]*\n)/,
             `$1${newEntry}`
             );
 
