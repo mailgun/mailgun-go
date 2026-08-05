@@ -11,10 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * _Separate GHA CI workflow for linters by @vtopc in https://github.com/mailgun/mailgun-go/pull/492_
 * _Bump the github-actions group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/490_
 
-## New Contributors
-* @Teko012 made their first contribution in https://github.com/mailgun/mailgun-go/pull/493
-
 **Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.18.0...v5.18.1
+
 ### [5.18.0] - 2026-08-01
 #### Changed
 * Bump github.com/oapi-codegen/runtime from 1.4.2 to 1.6.0 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/488
@@ -22,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 **Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.17.0...v5.18.0
+
+### [5.1.0 - 5.17.0]
+TBA
 
 ### [5.0.0] - 2024-12-19
 #### Changed

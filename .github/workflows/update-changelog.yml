@@ -37,7 +37,7 @@ jobs:
 
             const changelogPath = 'CHANGELOG.md';
 
-            const newEntry = `### [${title}] - ${date}\n${body}\n`;
+            const newEntry = `### [${title}] - ${date}\n${body}\n\n`;
 
             console.log('----- NEW CHANGELOG ENTRY START -----');
             console.log(newEntry);
