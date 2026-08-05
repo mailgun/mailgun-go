@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.17.0...v5.18.0
 
+### [5.1.0 - 5.17.0]
+TBA
+
 ### [5.0.0] - 2024-12-19
 #### Changed
 * **BREAKING**: Move all types into `mtypes` package for better organization and type safety
