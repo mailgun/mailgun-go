@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Changes
+### [5.18.1] - 2026-08-05
+#### Changed
+* Update ValidateEmail to use provider_lookup parameter by @Teko012 in https://github.com/mailgun/mailgun-go/pull/493: **This might be a breaking change if you are using `ValidateEmail(ctx, email, false)`. The `false` will work now, and it won't do provider lookup!!!** 
+* _Separate GHA CI workflow for linters by @vtopc in https://github.com/mailgun/mailgun-go/pull/492_
+* _Bump the github-actions group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/490_
+
+## New Contributors
+* @Teko012 made their first contribution in https://github.com/mailgun/mailgun-go/pull/493
+
+**Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.18.0...v5.18.1
 ### [5.18.0] - 2026-08-01
 #### Changed
 * Bump github.com/oapi-codegen/runtime from 1.4.2 to 1.6.0 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/488
