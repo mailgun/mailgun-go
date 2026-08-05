@@ -26,6 +26,9 @@ func (ms *Server) validateEmailV4(w http.ResponseWriter, r *http.Request) {
 		results.Risk = "low"
 	}
 	results.Reason = []string{"no-reason"}
+	if r.FormValue("provider_lookup") == "true" {
+		results.Reason = []string{"smtp_timeout"}
+	}
 	results.Result = "deliverable"
 	results.Engagement = &mtypes.EngagementData{
 		Engaging: false,

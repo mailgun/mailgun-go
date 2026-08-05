@@ -270,7 +270,7 @@ type Mailgun interface {
 	DeleteTemplateVersion(ctx context.Context, domain, templateName, tag string) error
 	ListTemplateVersions(domain, templateName string, opts *ListOptions) *TemplateVersionsIterator
 
-	ValidateEmail(ctx context.Context, email string, mailBoxVerify bool) (mtypes.ValidateEmailResponse, error)
+	ValidateEmail(ctx context.Context, email string, providerLookup bool) (mtypes.ValidateEmailResponse, error)
 
 	ListAlertsEvents(context.Context, *ListAlertsEventsOptions) (*mtypes.AlertsEventsResponse, error)
 	ListAlerts(context.Context, *ListAlertsOptions) (*mtypes.AlertsSettingsResponse, error)
