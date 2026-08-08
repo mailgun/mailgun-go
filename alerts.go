@@ -4,6 +4,10 @@ package mailgun
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"crypto/subtle"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
@@ -66,4 +70,34 @@ func (mg *Client) DeleteAlert(ctx context.Context, id uuid.UUID) error {
 	_, err := makeDeleteRequest(ctx, r)
 
 	return err
+}
+
+// VerifyAlertsWebhookSign verifies if the request was sent from the Mailgun.
+// This is optional.
+// Alerts webhooks are using another method to validate the webhook, not same as Mailgun Send webhooks.
+//
+// `body` is a raw HTTP request body sent by Mailgun to your webhook URL.
+// `sign` is an "X-Sign" header from the Mailgun request.
+// `signingKey` - is a Webhooks.SigningKey from (*Client).ListAlerts response.
+func VerifyAlertsWebhookSign(body []byte, sign, webhookSigningKey string) (verified bool, err error) {
+	calculatedSign, err := CalcAlertsHMAC(body, webhooksEndpoint)
+	if err != nil {
+		return false, fmt.Errorf("calculating HMAC: %w", err)
+	}
+
+	return subtle.ConstantTimeCompare([]byte(sign), calculatedSign) == 1, nil
+}
+
+// CalcAlertsHMAC calculates Alerts webhook HMAC.
+// Alerts webhooks are using another method to validate the webhook, not same as Mailgun Send webhooks.
+//
+// `signingKey` - is a Webhooks.SigningKey from (*Client).ListAlerts.
+func CalcAlertsHMAC(body []byte, webhookSigningKey string) (sign []byte, err error) {
+	h := hmac.New(sha256.New, []byte(webhookSigningKey))
+	_, err = h.Write(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return h.Sum(nil), nil
 }

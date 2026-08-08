@@ -94,7 +94,8 @@ func (mg *Client) UpdateWebhook(ctx context.Context, domain, name string, urls [
 	return err
 }
 
-// VerifyWebhookSignature - use this method to parse the webhook signature given as JSON in the webhook response
+// VerifyWebhookSignature - use this method to parse the Mailgun Send webhook signature given as JSON in the webhook response.
+// If you need to validate Alerts webhooks, use the func VerifyAlertsWebhookSign instead.
 func (mg *Client) VerifyWebhookSignature(sig mtypes.Signature) (verified bool, err error) {
 	webhookSigningKey := mg.WebhookSigningKey()
 	if webhookSigningKey == "" {
