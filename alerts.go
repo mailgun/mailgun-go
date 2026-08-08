@@ -81,7 +81,7 @@ func (mg *Client) DeleteAlert(ctx context.Context, id uuid.UUID) error {
 // `sign` is an "X-Sign" header from the Mailgun request.
 // `signingKey` - is a Webhooks.SigningKey from (*Client).ListAlerts response.
 func VerifyAlertsWebhookSign(body []byte, sign, webhookSigningKey string) (verified bool, err error) {
-	calculatedSignature, err := CalcAlertsHMAC(body, webhooksEndpoint)
+	calculatedSignature, err := CalcAlertsHMAC(body, webhookSigningKey)
 	if err != nil {
 		return false, fmt.Errorf("calculating HMAC: %w", err)
 	}
