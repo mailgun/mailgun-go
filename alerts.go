@@ -95,7 +95,7 @@ func VerifyAlertsWebhookSign(body []byte, sign, webhookSigningKey string) (verif
 }
 
 // CalcAlertsHMAC calculates Alerts webhook HMAC.
-// Alerts webhooks are using another method to validate the webhook, not same as Mailgun Send webhooks.
+// Alerts webhooks are using another method to validate the webhook, not the same as Mailgun Send webhooks.
 //
 // `signingKey` - is a Webhooks.SigningKey from (*Client).ListAlerts.
 func CalcAlertsHMAC(body []byte, webhookSigningKey string) (sign []byte, err error) {
