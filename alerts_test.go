@@ -94,8 +94,8 @@ func TestCalcAlertsHMAC(t *testing.T) {
 	}{
 		"positive": {
 			body:              testBody,
-			webhookSigningKey: testWebhookSigningKey,
-			wantSign:          "9900bf2f2ae23f99dcb3b660906a20d3cdc89e67ee61cc7522f1f4d661240e04",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			wantSign:          "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
 		},
 	}
 
