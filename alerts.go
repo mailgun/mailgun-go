@@ -7,6 +7,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -80,12 +81,17 @@ func (mg *Client) DeleteAlert(ctx context.Context, id uuid.UUID) error {
 // `sign` is an "X-Sign" header from the Mailgun request.
 // `signingKey` - is a Webhooks.SigningKey from (*Client).ListAlerts response.
 func VerifyAlertsWebhookSign(body []byte, sign, webhookSigningKey string) (verified bool, err error) {
-	calculatedSign, err := CalcAlertsHMAC(body, webhooksEndpoint)
+	calculatedSignature, err := CalcAlertsHMAC(body, webhooksEndpoint)
 	if err != nil {
 		return false, fmt.Errorf("calculating HMAC: %w", err)
 	}
 
-	return subtle.ConstantTimeCompare([]byte(sign), calculatedSign) == 1, nil
+	signature, err := hex.DecodeString(sign)
+	if err != nil {
+		return false, fmt.Errorf("invalid sign: %w", err)
+	}
+
+	return subtle.ConstantTimeCompare(signature, calculatedSignature) == 1, nil
 }
 
 // CalcAlertsHMAC calculates Alerts webhook HMAC.
