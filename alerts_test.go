@@ -89,25 +89,82 @@ func TestCalcAlertsHMAC(t *testing.T) {
 	tests := map[string]struct {
 		body              []byte
 		webhookSigningKey string
-		wantSign          string
-		wantErr           error
+		wantHEXSign       string
+		wantErr           bool
 	}{
 		"positive": {
 			body:              testBody,
 			webhookSigningKey: testAlertWebhookSigningKey,
-			wantSign:          "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
+			wantHEXSign:       "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
 		},
 	}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			b, err := mailgun.CalcAlertsHMAC(tt.body, tt.webhookSigningKey)
-			require.Equal(t, tt.wantErr, err)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 
-			gotSign := hex.EncodeToString(b)
-			assert.Equal(t, tt.wantSign, gotSign)
+				gotSign := hex.EncodeToString(b)
+				assert.Equal(t, tt.wantHEXSign, gotSign)
+			}
 		})
 	}
 }
 
-// TODO(vtopc): add tests for VerifyAlertsWebhookSign
+func TestVerifyAlertsWebhookSign(t *testing.T) {
+	body := AlertsWebhookReq{
+		Signature: Signature{
+			Timestamp: 1136239445,
+			Token:     "abc",
+		},
+		EventData: map[string]string{
+			"event": "ip_listed",
+			"ip":    "1.1.1.1",
+		},
+	}
+	testBody, err := json.Marshal(body)
+	require.NoError(t, err)
+
+	tests := map[string]struct {
+		body              []byte
+		signHeader        string
+		webhookSigningKey string
+		want              bool
+		wantErr           bool
+	}{
+		"verified": {
+			body:              testBody,
+			signHeader:        "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			want:              true,
+		},
+		"not_verified": {
+			body:              testBody,
+			signHeader:        "beef",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			want:              false,
+		},
+		"malformed_sign": {
+			body:              testBody,
+			signHeader:        "malformed",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			wantErr:           true,
+			want:              false,
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			isVerified, err := mailgun.VerifyAlertsWebhookSign(tt.body, tt.signHeader, tt.webhookSigningKey)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.want, isVerified)
+			}
+		})
+	}
+}

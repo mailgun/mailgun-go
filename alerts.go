@@ -78,15 +78,15 @@ func (mg *Client) DeleteAlert(ctx context.Context, id uuid.UUID) error {
 // Alerts webhooks are using another method to validate the webhook, not same as Mailgun Send webhooks.
 //
 // `body` is a raw HTTP request body sent by Mailgun to your webhook URL.
-// `sign` is an "X-Sign" header from the Mailgun request.
-// `signingKey` - is a Webhooks.SigningKey from (*Client).ListAlerts response.
-func VerifyAlertsWebhookSign(body []byte, sign, webhookSigningKey string) (verified bool, err error) {
+// `signHeader` is an "X-Sign" header from the Mailgun request.
+// `webhookSigningKey` - is a Webhooks.SigningKey from (*Client).ListAlerts (GET /v1/alerts/settings) response.
+func VerifyAlertsWebhookSign(body []byte, signHeader, webhookSigningKey string) (verified bool, err error) {
 	calculatedSignature, err := CalcAlertsHMAC(body, webhookSigningKey)
 	if err != nil {
 		return false, fmt.Errorf("calculating HMAC: %w", err)
 	}
 
-	signature, err := hex.DecodeString(sign)
+	signature, err := hex.DecodeString(signHeader)
 	if err != nil {
 		return false, fmt.Errorf("invalid sign: %w", err)
 	}
@@ -97,7 +97,8 @@ func VerifyAlertsWebhookSign(body []byte, sign, webhookSigningKey string) (verif
 // CalcAlertsHMAC calculates Alerts webhook HMAC.
 // Alerts webhooks are using another method to validate the webhook, not the same as Mailgun Send webhooks.
 //
-// `signingKey` - is a Webhooks.SigningKey from (*Client).ListAlerts.
+// `body` is a raw HTTP request body sent by Mailgun to your webhook URL.
+// `webhookSigningKey` - is a Webhooks.SigningKey from (*Client).ListAlerts (GET /v1/alerts/settings) response.
 func CalcAlertsHMAC(body []byte, webhookSigningKey string) (sign []byte, err error) {
 	h := hmac.New(sha256.New, []byte(webhookSigningKey))
 	_, err = h.Write(body)
