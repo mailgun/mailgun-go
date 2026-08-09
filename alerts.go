@@ -1,6 +1,6 @@
 package mailgun
 
-// https://documentation.mailgun.com/docs/inboxready/openapi-final/tag/Alerts/
+// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/inboxready/alerts
 
 import (
 	"bytes"
