@@ -1,9 +1,13 @@
 package mailgun_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/google/uuid"
@@ -60,32 +64,7 @@ func TestDeleteAlert(t *testing.T) {
 	require.NoError(t, err)
 }
 
-type AlertsWebhookReq struct {
-	Signature Signature `json:"signature"`
-	EventData any       `json:"event_data"`
-}
-
-type Signature struct {
-	// Number of seconds passed since January 1, 1970.
-	Timestamp int64 `json:"timestamp"`
-	// Randomly generated string.
-	Token string `json:"token"`
-}
-
 func TestCalcAlertsHMAC(t *testing.T) {
-	body := AlertsWebhookReq{
-		Signature: Signature{
-			Timestamp: 1136239445,
-			Token:     "abc",
-		},
-		EventData: map[string]string{
-			"event": "ip_listed",
-			"ip":    "1.1.1.1",
-		},
-	}
-	testBody, err := json.Marshal(body)
-	require.NoError(t, err)
-
 	tests := map[string]struct {
 		body              []byte
 		webhookSigningKey string
@@ -93,7 +72,7 @@ func TestCalcAlertsHMAC(t *testing.T) {
 		wantErr           bool
 	}{
 		"positive": {
-			body:              testBody,
+			body:              alertsWebhookBody(t),
 			webhookSigningKey: testAlertWebhookSigningKey,
 			wantHEXSign:       "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
 		},
@@ -115,19 +94,6 @@ func TestCalcAlertsHMAC(t *testing.T) {
 }
 
 func TestVerifyAlertsWebhookSign(t *testing.T) {
-	body := AlertsWebhookReq{
-		Signature: Signature{
-			Timestamp: 1136239445,
-			Token:     "abc",
-		},
-		EventData: map[string]string{
-			"event": "ip_listed",
-			"ip":    "1.1.1.1",
-		},
-	}
-	testBody, err := json.Marshal(body)
-	require.NoError(t, err)
-
 	tests := map[string]struct {
 		body              []byte
 		signHeader        string
@@ -136,19 +102,19 @@ func TestVerifyAlertsWebhookSign(t *testing.T) {
 		wantErr           bool
 	}{
 		"verified": {
-			body:              testBody,
+			body:              alertsWebhookBody(t),
 			signHeader:        "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
 			webhookSigningKey: testAlertWebhookSigningKey,
 			want:              true,
 		},
 		"not_verified": {
-			body:              testBody,
+			body:              alertsWebhookBody(t),
 			signHeader:        "beef",
 			webhookSigningKey: testAlertWebhookSigningKey,
 			want:              false,
 		},
 		"malformed_sign": {
-			body:              testBody,
+			body:              alertsWebhookBody(t),
 			signHeader:        "malformed",
 			webhookSigningKey: testAlertWebhookSigningKey,
 			wantErr:           true,
@@ -167,4 +133,92 @@ func TestVerifyAlertsWebhookSign(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestVerifyAlertsWebhookSignFromRequest(t *testing.T) {
+	tests := map[string]struct {
+		body              []byte
+		signHeader        string
+		webhookSigningKey string
+		want              bool
+		wantErr           bool
+	}{
+		"verified": {
+			body:              alertsWebhookBody(t),
+			signHeader:        "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			want:              true,
+		},
+		"not_verified": {
+			body:              alertsWebhookBody(t),
+			signHeader:        "beef",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			want:              false,
+		},
+		"missing_sign_header": {
+			body:              alertsWebhookBody(t),
+			signHeader:        "",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			want:              false,
+		},
+		"malformed_sign": {
+			body:              alertsWebhookBody(t),
+			signHeader:        "malformed",
+			webhookSigningKey: testAlertWebhookSigningKey,
+			wantErr:           true,
+			want:              false,
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(tt.body))
+			req.Header.Set(mailgun.AlertsWebhookSignHeader, tt.signHeader)
+
+			isVerified, err := mailgun.VerifyAlertsWebhookSignFromRequest(req, tt.webhookSigningKey)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.want, isVerified)
+			}
+
+			t.Run("body_is_still_readable", func(t *testing.T) {
+				gotBody, err := io.ReadAll(req.Body)
+				require.NoError(t, err)
+				assert.Equal(t, tt.body, gotBody)
+			})
+		})
+	}
+}
+
+func alertsWebhookBody(t *testing.T) []byte {
+	t.Helper()
+
+	type Signature struct {
+		// Number of seconds passed since January 1, 1970.
+		Timestamp int64 `json:"timestamp"`
+		// Randomly generated string.
+		Token string `json:"token"`
+	}
+
+	type AlertsWebhookReq struct {
+		Signature Signature `json:"signature"`
+		EventData any       `json:"event_data"`
+	}
+
+	body := AlertsWebhookReq{
+		Signature: Signature{
+			Timestamp: 1136239445,
+			Token:     "abc",
+		},
+		EventData: map[string]string{
+			"event": "ip_listed",
+			"ip":    "1.1.1.1",
+		},
+	}
+	b, err := json.Marshal(body)
+	require.NoError(t, err)
+
+	return b
 }

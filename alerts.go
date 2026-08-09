@@ -3,16 +3,21 @@ package mailgun
 // https://documentation.mailgun.com/docs/inboxready/openapi-final/tag/Alerts/
 
 import (
+	"bytes"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
+
+const AlertsWebhookSignHeader = "X-Sign"
 
 type ListAlertsEventsOptions struct{}
 
@@ -92,6 +97,25 @@ func VerifyAlertsWebhookSign(body []byte, signHeader, webhookSigningKey string) 
 	}
 
 	return subtle.ConstantTimeCompare(signature, calculatedSignature) == 1, nil
+}
+
+// VerifyAlertsWebhookSignFromRequest verifies if the request was sent from the Mailgun.
+// This is optional.
+// Alerts webhooks are using another method to validate the webhook, not same as Mailgun Send webhooks.
+//
+// `webhookSigningKey` - is a Webhooks.SigningKey from (*Client).ListAlerts (GET /v1/alerts/settings) response.
+func VerifyAlertsWebhookSignFromRequest(r *http.Request, webhookSigningKey string) (verified bool, err error) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return false, fmt.Errorf("reading request body: %w", err)
+	}
+
+	// put the body back to the request so it can be read again later
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	signHeader := r.Header.Get(AlertsWebhookSignHeader)
+
+	return VerifyAlertsWebhookSign(body, signHeader, webhookSigningKey)
 }
 
 // CalcAlertsHMAC calculates Alerts webhook HMAC.
