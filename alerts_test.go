@@ -173,7 +173,7 @@ func TestVerifyAlertsWebhookSignFromRequest(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/webhook", bytes.NewReader(tt.body))
-			req.Header.Set(mailgun.AlertsWebhookSignHeader, tt.signHeader)
+			req.Header.Set(mtypes.AlertsWebhookSignHeader, tt.signHeader)
 
 			isVerified, err := mailgun.VerifyAlertsWebhookSignFromRequest(req, tt.webhookSigningKey)
 			if tt.wantErr {

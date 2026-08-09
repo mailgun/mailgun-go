@@ -17,8 +17,6 @@ import (
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
-const AlertsWebhookSignHeader = "X-Sign"
-
 type ListAlertsEventsOptions struct{}
 
 // ListAlertsEvents list of events that you can choose to receive alerts for.
@@ -92,7 +90,7 @@ func VerifyAlertsWebhookSignFromRequest(r *http.Request, webhookSigningKey strin
 	// put the body back to the request so it can be read again later
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
-	signHeader := r.Header.Get(AlertsWebhookSignHeader)
+	signHeader := r.Header.Get(mtypes.AlertsWebhookSignHeader)
 
 	return VerifyAlertsWebhookSign(body, signHeader, webhookSigningKey)
 }
