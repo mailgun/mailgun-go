@@ -76,6 +76,11 @@ func TestCalcAlertsHMAC(t *testing.T) {
 			webhookSigningKey: testAlertWebhookSigningKey,
 			wantHEXSign:       "8c82d17f19d19baf6cae658e3cf5db3c389309bcccfa490d27a5d39fa036dadf",
 		},
+		"empty_signing_key": {
+			body:              alertsWebhookBody(t),
+			webhookSigningKey: "",
+			wantErr:           true,
+		},
 	}
 
 	for name, tt := range tests {

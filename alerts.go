@@ -125,6 +125,10 @@ func VerifyAlertsWebhookSign(body []byte, signHeader, webhookSigningKey string) 
 //
 // `webhookSigningKey` - is a Webhooks.SigningKey from (*Client).ListAlerts (GET /v1/alerts/settings) response.
 func CalcAlertsHMAC(body []byte, webhookSigningKey string) (sign []byte, err error) {
+	if webhookSigningKey == "" {
+		return nil, fmt.Errorf("webhook signing key is not set")
+	}
+
 	h := hmac.New(sha256.New, []byte(webhookSigningKey))
 	_, err = h.Write(body)
 	if err != nil {
