@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Changes
+### [5.19.1] - 2026-08-10
+#### Changed
+* DE-1542 Add check to CalcAlertsHMAC by @vtopc in https://github.com/mailgun/mailgun-go/pull/498
+
+
+**Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.19.0...v5.19.1
+
 ### [5.19.0] - 2026-08-09
 #### Changed
 * DE-1542 Add VerifyAlertsWebhookSignFromRequest, VerifyAlertsWebhookSign, and CalcAlertsHMAC functions to verify Alerts Webhooks by @vtopc in https://github.com/mailgun/mailgun-go/pull/496
