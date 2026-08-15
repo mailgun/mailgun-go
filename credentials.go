@@ -190,6 +190,9 @@ func (mg *Client) ChangeCredentialPassword(ctx context.Context, domain, login, p
 	r := newHTTPRequest(generateCredentialsUrl(mg, domain, login))
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
+
+	// TODO(vtopc): should be "multipart/form-data" (NewFormDataPayload) according to the docs:
+	// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/mailgun/credentials/put-v3-domains--domain-name--credentials--spec-
 	p := newUrlEncodedPayload()
 	p.addValue("password", password)
 	_, err := makePutRequest(ctx, r, p)
