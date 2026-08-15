@@ -334,6 +334,7 @@ func (mg *Client) DeactivateDomainKey(ctx context.Context, domain, dkimSelector 
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): why newUrlEncodedPayload()?
 	_, err := makePutRequest(ctx, r, newUrlEncodedPayload())
 	return err
 }
