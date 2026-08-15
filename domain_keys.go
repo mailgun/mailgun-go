@@ -362,6 +362,8 @@ func (mg *Client) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSele
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): should be "multipart/form-data" (NewFormDataPayload) according to the docs:
+	// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/mailgun/domain-keys/put-v3-domains--name--dkim-selector
 	payload := newUrlEncodedPayload()
 	payload.addValue("dkim_selector", dkimSelector)
 	_, err := makePutRequest(ctx, r, payload)
