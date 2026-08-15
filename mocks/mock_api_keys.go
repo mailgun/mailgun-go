@@ -24,9 +24,15 @@ func (ms *Server) listAPIKeys(w http.ResponseWriter, _ *http.Request) {
 	toJSON(w, resp)
 }
 
-func (ms *Server) createAPIKey(w http.ResponseWriter, _ *http.Request) {
+func (ms *Server) createAPIKey(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+		return
+	}
+
 	resp := mtypes.CreateAPIKeyResponse{
-		Key: mtypes.APIKey{ID: "1", Role: "basic"},
+		Key: mtypes.APIKey{ID: "1", Role: r.FormValue("role")},
 	}
 
 	toJSON(w, resp)
