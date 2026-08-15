@@ -59,7 +59,7 @@ func (mg *Client) GetTemplate(ctx context.Context, domain, name string) (mtypes.
 	return resp.Item, nil
 }
 
-// Update the name and description of a template
+// UpdateTemplate updates the name and description of a template
 func (mg *Client) UpdateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
 	if template.Name == "" {
 		return errors.New("UpdateTemplate() Template.Name cannot be empty")
