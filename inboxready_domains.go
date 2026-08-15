@@ -86,14 +86,15 @@ func (iter *MonitoredDomainsIterator) fetch(ctx context.Context,
 	return &resp, nil
 }
 
-// AddDomainToMonitoring adds a single domain to an account
+// AddDomainToMonitoring adds a single domain to an account.
+// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/inboxready/domains/post-v1-inboxready-domains
 func (mg *Client) AddDomainToMonitoring(ctx context.Context, opts mtypes.AddDomainToMonitoringOptions,
 ) (*mtypes.AddDomainToMonitoringResponse, error) {
 	req := newHTTPRequest(generateApiUrl(mg, mtypes.InboxreadyDomainsVersion, mtypes.InboxreadyDomainsEndpoint))
 	req.setBasicAuth(basicAuthUser, mg.APIKey())
 	req.setClient(mg.HTTPClient())
 
-	payload := newUrlEncodedPayload()
+	payload := newUrlEncodedPayload() // NOTE: this is according to docs, just not very RESTful
 	payload.addValue("domain", opts.Domain)
 
 	var resp mtypes.AddDomainToMonitoringResponse

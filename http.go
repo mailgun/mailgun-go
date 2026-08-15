@@ -18,6 +18,7 @@ import (
 
 var invalidURL = regexp.MustCompile(`/v\d+.*`)
 
+// TODO(DE-1140): remove this, should be (*Client).Do(*http.Request)
 type httpRequest struct {
 	URL               string
 	Parameters        map[string][]string
@@ -116,7 +117,7 @@ func (*jsonEncodedPayload) getValues() []keyValuePair {
 }
 
 // newUrlEncodedPayload creates "application/x-www-form-urlencoded" request payload.
-// TODO(vtopc): misused in many places instead of NewFormDataPayload().
+// TODO(vtopc): misused in many places and used with POST, PUT and DELETE instead of NewFormDataPayload().
 func newUrlEncodedPayload() *urlEncodedPayload {
 	return &urlEncodedPayload{}
 }

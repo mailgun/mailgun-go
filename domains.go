@@ -238,6 +238,7 @@ func (mg *Client) VerifyDomain(ctx context.Context, domain string) (mtypes.GetDo
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): why newUrlEncodedPayload()?
 	payload := newUrlEncodedPayload()
 	var resp mtypes.GetDomainResponse
 	err := putResponseFromJSON(ctx, r, payload, &resp)

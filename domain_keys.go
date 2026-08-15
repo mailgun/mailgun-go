@@ -175,6 +175,8 @@ func (mg *Client) CreateDomainKey(ctx context.Context, domain, dkimSelector stri
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): should be "multipart/form-data" (NewFormDataPayload) according to the docs:
+	// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/mailgun/domain-keys/post-v1-dkim-keys
 	payload := newUrlEncodedPayload()
 	payload.addValue("signing_domain", domain)
 	payload.addValue("selector", dkimSelector)
@@ -213,6 +215,7 @@ func (mg *Client) ActivateDomainKey(ctx context.Context, domain, dkimSelector st
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): why newUrlEncodedPayload()?
 	_, err := makePutRequest(ctx, r, newUrlEncodedPayload())
 	return err
 }
@@ -331,6 +334,7 @@ func (mg *Client) DeactivateDomainKey(ctx context.Context, domain, dkimSelector 
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): why newUrlEncodedPayload()?
 	_, err := makePutRequest(ctx, r, newUrlEncodedPayload())
 	return err
 }
@@ -340,6 +344,8 @@ func (mg *Client) UpdateDomainDkimAuthority(ctx context.Context, domain string, 
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): should be "multipart/form-data" (NewFormDataPayload) according to the docs:
+	// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/mailgun/domain-keys/put-v3-domains--name--dkim-authority
 	payload := newUrlEncodedPayload()
 	payload.addValue("self", boolToString(self))
 
@@ -356,6 +362,8 @@ func (mg *Client) UpdateDomainDkimSelector(ctx context.Context, domain, dkimSele
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): should be "multipart/form-data" (NewFormDataPayload) according to the docs:
+	// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/mailgun/domain-keys/put-v3-domains--name--dkim-selector
 	payload := newUrlEncodedPayload()
 	payload.addValue("dkim_selector", dkimSelector)
 	_, err := makePutRequest(ctx, r, payload)
