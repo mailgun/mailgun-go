@@ -18,6 +18,7 @@ import (
 
 var invalidURL = regexp.MustCompile(`/v\d+.*`)
 
+// TODO(DE-1140): remove this, should be (*Client).Do(*http.Request)
 type httpRequest struct {
 	URL               string
 	Parameters        map[string][]string
