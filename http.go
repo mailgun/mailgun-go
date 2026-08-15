@@ -117,7 +117,7 @@ func (*jsonEncodedPayload) getValues() []keyValuePair {
 }
 
 // newUrlEncodedPayload creates "application/x-www-form-urlencoded" request payload.
-// TODO(vtopc): misused in many places instead of NewFormDataPayload().
+// TODO(vtopc): misused in many places and used with POST, PUT and DELETE instead of NewFormDataPayload().
 func newUrlEncodedPayload() *urlEncodedPayload {
 	return &urlEncodedPayload{}
 }
