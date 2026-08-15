@@ -8,7 +8,7 @@ import (
 	"github.com/mailgun/mailgun-go/v5/mtypes"
 )
 
-// Create a new template which can be used to attach template versions to
+// CreateTemplate creates a new template which can be used to attach template versions to
 func (mg *Client) CreateTemplate(ctx context.Context, domain string, template *mtypes.Template) error {
 	r := newHTTPRequest(generateApiV3UrlWithDomain(mg, templatesEndpoint, domain))
 	r.setClient(mg.HTTPClient())
