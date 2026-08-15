@@ -175,6 +175,8 @@ func (mg *Client) CreateDomainKey(ctx context.Context, domain, dkimSelector stri
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): should be "multipart/form-data" (NewFormDataPayload) according to the docs:
+	// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/mailgun/domain-keys/post-v1-dkim-keys
 	payload := newUrlEncodedPayload()
 	payload.addValue("signing_domain", domain)
 	payload.addValue("selector", dkimSelector)
