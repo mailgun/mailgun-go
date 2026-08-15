@@ -344,6 +344,8 @@ func (mg *Client) UpdateDomainDkimAuthority(ctx context.Context, domain string, 
 	r.setClient(mg.HTTPClient())
 	r.setBasicAuth(basicAuthUser, mg.APIKey())
 
+	// TODO(vtopc): should be "multipart/form-data" (NewFormDataPayload) according to the docs:
+	// https://documentation.mailgun.com/docs/inboxready/api-reference/optimize/mailgun/domain-keys/put-v3-domains--name--dkim-authority
 	payload := newUrlEncodedPayload()
 	payload.addValue("self", boolToString(self))
 
