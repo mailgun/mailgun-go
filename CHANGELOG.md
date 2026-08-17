@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Changes
+### [5.19.2] - 2026-08-17
+#### Changed
+* DE-1723 Fix payload format for CreateAPIKey by @vtopc in https://github.com/mailgun/mailgun-go/pull/500
+
+
+**Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.19.1...v5.19.2
+
 ### [5.19.1] - 2026-08-10
 #### Changed
 * DE-1542 Add check to CalcAlertsHMAC by @vtopc in https://github.com/mailgun/mailgun-go/pull/498
