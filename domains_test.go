@@ -42,19 +42,31 @@ func TestListDomainsPagination(t *testing.T) {
 
 	ctx := context.Background()
 
+	wantDomains := []string{"mailgun.test", "example.com"}
+
+	_, err = mg.CreateDomain(ctx, "example.com", &mailgun.CreateDomainOptions{
+		SpamAction: mtypes.SpamActionTag,
+		Password:   "supersecret",
+		WebScheme:  "http",
+	})
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, mg.DeleteDomain(context.Background(), "example.com"))
+	})
+
 	var (
-		pages   int
-		domains []mtypes.Domain
+		pages      int
+		gotDomains []string
 	)
 	for page, err := range mg.ListDomains(ctx, &mailgun.ListDomainsOptions{Limit: 1}) {
 		require.NoError(t, err)
 		require.Len(t, page, 1)
 		pages++
-		domains = append(domains, page...)
+		gotDomains = append(gotDomains, page[0].Name)
 	}
 
-	assert.Equal(t, 1, pages)
-	assert.Len(t, domains, 1)
+	assert.Equal(t, len(wantDomains), pages)
+	assert.Equal(t, wantDomains, gotDomains)
 }
 
 func TestListDomainsError(t *testing.T) {
