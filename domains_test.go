@@ -35,7 +35,7 @@ func TestListDomains(t *testing.T) {
 	assert.NotEmpty(t, domains)
 }
 
-func TestListDomainsPaginates(t *testing.T) {
+func TestListDomainsPagination(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
@@ -53,8 +53,8 @@ func TestListDomainsPaginates(t *testing.T) {
 		domains = append(domains, page...)
 	}
 
-	assert.Equal(t, len(domains), pages)
-	assert.NotEmpty(t, domains)
+	assert.Equal(t, 1, pages)
+	assert.Len(t, domains, 1)
 }
 
 func TestListDomainsBreak(t *testing.T) {
