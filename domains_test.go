@@ -40,9 +40,10 @@ func TestListDomainsPagination(t *testing.T) {
 	err := mg.SetAPIBase(server.URL())
 	require.NoError(t, err)
 
-	ctx := context.Background()
-
+	const limit = 1
 	wantDomains := []string{"mailgun.test", "example.com"}
+
+	ctx := context.Background()
 
 	_, err = mg.CreateDomain(ctx, "example.com", &mailgun.CreateDomainOptions{
 		SpamAction: mtypes.SpamActionTag,
@@ -58,9 +59,9 @@ func TestListDomainsPagination(t *testing.T) {
 		pages      int
 		gotDomains []string
 	)
-	for page, err := range mg.ListDomains(ctx, &mailgun.ListDomainsOptions{Limit: 1}) {
+	for page, err := range mg.ListDomains(ctx, &mailgun.ListDomainsOptions{Limit: limit}) {
 		require.NoError(t, err)
-		require.Len(t, page, 1)
+		require.Len(t, page, limit)
 		pages++
 		gotDomains = append(gotDomains, page[0].Name)
 	}
