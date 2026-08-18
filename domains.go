@@ -31,7 +31,6 @@ type ListDomainsOptions struct {
 // ListDomains returns an iterator over pages of domains.
 // Iteration stops after the first error, which is yielded with a nil page.
 // https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domains/get-v4-domains
-// TODO(vtopc): return a singe mtypes.Domain instead of a page?
 func (mg *Client) ListDomains(ctx context.Context, opts *ListDomainsOptions) iter.Seq2[[]mtypes.Domain, error] {
 	limit := 100
 	if opts != nil && opts.Limit != 0 {
