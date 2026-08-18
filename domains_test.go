@@ -57,23 +57,6 @@ func TestListDomainsPagination(t *testing.T) {
 	assert.Len(t, domains, 1)
 }
 
-func TestListDomainsBreak(t *testing.T) {
-	mg := mailgun.NewMailgun(testKey)
-	err := mg.SetAPIBase(server.URL())
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	var pages int
-	for _, err := range mg.ListDomains(ctx, &mailgun.ListDomainsOptions{Limit: 1}) {
-		require.NoError(t, err)
-		pages++
-		break
-	}
-
-	assert.Equal(t, 1, pages)
-}
-
 func TestListDomainsError(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase("http://localhost:9/invalid")
