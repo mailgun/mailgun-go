@@ -25,16 +25,69 @@ func TestListDomains(t *testing.T) {
 
 	ctx := context.Background()
 
-	it := mg.ListDomains(nil)
-	var page []mtypes.Domain
-	for it.Next(ctx, &page) {
-		for _, d := range page {
-			t.Logf("TestListDomains: %#v\n", d)
-		}
+	var domains []mtypes.Domain
+	for page, err := range mg.ListDomains(ctx, nil) {
+		require.NoError(t, err)
+		domains = append(domains, page...)
 	}
-	t.Logf("TestListDomains: %d domains retrieved\n", it.TotalCount)
-	require.NoError(t, it.Err())
-	assert.True(t, it.TotalCount != 0)
+
+	t.Logf("TestListDomains: %d domains retrieved", len(domains))
+	assert.NotEmpty(t, domains)
+}
+
+func TestListDomainsPaginates(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	var (
+		pages   int
+		domains []mtypes.Domain
+	)
+	for page, err := range mg.ListDomains(ctx, &mailgun.ListDomainsOptions{Limit: 1}) {
+		require.NoError(t, err)
+		require.Len(t, page, 1)
+		pages++
+		domains = append(domains, page...)
+	}
+
+	assert.Equal(t, len(domains), pages)
+	assert.NotEmpty(t, domains)
+}
+
+func TestListDomainsBreak(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase(server.URL())
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	var pages int
+	for _, err := range mg.ListDomains(ctx, &mailgun.ListDomainsOptions{Limit: 1}) {
+		require.NoError(t, err)
+		pages++
+		break
+	}
+
+	assert.Equal(t, 1, pages)
+}
+
+func TestListDomainsError(t *testing.T) {
+	mg := mailgun.NewMailgun(testKey)
+	err := mg.SetAPIBase("http://localhost:9/invalid")
+	require.NoError(t, err)
+
+	ctx := context.Background()
+
+	var iterations int
+	for _, err := range mg.ListDomains(ctx, nil) {
+		iterations++
+		assert.Error(t, err)
+	}
+
+	assert.Equal(t, 1, iterations)
 }
 
 func TestGetSingleDomain(t *testing.T) {
@@ -44,10 +97,13 @@ func TestGetSingleDomain(t *testing.T) {
 
 	ctx := context.Background()
 
-	it := mg.ListDomains(nil)
 	var page []mtypes.Domain
-	require.True(t, it.Next(ctx, &page))
-	require.NoError(t, it.Err())
+	for p, err := range mg.ListDomains(ctx, nil) {
+		require.NoError(t, err)
+		page = p
+		break
+	}
+	require.NotEmpty(t, page)
 
 	dr, err := mg.GetDomain(ctx, page[0].Name, nil)
 	require.NoError(t, err)
