@@ -1,10 +1,9 @@
 package mtypes
 
 import (
+	"errors"
 	"strconv"
 	"time"
-
-	"errors"
 )
 
 // RFC2822Time Mailgun uses RFC2822 format for timestamps in most endpoints ('Thu, 13 Oct 2011 18:02:00 +0000'), but
@@ -12,6 +11,12 @@ import (
 // https://documentation.mailgun.com/docs/mailgun/user-manual/get-started/#date-format
 // TODO(v6): make a struct and embed time.Time to inherit all its methods.
 type RFC2822Time time.Time
+
+var rfc2822TimeFormats = []string{
+	time.RFC1123,
+	time.RFC1123Z,
+	time.RFC3339, // Just in case. See https://github.com/mailgun/mailgun-go/issues/506
+}
 
 func NewRFC2822Time(str string) (RFC2822Time, error) {
 	t, err := time.Parse(time.RFC1123, str)
@@ -39,17 +44,20 @@ func (t *RFC2822Time) UnmarshalJSON(s []byte) error {
 		return err
 	}
 
-	var err1 error
-	*(*time.Time)(t), err1 = time.Parse(time.RFC1123, q)
-	if err1 != nil {
-		var err2 error
-		*(*time.Time)(t), err2 = time.Parse(time.RFC1123Z, q)
-		if err2 != nil {
-			return errors.Join(err1, err2)
+	errs := make([]error, 0, len(rfc2822TimeFormats))
+	for _, format := range rfc2822TimeFormats {
+		parsed, err := time.Parse(format, q)
+		if err != nil {
+			errs = append(errs, err)
+			continue
 		}
+
+		*(*time.Time)(t) = parsed
+
+		return nil
 	}
 
-	return nil
+	return errors.Join(errs...)
 }
 
 func (t RFC2822Time) String() string {
