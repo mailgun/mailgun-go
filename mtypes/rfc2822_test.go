@@ -56,7 +56,7 @@ func TestUnmarshalRFC2822Time(t *testing.T) {
 				require.NoError(t, err)
 				assert.True(t,
 					time.Time(tt.want.CreatedAt).Equal(time.Time(req.CreatedAt)),
-					fmt.Sprintf("want: %s; got: %s", tt.want.CreatedAt, req.CreatedAt),
+					fmt.Sprintf("want: %v; got: %v", tt.want.CreatedAt, req.CreatedAt),
 				)
 			}
 		})
