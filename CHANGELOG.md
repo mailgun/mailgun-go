@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Changes
+### [5.19.3] - 2026-08-25
+#### Changed
+* Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/505
+* DE-9847 Fallback to RFC3339 in RFC2822Time parser by @vtopc in https://github.com/mailgun/mailgun-go/pull/507
+
+
+**Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.19.2...v5.19.3
+
 ### [5.19.2] - 2026-08-17
 #### Changed
 * DE-1723 Fix payload format for CreateAPIKey by @vtopc in https://github.com/mailgun/mailgun-go/pull/500
