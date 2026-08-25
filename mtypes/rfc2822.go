@@ -52,7 +52,7 @@ func (t *RFC2822Time) UnmarshalJSON(s []byte) error {
 			continue
 		}
 
-		*(*time.Time)(t) = parsed
+		*t = RFC2822Time(parsed)
 
 		return nil
 	}
