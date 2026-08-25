@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,7 +35,7 @@ func TestUnmarshalRFC2822Time(t *testing.T) {
 		},
 		{
 			name:    "RFC3339",
-			s:       `{"created_at":"2011-10-13T18:02:00.123Z"}`,
+			s:       `{"created_at":"2011-10-13T18:02:01.123Z"}`,
 			wantErr: false,
 			want:    Req{CreatedAt: RFC2822Time(time.Date(2011, 10, 13, 18, 2, 0, 123000000, time.UTC))},
 		},
@@ -49,12 +50,15 @@ func TestUnmarshalRFC2822Time(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var req Req
 			err := json.Unmarshal([]byte(tt.s), &req)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.True(t,
+					time.Time(tt.want.CreatedAt).Equal(time.Time(req.CreatedAt)),
+					fmt.Sprintf("want: %s; got: %s", tt.want.CreatedAt, req.CreatedAt),
+				)
 			}
-
-			require.True(t, time.Time(tt.want.CreatedAt).Equal(time.Time(req.CreatedAt)),
-				fmt.Sprintf("want: %s; got: %s", tt.want.CreatedAt, req.CreatedAt))
 		})
 	}
 }
