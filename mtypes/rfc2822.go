@@ -19,11 +19,18 @@ var rfc2822TimeFormats = []string{
 }
 
 func NewRFC2822Time(str string) (RFC2822Time, error) {
-	t, err := time.Parse(time.RFC1123, str)
-	if err != nil {
-		return RFC2822Time{}, err
+	errs := make([]error, 0, len(rfc2822TimeFormats))
+	for _, format := range rfc2822TimeFormats {
+		t, err := time.Parse(format, str)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+
+		return RFC2822Time(t), nil
 	}
-	return RFC2822Time(t), nil
+
+	return RFC2822Time{}, errors.Join(errs...)
 }
 
 func (t RFC2822Time) Unix() int64 {
@@ -44,20 +51,14 @@ func (t *RFC2822Time) UnmarshalJSON(s []byte) error {
 		return err
 	}
 
-	errs := make([]error, 0, len(rfc2822TimeFormats))
-	for _, format := range rfc2822TimeFormats {
-		parsed, err := time.Parse(format, q)
-		if err != nil {
-			errs = append(errs, err)
-			continue
-		}
-
-		*t = RFC2822Time(parsed)
-
-		return nil
+	parsed, err := NewRFC2822Time(q)
+	if err != nil {
+		return err
 	}
 
-	return errors.Join(errs...)
+	*t = parsed
+
+	return nil
 }
 
 func (t RFC2822Time) String() string {
