@@ -38,6 +38,11 @@ func TestUnmarshalRFC2822Time(t *testing.T) {
 			wantErr: false,
 			want:    Req{CreatedAt: RFC2822Time(time.Date(2011, 10, 13, 18, 2, 0, 123000000, time.UTC))},
 		},
+		{
+			name:    "error",
+			s:       `{"created_at":"foobar"}`,
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
