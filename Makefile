@@ -23,6 +23,10 @@ all: test
 test:
 	go test ./... -race -count=1
 
+.PHONY: test-integration
+test-integration:
+	source .env && go test -tags integration ./... -race -count=1 -run TestIntegration
+
 .PHONY: godoc
 godoc:
 	mkdir -p /tmp/tmpgoroot/doc
