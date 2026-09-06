@@ -4,6 +4,6 @@ First off, thank you for considering contributing to Mailgun Go client. Contribu
 
 Please create issues for any major changes so it can be discussed first. For small bug fixes feel free to submit the PR directly.
 
-Make sure to run tests and `go fmt` your project before creating the PR.
+Make sure to run tests (`make test`) and linters (`make lint`) before creating the PR.
 
 When submitting a pull request, please include the purpose and implementation details.
