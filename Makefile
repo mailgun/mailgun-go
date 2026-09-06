@@ -25,7 +25,7 @@ test:
 
 .PHONY: test-integration
 test-integration:
-	source .env && go test -tags integration ./... -race -count=1 -run TestIntegration
+	source .env && go test -v -tags integration -race -count=1 -run TestIntegration ./...
 
 .PHONY: godoc
 godoc:
