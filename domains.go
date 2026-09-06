@@ -56,11 +56,10 @@ func (mg *Client) ListDomains(ctx context.Context, opts *ListDomainsOptions) ite
 				return
 			}
 
-			if len(resp.Items) < limit {
+			skip += limit
+			if len(resp.Items) < limit || skip >= resp.TotalCount {
 				return
 			}
-
-			skip += len(resp.Items)
 		}
 	}
 }
