@@ -28,7 +28,7 @@ type ListDomainsOptions struct {
 	IncludeSubaccounts *bool
 }
 
-// ListDomains returns an iterator over pages of domains.
+// ListDomainsIter returns an iterator over pages of domains.
 // Iteration stops after the first error, which is yielded with a nil page.
 // https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domains/get-v4-domains
 func (mg *Client) ListDomainsIter(ctx context.Context, opts *ListDomainsOptions) iter.Seq2[[]mtypes.Domain, error] {
