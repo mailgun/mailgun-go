@@ -28,6 +28,6 @@ func TestIntegrationListDomainsIter(t *testing.T) {
 		domains = append(domains, page...)
 	}
 
-	t.Logf("TestListDomains: %d domains retrieved", len(domains))
+	t.Logf("ListDomainsIter: %d domains retrieved", len(domains))
 	assert.NotEmpty(t, domains)
 }
