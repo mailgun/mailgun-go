@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testDkimSelector = "gotest"
+
 func TestListAllDomainsKeys(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())

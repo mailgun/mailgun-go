@@ -11,13 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	testDomain            = "mailgun.test"
-	testDkimSelector      = "gotest"
-	testKey               = "api-fake-key"
-	testWebhookSigningKey = "WEBHOOK_SIGNING_KEY"
-)
-
 func TestListDomains(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
