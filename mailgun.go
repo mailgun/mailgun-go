@@ -132,6 +132,7 @@ const (
 // Some endpoints listed in this interface may, at any time, become obsolete.
 // Always double-check with the Mailgun API Documentation to
 // determine the currently supported feature set.
+// TODO(v6): remove interface and use Client directly. This interface is only here for testing purposes.
 type Mailgun interface {
 	APIBase() string
 	APIKey() string
