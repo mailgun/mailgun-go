@@ -23,7 +23,7 @@ func TestIntegrationListDomainsIter(t *testing.T) {
 	defer cancel()
 
 	var domains []mtypes.Domain
-	for page, err := range mg.ListDomainsIter(ctx, nil) {
+	for page, err := range mg.ListDomainsIter(ctx, &mailgun.ListDomainsOptions{Limit: 10}) {
 		require.NoError(t, err)
 		domains = append(domains, page...)
 	}
