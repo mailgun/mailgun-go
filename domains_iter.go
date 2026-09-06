@@ -36,10 +36,6 @@ func (mg *Client) ListDomainsIter(ctx context.Context, opts *ListDomainsOptions)
 				return
 			}
 
-			if len(resp.Items) < limit {
-				return
-			}
-
 			skip += len(resp.Items)
 			if skip >= resp.TotalCount {
 				return
