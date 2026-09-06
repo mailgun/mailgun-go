@@ -161,7 +161,7 @@ type Mailgun interface {
 	DeleteTag(ctx context.Context, domain, tag string) error
 	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
-	ListDomains(ctx context.Context, opts *ListDomainsOptions) iter.Seq2[[]mtypes.Domain, error]
+	ListDomainsIter(ctx context.Context, opts *ListDomainsOptions) iter.Seq2[[]mtypes.Domain, error]
 	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
 	CreateDomain(ctx context.Context, domain string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
 	VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error)

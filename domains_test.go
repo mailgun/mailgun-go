@@ -26,7 +26,7 @@ func TestListDomains(t *testing.T) {
 	ctx := context.Background()
 
 	var domains []mtypes.Domain
-	for page, err := range mg.ListDomains(ctx, nil) {
+	for page, err := range mg.ListDomainsIter(ctx, nil) {
 		require.NoError(t, err)
 		domains = append(domains, page...)
 	}
@@ -59,7 +59,7 @@ func TestListDomainsPagination(t *testing.T) {
 		pages      int
 		gotDomains []string
 	)
-	for page, err := range mg.ListDomains(ctx, &mailgun.ListDomainsOptions{Limit: limit}) {
+	for page, err := range mg.ListDomainsIter(ctx, &mailgun.ListDomainsOptions{Limit: limit}) {
 		require.NoError(t, err)
 		require.Len(t, page, limit)
 		pages++
@@ -78,7 +78,7 @@ func TestListDomainsError(t *testing.T) {
 	ctx := context.Background()
 
 	var iterations int
-	for _, err := range mg.ListDomains(ctx, nil) {
+	for _, err := range mg.ListDomainsIter(ctx, nil) {
 		iterations++
 		assert.Error(t, err)
 	}
@@ -94,7 +94,7 @@ func TestGetSingleDomain(t *testing.T) {
 	ctx := context.Background()
 
 	var page []mtypes.Domain
-	for p, err := range mg.ListDomains(ctx, nil) {
+	for p, err := range mg.ListDomainsIter(ctx, nil) {
 		require.NoError(t, err)
 		page = p
 		break

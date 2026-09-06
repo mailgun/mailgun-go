@@ -452,7 +452,7 @@ func ListDomains(domain, apiKey string) ([]mtypes.Domain, error) {
 	defer cancel()
 
 	var result []mtypes.Domain
-	for page, err := range mg.ListDomains(ctx, nil) {
+	for page, err := range mg.ListDomainsIter(ctx, nil) {
 		if err != nil {
 			return nil, err
 		}
