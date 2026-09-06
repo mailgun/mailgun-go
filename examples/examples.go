@@ -447,19 +447,18 @@ func GetDomainTracking(domain, apiKey string) (mtypes.DomainTracking, error) {
 
 func ListDomains(domain, apiKey string) ([]mtypes.Domain, error) {
 	mg := mailgun.NewMailgun(apiKey)
-	it := mg.ListDomains(nil)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	var page, result []mtypes.Domain
-	for it.Next(ctx, &page) {
+	var result []mtypes.Domain
+	for page, err := range mg.ListDomainsIter(ctx, nil) {
+		if err != nil {
+			return nil, err
+		}
 		result = append(result, page...)
 	}
 
-	if it.Err() != nil {
-		return nil, it.Err()
-	}
 	return result, nil
 }
 

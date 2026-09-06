@@ -14,8 +14,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const domain = "valid-mailgun-domain"
-const apiKey = "valid-mailgun-api-key" //nolint:gosec // This is a test
+// TODO(vtopc): merge constants:
+const (
+	domain     = "valid-mailgun-domain"
+	testDomain = "mailgun.test"
+)
+
+// TODO(vtopc): merge constants:
+const (
+	apiKey  = "valid-mailgun-api-key" //nolint:gosec // This is a test
+	testKey = "api-fake-key"
+)
 
 var server *mocks.Server
 
