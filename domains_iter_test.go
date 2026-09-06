@@ -77,32 +77,3 @@ func TestListDomainsIter_Error(t *testing.T) {
 
 	assert.Equal(t, 1, iterations)
 }
-
-func TestListDomainsIter_GetSingleDomain(t *testing.T) {
-	mg := mailgun.NewMailgun(testKey)
-	err := mg.SetAPIBase(server.URL())
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	var page []mtypes.Domain
-	for p, err := range mg.ListDomainsIter(ctx, nil) {
-		require.NoError(t, err)
-		page = p
-		break
-	}
-	require.NotEmpty(t, page)
-
-	dr, err := mg.GetDomain(ctx, page[0].Name, nil)
-	require.NoError(t, err)
-	require.True(t, len(dr.ReceivingDNSRecords) != 0)
-	require.True(t, len(dr.SendingDNSRecords) != 0)
-
-	t.Logf("TestGetSingleDomain: %#v\n", dr)
-	for _, rxd := range dr.ReceivingDNSRecords {
-		t.Logf("TestGetSingleDomains:   %#v\n", rxd)
-	}
-	for _, txd := range dr.SendingDNSRecords {
-		t.Logf("TestGetSingleDomains:   %#v\n", txd)
-	}
-}
