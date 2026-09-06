@@ -4,7 +4,7 @@ First off, thank you for considering contributing to Mailgun Go client. Contribu
 
 Please create issues for any major changes so it can be discussed first. For small bug fixes feel free to submit the PR directly.
 
-New List endpoints should return `iter.Seq2`(https://pkg.go.dev/iter), e.g.:
+New List endpoints should return `iter.Seq2` (https://pkg.go.dev/iter), e.g.:
 ```
 ListDomainsIter(ctx context.Context, opts *ListDomainsOptions) iter.Seq2[[]mtypes.Domain, error]
 ```
