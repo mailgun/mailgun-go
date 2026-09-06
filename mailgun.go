@@ -163,6 +163,8 @@ type Mailgun interface {
 	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
 	ListDomainsIter(ctx context.Context, opts *ListDomainsOptions) iter.Seq2[[]mtypes.Domain, error]
+	// Deprecated: use ListDomainsIter instead.
+	ListDomains(opts *ListDomainsOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
 	CreateDomain(ctx context.Context, domain string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)
 	VerifyDomain(ctx context.Context, domain string) (mtypes.GetDomainResponse, error)
