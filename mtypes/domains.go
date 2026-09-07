@@ -21,7 +21,6 @@ const (
 )
 
 type ListDomainsResponse struct {
-	// is -1 if Next() or First() have not been called
 	TotalCount int      `json:"total_count"`
 	Items      []Domain `json:"items"`
 }

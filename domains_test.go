@@ -11,13 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	testDomain            = "mailgun.test"
-	testDkimSelector      = "gotest"
-	testKey               = "api-fake-key"
-	testWebhookSigningKey = "WEBHOOK_SIGNING_KEY"
-)
-
 func TestListDomains(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
@@ -44,10 +37,13 @@ func TestGetSingleDomain(t *testing.T) {
 
 	ctx := context.Background()
 
-	it := mg.ListDomains(nil)
 	var page []mtypes.Domain
-	require.True(t, it.Next(ctx, &page))
-	require.NoError(t, it.Err())
+	for p, err := range mg.ListDomainsIter(ctx, nil) {
+		require.NoError(t, err)
+		page = p
+		break
+	}
+	require.NotEmpty(t, page)
 
 	dr, err := mg.GetDomain(ctx, page[0].Name, nil)
 	require.NoError(t, err)

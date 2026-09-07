@@ -78,6 +78,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"net/http"
 	"os"
 	"strconv"
@@ -131,6 +132,7 @@ const (
 // Some endpoints listed in this interface may, at any time, become obsolete.
 // Always double-check with the Mailgun API Documentation to
 // determine the currently supported feature set.
+// TODO(v6): remove interface and use Client directly. This interface is only here for testing purposes.
 type Mailgun interface {
 	APIBase() string
 	APIKey() string
@@ -160,6 +162,8 @@ type Mailgun interface {
 	DeleteTag(ctx context.Context, domain, tag string) error
 	ListTags(domain string, opts *ListTagOptions) *TagIterator
 
+	ListDomainsIter(ctx context.Context, opts *ListDomainsOptions) iter.Seq2[[]mtypes.Domain, error]
+	// Deprecated: use ListDomainsIter instead.
 	ListDomains(opts *ListDomainsOptions) *DomainsIterator
 	GetDomain(ctx context.Context, domain string, opts *GetDomainOptions) (mtypes.GetDomainResponse, error)
 	CreateDomain(ctx context.Context, domain string, opts *CreateDomainOptions) (mtypes.GetDomainResponse, error)

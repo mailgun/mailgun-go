@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testWebhookSigningKey = "WEBHOOK_SIGNING_KEY"
+
 func TestGetWebhook(t *testing.T) {
 	mg := mailgun.NewMailgun(testKey)
 	err := mg.SetAPIBase(server.URL())
