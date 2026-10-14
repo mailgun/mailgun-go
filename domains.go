@@ -30,9 +30,7 @@ type ListDomainsOptions struct {
 // ListDomains retrieves a set of domains from Mailgun.
 // https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/domains/get-v4-domains
 //
-// Deprecated: use ListDomainsIter instead.
-//
-// TODO(v6): remove this method
+// TODO(v6): remove this method on behalf of ListDomainsIter?
 func (mg *Client) ListDomains(opts *ListDomainsOptions) *DomainsIterator {
 	var limit int
 	if opts != nil {
