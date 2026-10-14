@@ -46,6 +46,11 @@ type ListMailingListsResponse struct {
 	Paging Paging        `json:"paging"`
 }
 
+type CreateMailingListResponse struct {
+	MailingList MailingList `json:"list"`
+	Message     string      `json:"message"`
+}
+
 type GetMailingListResponse struct {
 	MailingList MailingList `json:"list"`
 }

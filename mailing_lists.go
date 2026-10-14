@@ -127,6 +127,8 @@ func (li *ListsIterator) fetch(ctx context.Context, uri string) error {
 // If unspecified, the Description remains blank,
 // while AccessLevel defaults to Everyone
 // and ReplyPreference defaults to List.
+//
+// https://documentation.mailgun.com/docs/mailgun/api-reference/send/mailgun/mailing-lists/post-v3-lists
 func (mg *Client) CreateMailingList(ctx context.Context, list mtypes.MailingList) (mtypes.MailingList, error) {
 	r := newHTTPRequest(generateApiUrl(mg, 3, listsEndpoint))
 	r.setClient(mg.HTTPClient())
@@ -151,9 +153,14 @@ func (mg *Client) CreateMailingList(ctx context.Context, list mtypes.MailingList
 	if err != nil {
 		return mtypes.MailingList{}, err
 	}
-	var l mtypes.MailingList
-	err = response.parseFromJSON(&l)
-	return l, err
+
+	var resp mtypes.CreateMailingListResponse
+	err = response.parseFromJSON(&resp)
+	if err != nil {
+		return mtypes.MailingList{}, err
+	}
+
+	return resp.MailingList, nil
 }
 
 // DeleteMailingList removes all current members of the list, then removes the list itself.
