@@ -184,17 +184,24 @@ func (ms *Server) createMailingList(w http.ResponseWriter, r *http.Request) {
 	defer ms.mutex.Unlock()
 	ms.mutex.Lock()
 
+	list := mtypes.MailingList{
+		CreatedAt:       mtypes.RFC2822Time(time.Now().UTC()),
+		Name:            r.FormValue("name"),
+		Address:         r.FormValue("address"),
+		Description:     r.FormValue("description"),
+		AccessLevel:     mtypes.AccessLevel(r.FormValue("access_level")),
+		ReplyPreference: mtypes.ReplyPreference(r.FormValue("reply_preference")),
+	}
+
 	ms.mailingList = append(ms.mailingList, MailingListContainer{
-		MailingList: mtypes.MailingList{
-			CreatedAt:       mtypes.RFC2822Time(time.Now().UTC()),
-			Name:            r.FormValue("name"),
-			Address:         r.FormValue("address"),
-			Description:     r.FormValue("description"),
-			AccessLevel:     mtypes.AccessLevel(r.FormValue("access_level")),
-			ReplyPreference: mtypes.ReplyPreference(r.FormValue("reply_preference")),
-		},
+		MailingList: list,
 	})
-	toJSON(w, okResp{Message: "Mailing list has been created"})
+
+	resp := mtypes.CreateMailingListResponse{
+		MailingList: list,
+		Message:     "Mailing list has been created",
+	}
+	toJSON(w, resp)
 }
 
 func (ms *Server) listMembers(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Changes
+### [5.19.4] - 2026-10-14
+#### Changed
+* Bump github.com/go-chi/chi/v5 from 5.3.1 to 5.3.2 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/503
+* DE-9853 test go 1.27.x by @vtopc in https://github.com/mailgun/mailgun-go/pull/509
+* [DE-10345] Switch ListDomains to iter.Seq2 by @vtopc in https://github.com/mailgun/mailgun-go/pull/502
+* DE-11100 Fix CreateMailingList by @vtopc in https://github.com/mailgun/mailgun-go/pull/511
+* Do not deprecate ListDomains yet by @vtopc in https://github.com/mailgun/mailgun-go/pull/512
+
+
+**Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.19.3...v5.19.4
+
 ### [5.19.3] - 2026-08-25
 #### Changed
 * Bump github.com/stretchr/testify from 1.11.1 to 1.12.1 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/505

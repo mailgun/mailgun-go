@@ -136,8 +136,13 @@ func TestMailingLists(t *testing.T) {
 		return count
 	}
 
-	_, err = mg.CreateMailingList(ctx, protoList)
+	createdList, err := mg.CreateMailingList(ctx, protoList)
 	require.NoError(t, err)
+	assert.Equal(t, protoList.Address, createdList.Address)
+	assert.Equal(t, protoList.Name, createdList.Name)
+	assert.Equal(t, protoList.Description, createdList.Description)
+	assert.Equal(t, protoList.AccessLevel, createdList.AccessLevel)
+	assert.Equal(t, protoList.ReplyPreference, createdList.ReplyPreference)
 	defer func() {
 		require.NoError(t, mg.DeleteMailingList(ctx, address))
 
