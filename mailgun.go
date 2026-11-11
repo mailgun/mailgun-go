@@ -96,6 +96,7 @@ const (
 	APIBase   = "https://api.mailgun.net"
 	APIBaseUS = APIBase
 	APIBaseEU = "https://api.eu.mailgun.net"
+	APIBaseAU = "https://api.au.mailgun.net"
 
 	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
 
@@ -381,14 +382,14 @@ func (mg *Client) RemoveOnBehalfOfSubaccount() {
 
 // SetAPIBase updates the API Base URL for this client.
 //
+//	// For US Customers (default)
+//	mg.SetAPIBase(mailgun.APIBaseUS)
+//
 //	// For EU Customers
 //	mg.SetAPIBase(mailgun.APIBaseEU)
 //
-//	// For US Customers
-//	mg.SetAPIBase(mailgun.APIBaseUS)
-//
-//	// Set a custom base API
-//	mg.SetAPIBase("https://localhost")
+//	// For AU Customers
+//	mg.SetAPIBase(mailgun.APIBaseAU)
 func (mg *Client) SetAPIBase(address string) error {
 	if invalidURL.MatchString(address) {
 		return errors.New(`APIBase must not contain a version; SetAPIBase("https://host")`)
