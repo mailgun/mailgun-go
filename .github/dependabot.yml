@@ -3,7 +3,7 @@
 
 version: 2
 updates:
-  - package-ecosystem: "gomod" # See documentation for possible values
+  - package-ecosystem: "gomod"
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
@@ -14,7 +14,7 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: "github-actions" # See documentation for possible values
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
