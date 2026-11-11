@@ -68,6 +68,7 @@ func TestValidBaseAPI(t *testing.T) {
 	apiBases := []string{
 		mailgun.APIBase,
 		mailgun.APIBaseEU,
+		mailgun.APIBaseAU,
 		testServer.URL,
 	}
 
