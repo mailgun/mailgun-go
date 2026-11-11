@@ -14,6 +14,7 @@ updates:
         patterns:
           - "*"
 
+  # https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/auto-update-actions#example-dependabotyml-file-for-github-actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
