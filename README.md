@@ -376,13 +376,18 @@ func main() {
 The official mailgun documentation includes examples using this library. Go
 [here](https://documentation.mailgun.com/docs/mailgun/sdk/go_sdk).
 
-## EU Region
-European customers will need to change the default API Base to access your domains
+## EU and AU Regions
+EU and AU customers will need to change the default API Base URL:
 
 ```go
 mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 mg.SetAPIBase(mailgun.APIBaseEU)
 ```
+```go
+mg := mailgun.NewMailgun("MAILGUN_API_KEY")
+mg.SetAPIBase(mailgun.APIBaseAU)
+```
+See [Base URL Documentation](https://documentation.mailgun.com/docs/mailgun/api-reference/api-overview#base-url) for more information.
 
 ## Major Version Migration Notes
 We are trying to keep breaking changes to a minimum, but sometimes they are necessary.

@@ -96,6 +96,7 @@ const (
 	APIBase   = "https://api.mailgun.net"
 	APIBaseUS = APIBase
 	APIBaseEU = "https://api.eu.mailgun.net"
+	APIBaseAU = "https://api.au.mailgun.net/"
 
 	OnBehalfOfHeader = "X-Mailgun-On-Behalf-Of"
 
