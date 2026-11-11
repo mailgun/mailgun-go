@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Changes
+### [5.20.0] - 2026-11-11
+#### Changed
+* Support AU region by @vtopc in https://github.com/mailgun/mailgun-go/pull/516
+
+* Bump github.com/go-chi/chi/v5 from 5.3.2 to 5.5.0 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/514
+* Bump github.com/oapi-codegen/runtime from 1.6.0 to 1.7.0 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/504
+* Bump github.com/oapi-codegen/runtime from 1.7.0 to 1.8.0 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/515
+
+* dependabot for security-updates only by @vtopc in https://github.com/mailgun/mailgun-go/pull/517
+
+
+**Full Changelog**: https://github.com/mailgun/mailgun-go/compare/v5.19.4...v5.20.0
+
 ### [5.19.4] - 2026-10-14
 #### Changed
 * Bump github.com/go-chi/chi/v5 from 5.3.1 to 5.3.2 by @dependabot[bot] in https://github.com/mailgun/mailgun-go/pull/503
