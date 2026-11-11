@@ -60,7 +60,7 @@ jobs:
 
       - name: Create PR
         # Requires "Allow GitHub Actions to create and approve pull requests" to be enabled in the repository settings
-        uses: peter-evans/create-pull-request@v8.1.1
+        uses: peter-evans/create-pull-request@v8.1.2
         with:
           base: ${{ github.event.repository.default_branch }}
           commit-message: "Update CHANGELOG.md for ${{ github.event.release.name || github.event.release.tag_name }}"
