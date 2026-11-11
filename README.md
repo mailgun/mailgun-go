@@ -379,10 +379,13 @@ The official mailgun documentation includes examples using this library. Go
 ## EU and AU Regions
 EU and AU customers will need to change the default API Base URL:
 
+EU:
 ```go
 mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 mg.SetAPIBase(mailgun.APIBaseEU)
 ```
+
+AU:
 ```go
 mg := mailgun.NewMailgun("MAILGUN_API_KEY")
 mg.SetAPIBase(mailgun.APIBaseAU)
