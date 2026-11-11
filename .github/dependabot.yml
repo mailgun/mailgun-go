@@ -3,12 +3,19 @@
 
 version: 2
 updates:
-  - package-ecosystem: "gomod" # See documentation for possible values
+  - package-ecosystem: "gomod"
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    open-pull-requests-limit: 0
+    groups:
+      security-updates:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
 
-  - package-ecosystem: "github-actions" # See documentation for possible values
+  # https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/auto-update-actions#example-dependabotyml-file-for-github-actions
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
